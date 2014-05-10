@@ -171,6 +171,7 @@ public class MapView {
 
         latestPositionRenderer = new MapPositionRenderer(this, MarkerIconFactory.IconType.iconLatest, latestPositionSelectHandler);
         archivePositionRenderer = new MapPositionRenderer(this, MarkerIconFactory.IconType.iconArchive, archivePositionSelectHandler);
+        // TODO add latest position renderer for track (???)
     }
 
     private final MapPositionRenderer latestPositionRenderer;
@@ -178,7 +179,7 @@ public class MapView {
     private final MapPositionRenderer archivePositionRenderer;
 
     public void showLatestPositions(List<Position> positions) {
-        latestPositionRenderer.showPositions(positions);
+        latestPositionRenderer.showLatestPositions(positions);
     }
 
     public void showArchivePositions(List<Position> positions) {
@@ -211,8 +212,4 @@ public class MapView {
         }
 
     };
-
-    public void catchPosition(Position position) {
-        latestPositionRenderer.catchPosition(position);
-    }
 }

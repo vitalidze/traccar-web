@@ -99,6 +99,23 @@ public class MapPositionRenderer {
     private Long selectedPositionId;
     private Long selectedDeviceId;
 
+    public void showLatestPositions(List<Position> positions) {
+        showPositions(positions);
+        for (Position position : positions) {
+            if (selectedDeviceId != null && selectedDeviceId == position.getDevice().getId()) {
+                catchPosition(position);
+            }
+        }
+    }
+
+    public void showArchivePositions(List<Position> positions) {
+        // TODO
+    }
+
+    public void appendExistingTrack(List<Position> positions) {
+        // TODO
+    }
+
     public void showPositions(List<Position> positions) {
         for (Marker marker : markerMap.values()) {
             getMarkerLayer().removeMarker(marker);

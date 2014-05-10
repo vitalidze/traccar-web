@@ -75,9 +75,11 @@ public class MapController implements ContentController, MapView.MapHandler {
             public void onSuccess(List<Position> result) {
                 mapView.showLatestPositions(result);
                 for (Position position : result) {
-                    latestPositionMap.put(position.getDevice().getId(), position);
-                    if (ApplicationContext.getInstance().isTracking(position.getDevice())) {
-                        mapView.catchPosition(position);
+                    Device device = position.getDevice();
+                    latestPositionMap.put(device.getId(), position);
+                    if (ApplicationContext.getInstance().isTracking(device)) {
+                        ApplicationContext.getInstance().addTrackingPosition(position);
+                        mapView.showArchivePositions(ApplicationContext.getInstance().getTrackedPositions(device));
                     }
                 }
                 for (Map.Entry<Long, PositionUpdateHandler> entry : positionUpdateMap.entrySet()) {
@@ -136,5 +138,4 @@ public class MapController implements ContentController, MapView.MapHandler {
     public void onArchivePositionSelected(Position position) {
         mapHandler.onArchivePositionSelected(position);
     }
-
 }

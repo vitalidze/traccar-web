@@ -1,12 +1,8 @@
 package org.traccar.web.client;
 
-import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.User;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class ApplicationContext {
 
@@ -67,21 +63,29 @@ public class ApplicationContext {
         }
     }
 
-    private Set<Long> trackedDeviceIds;
+    private Map<Long, List<Position>> deviceTracks;
     public void trackDevice(Device device) {
-        if (trackedDeviceIds == null) {
-            trackedDeviceIds = new HashSet<Long>();
+        if (deviceTracks == null) {
+            deviceTracks = new HashMap<Long, List<Position>>();
         }
-        trackedDeviceIds.add(device.getId());
+        deviceTracks.put(device.getId(), new ArrayList<Position>());
     }
 
     public void stopTracking(Device device) {
-        if (trackedDeviceIds != null) {
-            trackedDeviceIds.remove(device.getId());
+        if (deviceTracks != null) {
+            deviceTracks.remove(device.getId());
         }
     }
 
     public boolean isTracking(Device device) {
-        return trackedDeviceIds != null && trackedDeviceIds.contains(device.getId());
+        return deviceTracks != null && deviceTracks.containsKey(device.getId());
+    }
+
+    public void addTrackingPosition(Position position) {
+        deviceTracks.get(position.getDevice().getId()).add(position);
+    }
+
+    public List<Position> getTrackedPositions(Device device) {
+        return deviceTracks.get(device.getId());
     }
 }
