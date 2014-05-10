@@ -16,6 +16,7 @@
 package org.traccar.web.client.view;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import org.gwtopenmaps.openlayers.client.geometry.LineString;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
+import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -99,24 +101,30 @@ public class MapPositionRenderer {
     private Long selectedPositionId;
     private Long selectedDeviceId;
 
-    public void showPositions(List<Position> positions) {
-        for (Marker marker : markerMap.values()) {
+    public void showLatestPositions(List<Position> positions) {
+        for (Iterator<Map.Entry<Long, Marker>> it = markerMap.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<Long, Marker> entry = it.next();
+            Marker marker = entry.getValue();
+            Position position = positionMap.get(entry.getKey());
+            Device device = position.getDevice();
+            /**
+             * Do not remove points for current tracking devices
+             */
+            if (ApplicationContext.getInstance().isTracking(device)) {
+                changeMarkerIcon(deviceMap.get(device.getId()), MarkerIconFactory.getIcon(iconType, false));
+                continue;
+            }
             getMarkerLayer().removeMarker(marker);
+            it.remove();
+            deviceMap.remove(device.getId());
+            positionMap.remove(position.getId());
         }
-        markerMap.clear();
-        deviceMap.clear();
-        positionMap.clear();
 
-        for (Position position : positions) {
-            Marker marker = new Marker(
-                    mapView.createLonLat(position.getLongitude(), position.getLatitude()),
-                    MarkerIconFactory.getIcon(iconType, false));
-            markerMap.put(position.getId(), marker);
-            deviceMap.put(position.getDevice().getId(), position.getId());
-            positionMap.put(position.getId(), position);
-            addSelectEvent(marker, position);
-            getMarkerLayer().addMarker(marker);
-        }
+        // TODO change track icon from red to yellow (or smth)
+        // TODO draw track between previous and latest positions
+        // TODO find out why sometimes track points remain green
+
+        drawPositions(positions);
 
         if (selectedPositionId != null) {
             if (!selectPosition(null, selectedPositionId, false)) {
@@ -131,7 +139,33 @@ public class MapPositionRenderer {
         }
     }
 
-    public void showTrack(List<Position> positions) {
+    public void showArchivePositions(List<Position> positions) {
+        drawTrack(positions);
+
+        for (Marker marker : markerMap.values()) {
+            getMarkerLayer().removeMarker(marker);
+        }
+        markerMap.clear();
+        positionMap.clear();
+        deviceMap.clear();
+
+        drawPositions(positions);
+    }
+
+    private void drawPositions(List<Position> positions) {
+        for (Position position : positions) {
+            Marker marker = new Marker(
+                    mapView.createLonLat(position.getLongitude(), position.getLatitude()),
+                    MarkerIconFactory.getIcon(iconType, false));
+            markerMap.put(position.getId(), marker);
+            deviceMap.put(position.getDevice().getId(), position.getId());
+            positionMap.put(position.getId(), position);
+            addSelectEvent(marker, position);
+            getMarkerLayer().addMarker(marker);
+        }
+    }
+
+    private void drawTrack(List<Position> positions) {
         getVectorLayer().destroyFeatures();
 
         if (!positions.isEmpty()) {

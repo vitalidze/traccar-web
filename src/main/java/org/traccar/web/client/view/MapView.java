@@ -178,12 +178,11 @@ public class MapView {
     private final MapPositionRenderer archivePositionRenderer;
 
     public void showLatestPositions(List<Position> positions) {
-        latestPositionRenderer.showPositions(positions);
+        latestPositionRenderer.showLatestPositions(positions);
     }
 
     public void showArchivePositions(List<Position> positions) {
-        archivePositionRenderer.showTrack(positions);
-        archivePositionRenderer.showPositions(positions);
+        archivePositionRenderer.showArchivePositions(positions);
     }
 
     public void selectDevice(Device device) {
