@@ -18,28 +18,14 @@ package org.traccar.web.client.view;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import org.gwtopenmaps.openlayers.client.LonLat;
-import org.gwtopenmaps.openlayers.client.Map;
-import org.gwtopenmaps.openlayers.client.MapOptions;
-import org.gwtopenmaps.openlayers.client.MapWidget;
-import org.gwtopenmaps.openlayers.client.Projection;
-import org.gwtopenmaps.openlayers.client.Style;
+import org.gwtopenmaps.openlayers.client.*;
 import org.gwtopenmaps.openlayers.client.control.LayerSwitcher;
 import org.gwtopenmaps.openlayers.client.control.ScaleLine;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
-import org.gwtopenmaps.openlayers.client.layer.Bing;
-import org.gwtopenmaps.openlayers.client.layer.BingOptions;
-import org.gwtopenmaps.openlayers.client.layer.BingType;
-import org.gwtopenmaps.openlayers.client.layer.GoogleV3;
-import org.gwtopenmaps.openlayers.client.layer.GoogleV3MapType;
-import org.gwtopenmaps.openlayers.client.layer.GoogleV3Options;
-import org.gwtopenmaps.openlayers.client.layer.Markers;
-import org.gwtopenmaps.openlayers.client.layer.MarkersOptions;
-import org.gwtopenmaps.openlayers.client.layer.OSM;
-import org.gwtopenmaps.openlayers.client.layer.Vector;
-import org.gwtopenmaps.openlayers.client.layer.VectorOptions;
+import org.gwtopenmaps.openlayers.client.layer.*;
+import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -99,6 +85,14 @@ public class MapView {
     private void initMapLayers(Map map) {
         map.addLayer(OSM.Mapnik("OpenStreetMap"));
 
+        TMSOptions seamarkOptions = new TMSOptions();
+        seamarkOptions.setType("png");
+        seamarkOptions.setGetURL(getTileURL());
+        seamarkOptions.setNumZoomLevels(18);
+        seamarkOptions.setIsBaseLayer(false);
+        seamarkOptions.setDisplayOutsideMaxExtent(true);
+        map.addLayer(new TMS(i18n.seamark(), "http://t1.openseamap.org/seamark/", seamarkOptions));
+
         GoogleV3Options gHybridOptions = new GoogleV3Options();
         gHybridOptions.setNumZoomLevels(20);
         gHybridOptions.setType(GoogleV3MapType.G_HYBRID_MAP);
@@ -125,12 +119,17 @@ public class MapView {
         map.addLayer(new Bing(new BingOptions("Bing Aerial", bingKey, BingType.AERIAL)));
     }
 
+    public static native JSObject getTileURL() /*-{
+        return $wnd.getTileURL;
+    }-*/;
+
     public MapView(MapHandler mapHandler) {
         this.mapHandler = mapHandler;
         contentPanel = new ContentPanel();
         contentPanel.setHeadingText(i18n.map());
 
         MapOptions defaultMapOptions = new MapOptions();
+        defaultMapOptions.setMaxExtent(new Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34));
 
         mapWidget = new MapWidget("100%", "100%", defaultMapOptions);
         map = mapWidget.getMap();
