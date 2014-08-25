@@ -88,7 +88,7 @@ public class MapView {
         TMSOptions seamarkOptions = new TMSOptions();
         seamarkOptions.setType("png");
         seamarkOptions.setGetURL(getTileURL());
-        seamarkOptions.setNumZoomLevels(18);
+        seamarkOptions.setNumZoomLevels(20);
         seamarkOptions.setIsBaseLayer(false);
         seamarkOptions.setDisplayOutsideMaxExtent(true);
         map.addLayer(new TMS(i18n.seamark(), "http://t1.openseamap.org/seamark/", seamarkOptions));
