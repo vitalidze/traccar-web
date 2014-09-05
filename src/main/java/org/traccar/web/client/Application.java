@@ -29,6 +29,7 @@ import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.DataServiceAsync;
+import org.traccar.web.client.view.AdPopup;
 import org.traccar.web.client.view.ApplicationView;
 import org.traccar.web.client.view.UserSettingsDialog;
 import org.traccar.web.shared.model.Device;
@@ -61,6 +62,7 @@ public class Application {
     private final DeviceController deviceController;
     private final MapController mapController;
     private final ArchiveController archiveController;
+    private final AdPopup adPopup;
 
     private ApplicationView view;
 
@@ -71,6 +73,7 @@ public class Application {
         deviceController.getDeviceStore().addStoreHandlers(deviceStoreHandler);
         archiveController = new ArchiveController(archiveHanlder, deviceController.getDeviceStore());
         archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
+        adPopup = new AdPopup();
 
         view = new ApplicationView(
                 deviceController.getView(), mapController.getView(), archiveController.getView());
@@ -82,6 +85,9 @@ public class Application {
         deviceController.run();
         mapController.run();
         archiveController.run();
+
+        adPopup.position();
+        adPopup.show();
     }
 
     private MapController.MapHandler mapHandler = new MapController.MapHandler() {
