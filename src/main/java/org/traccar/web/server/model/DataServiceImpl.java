@@ -206,7 +206,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
     }
 
     @Transactional(commit = true)
-    @RequireUser(roles = { Role.ADMIN })
+    @RequireUser
     @Override
     public User updateUser(User user) {
         User currentUser = getSessionUser();
@@ -260,6 +260,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
 
     @Transactional(commit = true)
     @RequireUser
+    @ManagesDevices
     @Override
     public Device addDevice(Device device) {
         EntityManager entityManager = getSessionEntityManager();
@@ -281,6 +282,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
 
     @Transactional(commit = true)
     @RequireUser
+    @ManagesDevices
     @Override
     public Device updateDevice(Device device) {
         EntityManager entityManager = getSessionEntityManager();
@@ -294,6 +296,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
             tmp_device.setName(device.getName());
             tmp_device.setUniqueId(device.getUniqueId());
             tmp_device.setTimeout(device.getTimeout());
+            tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
             return tmp_device;
         } else {
             throw new IllegalStateException();
@@ -302,11 +305,12 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
 
     @Transactional(commit = true)
     @RequireUser
+    @ManagesDevices
     @Override
     public Device removeDevice(Device device) {
         EntityManager entityManager = getSessionEntityManager();
         User user = getSessionUser();
-        device = entityManager.merge(device);
+        device = entityManager.find(Device.class, device.getId());
         if (user.getAdmin() || user.getManager()) {
             device.getUsers().removeAll(getUsers());
         }

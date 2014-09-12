@@ -168,5 +168,9 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
 
     String idle();
 
+    String disallowDeviceManagementByUsers();
+
+    String idleWhenSpeedIsLE();
+
     String seamark();
 }
