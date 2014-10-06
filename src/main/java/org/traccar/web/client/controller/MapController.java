@@ -101,12 +101,23 @@ public class MapController implements ContentController, MapView.MapHandler {
             @Override
             public void onSuccess(List<Position> result) {
                 /**
-                 * Set up icon
+                 * Set up icon and 'idle since'
                  */
                 long currentTime = System.currentTimeMillis();
                 for (Position position : result) {
+                    Device device = position.getDevice();
                     boolean isOffline = currentTime - position.getTime().getTime() > position.getDevice().getTimeout() * 1000;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
+                    if (position.getSpeed() != null) {
+                        if (position.getSpeed().doubleValue() > position.getDevice().getIdleSpeedThreshold()) {
+                            latestNonIdlePositionMap.put(device.getId(), position);
+                        } else {
+                            Position latestNonIdlePosition = latestNonIdlePositionMap.get(device.getId());
+                            if (latestNonIdlePosition != null) {
+                                position.setIdleSince(latestNonIdlePosition.getTime());
+                            }
+                        }
+                    }
                 }
                 /**
                  * Draw positions
@@ -132,19 +143,9 @@ public class MapController implements ContentController, MapView.MapHandler {
                         Position prevTimestampPosition = timestampMap.get(device.getId());
 
                         if (prevTimestampPosition == null ||
-                                (position.getTime().getTime() - prevTimestampPosition.getTime().getTime() >= ApplicationContext.getInstance().getUserSettings().getTimePrintInterval() * 60 * 1000)) {
+                            (position.getTime().getTime() - prevTimestampPosition.getTime().getTime() >= ApplicationContext.getInstance().getUserSettings().getTimePrintInterval() * 60 * 1000)) {
                             mapView.showLatestTime(Arrays.asList(position));
                             timestampMap.put(device.getId(), position);
-                        }
-                    }
-                    if (position.getSpeed() != null) {
-                        if (position.getSpeed().doubleValue() > position.getDevice().getIdleSpeedThreshold()) {
-                            latestNonIdlePositionMap.put(device.getId(), position);
-                        } else {
-                            Position latestNonIdlePosition = latestNonIdlePositionMap.get(device.getId());
-                            if (latestNonIdlePosition != null) {
-                                position.setIdleSince(latestNonIdlePosition.getTime());
-                            }
                         }
                     }
                     latestPositionMap.put(device.getId(), position);
