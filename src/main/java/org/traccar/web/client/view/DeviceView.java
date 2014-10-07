@@ -29,6 +29,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
+import com.sencha.gxt.state.client.GridStateHandler;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
@@ -184,6 +185,8 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
 
         grid.getView().setAutoFill(true);
         grid.getView().setForceFit(true);
+
+        new GridStateHandler<Device>(grid).loadState();
 
         GridEditing<Device> editing = new GridInlineEditing<Device>(grid);
         grid.getView().setShowDirtyCells(false);

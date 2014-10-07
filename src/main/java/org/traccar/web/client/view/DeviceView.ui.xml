@@ -52,7 +52,7 @@
       </container:child>
       
       <container:child layoutData="{layoutData}">
-        <grid:Grid ui:field="grid" store="{deviceStore}" cm="{columnModel}" view="{view}" />
+        <grid:Grid ui:field="grid" store="{deviceStore}" cm="{columnModel}" view="{view}" stateful="true" stateId="deviceGrid" />
       </container:child>
 
     </container:VerticalLayoutContainer>
