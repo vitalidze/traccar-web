@@ -15,18 +15,26 @@
  */
 package org.traccar.web.server.model;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.rpc.RpcTokenException;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RPC;
 import com.google.gwt.user.server.rpc.RPCRequest;
+import com.google.gwt.user.server.rpc.RPCServletUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import org.traccar.web.shared.model.ApplicationSettings;
 import org.traccar.web.shared.model.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
@@ -156,24 +164,98 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
      */
     @Override
     public String processCall(String payload) throws SerializationException {
-        // First, check for possible XSRF situation
-        checkPermutationStrongName();
+        if (getThreadLocalRequest().getContentType().startsWith("text/x-gwt-rpc")) {
+            // First, check for possible XSRF situation
+            checkPermutationStrongName();
 
+            try {
+                RPCRequest rpcRequest = RPC.decodeRequest(payload, proxy.getClass(), this);
+                onAfterRequestDeserialized(rpcRequest);
+                return RPC.invokeAndEncodeResponse(proxy, rpcRequest.getMethod(),
+                        rpcRequest.getParameters(), rpcRequest.getSerializationPolicy(),
+                        rpcRequest.getFlags());
+            } catch (IncompatibleRemoteServiceException ex) {
+                log(
+                        "An IncompatibleRemoteServiceException was thrown while processing this call.",
+                        ex);
+                return RPC.encodeResponseForFailure(null, ex);
+            } catch (RpcTokenException tokenException) {
+                log("An RpcTokenException was thrown while processing this call.",
+                        tokenException);
+                return RPC.encodeResponseForFailure(null, tokenException);
+            }
+        } else {
+            return makeRestCall(payload);
+        }
+    }
+
+    @Override
+    protected String readContent(HttpServletRequest request) throws ServletException, IOException {
+        if (request.getContentType().startsWith("text/x-gwt-rpc")) {
+            return super.readContent(request);
+        } else {
+            return RPCServletUtils.readContent(request, null, null);
+        }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        perThreadRequest.set(req);
+        perThreadResponse.set(resp);
         try {
-            RPCRequest rpcRequest = RPC.decodeRequest(payload, proxy.getClass(), this);
-            onAfterRequestDeserialized(rpcRequest);
-            return RPC.invokeAndEncodeResponse(proxy, rpcRequest.getMethod(),
-                    rpcRequest.getParameters(), rpcRequest.getSerializationPolicy(),
-                    rpcRequest.getFlags());
-        } catch (IncompatibleRemoteServiceException ex) {
-            log(
-                    "An IncompatibleRemoteServiceException was thrown while processing this call.",
-                    ex);
-            return RPC.encodeResponseForFailure(null, ex);
-        } catch (RpcTokenException tokenException) {
-            log("An RpcTokenException was thrown while processing this call.",
-                    tokenException);
-            return RPC.encodeResponseForFailure(null, tokenException);
+            String payload = RPCServletUtils.readContent(req, null, null);
+            String result = makeRestCall(payload);
+            if (result != null) {
+                resp.getWriter().write(result);
+                if (resp.getStatus() != HttpServletResponse.SC_INTERNAL_SERVER_ERROR &&
+                    resp.getStatus() != HttpServletResponse.SC_UNAUTHORIZED &&
+                    resp.getStatus() != HttpServletResponse.SC_NOT_FOUND) {
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                }
+            }
+        } finally {
+            perThreadRequest.set(null);
+            perThreadResponse.set(null);
+        }
+    }
+
+    private String makeRestCall(String payload) {
+        String methodName = getThreadLocalRequest().getPathInfo().substring(1);
+        try {
+            Object[] args = new Gson().fromJson(payload, Object[].class);
+            Class<?>[] argClasses = new Class<?>[args == null ? 0 : args.length];
+            if (args != null) {
+                for (int i = 0; i < args.length; i++) {
+                    argClasses[i] = args[i].getClass();
+                }
+            }
+            Method method = proxy.getClass().getDeclaredMethod(methodName, argClasses);
+            Object result = method.invoke(proxy, args);
+            return result == null ? null : new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(result);
+        } catch (NoSuchMethodException nsme) {
+            log("Method not found: " + methodName);
+            try {
+                getThreadLocalResponse().sendError(HttpServletResponse.SC_NOT_FOUND);
+            } catch (Exception ex) {}
+            return "Method not found: " + methodName;
+        } catch (InvocationTargetException ite) {
+            log("Error during method '" + methodName + "' call: " + ite.getLocalizedMessage(), ite);
+            int errorCode = 0;
+            if (ite.getCause() instanceof SecurityException) {
+                errorCode = HttpServletResponse.SC_UNAUTHORIZED;
+            } else {
+                errorCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+            }
+            try {
+                getThreadLocalResponse().sendError(errorCode);
+            } catch (Exception ex) {}
+            return "Error during method '" + methodName + "' call: " + ite.getLocalizedMessage();
+        } catch (IllegalAccessException iae) {
+            log("Method '" + methodName + "' is not accessible");
+            try {
+                getThreadLocalResponse().sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            } catch (Exception ex) {}
+            return "Method '" + methodName + "' is not accessible";
         }
     }
 

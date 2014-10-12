@@ -1,5 +1,7 @@
 package org.traccar.web.shared.model;
 
+import com.google.gson.annotations.Expose;
+
 import java.io.Serializable;
 
 import javax.persistence.Entity;
@@ -59,6 +61,7 @@ public class UserSettings implements Serializable {
     }
 
     @Enumerated(EnumType.STRING)
+    @Expose
     private SpeedUnit speedUnit;
 
     public void setSpeedUnit(SpeedUnit speedUnit) {
@@ -72,6 +75,7 @@ public class UserSettings implements Serializable {
     /**
      * Interval of printing time on recorded trace in minutes based on position time
      */
+    @Expose
     private Short timePrintInterval;
 
     public Short getTimePrintInterval() {
@@ -82,8 +86,11 @@ public class UserSettings implements Serializable {
         this.timePrintInterval = timePrintInterval;
     }
 
+    @Expose
     private Integer zoomLevel;
+    @Expose
     private Double centerLongitude;
+    @Expose
     private Double centerLatitude;
 
     public Integer getZoomLevel() {

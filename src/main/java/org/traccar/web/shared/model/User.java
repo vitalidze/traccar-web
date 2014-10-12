@@ -23,6 +23,7 @@ import java.util.Set;
 
 import javax.persistence.*;
 
+import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 
 @Entity
@@ -45,6 +46,7 @@ public class User implements Serializable, Cloneable {
 
     @Id
     @GeneratedValue
+    @Expose
     private long id;
 
     public long getId() {
@@ -52,6 +54,7 @@ public class User implements Serializable, Cloneable {
     }
 
     @Column(unique = true)
+    @Expose
     private String login;
 
     public void setLogin(String login) {
@@ -73,6 +76,7 @@ public class User implements Serializable, Cloneable {
     }
 
     // TODO temporary nullable to migrate from old database
+    @Expose
     private Boolean admin;
 
     public void setAdmin(boolean admin) {
@@ -84,6 +88,7 @@ public class User implements Serializable, Cloneable {
         return (admin == null) ? false : admin;
     }
 
+    @Expose
     private Boolean manager;
 
     public Boolean getManager() {
@@ -118,6 +123,7 @@ public class User implements Serializable, Cloneable {
     }
 
     @OneToOne(cascade = CascadeType.ALL)
+    @Expose
     private UserSettings userSettings;
 
     public void setUserSettings(UserSettings userSettings) {

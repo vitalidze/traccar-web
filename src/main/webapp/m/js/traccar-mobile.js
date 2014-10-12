@@ -10,9 +10,11 @@ var $$ = Dom7;
 // Add view
 var mainView = myApp.addView('.view-main');
 
-if (true) {
-    mainView.loadPage({url: 'pages/login.html', animatePages: false});
-}
+// check authentication
+callGet({ method: 'authenticated',
+          success: function(xhr) { mainView.loadPage({url: 'pages/map.html', animatePages: false}); },
+          error: function(xhr) { mainView.loadPage({url: 'pages/login.html', animatePages: false}); }
+        });
 
 // In page callbacks:
 myApp.onPageInit('login-screen', function (page) {
@@ -28,25 +30,56 @@ myApp.onPageInit('login-screen', function (page) {
             return;
         }
 
-        $$.ajax({
-            url: '/login',
-            method: 'POST',
-            dataType: 'json',
-            data: { username: username, password: password },
-            success: function(xhr) {
-                myApp.hideIndicator();
-//                console.log('success!');
-            },
-            complete: function(xhr) {
-                myApp.hideIndicator();
-                if (xhr.status != 200) {
-                    myApp.alert("User name or password is invalid")
-                }
-                console.log(xhr.status);
-            },
-            error: function(xhr) {
-                myApp.hideIndicator();
-            }
-        });
+        callPost({ method: 'login',
+                   data: [username, password],
+                   success: function(xhr) { mainView.loadPage('pages/map.html'); },
+                   error: function(xhr) { myApp.alert("User name or password is invalid"); },
+                   showIndicator: true });
     });
 });
+
+myApp.onPageInit('map-screen', function(page) {
+    var pageContainer = $$(page.container);
+
+    pageContainer.find('#logout').on('click', function() {
+        callGet({ method: 'logout',
+                  success: function(xhr) { mainView.loadPage('pages/login.html');},
+                  error: function(xhr) { myApp.alert("Unexpected error"); mainView.loadPage('pages/login.html'); }})
+    });
+});
+
+function callGet(options) {
+    options.httpMethod = 'GET'
+    invoke(options);
+}
+
+function callPost(options) {
+    options.httpMethod = 'POST'
+    invoke(options);
+}
+
+function invoke(options) {
+    $$.ajax({
+        url: '/traccar/rest/' + options.method,
+        method: options.httpMethod,
+        dataType: 'json',
+        data: JSON.stringify(options.data),
+        processData: false,
+        start: function(xhr) {
+            if (options.showIndicator != undefined && options.showIndicator) {
+                myApp.showIndicator();
+            }
+        },
+        success: options.success,
+        complete: function(xhr) {
+            if (options.showIndicator != undefined && options.showIndicator) {
+                myApp.hideIndicator();
+            }
+
+            if (xhr.status != 200) {
+                options.error(xhr);
+            }
+        },
+        error: options.error
+    })
+}
