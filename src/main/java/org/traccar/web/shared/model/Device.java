@@ -15,6 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 
 import java.io.Serializable;
@@ -61,6 +62,7 @@ public class Device implements Serializable {
     }
 
     @Column(unique = true)
+    @Expose
     private String uniqueId;
 
     public void setUniqueId(String uniqueId) {
@@ -71,6 +73,7 @@ public class Device implements Serializable {
         return uniqueId;
     }
 
+    @Expose
     private String name;
 
     public void setName(String name) {
@@ -104,6 +107,7 @@ public class Device implements Serializable {
     /**
      * Consider device offline after 'timeout' seconds spent from last position
      */
+    @Expose
     private int timeout = DEFAULT_TIMEOUT;
 
     public int getTimeout() {
@@ -114,6 +118,7 @@ public class Device implements Serializable {
         this.timeout = timeout;
     }
 
+    @Expose
     private double idleSpeedThreshold;
 
     public double getIdleSpeedThreshold() {

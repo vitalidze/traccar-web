@@ -1,7 +1,8 @@
 // Initialize app
 var myApp = new Framework7({
-    // Hide and show indicator during ajax requests
-    modalTitle: ''
+    modalTitle: '',
+    swipeBackPage: false,
+    swipePanel: 'left'
 });
 
 // If we need to use custom DOM library, let's save it to $$ variable:
@@ -12,12 +13,20 @@ var mainView = myApp.addView('.view-main');
 
 // check authentication
 callGet({ method: 'authenticated',
-          success: function(xhr) { mainView.loadPage({url: 'pages/map.html', animatePages: false}); },
-          error: function(xhr) { mainView.loadPage({url: 'pages/login.html', animatePages: false}); }
+          success: function() { mainView.loadPage({url: 'pages/map.html', animatePages: false}); },
+          error: function() { mainView.loadPage({url: 'pages/login.html', animatePages: false}); }
         });
 
-// In page callbacks:
+// set up logout action
+$$('#logout').on('click', function() {
+    callGet({ method: 'logout',
+        success: function() { myApp.closePanel(); mainView.loadPage('pages/login.html');},
+        error: function() { myApp.alert("Unexpected error"); mainView.loadPage('pages/login.html'); }})
+});
+
 myApp.onPageInit('login-screen', function (page) {
+    myApp.params.swipePanel = false;
+
     // "page" variable contains all required information about loaded and initialized page
     var pageContainer = $$(page.container);
 
@@ -32,21 +41,42 @@ myApp.onPageInit('login-screen', function (page) {
 
         callPost({ method: 'login',
                    data: [username, password],
-                   success: function(xhr) { mainView.loadPage('pages/map.html'); },
-                   error: function(xhr) { myApp.alert("User name or password is invalid"); },
+                   success: function() { mainView.loadPage('pages/map.html'); },
+                   error: function() { myApp.alert("User name or password is invalid"); },
                    showIndicator: true });
     });
 });
 
 myApp.onPageInit('map-screen', function(page) {
-    var pageContainer = $$(page.container);
+    myApp.params.swipePanel = 'left';
 
-    pageContainer.find('#logout').on('click', function() {
-        callGet({ method: 'logout',
-                  success: function(xhr) { mainView.loadPage('pages/login.html');},
-                  error: function(xhr) { myApp.alert("Unexpected error"); mainView.loadPage('pages/login.html'); }})
-    });
+    loadDevices();
 });
+
+function loadDevices() {
+    var devicesList = $$('#devicesList');
+    devicesList.html('');
+
+    callGet({ method: 'getDevices',
+        success: function(data) {
+            var listHTML = '<div class="list-block">';
+            listHTML += '<div class="list-block-label">Devices</div>';
+            listHTML += '<ul>';
+            for (var i = 0; i < data.length; i++) {
+                listHTML += '<li class="item-content">';
+                listHTML += '<div class="item-inner"><div class="item-title">' + data[i].name + '</div></div>';
+                listHTML += '</li>';
+            }
+            listHTML += '</ul>';
+            listHTML += '</div>';
+
+            devicesList.append(listHTML);
+        },
+        error: function() {
+            devicesList.append("Unable to load devices list");
+        }
+    });
+}
 
 function callGet(options) {
     options.httpMethod = 'GET'
