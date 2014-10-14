@@ -1,5 +1,7 @@
 package org.traccar.web.shared.model;
 
+import com.google.gson.annotations.Expose;
+
 import java.io.Serializable;
 
 import javax.persistence.Entity;
@@ -23,10 +25,13 @@ public class ApplicationSettings implements Serializable {
         updateInterval = Short.valueOf(DEFAULT_UPDATE_INTERVAL);
     }
 
+    @Expose
     private boolean registrationEnabled;
 
+    @Expose
     private Short updateInterval;
 
+    @Expose
     private boolean disallowDeviceManagementByUsers;
 
     public void setRegistrationEnabled(boolean registrationEnabled) {

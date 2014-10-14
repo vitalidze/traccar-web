@@ -200,6 +200,14 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // warm up thread local variables
+        if (perThreadRequest == null) {
+            getThreadLocalRequest();
+        }
+        if (perThreadResponse == null) {
+            getThreadLocalResponse();
+        }
+
         perThreadRequest.set(req);
         perThreadResponse.set(resp);
         try {

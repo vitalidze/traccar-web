@@ -14,6 +14,9 @@ var mainView = myApp.addView('.view-main');
 // Application state, user settings, devices, etc.
 var appState = {};
 
+// load application settings
+callGet({ method: 'getApplicationSettings', success: function(appSettings) { appState.settings = appSettings; }});
+
 // check authentication
 callGet({ method: 'authenticated',
           success: function(data) {
@@ -72,18 +75,26 @@ myApp.onPageInit('login-screen', function (page) {
 
 // initialize map when page ready
 var map;
+var vectorLayer;
 
 myApp.onPageInit('map-screen', function(page) {
     myApp.params.swipePanel = 'left';
 
     loadDevices();
 
+    // TODO OSM attributions
+    // TODO choose map layer
+
+    var vectorSource = new ol.source.Vector();
+    vectorLayer = new ol.layer.Vector({ source: vectorSource });
+
     map = new ol.Map({
         target: 'map',
         layers: [
             new ol.layer.Tile({
                 source: new ol.source.OSM()
-            })
+            }),
+            vectorLayer
         ]
     });
 
@@ -92,7 +103,46 @@ myApp.onPageInit('map-screen', function(page) {
         center: createPoint(appState.userSettings.centerLongitude, appState.userSettings.centerLatitude),
         zoom: appState.userSettings.zoomLevel
     }));
+
+    // start positions loading cycle
+    loadPositions();
 });
+
+function loadPositions() {
+    callGet({ method: 'getLatestPositions',
+        success: function(positions) {
+            // save latest positions into application state
+            appState.latestPositions = positions;
+
+            // remove old markers
+            vectorLayer.getSource().clear();
+
+            for (i = 0; i < positions.length; i++) {
+                position = positions[i];
+
+                var iconFeature = new ol.Feature({
+                    geometry: new ol.geom.Point(createPoint(position.longitude, position.latitude))
+                });
+
+                var iconStyle = new ol.style.Style({
+                    image: new ol.style.Icon({
+                        anchor: [0.5, 46],
+                        anchorXUnits: 'fraction',
+                        anchorYUnits: 'pixels',
+                        opacity: 0.75,
+                        src: 'http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker.png'
+                    })
+                });
+
+                iconFeature.setStyle(iconStyle);
+
+                vectorLayer.getSource().addFeature(iconFeature);
+            }
+
+            setTimeout(loadPositions, appState.settings.updateInterval);
+        }
+    });
+}
 
 function createPoint(lon, lat) {
     return ol.proj.transform([lon, lat], 'EPSG:4326', map.getView().getProjection());
@@ -154,7 +204,7 @@ function invoke(options) {
                 myApp.hideIndicator();
             }
 
-            if (xhr.status != 200) {
+            if (xhr.status != 200 && options.error != undefined) {
                 options.error(xhr);
             }
         },

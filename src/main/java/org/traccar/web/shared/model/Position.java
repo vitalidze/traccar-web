@@ -25,6 +25,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 import org.hibernate.annotations.Index;
 import org.traccar.web.client.view.MarkerIconFactory;
@@ -85,6 +86,7 @@ public class Position implements Serializable, Cloneable {
         return device;
     }
 
+    @Expose
     @Index(name = "positionsIndex")
     private Date time;
 
@@ -92,54 +94,63 @@ public class Position implements Serializable, Cloneable {
         return time;
     }
 
+    @Expose
     private Boolean valid;
 
     public Boolean getValid() {
         return valid;
     }
 
+    @Expose
     private Double latitude;
 
     public Double getLatitude() {
         return latitude;
     }
 
+    @Expose
     private Double longitude;
 
     public Double getLongitude() {
         return longitude;
     }
 
+    @Expose
     private Double altitude;
 
     public Double getAltitude() {
         return altitude;
     }
 
+    @Expose
     private Double speed;
 
     public Double getSpeed() {
         return speed;
     }
 
+    @Expose
     private Double course;
 
     public Double getCourse() {
         return course;
     }
 
+    @Expose
     private Double power;
 
     public Double getPower() {
         return power;
     }
 
+    @Expose
     private String address;
 
     public String getAddress() {
         return address;
     }
 
+    @Expose
     private String other;
 
     public String getOther() {
