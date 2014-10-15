@@ -2,7 +2,8 @@
 var myApp = new Framework7({
     modalTitle: '',
     swipeBackPage: false,
-    swipePanel: 'left'
+    swipePanel: 'left',
+    swipePanelActiveArea: 10
 });
 
 // If we need to use custom DOM library, let's save it to $$ variable:
@@ -126,9 +127,9 @@ function loadPositions() {
 
                 var iconStyle = new ol.style.Style({
                     image: new ol.style.Icon({
-                        anchor: [0.5, 46],
+                        anchor: [0.5, 1.0],
                         anchorXUnits: 'fraction',
-                        anchorYUnits: 'pixels',
+                        anchorYUnits: 'fraction',
                         opacity: 0.75,
                         src: 'http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker.png'
                     })
