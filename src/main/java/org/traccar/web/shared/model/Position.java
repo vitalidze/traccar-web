@@ -78,6 +78,7 @@ public class Position implements Serializable, Cloneable {
         return id;
     }
 
+    @Expose
     @ManyToOne(fetch = FetchType.EAGER)
     @Index(name = "positionsIndex")
     private Device device;

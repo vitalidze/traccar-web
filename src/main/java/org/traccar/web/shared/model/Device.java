@@ -41,6 +41,7 @@ public class Device implements Serializable {
         idleSpeedThreshold = device.idleSpeedThreshold;
     }
 
+    @Expose
     @Id
     @GeneratedValue
     private long id;

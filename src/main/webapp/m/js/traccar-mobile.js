@@ -118,8 +118,12 @@ function loadPositions() {
             // remove old markers
             vectorLayer.getSource().clear();
 
+            currentTime = new Date().getTime();
+
             for (i = 0; i < positions.length; i++) {
                 position = positions[i];
+                position.time = new Date(Date.parse(position.time));
+                position.offline = currentTime - position.time.getTime() > position.device.timeout * 1000;
 
                 var iconFeature = new ol.Feature({
                     geometry: new ol.geom.Point(createPoint(position.longitude, position.latitude))
@@ -131,7 +135,7 @@ function loadPositions() {
                         anchorXUnits: 'fraction',
                         anchorYUnits: 'fraction',
                         opacity: 0.75,
-                        src: 'http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker.png'
+                        src: position.offline ? '/img/marker-white.png' : 'http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker.png'
                     })
                 });
 

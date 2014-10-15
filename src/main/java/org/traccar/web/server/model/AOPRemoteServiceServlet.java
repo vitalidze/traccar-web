@@ -37,6 +37,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.text.DateFormat;
 import java.util.List;
 
 abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
@@ -230,7 +231,8 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
     private String makeRestCall(String payload) {
         String methodName = getThreadLocalRequest().getPathInfo().substring(1);
         try {
-            Object[] args = new Gson().fromJson(payload, Object[].class);
+            Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setDateFormat("EEE, dd MMM yyyy HH:mm:ss Z").create();
+            Object[] args = gson.fromJson(payload, Object[].class);
             Class<?>[] argClasses = new Class<?>[args == null ? 0 : args.length];
             if (args != null) {
                 for (int i = 0; i < args.length; i++) {
@@ -239,7 +241,7 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
             }
             Method method = proxy.getClass().getDeclaredMethod(methodName, argClasses);
             Object result = method.invoke(proxy, args);
-            return result == null ? null : new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(result);
+            return result == null ? null : gson.toJson(result);
         } catch (NoSuchMethodException nsme) {
             log("Method not found: " + methodName);
             try {
