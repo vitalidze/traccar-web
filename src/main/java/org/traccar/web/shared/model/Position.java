@@ -70,6 +70,7 @@ public class Position implements Serializable, Cloneable {
         other = position.other;
     }
 
+    @Expose
     @Id
     @GeneratedValue
     private long id;

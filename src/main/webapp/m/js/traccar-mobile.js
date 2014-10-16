@@ -9,6 +9,36 @@ var myApp = new Framework7({
 // If we need to use custom DOM library, let's save it to $$ variable:
 var $$ = Dom7;
 
+// register handlebars helpers
+Handlebars.registerHelper('formatDate', function(timestamp) {
+    var date = new Date(timestamp);
+
+    return date.getFullYear() + '-' +
+        (date.getMonth() < 10 ? '0' : '') + date.getMonth() + '-' +
+        (date.getDay() < 10 ? '0' : '') + date.getDay() + ' ' +
+        (date.getHours() < 10 ? '0' : '') + date.getHours() + ':' +
+        (date.getMinutes() < 10 ? '0' : '') + date.getMinutes() + ':' +
+        (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
+});
+
+Handlebars.registerHelper('formatDouble', function(double, n) {
+    return double.toFixed(n);
+});
+
+Handlebars.registerHelper('formatSpeed', function(speed) {
+    var factor = 1;
+    var suffix = 'kn';
+
+    if (appState.userSettings.speedUnit == 'kilometersPerHour') {
+        factor = 1.852;
+        suffix = 'km/h';
+    } else if (appState.userSettings.speedUnit == 'milesPerHour') {
+        factor = 1.150779;
+        suffix = 'mph';
+    }
+    return (speed * factor).toFixed(2) + ' ' + suffix;
+});
+
 // Add view
 var mainView = myApp.addView('.view-main');
 
@@ -112,8 +142,10 @@ myApp.onPageInit('map-screen', function(page) {
 function loadPositions() {
     callGet({ method: 'getLatestPositions',
         success: function(positions) {
-            // save latest positions into application state
-            appState.latestPositions = positions;
+            // initialize latest positions in application state
+            if (appState.latestPositions == undefined) {
+                appState.latestPositions = [];
+            }
 
             // remove old markers
             vectorLayer.getSource().clear();
@@ -121,27 +153,29 @@ function loadPositions() {
             currentTime = new Date().getTime();
 
             for (i = 0; i < positions.length; i++) {
-                position = positions[i];
-                position.time = new Date(Date.parse(position.time));
-                position.offline = currentTime - position.time.getTime() > position.device.timeout * 1000;
+                var position = positions[i];
 
-                var iconFeature = new ol.Feature({
-                    geometry: new ol.geom.Point(createPoint(position.longitude, position.latitude))
-                });
+                // save 'selected' state from previous position
+                prevPosition = appState.latestPositions[position.device.id];
+                if (prevPosition != undefined) {
+                    position.selected = prevPosition.selected;
+                }
+                if (position.selected == undefined) {
+                    position.selected = false;
+                }
 
-                var iconStyle = new ol.style.Style({
-                    image: new ol.style.Icon({
-                        anchor: [0.5, 1.0],
-                        anchorXUnits: 'fraction',
-                        anchorYUnits: 'fraction',
-                        opacity: 0.75,
-                        src: position.offline ? '/img/marker-white.png' : 'http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker.png'
-                    })
-                });
+                // calculate whether we can consider device offline
+                appState.latestPositions[position.device.id] = position;
+                position.time = Date.parse(position.time);
+                position.offline = currentTime - position.time > position.device.timeout * 1000;
 
-                iconFeature.setStyle(iconStyle);
+                // draw marker on map
+                drawMarker(position);
 
-                vectorLayer.getSource().addFeature(iconFeature);
+                // update position details in side panel
+                if (prevPosition != undefined && position.id != prevPosition.id) {
+                    drawDeviceDetails(position);
+                }
             }
 
             setTimeout(loadPositions, appState.settings.updateInterval);
@@ -158,27 +192,89 @@ function loadDevices() {
     devicesList.html('');
 
     callGet({ method: 'getDevices',
-        success: function(data) {
+        success: function(devices) {
             // save devices into application state
-            appState.devices = data;
+            appState.devices = devices;
 
-            var listHTML = '<div class="list-block">';
-            listHTML += '<div class="list-block-label">Devices</div>';
-            listHTML += '<ul>';
-            for (var i = 0; i < data.length; i++) {
-                listHTML += '<li class="item-content">';
-                listHTML += '<div class="item-inner"><div class="item-title">' + data[i].name + '</div></div>';
-                listHTML += '</li>';
-            }
-            listHTML += '</ul>';
-            listHTML += '</div>';
+            var source   = $$('#devices-list-template').html();
+            var template = Handlebars.compile(source);
 
-            devicesList.append(listHTML);
+            devicesList.html(template({devices: devices}));
+
+            $$('.device-details-link').on('click', function(e) {
+                var deviceId = e.currentTarget.id.substring(7);
+                deviceId = deviceId.substring(0, deviceId.indexOf('-'));
+                drawDeviceDetails(appState.latestPositions[deviceId]);
+                myApp.accordionToggle($$('#device-' + deviceId + '-list-item'));
+            });
         },
         error: function() {
             devicesList.append("Unable to load devices list");
         }
     });
+}
+
+function drawDeviceDetails(position) {
+    var deviceId = position.device.id;
+    var deviceDetails = $$('#device-' + deviceId + '-details');
+    if (deviceDetails != undefined) {
+        if (position == undefined) {
+            deviceDetails.html('<p>No data available</p>');
+        } else {
+            var source   = $$('#device-details-template').html();
+            var template = Handlebars.compile(source);
+
+            deviceDetails.html(template(position));
+
+            $$('#device-' + deviceId +'-select-on-map').on('click', function() {
+                position = appState.latestPositions[deviceId];
+                position.selected = true;
+                drawMarker(position);
+                map.getView().setCenter(createPoint(position.longitude, position.latitude));
+                myApp.closePanel();
+            });
+        }
+    }
+}
+
+function drawMarker(position) {
+    var markerFeature = new ol.Feature({
+        geometry: new ol.geom.Point(createPoint(position.longitude, position.latitude))
+    });
+
+    var markerStyle = new ol.style.Style({
+        image: new ol.style.Icon({
+            anchor: [0.5, 1.0],
+            anchorXUnits: 'fraction',
+            anchorYUnits: 'fraction',
+            opacity: 0.75,
+            src:
+                position.selected ? 'http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker-green.png' :
+                position.offline ? '/img/marker-white.png' : 'http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker.png'
+        }),
+        text: new ol.style.Text({
+            text: position.device.name,
+            textAlign: 'center',
+            offsetX: 0,
+            offsetY: 8,
+            font: '12px',
+            fill: new ol.style.Fill({
+                color: '#0000FF'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#fff',
+                width: 2
+            })
+        })
+    });
+
+    markerFeature.setStyle(markerStyle);
+
+    if (position.marker != undefined) {
+        vectorLayer.getSource().removeFeature(position.marker);
+    }
+    position.marker = markerFeature;
+    vectorLayer.getSource().addFeature(markerFeature);
 }
 
 function callGet(options) {
