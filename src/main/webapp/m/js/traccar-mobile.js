@@ -1,9 +1,7 @@
 // Initialize app
 var myApp = new Framework7({
     modalTitle: '',
-    swipeBackPage: false,
-    swipePanel: 'left',
-    swipePanelActiveArea: 10
+    swipeBackPage: false
 });
 
 // If we need to use custom DOM library, let's save it to $$ variable:
@@ -104,6 +102,34 @@ myApp.onPageInit('login-screen', function (page) {
     });
 });
 
+// button that opens sidebar menu
+var OpenSideMenuControl = function(opt_options) {
+    var options = opt_options || {};
+
+    var anchor = document.createElement('a');
+    anchor.href = '#open-side-menu';
+    anchor.innerHTML = '<span role="tooltip">Open sidebar</span>&gt;';
+
+    var handleOpenSideMenu = function(e) {
+        e.preventDefault();
+        myApp.openPanel('left');
+    };
+
+    anchor.addEventListener('click', handleOpenSideMenu, false);
+    anchor.addEventListener('touchstart', handleOpenSideMenu, false);
+
+    var element = document.createElement('div');
+    element.className = 'button-open-side-menu ol-unselectable ol-has-tooltip';
+    element.appendChild(anchor);
+
+    ol.control.Control.call(this, {
+        element: element,
+        target: options.target
+    });
+
+};
+ol.inherits(OpenSideMenuControl, ol.control.Control);
+
 // initialize map when page ready
 var map;
 var vectorLayer;
@@ -128,7 +154,9 @@ myApp.onPageInit('map-screen', function(page) {
             }),
             vectorLayer
         ],
-        controls: ol.control.defaults({ attribution: false }).extend([attribution])
+        controls: ol.control.defaults({ attribution: false })
+            .extend([attribution])
+            .extend([new OpenSideMenuControl()])
     });
 
     // set up map center and zoom
