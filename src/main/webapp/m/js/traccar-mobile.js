@@ -113,8 +113,9 @@ myApp.onPageInit('map-screen', function(page) {
 
     loadDevices();
 
-    // TODO OSM attributions
-    // TODO choose map layer
+    var attribution = new ol.control.Attribution({
+        collapsible: false
+    });
 
     var vectorSource = new ol.source.Vector();
     vectorLayer = new ol.layer.Vector({ source: vectorSource });
@@ -126,7 +127,8 @@ myApp.onPageInit('map-screen', function(page) {
                 source: new ol.source.OSM()
             }),
             vectorLayer
-        ]
+        ],
+        controls: ol.control.defaults({ attribution: false }).extend([attribution])
     });
 
     // set up map center and zoom
