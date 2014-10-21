@@ -80,12 +80,21 @@ myApp.onPageInit('login-screen', function (page) {
     var pageContainer = $$(page.container);
 
     pageContainer.find('#sign-in').on('click', function() {
+        pageContainer.find('#form-login').trigger('submit');
+    });
+
+    pageContainer.find('#form-login').on('submit', function(e) {
+        e.preventDefault();
+
+        // removes the iOS keyboard
+        document.activeElement.blur();
+
         var username = pageContainer.find('input[name="username"]').val();
         var password = pageContainer.find('input[name="password"]').val();
 
         if (username.trim().length == 0 || password.trim().length == 0) {
             myApp.alert("User name and password must not be empty");
-            return;
+            return false;
         }
 
         callPost({ method: 'login',
@@ -99,6 +108,8 @@ myApp.onPageInit('login-screen', function (page) {
                    },
                    error: function() { myApp.alert("User name or password is invalid"); },
                    showIndicator: true });
+
+        return false;
     });
 });
 
