@@ -215,7 +215,7 @@ function loadPositions() {
 
                 // update position details in side panel
                 if (prevPosition != undefined && position.id != prevPosition.id) {
-                    drawDeviceDetails(position);
+                    drawDeviceDetails(position.device.id, position);
                 }
             }
 
@@ -245,7 +245,7 @@ function loadDevices() {
             $$('.device-details-link').on('click', function(e) {
                 var deviceId = e.currentTarget.id.substring(7);
                 deviceId = deviceId.substring(0, deviceId.indexOf('-'));
-                drawDeviceDetails(appState.latestPositions[deviceId]);
+                drawDeviceDetails(deviceId, appState.latestPositions[deviceId]);
                 myApp.accordionToggle($$('#device-' + deviceId + '-list-item'));
             });
         },
@@ -255,8 +255,7 @@ function loadDevices() {
     });
 }
 
-function drawDeviceDetails(position) {
-    var deviceId = position.device.id;
+function drawDeviceDetails(deviceId, position) {
     var deviceDetails = $$('#device-' + deviceId + '-details');
     if (deviceDetails != undefined) {
         if (position == undefined) {
