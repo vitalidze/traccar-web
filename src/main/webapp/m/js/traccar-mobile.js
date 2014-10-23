@@ -288,7 +288,7 @@ function drawMarker(position) {
             anchor: [0.5, 1.0],
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
-            opacity: 0.75,
+            opacity: 0.9,
             src:
                 position.selected ? 'http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker-green.png' :
                 position.offline ? '/img/marker-white.png' : 'http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker.png'
@@ -298,13 +298,13 @@ function drawMarker(position) {
             textAlign: 'center',
             offsetX: 0,
             offsetY: 8,
-            font: '12px',
+            font: '12px Arial',
             fill: new ol.style.Fill({
                 color: '#0000FF'
             }),
             stroke: new ol.style.Stroke({
                 color: '#fff',
-                width: 2
+                width: 3
             })
         })
     });
