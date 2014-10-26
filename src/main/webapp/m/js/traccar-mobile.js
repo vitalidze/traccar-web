@@ -259,7 +259,7 @@ function drawDeviceDetails(deviceId, position) {
     var deviceDetails = $$('#device-' + deviceId + '-details');
     if (deviceDetails != undefined) {
         if (position == undefined) {
-            deviceDetails.html('<p>No data available</p>');
+            deviceDetails.html('<div class="content-block">No data available</div>');
         } else {
             var source   = $$('#device-details-template').html();
             var template = Handlebars.compile(source);
