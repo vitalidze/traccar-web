@@ -10,10 +10,11 @@ var $$ = Dom7;
 // register handlebars helpers
 Handlebars.registerHelper('formatDate', function(timestamp) {
     var date = new Date(timestamp);
+    var month = date.getMonth() + 1;
 
     return date.getFullYear() + '-' +
-        (date.getMonth() < 10 ? '0' : '') + date.getMonth() + '-' +
-        (date.getDay() < 10 ? '0' : '') + date.getDay() + ' ' +
+        (month < 10 ? '0' : '') + month + '-' +
+        (date.getDate() < 10 ? '0' : '') + date.getDate() + ' ' +
         (date.getHours() < 10 ? '0' : '') + date.getHours() + ':' +
         (date.getMinutes() < 10 ? '0' : '') + date.getMinutes() + ':' +
         (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
