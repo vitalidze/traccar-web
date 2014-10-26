@@ -271,6 +271,13 @@ function drawDeviceDetails(deviceId, position) {
                 position = appState.latestPositions[deviceId];
                 position.selected = true;
                 drawMarker(position);
+                // deselect previously selected position
+                appState.latestPositions.forEach(function(pos) {
+                    if (pos.id != position.id && pos.selected != undefined && pos.selected) {
+                        pos.selected = false;
+                        drawMarker(pos);
+                    }
+                });
                 map.getView().setCenter(createPoint(position.longitude, position.latitude));
                 myApp.closePanel();
             });
