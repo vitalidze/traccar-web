@@ -360,3 +360,10 @@ function invoke(options) {
         error: options.error
     })
 }
+
+// Fix scrolling issue in accordion in side panel
+if (myApp.device.ios) {
+    $$(window).resize(function () {
+        $$('.panel-left').css({height: $$(window).height() + 'px'});
+    }).trigger('resize');
+}
