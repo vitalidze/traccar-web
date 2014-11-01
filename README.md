@@ -10,7 +10,7 @@ Web interface for traccar server.
 
 ## Installation
 
-1) Download latest build from http://ultrashare.ngrok.com/s/traccar-web/dev/latest/traccar-web.war
+1) Download latest build from http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war
 
 2) Stop Traccar service.
 
