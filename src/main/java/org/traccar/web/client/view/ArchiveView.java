@@ -125,6 +125,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         List<ColumnConfig<Position, ?>> columnConfigList = new LinkedList<ColumnConfig<Position, ?>>();
 
+	columnConfigList.add(new ColumnConfig<Position, String>(positionProperties.address(), 25, i18n.address()));
+
         columnConfigList.add(new ColumnConfig<Position, Boolean>(positionProperties.valid(), 25, i18n.valid()));
 
         ColumnConfig<Position, Date> columnConfigDate = new ColumnConfig<Position, Date>(positionProperties.time(), 25, i18n.time());
