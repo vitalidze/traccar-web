@@ -215,6 +215,8 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
             String payload = RPCServletUtils.readContent(req, null, null);
             String result = makeRestCall(payload);
             if (result != null) {
+                resp.setHeader("Content-Type", "application/json;charset=UTF-8");
+                resp.setCharacterEncoding("UTF-8");
                 resp.getWriter().write(result);
                 if (resp.getStatus() != HttpServletResponse.SC_INTERNAL_SERVER_ERROR &&
                     resp.getStatus() != HttpServletResponse.SC_UNAUTHORIZED &&
