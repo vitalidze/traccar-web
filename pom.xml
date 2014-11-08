@@ -13,8 +13,10 @@
   <name>Traccar Web UI</name>
 
   <properties>
+    <!-- Convenience property to set the hibernate version -->
+    <hibernateVersion>4.3.7.Final</hibernateVersion>
     <!-- Convenience property to set the GWT version -->
-    <gwtVersion>2.6.0</gwtVersion>
+    <gwtVersion>2.6.1</gwtVersion>
     <!-- GWT needs at least java 1.5 -->
     <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,34 +38,34 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>4.1.10.Final</version>
+      <version>${hibernateVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>4.3.1.Final</version>
+      <version>4.3.2.Final</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-      <version>4.1.10.Final</version>
+      <version>${hibernateVersion}</version>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.180</version>
+      <version>1.4.182</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
        <groupId>mysql</groupId>
        <artifactId>mysql-connector-java</artifactId>
-       <version>5.1.31</version>
+       <version>5.1.33</version>
        <scope>provided</scope>
     </dependency>
     <dependency>
        <groupId>com.sencha.gxt</groupId>
        <artifactId>gxt</artifactId>
-       <version>3.1.0-beta</version>
+       <version>3.1.1</version>
        <scope>provided</scope>
     </dependency>
     <dependency>
@@ -75,7 +77,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.7</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -103,7 +105,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>2.6.0</version>
+        <version>2.6.1</version>
         <configuration>
           <deploy>${project.build.directory}/gwt-deploy</deploy>
           <runTarget>traccar.html</runTarget>
@@ -125,7 +127,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.1.1</version>
+        <version>2.5</version>
         <executions>
           <execution>
             <phase>compile</phase>
@@ -141,7 +143,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>2.5.1</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
@@ -151,7 +153,7 @@
       <plugin>
         <groupId>com.rimerosolutions.maven.plugins</groupId>
         <artifactId>wrapper-maven-plugin</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.2</version>
       </plugin>
     </plugins>
   </build>
