@@ -104,6 +104,7 @@ public class Device implements Serializable {
     /**
      * Consider device offline after 'timeout' seconds spent from last position
      */
+    @Column(nullable = true)
     private int timeout = DEFAULT_TIMEOUT;
 
     public int getTimeout() {
@@ -114,6 +115,7 @@ public class Device implements Serializable {
         this.timeout = timeout;
     }
 
+    @Column(nullable = true)
     private double idleSpeedThreshold;
 
     public double getIdleSpeedThreshold() {

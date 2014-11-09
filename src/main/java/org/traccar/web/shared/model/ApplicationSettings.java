@@ -2,10 +2,7 @@ package org.traccar.web.shared.model;
 
 import java.io.Serializable;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name="application_settings")
@@ -27,6 +24,7 @@ public class ApplicationSettings implements Serializable {
 
     private Short updateInterval;
 
+    @Column(nullable = true)
     private boolean disallowDeviceManagementByUsers;
 
     public void setRegistrationEnabled(boolean registrationEnabled) {

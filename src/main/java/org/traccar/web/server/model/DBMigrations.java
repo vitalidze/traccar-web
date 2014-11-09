@@ -27,12 +27,14 @@ import java.util.List;
 public class DBMigrations {
     public void migrate(EntityManager em) throws Exception {
         for (Migration migration : new Migration[] {
-                new CreateAdmin(),
                 new SetUpdateInterval(),
                 new SetTimePrintInterval(),
                 new SetDefaultMapViewSettings(),
                 new SetManagerFlag(),
-                new SetDefaultDeviceTimeout()
+                new SetDefaultDeviceTimeout(),
+                new SetDefaultIdleSpeedThreshold(),
+                new SetDefaultDisallowDeviceManagementByUsers(),
+                new CreateAdmin(),
 
         }) {
             em.getTransaction().begin();
@@ -126,6 +128,28 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.timeout = :tmout WHERE D.timeout IS NULL OR D.timeout <= 0")
                     .setParameter("tmout", Integer.valueOf(Device.DEFAULT_TIMEOUT))
+                    .executeUpdate();
+        }
+    }
+
+    /**
+     * set up default idle speed threshold to 0
+     */
+    static class SetDefaultIdleSpeedThreshold implements Migration {
+
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.idleSpeedThreshold = :idleSpeedThreshold WHERE D.idleSpeedThreshold IS NULL")
+                    .setParameter("idleSpeedThreshold", Double.valueOf(0))
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultDisallowDeviceManagementByUsers implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.disallowDeviceManagementByUsers = :ddmbu WHERE S.disallowDeviceManagementByUsers IS NULL")
+                    .setParameter("ddmbu", Boolean.FALSE)
                     .executeUpdate();
         }
     }
