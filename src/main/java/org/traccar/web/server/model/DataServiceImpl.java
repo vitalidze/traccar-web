@@ -377,13 +377,20 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
             EntityManager entityManager = getSessionEntityManager();
 
             for (Device device : devices) {
-                Position position = (Position) entityManager.createQuery("SELECT p FROM Position p WHERE p.device = :device AND p.speed > 0 ORDER BY time DESC")
+                List<Position> position = entityManager.createQuery("SELECT p FROM Position p WHERE p.device = :device AND p.speed > 0 ORDER BY time DESC", Position.class)
                         .setParameter("device", device)
                         .setMaxResults(1)
-                        .getSingleResult();
+                        .getResultList();
 
-                if (position != null) {
-                    positions.add(position);
+                if (position.isEmpty()) {
+                    position = entityManager.createQuery("SELECT p FROM Position p WHERE p.device = :device ORDER BY time ASC", Position.class)
+                        .setParameter("device", device)
+                        .setMaxResults(1)
+                        .getResultList();
+                }
+
+                if (!position.isEmpty()) {
+                    positions.add(position.get(0));
                 }
             }
         }

@@ -109,6 +109,7 @@ public class Device implements Serializable {
      * Consider device offline after 'timeout' seconds spent from last position
      */
     @Expose
+    @Column(nullable = true)
     private int timeout = DEFAULT_TIMEOUT;
 
     public int getTimeout() {
@@ -120,6 +121,7 @@ public class Device implements Serializable {
     }
 
     @Expose
+    @Column(nullable = true)
     private double idleSpeedThreshold;
 
     public double getIdleSpeedThreshold() {
