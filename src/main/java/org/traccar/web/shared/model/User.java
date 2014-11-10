@@ -21,7 +21,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 import com.google.gwt.user.client.rpc.GwtTransient;
 
@@ -44,10 +56,12 @@ public class User implements Serializable, Cloneable {
     }
 
     @Id
-    @GeneratedValue
-    private long id;
+    @SequenceGenerator(name = "users_id_seq", sequenceName = "users_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_id_seq")
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
+    private Long id;
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

@@ -2,15 +2,18 @@ package org.traccar.web.shared.model;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="user_settings")
+@Table(name = "user_settings")
 public class UserSettings implements Serializable {
 
     private static final long serialVersionUID = 1;
@@ -21,8 +24,10 @@ public class UserSettings implements Serializable {
     public static final double DEFAULT_CENTER_LATITUDE = 41.9;
 
     @Id
-    @GeneratedValue
-    private long id;
+    @SequenceGenerator(name = "usersettings_id_seq", sequenceName = "usersettings_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usersettings_id_seq")
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
+    private Long id;
 
     public UserSettings() {
         speedUnit = SpeedUnit.knots;
@@ -108,5 +113,27 @@ public class UserSettings implements Serializable {
 
     public void setCenterLatitude(Double centerLatitude) {
         this.centerLatitude = centerLatitude;
+    }
+
+    // Added hashCode() and equals() to conform to JPA.
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof UserSettings)) {
+            return false;
+        }
+        UserSettings other = (UserSettings) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
     }
 }
