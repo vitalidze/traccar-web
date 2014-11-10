@@ -21,10 +21,22 @@ import com.google.gwt.user.client.rpc.GwtTransient;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 @Entity
-@Table(name = "devices")
+@Table(name = "devices",
+       indexes = { @Index(name = "devices_pkey", columnList = "id") })
 public class Device implements Serializable {
 
     private static final long serialVersionUID = 1;
@@ -43,7 +55,8 @@ public class Device implements Serializable {
 
     @Expose
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
     public long getId() {

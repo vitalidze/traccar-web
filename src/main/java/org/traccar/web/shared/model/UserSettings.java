@@ -4,15 +4,17 @@ import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="user_settings")
+@Table(name = "user_settings")
 public class UserSettings implements Serializable {
 
     private static final long serialVersionUID = 1;
@@ -23,7 +25,8 @@ public class UserSettings implements Serializable {
     public static final double DEFAULT_CENTER_LATITUDE = 41.9;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
     public UserSettings() {
@@ -136,5 +139,23 @@ public class UserSettings implements Serializable {
 
     public void setCenterLatitude(Double centerLatitude) {
         this.centerLatitude = centerLatitude;
+    }
+
+    // Added hashCode() and equals() to conform to JPA.
+
+    @Override
+    public int hashCode() {
+        return (int) this.id;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof UserSettings)) {
+            return false;
+        }
+
+        UserSettings other = (UserSettings) object;
+
+        return this.id == other.id;
     }
 }

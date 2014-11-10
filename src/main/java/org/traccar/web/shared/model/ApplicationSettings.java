@@ -4,7 +4,12 @@ import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name="application_settings")
@@ -14,7 +19,8 @@ public class ApplicationSettings implements Serializable {
     public static final short DEFAULT_UPDATE_INTERVAL = 15000;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
     public ApplicationSettings() {
@@ -54,5 +60,23 @@ public class ApplicationSettings implements Serializable {
 
     public void setDisallowDeviceManagementByUsers(boolean disallowDeviceManagementByUsers) {
         this.disallowDeviceManagementByUsers = disallowDeviceManagementByUsers;
+    }
+
+    // Added hashCode() and equals() to conform to JPA.
+
+    @Override
+    public int hashCode() {
+        return (int) this.id;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof ApplicationSettings)) {
+            return false;
+        }
+
+        ApplicationSettings other = (ApplicationSettings) object;
+        
+        return this.id == other.id;
     }
 }

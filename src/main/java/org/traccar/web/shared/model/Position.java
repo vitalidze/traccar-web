@@ -18,9 +18,11 @@ package org.traccar.web.shared.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.ManyToOne;
@@ -77,7 +79,8 @@ public class Position implements Serializable, Cloneable {
 
     @Expose
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
     public long getId() {
@@ -194,5 +197,23 @@ public class Position implements Serializable, Cloneable {
 
     public void setDistance(double distance) {
         this.distance = distance;
+    }
+    
+    // Added hashCode() and equals() to conform to JPA.
+
+    @Override
+    public int hashCode() {
+        return (int) this.id;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof Position)) {
+            return false;
+        }
+
+        Position p = (Position) object;
+
+        return this.id == p.id;
     }
 }
