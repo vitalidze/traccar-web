@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -33,10 +34,12 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "devices",
-       indexes = { @Index(name = "devices_pkey", columnList = "id") })
+       indexes = { @Index(name = "devices_pkey", columnList = "id") },
+       uniqueConstraints = { @UniqueConstraint(name = "devices_ukey_uniqueid", columnNames = "uniqueid") })
 public class Device implements Serializable {
 
     private static final long serialVersionUID = 1;
@@ -63,8 +66,9 @@ public class Device implements Serializable {
         return id;
     }
 
-    @OneToOne(fetch = FetchType.EAGER)
     @GwtTransient
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_position_id"))
     private Position latestPosition;
 
     public void setLatestPosition(Position latestPosition) {
@@ -75,7 +79,6 @@ public class Device implements Serializable {
         return latestPosition;
     }
 
-    @Column(unique = true)
     private String uniqueId;
 
     public void setUniqueId(String uniqueId) {
@@ -139,11 +142,17 @@ public class Device implements Serializable {
         this.idleSpeedThreshold = idleSpeedThreshold;
     }
 
+    // Hibernate bug HHH-8783: (http://hibernate.atlassian.net/browse/HHH-8783)
+    //     ForeignKey(name) has no effect in JoinTable (and others).  It is
+    //     reported as closed but the comments indicate it is still not fixed
+    //     for @JoinTable() and targeted to be fixed in 5.x :-(.
+    //                          
     @GwtTransient
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_devices",
-            joinColumns = { @JoinColumn(name = "devices_id", referencedColumnName = "id") },
-            inverseJoinColumns = { @JoinColumn(name = "users_id", referencedColumnName = "id") })
+               foreignKey = @ForeignKey(name = "users_devices_fkey_devices_id"),
+               joinColumns = { @JoinColumn(name = "devices_id", table = "devices", referencedColumnName = "id") },
+               inverseJoinColumns = { @JoinColumn(name = "users_id", table = "users", referencedColumnName = "id") })
     private Set<User> users;
 
     public Set<User> getUsers() {
