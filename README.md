@@ -53,6 +53,8 @@ This project has following features, which don't exist in original `traccar-web`
 * new device status - idle. It is shown in popup and also there will be a time of idling. Each device got new setting 'Idle when speed is <=', which is zero by default. It may be changed to some reasonable value, which is then used to consider device idle (for example to handle 'satelite drift compansation').
 * possibility to restrict ordinary users to manage (i.e. add/edit/delete) devices. Configured in global application settings.
 * save sort order in devices grid into browser cookies
+* mobile web UI based on [framework7](http://www.idangero.us/framework7/) with general functions for GPS tracking, available at `m/` URL, i.e. `http://server-ip:8082/m/`
+* RESTful API. Available at `/traccar/rest/{methodName}` - allows to call methods from `DataService` class. Full documentation will be available by request. 
 
 
 ## Building
