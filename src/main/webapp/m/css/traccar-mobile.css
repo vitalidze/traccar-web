@@ -69,3 +69,7 @@
 .panel .content-block-title  {
     color: #eafac9;
 }
+
+#devicesList li {
+    -webkit-transform-style: preserve-3d;
+}
