@@ -29,7 +29,8 @@ import javax.persistence.TypedQuery;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpSession;
 
-import org.hibernate.jpa.internal.EntityManagerImpl;
+import org.hibernate.Session;
+
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.shared.model.*;
 
@@ -90,8 +91,12 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
     void closeSessionEntityManager() {
         EntityManager em = entityManager.get();
         if (em != null) {
-            if (em.isOpen() && ((EntityManagerImpl) em).getSession().isOpen()) {
-                em.close();
+            if (em.isOpen()) {
+                Session session = em.unwrap(Session.class);
+                
+                if (session.isOpen()) {
+                    em.close();
+                }
             }
             entityManager.set(null);
         }

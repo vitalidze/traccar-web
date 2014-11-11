@@ -18,15 +18,25 @@ package org.traccar.web.shared.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
-import org.hibernate.annotations.Index;
+
 import org.traccar.web.client.view.MarkerIconFactory;
 
 @Entity
-@Table(name = "positions")
+@Table(name = "positions",
+       indexes = { @Index(name="positionsIndex", columnList="device_id,time") })
 public class Position implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1;
@@ -76,7 +86,6 @@ public class Position implements Serializable, Cloneable {
 
     @Expose
     @ManyToOne(fetch = FetchType.EAGER)
-    @Index(name = "positionsIndex")
     private Device device;
 
     public Device getDevice() {
@@ -84,7 +93,7 @@ public class Position implements Serializable, Cloneable {
     }
 
     @Expose
-    @Index(name = "positionsIndex")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date time;
 
     public Date getTime() {
