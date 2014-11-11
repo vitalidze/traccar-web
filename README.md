@@ -54,7 +54,8 @@ This project has following features, which don't exist in original `traccar-web`
 * possibility to restrict ordinary users to manage (i.e. add/edit/delete) devices. Configured in global application settings.
 * save sort order in devices grid into browser cookies
 * mobile web UI based on [framework7](http://www.idangero.us/framework7/) with general functions for GPS tracking, available at `m/` URL, i.e. `http://server-ip:8082/m/`
-* RESTful API. Available at `/traccar/rest/{methodName}` - allows to call methods from `DataService` class. Full documentation will be available by request. 
+* RESTful API. Available at `/traccar/rest/{methodName}` - allows to call methods from `DataService` class. Full documentation will be available by request.
+* 'Address' column in archive (hidden by default)
 
 
 ## Building
