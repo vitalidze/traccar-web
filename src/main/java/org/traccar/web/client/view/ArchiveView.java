@@ -15,9 +15,7 @@
  */
 package org.traccar.web.client.view;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.state.client.GridStateHandler;
@@ -127,7 +125,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         List<ColumnConfig<Position, ?>> columnConfigList = new LinkedList<ColumnConfig<Position, ?>>();
 
         ColumnConfig<Position, Boolean> columnConfigValid = new ColumnConfig<Position, Boolean>(positionProperties.valid(), 25, i18n.valid());
-        columnConfigValid.setHidden(true);
         columnConfigList.add(columnConfigValid);
 
         ColumnConfig<Position, Date> columnConfigDate = new ColumnConfig<Position, Date>(positionProperties.time(), 25, i18n.time());
@@ -135,7 +132,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         columnConfigList.add(columnConfigDate);
 
         ColumnConfig<Position, String> columnConfigAddress = new ColumnConfig<Position, String>(positionProperties.address(), 25, i18n.address());
-        columnConfigAddress.setHidden(true);
         columnConfigList.add(columnConfigAddress);
 
         columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.latitude(), 25, i18n.latitude()));
@@ -161,7 +157,18 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         uiBinder.createAndBindUi(this);
 
-        new GridStateHandler<Position>(grid).loadState();
+        GridStateHandler<Position> gridStateHandler = new GridStateHandler<Position>(grid);
+        gridStateHandler.loadState();
+        Set<String> hidden = gridStateHandler.getState().getHidden();
+        if (hidden == null) {
+            hidden = new HashSet<String>();
+            gridStateHandler.getState().setHidden(hidden);
+            columnConfigValid.setHidden(true);
+            columnConfigAddress.setHidden(true);
+            hidden.add(positionProperties.valid().getPath());
+            hidden.add(positionProperties.address().getPath());
+            gridStateHandler.saveState();
+        }
 
         speedUnits.setLabel(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getUnit());
 
