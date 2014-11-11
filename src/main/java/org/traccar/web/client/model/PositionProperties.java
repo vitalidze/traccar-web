@@ -45,4 +45,6 @@ public interface PositionProperties extends PropertyAccess<Position> {
 
     ValueProvider<Position, String> address();
 
+    ValueProvider<Position, Double> distance();
+
 }

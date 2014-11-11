@@ -348,6 +348,26 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
             query.setParameter("speed", getSessionUser().getUserSettings().getSpeedUnit().toKnots(speed));
         }
         positions.addAll(query.getResultList());
+
+        final double radKoef = Math.PI / 180;
+        final double earthRadius = 6371.01; // Radius of the earth in km
+
+        for (int i = 0; i < positions.size(); i++) {
+            if (i > 0) {
+                Position positionA = positions.get(i - 1);
+                Position positionB = positions.get(i);
+
+                double dLat = (positionA.getLatitude() - positionB.getLatitude()) * radKoef;
+                double dLon = (positionA.getLongitude() - positionB.getLongitude()) * radKoef;
+                double a =
+                        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                                Math.cos(positionA.getLatitude() * radKoef) * Math.cos(positionB.getLatitude() * radKoef) *
+                                Math.sin(dLon / 2) * Math.sin(dLon / 2)
+                        ;
+                double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                positionB.setDistance(earthRadius * c); // Distance in km
+            }
+        }
         return positions;
     }
 

@@ -60,6 +60,27 @@ public class UserSettings implements Serializable {
         }
     }
 
+    public enum DistanceUnit {
+        km("km", 1d),
+        mile("mi", 0.621371192);
+
+        final String unit;
+        final double factor;
+
+        DistanceUnit(String unit, double factor) {
+            this.unit = unit;
+            this.factor = factor;
+        }
+
+        public double getFactor() {
+            return factor;
+        }
+
+        public String getUnit() {
+            return unit;
+        }
+    }
+
     @Enumerated(EnumType.STRING)
     @Expose
     private SpeedUnit speedUnit;

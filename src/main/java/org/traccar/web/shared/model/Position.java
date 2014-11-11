@@ -18,12 +18,7 @@ package org.traccar.web.shared.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
@@ -179,5 +174,16 @@ public class Position implements Serializable, Cloneable {
 
     public void setIdleSince(Date idleSince) {
         this.idleSince = idleSince;
+    }
+
+    @Transient
+    private double distance;
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
     }
 }

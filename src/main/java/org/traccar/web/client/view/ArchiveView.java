@@ -22,6 +22,7 @@ import com.sencha.gxt.state.client.GridStateHandler;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
+import com.sencha.gxt.widget.core.client.grid.*;
 import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
@@ -43,9 +44,6 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 
 public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandler<Position> {
@@ -138,14 +136,25 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.longitude(), 25, i18n.longitude()));
         columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.altitude(), 25, i18n.altitude()));
 
-        ColumnConfig<Position, Double> columnConfigDouble = new ColumnConfig<Position, Double>(positionProperties.speed(), 25, i18n.speed());
-        columnConfigDouble.setCell(new NumberCell<Double>(ApplicationContext.getInstance().getFormatterUtil().getSpeedFormat()));
-        columnConfigList.add(columnConfigDouble);
+        ColumnConfig<Position, Double> columnConfigSpeed = new ColumnConfig<Position, Double>(positionProperties.speed(), 25, i18n.speed());
+        columnConfigSpeed.setCell(new NumberCell<Double>(ApplicationContext.getInstance().getFormatterUtil().getSpeedFormat()));
+        columnConfigList.add(columnConfigSpeed);
+
+        ColumnConfig<Position, Double> columnConfigDistance = new ColumnConfig<Position, Double>(positionProperties.distance(), 25, i18n.distance());
+        columnConfigDistance.setCell(new NumberCell<Double>(ApplicationContext.getInstance().getFormatterUtil().getDistanceFormat()));
+        columnConfigList.add(columnConfigDistance);
 
         columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.course(), 25, i18n.course()));
         columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.power(), 25, i18n.power()));
 
         columnModel = new ColumnModel<Position>(columnConfigList);
+
+        // set up 'Totals' row
+        AggregationRowConfig<Position> totals = new AggregationRowConfig<Position>();
+        totals.setRenderer(columnConfigSpeed, new AggregationNumberSummaryRenderer<Position, Double>(ApplicationContext.getInstance().getFormatterUtil().getSpeedFormat(), new SummaryType.AvgSummaryType<Double>()));
+        totals.setRenderer(columnConfigDistance, new AggregationNumberSummaryRenderer<Position, Double>(ApplicationContext.getInstance().getFormatterUtil().getDistanceFormat(), new SummaryType.SumSummaryType<Double>()));
+
+        columnModel.addAggregationRow(totals);
 
         speedModifierCombo = new SimpleComboBox<String>(new StringLabelProvider<String>());
         speedModifierCombo.add("<");
