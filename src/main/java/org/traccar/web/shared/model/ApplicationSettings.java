@@ -30,6 +30,7 @@ public class ApplicationSettings implements Serializable {
 
     private Short updateInterval;
 
+    @Column(nullable = true)
     private boolean disallowDeviceManagementByUsers;
 
     public void setRegistrationEnabled(boolean registrationEnabled) {
