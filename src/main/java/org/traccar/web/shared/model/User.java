@@ -142,7 +142,7 @@ public class User implements Serializable, Cloneable {
         return devices;
     }
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))
     private UserSettings userSettings;
 
@@ -168,7 +168,8 @@ public class User implements Serializable, Cloneable {
     }
 
     @GwtTransient
-    @OneToMany(mappedBy = "managedBy", fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true,
+               fetch = FetchType.EAGER, mappedBy = "managedBy")
     private Set<User> managedUsers;
 
     public Set<User> getManagedUsers() {

@@ -64,6 +64,9 @@ public class Device implements Serializable {
         return id;
     }
 
+    // TODO:  On the rare occasion when a position is deleted, any device
+    //        that references that position should have the "latestPosition"
+    //        set to NULL.
     @GwtTransient
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_position_id"))
