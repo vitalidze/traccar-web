@@ -29,7 +29,7 @@ import javax.persistence.TypedQuery;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpSession;
 
-import org.hibernate.ejb.EntityManagerImpl;
+import org.hibernate.jpa.internal.EntityManagerImpl;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.shared.model.*;
 
