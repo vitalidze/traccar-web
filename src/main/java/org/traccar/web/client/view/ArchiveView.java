@@ -134,6 +134,10 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         columnConfigDate.setCell(new DateCell(ApplicationContext.getInstance().getFormatterUtil().getTimeFormat()));
         columnConfigList.add(columnConfigDate);
 
+        ColumnConfig<Position, String> columnConfigAddress = new ColumnConfig<Position, String>(positionProperties.address(), 25, i18n.address());
+        columnConfigAddress.setHidden(true);
+        columnConfigList.add(columnConfigAddress);
+
         columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.latitude(), 25, i18n.latitude()));
         columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.longitude(), 25, i18n.longitude()));
         columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.altitude(), 25, i18n.altitude()));
