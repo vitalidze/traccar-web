@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.sencha.gxt.data.shared.StringLabelProvider;
+import com.sencha.gxt.state.client.GridStateHandler;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
@@ -153,6 +154,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         speedModifierCombo.setValue(">=");
 
         uiBinder.createAndBindUi(this);
+
+        new GridStateHandler<Position>(grid).loadState();
 
         speedUnits.setLabel(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getUnit());
 

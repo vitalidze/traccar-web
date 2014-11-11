@@ -67,7 +67,7 @@
       </container:child>
       
       <container:child layoutData="{layoutData}">
-        <grid:Grid ui:field="grid" store="{positionStore}" cm="{columnModel}" view="{view}" />
+        <grid:Grid ui:field="grid" store="{positionStore}" cm="{columnModel}" view="{view}" stateful="true" stateId="archiveGrid" />
       </container:child>
 
     </container:VerticalLayoutContainer>
