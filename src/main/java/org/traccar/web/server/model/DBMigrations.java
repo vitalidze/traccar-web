@@ -65,6 +65,7 @@ public class DBMigrations {
                 user.setLogin("admin");
                 user.setPassword("admin");
                 user.setAdmin(true);
+                user.setManager(Boolean.FALSE);
                 em.persist(user);
             }
         }
