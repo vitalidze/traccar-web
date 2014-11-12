@@ -34,6 +34,7 @@ public class User implements Serializable, Cloneable {
 
     public User() {
         admin = false;
+        manager = false;
     }
 
     public User(User user) {
@@ -92,7 +93,7 @@ public class User implements Serializable, Cloneable {
     private Boolean manager;
 
     public Boolean getManager() {
-        return manager;
+        return (manager == null) ? false : manager;
     }
 
     public void setManager(Boolean manager) {
