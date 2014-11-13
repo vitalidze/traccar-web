@@ -17,6 +17,9 @@ package org.traccar.web.client.view;
 
 import java.util.*;
 
+import com.google.gwt.core.client.JsonUtils;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.Window;
 import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.state.client.GridStateHandler;
 import com.sencha.gxt.widget.core.client.form.*;
@@ -25,6 +28,7 @@ import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import com.sencha.gxt.widget.core.client.grid.*;
 import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.FormatterUtil;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
@@ -233,6 +237,19 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiHandler("clearButton")
     public void onClearClicked(SelectEvent event) {
         archiveHandler.onClear();
+    }
+
+    @UiHandler("csvButton")
+    public void onCSVClicked(SelectEvent event) {
+        DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getJSONtimeFormat();
+
+        Window.open("/traccar/rest/getPositionsCSV?payload=[" +
+                (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) + "," +
+                JsonUtils.escapeValue(jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B")) + "," +
+                JsonUtils.escapeValue(jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B")) + "," +
+                (speedModifierCombo.getText().isEmpty() ? null : JsonUtils.escapeValue(speedModifierCombo.getText())) + "," +
+                speed.getValue() +
+                "]", "_blank", null);
     }
 
     private StoreHandlers<Device> deviceStoreHandlers = new BaseStoreHandlers<Device>() {
