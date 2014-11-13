@@ -212,10 +212,15 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
         perThreadRequest.set(req);
         perThreadResponse.set(resp);
         try {
-            String payload = RPCServletUtils.readContent(req, null, null);
+            String payload = req.getParameter("payload");
+            if (payload == null) {
+                payload = "";
+            }
             String result = makeRestCall(payload);
             if (result != null) {
-                resp.setHeader("Content-Type", "application/json;charset=UTF-8");
+                if (!resp.containsHeader("Content-Type")) {
+                    resp.setHeader("Content-Type", "application/json;charset=UTF-8");
+                }
                 resp.setCharacterEncoding("UTF-8");
                 resp.getWriter().write(result);
                 if (resp.getStatus() != HttpServletResponse.SC_INTERNAL_SERVER_ERROR &&
@@ -238,10 +243,39 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
             Class<?>[] argClasses = new Class<?>[args == null ? 0 : args.length];
             if (args != null) {
                 for (int i = 0; i < args.length; i++) {
-                    argClasses[i] = args[i].getClass();
+                    argClasses[i] = args[i] == null ? null : args[i].getClass();
                 }
             }
-            Method method = proxy.getClass().getDeclaredMethod(methodName, argClasses);
+            Method method = null;
+            try {
+                method = proxy.getClass().getDeclaredMethod(methodName, argClasses);
+            } catch (NoSuchMethodException nsme) {
+                /**
+                 * Try to find method by name and number of arguments
+                 */
+                for (Method declaredMethod : proxy.getClass().getDeclaredMethods()) {
+                    if (declaredMethod.getName().equals(methodName) && declaredMethod.getParameterTypes().length == args.length) {
+                        /**
+                         * Parse arguments
+                         */
+                        for (int i = 0; i < args.length; i++) {
+                            Class<?> expectedType = declaredMethod.getParameterTypes()[i];
+                            if (argClasses[i] != null && argClasses[i] != expectedType) {
+                                if (argClasses[i] == String.class) {
+                                    args[i] = gson.fromJson("\"" + args[i].toString() + "\"", expectedType);
+                                } else {
+                                    args[i] = gson.fromJson(args[i].toString(), expectedType);
+                                }
+                            }
+                        }
+                        method = declaredMethod;
+                        break;
+                    }
+                }
+                if (method == null) {
+                    throw new NoSuchMethodException();
+                }
+            }
             Object result = method.invoke(proxy, args);
             return result == null ? null : gson.toJson(result);
         } catch (NoSuchMethodException nsme) {
@@ -250,6 +284,12 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
                 getThreadLocalResponse().sendError(HttpServletResponse.SC_NOT_FOUND);
             } catch (Exception ex) {}
             return "Method not found: " + methodName;
+        } catch (IllegalArgumentException iae) {
+            log("Method " + methodName + " illegal arguments: " + iae.getLocalizedMessage());
+            try {
+                getThreadLocalResponse().sendError(HttpServletResponse.SC_NOT_FOUND);
+            } catch (Exception ex) {}
+            return "Method " + methodName + " illegal arguments: " + iae.getLocalizedMessage();
         } catch (InvocationTargetException ite) {
             log("Error during method '" + methodName + "' call: " + ite.getLocalizedMessage(), ite);
             int errorCode = 0;

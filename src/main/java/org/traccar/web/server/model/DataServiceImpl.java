@@ -546,4 +546,34 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
             entityManager.merge(user);
         }
     }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public void getPositionsCSV(long deviceId, Date from, Date to, String speedModifier, Double speed) throws IOException {
+        getThreadLocalResponse().setContentType("text/csv;charset=UTF-8");
+
+        final char SEPARATOR = ';';
+
+        PrintWriter writer = getThreadLocalResponse().getWriter();
+
+        writer.println(line(SEPARATOR, "time", "valid", "latitude", "longitude", "altitude", "speed", "distance", "course", "power", "address", "other"));
+
+        Device device = getSessionEntityManager().find(Device.class, deviceId);
+        for (Position p : getPositions(device, from, to, speedModifier, speed)) {
+            writer.println(line(SEPARATOR, p.getTime(), p.getValid(), p.getLatitude(), p.getLongitude(), p.getAltitude(), p.getSpeed(), p.getDistance(), p.getCourse(), p.getPower(), p.getAddress(), p.getOther()));
+        }
+    }
+
+    private static String line(char SEPARATOR, Object... s) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < s.length; i++) {
+            result.append('\"');
+            if (s[i] != null) {
+                result.append(s[i]);
+            }
+            result.append('\"').append(SEPARATOR);
+        }
+        return result.toString();
+    }
 }

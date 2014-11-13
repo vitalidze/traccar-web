@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.model;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,8 @@ public interface DataService extends RemoteService {
     void saveDeviceShare(Device device, Map<User, Boolean> share);
 
     List<Position> getPositions(Device device, Date from, Date to, String speedModifier, Double speed);
+
+    void getPositionsCSV(long deviceId, Date from, Date to, String speedModifier, Double speed) throws IOException;
 
     List<Position> getLatestPositions();
 

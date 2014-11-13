@@ -69,4 +69,9 @@ public interface DataServiceAsync {
     void saveDeviceShare(Device device, Map<User, Boolean> share, AsyncCallback<Void> async);
 
     void getLatestNonIdlePositions(AsyncCallback<List<Position>> async);
+
+    /**
+     * @deprecated do not use in GWT calls
+     */
+    void getPositionsCSV(long deviceId, Date from, Date to, String speedModifier, Double speed, AsyncCallback<Void> async);
 }
