@@ -13,7 +13,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <gxt:Window ui:field="window" pixelSize="300, 130" modal="true" closable="false" headingText="{i18n.authentication}" focusWidget="{loginButton}">
+    <gxt:Window ui:field="window" pixelSize="300, 130" modal="true" closable="false" headingText="{i18n.authentication}" focusWidget="{login}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.user}" labelWidth="110">
