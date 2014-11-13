@@ -56,6 +56,8 @@ This project has following features, which don't exist in original `traccar-web`
 * mobile web UI based on [framework7](http://www.idangero.us/framework7/) with general functions for GPS tracking, available at `m/` URL, i.e. `http://server-ip:8082/m/`
 * RESTful API. Available at `/traccar/rest/{methodName}` - allows to call methods from `DataService` class. Full documentation will be available by request.
 * 'Address' column in archive (hidden by default)
+* 'Distance' column in archive with total distance at the bottom
+* possibility to export archive to CSV
 
 
 ## Building
