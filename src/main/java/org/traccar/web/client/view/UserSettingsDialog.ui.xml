@@ -72,7 +72,7 @@
                   <container:child layoutData="{verticalLayoutData}">
                       <form:FieldLabel text="{i18n.zoom}">
                           <form:widget>
-                              <form:NumberField editor="{shortPropertyEditor}"
+                              <form:NumberField editor="{integerPropertyEditor}"
                                                 ui:field="zoomLevel"
                                                 allowNegative="false"
                                                 allowDecimals="false"
