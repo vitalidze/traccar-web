@@ -81,7 +81,14 @@ public class MapController implements ContentController, MapView.MapHandler {
 
             @Override
             public void onSuccess(List<Position> positions) {
+                boolean showInvalidPositions = ApplicationContext.getInstance().getUserSettings().getShowInvalidPositions();
+
                 for (Position position : positions) {
+                    if (! (showInvalidPositions || position.getValid())) {
+                        // Filter out invalid positions
+                        continue;
+                    }
+                    
                     latestNonIdlePositionMap.put(position.getDevice().getId(), position);
                 }
                 update();
@@ -104,7 +111,15 @@ public class MapController implements ContentController, MapView.MapHandler {
                  * Set up icon and 'idle since'
                  */
                 long currentTime = System.currentTimeMillis();
+                boolean showInvalidPositions = ApplicationContext.getInstance().getUserSettings().getShowInvalidPositions();
+                
                 for (Position position : result) {
+                    if (! (showInvalidPositions || position.getValid())) {
+                        // Filter out invalid positions from the result
+                        result.remove(position);
+                        continue;
+                    }
+                    
                     Device device = position.getDevice();
                     boolean isOffline = currentTime - position.getTime().getTime() > position.getDevice().getTimeout() * 1000;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
@@ -166,6 +181,16 @@ public class MapController implements ContentController, MapView.MapHandler {
     }
 
     public void showArchivePositions(List<Position> positions) {
+        if (! ApplicationContext.getInstance().getUserSettings().getShowInvalidPositions()) {
+            // Filter out invalid positions from the result
+            
+            for (Position position : positions) {
+                if (!position.getValid()) {
+                    positions.remove(position);
+                }
+            }
+        }
+                
         List<Position> sortedPositions = new LinkedList<Position>(positions);
         Collections.sort(sortedPositions, new Comparator<Position>() {
             @Override
