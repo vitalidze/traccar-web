@@ -345,7 +345,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
         EntityManager entityManager = getSessionEntityManager();
         List<Position> positions = new LinkedList<Position>();
         TypedQuery<Position> query = entityManager.createQuery(
-                "SELECT x FROM Position x WHERE x.device = :device AND x.time BETWEEN :from AND :to" + (speed == null ? "" : " AND speed " + speedModifier + " :speed"), Position.class);
+                "SELECT x FROM Position x WHERE x.device = :device AND x.time BETWEEN :from AND :to" + (speed == null ? "" : " AND x.speed " + speedModifier + " :speed"), Position.class);
         query.setParameter("device", device);
         query.setParameter("from", from);
         query.setParameter("to", to);
