@@ -273,7 +273,9 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
                             Class<?> expectedType = declaredMethod.getParameterTypes()[i];
                             if (argClasses[i] != null && argClasses[i] != expectedType) {
                                 if (argClasses[i] == String.class) {
-                                    if (Date.class.isAssignableFrom(expectedType)) {
+                                    if (args[i].toString().equals("undefined")) {
+                                        args[i] = null;
+                                    } else if (Date.class.isAssignableFrom(expectedType)) {
                                         args[i] = requestDateFormat.get().parse(args[i].toString());
                                     } else {
                                         args[i] = gson.fromJson("\"" + args[i].toString() + "\"", expectedType);
