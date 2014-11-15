@@ -24,10 +24,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.view.MapView;
-import org.traccar.web.client.view.MarkerIconFactory;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -202,6 +202,12 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public void loadMapSettings() {
         UserSettings userSettings = ApplicationContext.getInstance().getUserSettings();
+        for (Layer map : mapView.getMap().getLayers()) {
+            if (map.getName().equals(userSettings.getMapType().getName())) {
+                mapView.getMap().setBaseLayer(map);
+                break;
+            }
+        }
         mapView.getMap().setCenter(mapView.createLonLat(userSettings.getCenterLongitude(), userSettings.getCenterLatitude()), userSettings.getZoomLevel());
     }
 
