@@ -74,4 +74,9 @@ public interface DataServiceAsync {
      * @deprecated do not use in GWT calls
      */
     void getPositionsCSV(long deviceId, Date from, Date to, String speedModifier, Double speed, AsyncCallback<Void> async);
+
+    /**
+     * @deprecated do not use in GWT calls
+     */
+    void getPositionsGPX(long deviceId, Date from, Date to, String speedModifier, Double speed, AsyncCallback<Void> async);
 }

@@ -16,6 +16,8 @@
 package org.traccar.web.server.model;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.naming.Context;
@@ -28,6 +30,9 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpSession;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.hibernate.ejb.EntityManagerImpl;
 import org.traccar.web.client.model.DataService;
@@ -575,5 +580,78 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
             result.append('\"').append(SEPARATOR);
         }
         return result.toString();
+    }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public void getPositionsGPX(long deviceId, Date from, Date to, String speedModifier, Double speed) throws IOException {
+        getThreadLocalResponse().setContentType("text/xml;charset=UTF-8");
+
+        Device device = getSessionEntityManager().find(Device.class, deviceId);
+
+        try {
+            TimeZone tz = TimeZone.getTimeZone("UTC");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+            dateFormat.setTimeZone(tz);
+
+            XMLStreamWriter xsw = XMLOutputFactory.newFactory().createXMLStreamWriter(getThreadLocalResponse().getOutputStream());
+
+            xsw.writeStartDocument("UTF-8", "1.0");
+            xsw.writeStartElement("gpx");
+            xsw.writeAttribute("xmlns", "http://www.topografix.com/GPX/1/1");
+            xsw.writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+            xsw.writeAttribute("creator", "Traccar WEB UI");
+            xsw.writeAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd");
+
+            // metadata
+            xsw.writeStartElement("metadata");
+                xsw.writeStartElement("link");
+                xsw.writeAttribute("href", "https://github.com/vitalidze/traccar-web");
+                    xsw.writeStartElement("text");
+                    xsw.writeCharacters("Traccar WEB UI");
+                    xsw.writeEndElement();
+                xsw.writeEndElement();
+                xsw.writeStartElement("time");
+                xsw.writeCharacters(dateFormat.format(new Date()));
+                xsw.writeEndElement();
+            xsw.writeEndElement();
+
+            // track
+            xsw.writeStartElement("trk");
+                xsw.writeStartElement("name");
+                xsw.writeCharacters(device.getName());
+                xsw.writeEndElement();
+                xsw.writeStartElement("desc");
+                xsw.writeCharacters("Archive records for " + device.getName() + " from " + dateFormat.format(from) + " to " + dateFormat.format(to));
+                xsw.writeEndElement();
+                xsw.writeStartElement("src");
+                xsw.writeCharacters("Traccar archive");
+                xsw.writeEndElement();
+                xsw.writeStartElement("trkseg");
+                    for (Position p : getPositions(device, from, to, speedModifier, speed)) {
+                        xsw.writeStartElement("trkpt");
+                        xsw.writeAttribute("lat", p.getLatitude().toString());
+                        xsw.writeAttribute("lon", p.getLongitude().toString());
+                            if (p.getAltitude() != null && p.getAltitude() != 0) {
+                                xsw.writeStartElement("ele");
+                                xsw.writeCharacters(p.getAltitude().toString());
+                                xsw.writeEndElement();
+                            }
+                            xsw.writeStartElement("time");
+                            xsw.writeCharacters(dateFormat.format(p.getTime()));
+                            xsw.writeEndElement();
+                        xsw.writeEndElement();
+                    }
+                xsw.writeEndElement();
+            xsw.writeEndElement();
+
+            xsw.writeEndElement();
+            xsw.writeEndDocument();
+
+            xsw.flush();
+        } catch (XMLStreamException xse) {
+            throw new IOException(xse);
+        }
     }
 }

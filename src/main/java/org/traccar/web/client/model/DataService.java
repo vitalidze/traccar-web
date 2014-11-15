@@ -63,6 +63,8 @@ public interface DataService extends RemoteService {
 
     void getPositionsCSV(long deviceId, Date from, Date to, String speedModifier, Double speed) throws IOException;
 
+    void getPositionsGPX(long deviceId, Date from, Date to, String speedModifier, Double speed) throws IOException;
+
     List<Position> getLatestPositions();
 
     List<Position> getLatestNonIdlePositions();

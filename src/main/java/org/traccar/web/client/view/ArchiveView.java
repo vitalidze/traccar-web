@@ -251,6 +251,19 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 "]", "_blank", null);
     }
 
+    @UiHandler("gpxButton")
+    public void onGPXClicked(SelectEvent event) {
+        DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
+
+        Window.open("/traccar/rest/getPositionsGPX?payload=[" +
+                (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) + "," +
+                JsonUtils.escapeValue(jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B")) + "," +
+                JsonUtils.escapeValue(jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B")) + "," +
+                (speedModifierCombo.getText().isEmpty() ? null : JsonUtils.escapeValue(speedModifierCombo.getText())) + "," +
+                speed.getValue() +
+                "]", "_blank", null);
+    }
+
     private StoreHandlers<Device> deviceStoreHandlers = new BaseStoreHandlers<Device>() {
 
         @Override

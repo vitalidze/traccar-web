@@ -175,4 +175,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String distance();
 
     String exportToCSV();
+
+    String exportToGPX();
 }
