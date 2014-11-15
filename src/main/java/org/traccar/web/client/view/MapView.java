@@ -29,17 +29,7 @@ import org.gwtopenmaps.openlayers.client.control.ScaleLine;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
-import org.gwtopenmaps.openlayers.client.layer.Bing;
-import org.gwtopenmaps.openlayers.client.layer.BingOptions;
-import org.gwtopenmaps.openlayers.client.layer.BingType;
-import org.gwtopenmaps.openlayers.client.layer.GoogleV3;
-import org.gwtopenmaps.openlayers.client.layer.GoogleV3MapType;
-import org.gwtopenmaps.openlayers.client.layer.GoogleV3Options;
-import org.gwtopenmaps.openlayers.client.layer.Markers;
-import org.gwtopenmaps.openlayers.client.layer.MarkersOptions;
-import org.gwtopenmaps.openlayers.client.layer.OSM;
-import org.gwtopenmaps.openlayers.client.layer.Vector;
-import org.gwtopenmaps.openlayers.client.layer.VectorOptions;
+import org.gwtopenmaps.openlayers.client.layer.*;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -49,6 +39,7 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Command;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import org.traccar.web.shared.model.UserSettings;
 
 public class MapView {
 
@@ -97,32 +88,43 @@ public class MapView {
     }
 
     private void initMapLayers(Map map) {
-        map.addLayer(OSM.Mapnik("OpenStreetMap"));
+        for (UserSettings.MapType mapType : UserSettings.MapType.values()) {
+            map.addLayer(createMap(mapType));
+        }
+    }
 
-        GoogleV3Options gHybridOptions = new GoogleV3Options();
-        gHybridOptions.setNumZoomLevels(20);
-        gHybridOptions.setType(GoogleV3MapType.G_HYBRID_MAP);
-        map.addLayer(new GoogleV3("Google Hybrid", gHybridOptions));
-
-        GoogleV3Options gNormalOptions = new GoogleV3Options();
-        gNormalOptions.setNumZoomLevels(22);
-        gNormalOptions.setType(GoogleV3MapType.G_NORMAL_MAP);
-        map.addLayer(new GoogleV3("Google Normal", gNormalOptions));
-
-        GoogleV3Options gSatelliteOptions = new GoogleV3Options();
-        gSatelliteOptions.setNumZoomLevels(20);
-        gSatelliteOptions.setType(GoogleV3MapType.G_SATELLITE_MAP);
-        map.addLayer(new GoogleV3("Google Satellite", gSatelliteOptions));
-
-        GoogleV3Options gTerrainOptions = new GoogleV3Options();
-        gTerrainOptions.setNumZoomLevels(16);
-        gTerrainOptions.setType(GoogleV3MapType.G_TERRAIN_MAP);
-        map.addLayer(new GoogleV3("Google Terrain", gTerrainOptions));
-
-        final String bingKey = "AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F";
-        map.addLayer(new Bing(new BingOptions("Bing Road", bingKey, BingType.ROAD)));
-        map.addLayer(new Bing(new BingOptions("Bing Hybrid", bingKey, BingType.HYBRID)));
-        map.addLayer(new Bing(new BingOptions("Bing Aerial", bingKey, BingType.AERIAL)));
+    private Layer createMap(UserSettings.MapType mapType) {
+        switch (mapType) {
+            case OSM:
+                return OSM.Mapnik(mapType.getName());
+            case GOOGLE_HYBRID:
+                GoogleV3Options gHybridOptions = new GoogleV3Options();
+                gHybridOptions.setNumZoomLevels(20);
+                gHybridOptions.setType(GoogleV3MapType.G_HYBRID_MAP);
+                return new GoogleV3(mapType.getName(), gHybridOptions);
+            case GOOGLE_NORMAL:
+                GoogleV3Options gNormalOptions = new GoogleV3Options();
+                gNormalOptions.setNumZoomLevels(22);
+                gNormalOptions.setType(GoogleV3MapType.G_NORMAL_MAP);
+                return new GoogleV3(mapType.getName(), gNormalOptions);
+            case GOOGLE_SATELLITE:
+                GoogleV3Options gSatelliteOptions = new GoogleV3Options();
+                gSatelliteOptions.setNumZoomLevels(20);
+                gSatelliteOptions.setType(GoogleV3MapType.G_SATELLITE_MAP);
+                return new GoogleV3(mapType.getName(), gSatelliteOptions);
+            case GOOGLE_TERRAIN:
+                GoogleV3Options gTerrainOptions = new GoogleV3Options();
+                gTerrainOptions.setNumZoomLevels(16);
+                gTerrainOptions.setType(GoogleV3MapType.G_TERRAIN_MAP);
+                return new GoogleV3(mapType.getName(), gTerrainOptions);
+            case BING_ROAD:
+                return new Bing(new BingOptions(mapType.getName(), mapType.getBingKey(), BingType.ROAD));
+            case BING_HYBRID:
+                return new Bing(new BingOptions(mapType.getName(), mapType.getBingKey(), BingType.HYBRID));
+            case BING_AERIAL:
+                return new Bing(new BingOptions(mapType.getName(), mapType.getBingKey(), BingType.AERIAL));
+        }
+        throw new IllegalArgumentException("Unsupported map type: " + mapType);
     }
 
     public MapView(MapHandler mapHandler) {

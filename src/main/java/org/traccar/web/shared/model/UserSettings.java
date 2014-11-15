@@ -60,6 +60,31 @@ public class UserSettings implements Serializable {
         }
     }
 
+    public enum MapType {
+        OSM("OpenStreetMap"),
+        GOOGLE_HYBRID("Google Hybrid"),
+        GOOGLE_NORMAL("Google Normal"),
+        GOOGLE_SATELLITE("Google Satellite"),
+        GOOGLE_TERRAIN("Google Terrain"),
+        BING_ROAD("Bing Road"),
+        BING_HYBRID("Bing Hybrid"),
+        BING_AERIAL("Bing Aerial");
+
+        final String name;
+
+        MapType(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getBingKey() {
+            return "AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F";
+        }
+    }
+
     public enum DistanceUnit {
         km("km", 1d),
         mile("mi", 0.621371192);
