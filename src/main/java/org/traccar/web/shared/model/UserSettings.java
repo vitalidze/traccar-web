@@ -138,6 +138,9 @@ public class UserSettings implements Serializable {
     private Double centerLongitude;
     @Expose
     private Double centerLatitude;
+    @Enumerated(EnumType.STRING)
+    @Expose
+    private MapType mapType;
 
     public Integer getZoomLevel() {
         return zoomLevel;
@@ -161,5 +164,13 @@ public class UserSettings implements Serializable {
 
     public void setCenterLatitude(Double centerLatitude) {
         this.centerLatitude = centerLatitude;
+    }
+
+    public MapType getMapType() {
+        return mapType;
+    }
+
+    public void setMapType(MapType mapType) {
+        this.mapType = mapType;
     }
 }
