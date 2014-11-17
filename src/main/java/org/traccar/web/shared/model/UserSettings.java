@@ -141,11 +141,9 @@ public class UserSettings implements Serializable {
         this.centerLatitude = centerLatitude;
     }
 
-    // Added hashCode() and equals() to conform to JPA.
-
     @Override
     public int hashCode() {
-        return (int) this.id;
+        return (int) (id ^ (id >>> 32));
     }
 
     @Override

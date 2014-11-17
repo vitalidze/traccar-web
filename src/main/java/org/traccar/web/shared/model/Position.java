@@ -202,11 +202,9 @@ public class Position implements Serializable, Cloneable {
         this.distance = distance;
     }
     
-    // Added hashCode() and equals() to conform to JPA.
-
     @Override
     public int hashCode() {
-        return (int) this.id;
+        return (int) (id ^ (id >>> 32));
     }
 
     @Override
