@@ -29,7 +29,8 @@ import javax.persistence.TypedQuery;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpSession;
 
-import org.hibernate.ejb.EntityManagerImpl;
+import org.hibernate.Session;
+
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.shared.model.*;
 
@@ -90,8 +91,12 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
     void closeSessionEntityManager() {
         EntityManager em = entityManager.get();
         if (em != null) {
-            if (em.isOpen() && ((EntityManagerImpl) em).getSession().isOpen()) {
-                em.close();
+            if (em.isOpen()) {
+                Session session = em.unwrap(Session.class);
+                
+                if (session.isOpen()) {
+                    em.close();
+                }
             }
             entityManager.set(null);
         }
@@ -340,7 +345,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
         EntityManager entityManager = getSessionEntityManager();
         List<Position> positions = new LinkedList<Position>();
         TypedQuery<Position> query = entityManager.createQuery(
-                "SELECT x FROM Position x WHERE x.device = :device AND x.time BETWEEN :from AND :to" + (speed == null ? "" : " AND speed " + speedModifier + " :speed"), Position.class);
+                "SELECT x FROM Position x WHERE x.device = :device AND x.time BETWEEN :from AND :to" + (speed == null ? "" : " AND x.speed " + speedModifier + " :speed"), Position.class);
         query.setParameter("device", device);
         query.setParameter("from", from);
         query.setParameter("to", to);

@@ -53,7 +53,8 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
     public interface UserSettingsHandler {
         public void onSave(UserSettings userSettings);
-        public void onTakeCurrentMapState(NumberField<Double> centerLongitude,
+        public void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
+                                          NumberField<Double> centerLongitude,
                                           NumberField<Double> centerLatitude,
                                           NumberField<Integer> zoomLevel);
     }
@@ -88,6 +89,9 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     NumberField<Integer> zoomLevel;
 
     @UiField(provided = true)
+    ComboBox<UserSettings.MapType> mapType;
+
+    @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
     public UserSettingsDialog(UserSettings userSettings, UserSettingsHandler userSettingsHandler) {
@@ -101,6 +105,15 @@ public class UserSettingsDialog implements Editor<UserSettings> {
                 speedUnitStore, new UserSettingsProperties.SpeedUnitLabelProvider());
         speedUnit.setForceSelection(true);
         speedUnit.setTriggerAction(TriggerAction.ALL);
+
+        ListStore<UserSettings.MapType> mapTypeStore = new ListStore<UserSettings.MapType>(
+                new EnumKeyProvider<UserSettings.MapType>());
+        mapTypeStore.addAll(Arrays.asList(UserSettings.MapType.values()));
+        mapType = new ComboBox<UserSettings.MapType>(
+                mapTypeStore, new UserSettingsProperties.MapTypeLabelProvider());
+
+        mapType.setForceSelection(true);
+        mapType.setTriggerAction(TriggerAction.ALL);
 
         uiBinder.createAndBindUi(this);
 
@@ -132,6 +145,6 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
     @UiHandler("takeFromMapButton")
     public void onSaveDefaultMapSateClicked(SelectEvent event) {
-        userSettingsHandler.onTakeCurrentMapState(centerLongitude, centerLatitude, zoomLevel);
+        userSettingsHandler.onTakeCurrentMapState(mapType, centerLongitude, centerLatitude, zoomLevel);
     }
 }

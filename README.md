@@ -39,7 +39,7 @@ This project has following features, which don't exist in original `traccar-web`
   * hungarian language (available via ?locale=hu URL parameter)
 * show server log menu for viewing tracker-server.log file on Web
 * speed filtering in archive view
-* change default map center position, zoom (in Settings >> Preferences)
+* change default map center position, zoom, provider (Google, OSM, Bing) (in Settings >> Preferences)
 * replaced 'current state' panel with popups. They appear either when you hover a row in 'devices' table or when you hover a marker on map
 * archive panel is collapsed by default. There is a button in upper right hand corner to expand it
 * new 'managers' functionality: 

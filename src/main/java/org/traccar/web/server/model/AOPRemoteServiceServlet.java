@@ -17,6 +17,7 @@ package org.traccar.web.server.model;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gwt.i18n.shared.DateTimeFormat;
 import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.rpc.RpcTokenException;
 import com.google.gwt.user.client.rpc.SerializationException;
@@ -38,6 +39,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
@@ -235,6 +239,13 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
         }
     }
 
+    private final ThreadLocal<SimpleDateFormat> requestDateFormat = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+        }
+    };
+
     private String makeRestCall(String payload) {
         String methodName = getThreadLocalRequest().getPathInfo().substring(1);
         try {
@@ -262,7 +273,13 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
                             Class<?> expectedType = declaredMethod.getParameterTypes()[i];
                             if (argClasses[i] != null && argClasses[i] != expectedType) {
                                 if (argClasses[i] == String.class) {
-                                    args[i] = gson.fromJson("\"" + args[i].toString() + "\"", expectedType);
+                                    if (args[i].toString().equals("undefined")) {
+                                        args[i] = null;
+                                    } else if (Date.class.isAssignableFrom(expectedType)) {
+                                        args[i] = requestDateFormat.get().parse(args[i].toString());
+                                    } else {
+                                        args[i] = gson.fromJson("\"" + args[i].toString() + "\"", expectedType);
+                                    }
                                 } else {
                                     args[i] = gson.fromJson(args[i].toString(), expectedType);
                                 }
@@ -278,6 +295,12 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
             }
             Object result = method.invoke(proxy, args);
             return result == null ? null : gson.toJson(result);
+        } catch (ParseException pe) {
+            log("Unable to parse date: " + pe.getLocalizedMessage());
+            try {
+                getThreadLocalResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
+            } catch (Exception ex) {}
+            return "Unable to parse date: " + methodName;
         } catch (NoSuchMethodException nsme) {
             log("Method not found: " + methodName);
             try {

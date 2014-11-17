@@ -34,6 +34,7 @@ public class DBMigrations {
                 new SetDefaultDeviceTimeout(),
                 new SetDefaultIdleSpeedThreshold(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
+                new SetDefaultMapType(),
                 new CreateAdmin(),
 
         }) {
@@ -65,7 +66,7 @@ public class DBMigrations {
                 user.setLogin("admin");
                 user.setPassword("admin");
                 user.setAdmin(true);
-                user.setManager(Boolean.FALSE);
+                user.setManager(false);
                 em.persist(user);
             }
         }
@@ -151,6 +152,15 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.disallowDeviceManagementByUsers = :ddmbu WHERE S.disallowDeviceManagementByUsers IS NULL")
                     .setParameter("ddmbu", Boolean.FALSE)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultMapType implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + UserSettings.class.getName() + " S SET S.mapType = :mt WHERE S.mapType IS NULL")
+                    .setParameter("mt", UserSettings.MapType.OSM)
                     .executeUpdate();
         }
     }

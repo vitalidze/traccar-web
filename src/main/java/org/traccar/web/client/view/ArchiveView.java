@@ -28,7 +28,6 @@ import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import com.sencha.gxt.widget.core.client.grid.*;
 import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
-import org.traccar.web.client.FormatterUtil;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
@@ -241,7 +240,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiHandler("csvButton")
     public void onCSVClicked(SelectEvent event) {
-        DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getJSONtimeFormat();
+        DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
         Window.open("/traccar/rest/getPositionsCSV?payload=[" +
                 (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) + "," +
