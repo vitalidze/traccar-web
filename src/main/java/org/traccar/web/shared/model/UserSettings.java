@@ -35,6 +35,7 @@ public class UserSettings implements Serializable {
         zoomLevel = DEFAULT_ZOOM_LEVEL;
         centerLongitude = DEFAULT_CENTER_LONGITUDE;
         centerLatitude = DEFAULT_CENTER_LATITUDE;
+        mapType = MapType.OSM;
     }
 
     public enum SpeedUnit {
