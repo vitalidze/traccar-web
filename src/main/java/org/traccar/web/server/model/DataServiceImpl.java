@@ -557,6 +557,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
     @Override
     public void getPositionsCSV(long deviceId, Date from, Date to, String speedModifier, Double speed) throws IOException {
         getThreadLocalResponse().setContentType("text/csv;charset=UTF-8");
+        getThreadLocalResponse().setHeader("Content-Disposition", "attachment; filename=traccar-positions.csv");
 
         final char SEPARATOR = ';';
 
@@ -587,6 +588,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
     @Override
     public void getPositionsGPX(long deviceId, Date from, Date to, String speedModifier, Double speed) throws IOException {
         getThreadLocalResponse().setContentType("text/xml;charset=UTF-8");
+        getThreadLocalResponse().setHeader("Content-Disposition", "attachment; filename=traccar-positions.gpx");
 
         Device device = getSessionEntityManager().find(Device.class, deviceId);
 
