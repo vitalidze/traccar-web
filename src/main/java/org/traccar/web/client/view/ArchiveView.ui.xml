@@ -60,7 +60,9 @@
           <toolbar:SeparatorToolItem />
 
           <button:TextButton ui:field="loadButton" text="{i18n.load}" />
+          <toolbar:SeparatorToolItem />
           <button:TextButton ui:field="csvButton" text="{i18n.exportToCSV}" />
+          <toolbar:SeparatorToolItem />
           <button:TextButton ui:field="gpxButton" text="{i18n.exportToGPX}" />
           <toolbar:FillToolItem />
           <button:TextButton ui:field="clearButton" text="{i18n.clear}" />
