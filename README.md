@@ -57,7 +57,7 @@ This project has following features, which don't exist in original `traccar-web`
 * RESTful API. Available at `/traccar/rest/{methodName}` - allows to call methods from `DataService` class. Full documentation will be available by request.
 * 'Address' column in archive (hidden by default)
 * 'Distance' column in archive with total distance at the bottom
-* possibility to export archive to CSV
+* possibility to export archive to [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) and [GPX](http://en.wikipedia.org/wiki/GPS_Exchange_Format)
 
 
 ## Building
