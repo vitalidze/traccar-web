@@ -13,6 +13,8 @@
   <name>Traccar Web UI</name>
 
   <properties>
+    <!-- Convenience property to set the hibernate version -->
+    <hibernateVersion>4.3.7.Final</hibernateVersion>
     <!-- Convenience property to set the GWT version -->
     <gwtVersion>2.6.0</gwtVersion>
     <!-- GWT needs at least java 1.5 -->
@@ -36,17 +38,22 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>4.1.10.Final</version>
+      <version>${hibernateVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>4.3.1.Final</version>
+      <version>4.3.2.Final</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-      <version>4.1.10.Final</version>
+      <version>${hibernateVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.javax.persistence</groupId>
+      <artifactId>hibernate-jpa-2.1-api</artifactId>
+      <version>1.0.0.Final</version>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
@@ -59,6 +66,12 @@
        <artifactId>mysql-connector-java</artifactId>
        <version>5.1.31</version>
        <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>9.3-1102-jdbc4</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
        <groupId>com.sencha.gxt</groupId>

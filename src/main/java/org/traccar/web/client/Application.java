@@ -17,6 +17,7 @@ package org.traccar.web.client;
 
 import java.util.logging.Logger;
 
+import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Projection;
@@ -144,7 +145,17 @@ public class Application {
         }
 
         @Override
-        public void onTakeCurrentMapState(NumberField<Double> centerLongitude, NumberField<Double> centerLatitude, NumberField<Integer> zoomLevel) {
+        public void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
+                                          NumberField<Double> centerLongitude,
+                                          NumberField<Double> centerLatitude,
+                                          NumberField<Integer> zoomLevel) {
+            String layerName = mapController.getMap().getBaseLayer().getName();
+            for (UserSettings.MapType mapTypeXX : UserSettings.MapType.values()) {
+                if (layerName.equals(mapTypeXX.getName())) {
+                    mapType.setValue(mapTypeXX);
+                    break;
+                }
+            }
             LonLat center = mapController.getMap().getCenter();
             center.transform(mapController.getMap().getProjection(), new Projection("EPSG:4326").getProjectionCode());
             centerLongitude.setValue(center.lon());

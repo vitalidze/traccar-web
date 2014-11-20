@@ -4,15 +4,17 @@ import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="user_settings")
+@Table(name = "user_settings")
 public class UserSettings implements Serializable {
 
     private static final long serialVersionUID = 1;
@@ -23,7 +25,8 @@ public class UserSettings implements Serializable {
     public static final double DEFAULT_CENTER_LATITUDE = 41.9;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
     public UserSettings() {
@@ -32,6 +35,7 @@ public class UserSettings implements Serializable {
         zoomLevel = DEFAULT_ZOOM_LEVEL;
         centerLongitude = DEFAULT_CENTER_LONGITUDE;
         centerLatitude = DEFAULT_CENTER_LATITUDE;
+        mapType = MapType.OSM;
     }
 
     public enum SpeedUnit {
@@ -57,6 +61,31 @@ public class UserSettings implements Serializable {
 
         public double toKnots(double speed) {
             return speed / factor;
+        }
+    }
+
+    public enum MapType {
+        OSM("OpenStreetMap"),
+        GOOGLE_HYBRID("Google Hybrid"),
+        GOOGLE_NORMAL("Google Normal"),
+        GOOGLE_SATELLITE("Google Satellite"),
+        GOOGLE_TERRAIN("Google Terrain"),
+        BING_ROAD("Bing Road"),
+        BING_HYBRID("Bing Hybrid"),
+        BING_AERIAL("Bing Aerial");
+
+        final String name;
+
+        MapType(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getBingKey() {
+            return "AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F";
         }
     }
 
@@ -113,6 +142,9 @@ public class UserSettings implements Serializable {
     private Double centerLongitude;
     @Expose
     private Double centerLatitude;
+    @Enumerated(EnumType.STRING)
+    @Expose
+    private MapType mapType;
 
     public Integer getZoomLevel() {
         return zoomLevel;
@@ -136,5 +168,29 @@ public class UserSettings implements Serializable {
 
     public void setCenterLatitude(Double centerLatitude) {
         this.centerLatitude = centerLatitude;
+    }
+
+    public MapType getMapType() {
+        return mapType;
+    }
+
+    public void setMapType(MapType mapType) {
+        this.mapType = mapType;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof UserSettings)) {
+            return false;
+        }
+
+        UserSettings other = (UserSettings) object;
+
+        return this.id == other.id;
     }
 }
