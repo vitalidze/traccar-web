@@ -27,6 +27,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -48,6 +49,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Inject
     private Provider<EntityManager> entityManager;
 
+    @Inject
+    private Provider<HttpServletRequest> request;
+
     @Override
     public void init() throws ServletException {
         super.init();
@@ -67,7 +71,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     }
 
     private void setSessionUser(User user) {
-        HttpSession session = getThreadLocalRequest().getSession();
+        HttpSession session = request.get().getSession();
         if (user != null) {
             session.setAttribute(CurrentUserProvider.ATTRIBUTE_USER_ID, user.getId());
         } else {
