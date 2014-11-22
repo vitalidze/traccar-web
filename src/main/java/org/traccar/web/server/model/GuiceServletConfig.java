@@ -17,17 +17,50 @@ package org.traccar.web.server.model;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.matcher.Matchers;
+import com.google.inject.persist.PersistFilter;
+import com.google.inject.persist.jpa.JpaPersistModule;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
+import org.traccar.web.shared.model.User;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 public class GuiceServletConfig extends GuiceServletContextListener {
+    private static final String PERSISTENCE_DATASTORE = "java:/DefaultDS";
+    private static final String PERSISTENCE_UNIT_DEBUG = "debug";
+    private static final String PERSISTENCE_UNIT_RELEASE = "release";
+
     @Override
     protected Injector getInjector() {
         return Guice.createInjector(new ServletModule() {
             @Override
             protected void configureServlets() {
+                String persistenceUnit;
+                try {
+                    Context context = new InitialContext();
+                    context.lookup(PERSISTENCE_DATASTORE);
+                    persistenceUnit = PERSISTENCE_UNIT_RELEASE;
+                } catch (NamingException e) {
+                    persistenceUnit = PERSISTENCE_UNIT_DEBUG;
+                }
+
+                install(new JpaPersistModule(persistenceUnit));
+
+                filter("/traccar/*").through(PersistFilter.class);
+
                 serve("/traccar/dataService").with(DataServiceImpl.class);
                 serve("/traccar/rest/*").with(DataServiceImpl.class);
+
+                UserCheck userCheck = new UserCheck();
+                requestInjection(userCheck);
+
+                bindInterceptor(Matchers.any(), Matchers.annotatedWith(RequireUser.class), userCheck);
+                bindInterceptor(Matchers.any(), Matchers.annotatedWith(ManagesDevices.class), userCheck);
+
+                bind(User.class).toProvider(CurrentUserProvider.class);
             }
         });
     }

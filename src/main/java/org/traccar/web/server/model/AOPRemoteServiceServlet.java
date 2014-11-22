@@ -45,121 +45,7 @@ import java.util.Date;
 import java.util.List;
 
 abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
-    final Object proxy;
-
-    public AOPRemoteServiceServlet(Class<?> iface) {
-        this.proxy = Proxy.newProxyInstance(iface.getClassLoader(), new Class<?> [] { iface }, new AOPHandler(this));
-    }
-
-    class AOPHandler implements InvocationHandler {
-        final Object target;
-
-        AOPHandler(Object target) {
-            this.target = target;
-        }
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            Method targetMethod = target.getClass().getMethod(method.getName(), method.getParameterTypes());
-            try {
-                checkAccess(targetMethod);
-                checkDeviceManagementAccess(targetMethod);
-                beginTransaction(targetMethod);
-                return targetMethod.invoke(target, args);
-            } finally {
-                endTransaction(targetMethod);
-            }
-        }
-
-        void checkAccess(Method method) throws Throwable {
-            RequireUser requireUser = method.getAnnotation(RequireUser.class);
-            if (requireUser == null) return;
-            beginTransaction();
-            try {
-                User user = getSessionUser();
-                if (user == null) {
-                    throw new SecurityException("Not logged in");
-                }
-                if (requireUser.roles().length > 0) {
-                    StringBuilder roles = new StringBuilder();
-                    for (Role role : requireUser.roles()) {
-                        if (roles.length() > 0) {
-                            roles.append(" or ");
-                        }
-                        roles.append(role.toString());
-                        if (role.has(user)) {
-                            return;
-                        }
-                    }
-                    throw new SecurityException("User must have " + roles + " role");
-                }
-            } finally {
-                if (method.getAnnotation(Transactional.class) == null) {
-                    endTransaction(false);
-                }
-            }
-        }
-
-        void checkDeviceManagementAccess(Method method) throws Throwable {
-            ManagesDevices managesDevices = method.getAnnotation(ManagesDevices.class);
-            if (managesDevices == null) return;
-            beginTransaction();
-            try {
-                User user = getSessionUser();
-                if (user == null) {
-                    throw new SecurityException("Not logged in");
-                }
-                if (!user.getAdmin() && !user.getManager()) {
-                    ApplicationSettings applicationSettings = getSessionEntityManager().createQuery("SELECT x FROM ApplicationSettings x", ApplicationSettings.class).getSingleResult();
-                    if (applicationSettings.isDisallowDeviceManagementByUsers()) {
-                        throw new SecurityException("Users are not allowed to manage devices");
-                    }
-                }
-            } finally {
-                if (method.getAnnotation(Transactional.class) == null) {
-                    endTransaction(false);
-                }
-            }
-        }
-
-        void beginTransaction(Method method) {
-            Transactional transactional = method.getAnnotation(Transactional.class);
-            if (transactional == null) return;
-            beginTransaction();
-        }
-
-        void beginTransaction() {
-            EntityManager entityManager = getSessionEntityManager();
-            if (!entityManager.getTransaction().isActive()) {
-                entityManager.getTransaction().begin();
-            }
-        }
-
-        void endTransaction(Method method) throws Throwable {
-            Transactional transactional = method.getAnnotation(Transactional.class);
-            if (transactional == null) return;
-            endTransaction(transactional.commit());
-        }
-
-        void endTransaction(boolean commit) throws Throwable {
-            EntityManager entityManager = getSessionEntityManager();
-            try {
-                if (entityManager.getTransaction().isActive()) {
-                    if (commit) {
-                        try {
-                            entityManager.getTransaction().commit();
-                        } catch (Throwable t) {
-                            entityManager.getTransaction().rollback();
-                            throw t;
-                        }
-                    } else {
-                        entityManager.getTransaction().rollback();
-                    }
-                }
-            } finally {
-                closeSessionEntityManager();
-            }
-        }
+    public AOPRemoteServiceServlet() {
     }
 
     /**
@@ -174,9 +60,9 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
             checkPermutationStrongName();
 
             try {
-                RPCRequest rpcRequest = RPC.decodeRequest(payload, proxy.getClass(), this);
+                RPCRequest rpcRequest = RPC.decodeRequest(payload, getClass(), this);
                 onAfterRequestDeserialized(rpcRequest);
-                return RPC.invokeAndEncodeResponse(proxy, rpcRequest.getMethod(),
+                return RPC.invokeAndEncodeResponse(this, rpcRequest.getMethod(),
                         rpcRequest.getParameters(), rpcRequest.getSerializationPolicy(),
                         rpcRequest.getFlags());
             } catch (IncompatibleRemoteServiceException ex) {
@@ -259,12 +145,12 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
             }
             Method method = null;
             try {
-                method = proxy.getClass().getDeclaredMethod(methodName, argClasses);
+                method = getClass().getDeclaredMethod(methodName, argClasses);
             } catch (NoSuchMethodException nsme) {
                 /**
                  * Try to find method by name and number of arguments
                  */
-                for (Method declaredMethod : proxy.getClass().getDeclaredMethods()) {
+                for (Method declaredMethod : getClass().getDeclaredMethods()) {
                     if (declaredMethod.getName().equals(methodName) && declaredMethod.getParameterTypes().length == args.length) {
                         /**
                          * Parse arguments
@@ -293,7 +179,7 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
                     throw new NoSuchMethodException();
                 }
             }
-            Object result = method.invoke(proxy, args);
+            Object result = method.invoke(this, args);
             return result == null ? null : gson.toJson(result);
         } catch (ParseException pe) {
             log("Unable to parse date: " + pe.getLocalizedMessage());
@@ -333,8 +219,4 @@ abstract class AOPRemoteServiceServlet extends RemoteServiceServlet {
             return "Method '" + methodName + "' is not accessible";
         }
     }
-
-    abstract EntityManager getSessionEntityManager();
-    abstract void closeSessionEntityManager();
-    abstract User getSessionUser();
 }
