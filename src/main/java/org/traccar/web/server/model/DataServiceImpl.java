@@ -20,6 +20,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import javax.inject.Singleton;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -39,6 +40,7 @@ import org.hibernate.Session;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.shared.model.*;
 
+@Singleton
 public class DataServiceImpl extends AOPRemoteServiceServlet implements DataService {
 
     private static final long serialVersionUID = 1;
