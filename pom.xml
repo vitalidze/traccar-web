@@ -17,12 +17,15 @@
     <hibernateVersion>4.3.7.Final</hibernateVersion>
     <!-- Convenience property to set the GWT version -->
     <gwtVersion>2.6.0</gwtVersion>
+    <!-- Convenience property to set the google guice version -->
+    <guiceVersion>3.0</guiceVersion>
     <!-- GWT needs at least java 1.5 -->
     <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
+    <!-- GWT dependencies -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-servlet</artifactId>
@@ -35,6 +38,7 @@
       <version>${gwtVersion}</version>
       <scope>provided</scope>
     </dependency>
+    <!-- Hibernate dependencies -->
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
@@ -55,6 +59,23 @@
       <artifactId>hibernate-jpa-2.1-api</artifactId>
       <version>1.0.0.Final</version>
     </dependency>
+    <!-- Google guice -->
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>${guiceVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-persist</artifactId>
+      <version>${guiceVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-servlet</artifactId>
+      <version>${guiceVersion}</version>
+    </dependency>
+    <!-- Database drivers -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
@@ -73,6 +94,7 @@
       <version>9.3-1102-jdbc4</version>
       <scope>provided</scope>
     </dependency>
+    <!-- Mapping dependencies -->
     <dependency>
        <groupId>com.sencha.gxt</groupId>
        <artifactId>gxt</artifactId>
@@ -85,12 +107,14 @@
        <version>1.0</version>
        <scope>provided</scope>
     </dependency>
+    <!-- Test dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.7</version>
       <scope>test</scope>
     </dependency>
+    <!-- Other dependencies -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
