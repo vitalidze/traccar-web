@@ -22,6 +22,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.state.client.GridStateHandler;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
@@ -262,6 +263,15 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                     "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
                     "&speed=" + speed.getValue(),
                     "_blank", null);
+    }
+
+    @UiHandler("importButton")
+    public void onImportClicked(SelectEvent event) {
+        if (deviceCombo.getValue() == null) {
+            new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
+        } else {
+            new ImportDialog(deviceCombo.getValue()).show();
+        }
     }
 
     private StoreHandlers<Device> deviceStoreHandlers = new BaseStoreHandlers<Device>() {
