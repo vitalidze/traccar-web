@@ -35,13 +35,15 @@ import java.util.Date;
 
 @Singleton
 public class RESTApiServlet extends HttpServlet {
+    public final static String REQUEST_DATE_PATTERN = "yyyy-MM-dd HH:mm:ss Z";
+
     @Inject
     private DataService dataService;
 
     private final ThreadLocal<SimpleDateFormat> requestDateFormat = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+            return new SimpleDateFormat(REQUEST_DATE_PATTERN);
         }
     };
 

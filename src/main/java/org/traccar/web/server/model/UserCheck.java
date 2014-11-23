@@ -23,7 +23,6 @@ import org.traccar.web.shared.model.User;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
-import java.lang.reflect.Method;
 
 public class UserCheck implements MethodInterceptor {
     @Inject

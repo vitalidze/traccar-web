@@ -242,26 +242,26 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     public void onCSVClicked(SelectEvent event) {
         DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-        Window.open("/traccar/rest/getPositionsCSV?payload=[" +
-                (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) + "," +
-                JsonUtils.escapeValue(jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B")) + "," +
-                JsonUtils.escapeValue(jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B")) + "," +
-                (speedModifierCombo.getText().isEmpty() ? null : JsonUtils.escapeValue(speedModifierCombo.getText())) + "," +
-                speed.getValue() +
-                "]", "_blank", null);
+        Window.open("/traccar/export/csv" +
+                    "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
+                    "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
+                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+                    "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
+                    "&speed=" + speed.getValue(),
+                    "_blank", null);
     }
 
     @UiHandler("gpxButton")
     public void onGPXClicked(SelectEvent event) {
         DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-        Window.open("/traccar/rest/getPositionsGPX?payload=[" +
-                (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) + "," +
-                JsonUtils.escapeValue(jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B")) + "," +
-                JsonUtils.escapeValue(jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B")) + "," +
-                (speedModifierCombo.getText().isEmpty() ? null : JsonUtils.escapeValue(speedModifierCombo.getText())) + "," +
-                speed.getValue() +
-                "]", "_blank", null);
+        Window.open("/traccar/export/gpx" +
+                    "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
+                    "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
+                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+                    "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
+                    "&speed=" + speed.getValue(),
+                    "_blank", null);
     }
 
     private StoreHandlers<Device> deviceStoreHandlers = new BaseStoreHandlers<Device>() {
