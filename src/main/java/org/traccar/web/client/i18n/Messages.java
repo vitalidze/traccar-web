@@ -181,4 +181,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String importData();
 
     String fileToImport();
+
+    String log();
 }

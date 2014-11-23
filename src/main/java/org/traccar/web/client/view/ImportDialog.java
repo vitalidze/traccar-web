@@ -65,6 +65,7 @@ public class ImportDialog {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 window.hide();
+                new LogViewDialog(event.getResults()).show();
             }
         });
         form.setAction(form.getAction() + "?deviceId=" + device.getId());
