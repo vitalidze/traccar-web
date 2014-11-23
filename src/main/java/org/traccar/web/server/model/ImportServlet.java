@@ -16,7 +16,11 @@
 package org.traccar.web.server.model;
 
 import com.google.inject.persist.Transactional;
+import org.apache.commons.fileupload.FileItemIterator;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.User;
 
 import javax.inject.Inject;
@@ -27,9 +31,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 @Singleton
@@ -50,8 +61,17 @@ public class ImportServlet extends HttpServlet {
         Device device = entityManager.get().find(Device.class, deviceId);
         checkAccess(device);
 
+        ServletFileUpload servletFileUpload = new ServletFileUpload();
+
         if (importType.equalsIgnoreCase("gpx")) {
-            gpx(device, req);
+            try {
+                FileItemIterator fileItemIterator = servletFileUpload.getItemIterator(req);
+                while (fileItemIterator.hasNext()) {
+                    gpx(device, fileItemIterator.next().openStream(), resp);
+                }
+            } catch (FileUploadException fue) {
+                throw new IOException(fue);
+            }
         } else {
             throw new ServletException("Unsupported import type: " + importType);
         }
@@ -64,11 +84,87 @@ public class ImportServlet extends HttpServlet {
         }
     }
 
-    void gpx(Device device, HttpServletRequest request) {
-        // TODO
-
+    // TODO prohibit importing for ordinary users when device management is disabled
+    void gpx(Device device, InputStream inputStream, HttpServletResponse response) throws IOException {
         TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         dateFormat.setTimeZone(tz);
+
+        try {
+            XMLStreamReader xsr = XMLInputFactory.newFactory().createXMLStreamReader(inputStream);
+
+            Position position = null;
+            LinkedHashMap<String, String> extendedInfo = null;
+
+            response.getWriter().println("<pre>");
+
+            int alreadyExist = 0;
+            int imported = 0;
+
+            while (xsr.hasNext()) {
+                xsr.next();
+                if (xsr.getEventType() == XMLStreamReader.START_ELEMENT) {
+
+                    if (xsr.getLocalName().equalsIgnoreCase("trkpt")) {
+                        position = new Position();
+                        position.setLongitude(Double.parseDouble(xsr.getAttributeValue(null, "lon")));
+                        position.setLatitude(Double.parseDouble(xsr.getAttributeValue(null, "lat")));
+
+                        extendedInfo = new LinkedHashMap<String, String>();
+                        extendedInfo.put("protocol", "gpx_import");
+                    } else if (xsr.getLocalName().equalsIgnoreCase("time")) {
+                        if (position != null) {
+                            position.setTime(dateFormat.parse(xsr.getElementText()));
+                        }
+                    } else if (xsr.getLocalName().equalsIgnoreCase("ele")) {
+                        if (position != null) {
+                            position.setAltitude(Double.parseDouble(xsr.getElementText()));
+                        }
+                    } else if (position != null) {
+                        extendedInfo.put(xsr.getLocalName(), xsr.getElementText());
+                    }
+                } else if (xsr.getEventType() == XMLStreamReader.END_ELEMENT &&
+                           xsr.getLocalName().equalsIgnoreCase("trkpt")) {
+
+                    StringBuilder other = new StringBuilder("<info>");
+                    for (Map.Entry<String, String> entry : extendedInfo.entrySet()) {
+                        other.append('<').append(entry.getKey()).append('>')
+                             .append(entry.getValue())
+                            .append("</").append(entry.getKey()).append('>');
+                    }
+                    other.append("</info>");
+                    position.setOther(other.toString());
+
+                    boolean exist = false;
+                    // TODO check lon, lat and altitude (with some delta cuz they are doubles)
+                    for (Position existing : entityManager.get().createQuery("SELECT p FROM Position p WHERE p.device=:device AND p.time=:time", Position.class)
+                            .setParameter("device", device)
+                            .setParameter("time", position.getTime()).getResultList()) {
+                        if (existing.getOther().equals(position.getOther())) {
+                            exist = true;
+                            break;
+                        }
+                    }
+
+                    if (exist) {
+                        alreadyExist++;
+                    } else {
+                        imported++;
+                    }
+                    // TODO persist position
+                    position = null;
+                    extendedInfo = null;
+                }
+            }
+
+            response.getWriter().println("Already exist: " + alreadyExist);
+            response.getWriter().println("Imported: " + imported);
+
+            response.getWriter().println("</pre>");
+        } catch (XMLStreamException xse) {
+            throw new IOException(xse);
+        } catch (ParseException pe) {
+            throw new IOException(pe);
+        }
     }
 }

@@ -106,6 +106,10 @@ public class Position implements Serializable, Cloneable {
         return time;
     }
 
+    public void setTime(Date time) {
+        this.time = time;
+    }
+
     @Expose
     private Boolean valid;
 
@@ -120,6 +124,10 @@ public class Position implements Serializable, Cloneable {
         return latitude;
     }
 
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
     @Expose
     private Double longitude;
 
@@ -127,11 +135,19 @@ public class Position implements Serializable, Cloneable {
         return longitude;
     }
 
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
     @Expose
     private Double altitude;
 
     public Double getAltitude() {
         return altitude;
+    }
+
+    public void setAltitude(Double altitude) {
+        this.altitude = altitude;
     }
 
     @Expose
@@ -167,6 +183,10 @@ public class Position implements Serializable, Cloneable {
 
     public String getOther() {
         return other;
+    }
+
+    public void setOther(String other) {
+        this.other = other;
     }
 
     @GwtTransient
