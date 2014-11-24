@@ -18,7 +18,11 @@ package org.traccar.web.client.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.data.shared.Store;
+import com.sencha.gxt.widget.core.client.box.AbstractInputMessageBox;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
+import com.sencha.gxt.widget.core.client.form.PasswordField;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
@@ -134,6 +138,28 @@ public class SettingsController implements DeviceView.SettingsHandler {
                                 userStore.commitChanges();
                             }
                         });
+                    }
+
+                    @Override
+                    public void onChangePassword(final User user) {
+                        final AbstractInputMessageBox passwordInput = new AbstractInputMessageBox(new PasswordField(), i18n.changePassword(), i18n.enterNewPassword(user.getLogin())) {};
+                        passwordInput.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+                            @Override
+                            public void onDialogHide(DialogHideEvent event) {
+                                if (event.getHideButton() == PredefinedButton.OK) {
+                                    final String oldPassword = user.getPassword();
+                                    user.setPassword(passwordInput.getValue());
+                                    Application.getDataService().updateUser(user, new BaseAsyncCallback<User>(i18n) {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            user.setPassword(oldPassword);
+                                            super.onFailure(caught);
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                        passwordInput.show();
                     }
                 }).show();
             }

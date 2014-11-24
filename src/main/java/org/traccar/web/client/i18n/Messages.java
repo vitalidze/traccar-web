@@ -177,4 +177,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String exportToCSV();
 
     String exportToGPX();
+
+    String changePassword();
+
+    String enterNewPassword(String p0);
 }
