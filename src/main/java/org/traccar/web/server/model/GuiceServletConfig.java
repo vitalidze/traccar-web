@@ -55,6 +55,7 @@ public class GuiceServletConfig extends GuiceServletContextListener {
                 serve("/traccar/dataService").with(DataServiceImpl.class);
                 serve("/traccar/rest/*").with(RESTApiServlet.class);
                 serve("/traccar/export/*").with(ExportServlet.class);
+                serve("/traccar/s/login").with(LoginServlet.class);
 
                 UserCheck userCheck = new UserCheck();
                 requestInjection(userCheck);

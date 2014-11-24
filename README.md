@@ -58,6 +58,7 @@ This project has following features, which don't exist in original `traccar-web`
 * 'Address' column in archive (hidden by default)
 * 'Distance' column in archive with total distance at the bottom
 * possibility to export archive to [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) and [GPX](http://en.wikipedia.org/wiki/GPS_Exchange_Format)
+* possibility to log in via GET request to a separate servlet (for example, for integration on external sites) - `http://server-ip:8082/traccar/s/login?user=your_username&password=your_password`
 
 
 ## Building
