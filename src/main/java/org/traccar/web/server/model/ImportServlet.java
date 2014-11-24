@@ -19,6 +19,7 @@ import com.google.inject.persist.Transactional;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.traccar.web.shared.model.ApplicationSettings;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.User;
@@ -47,6 +48,8 @@ import java.util.TimeZone;
 public class ImportServlet extends HttpServlet {
     @Inject
     private Provider<User> sessionUser;
+    @Inject
+    private Provider<ApplicationSettings> applicationSettings;
     @Inject
     private Provider<EntityManager> entityManager;
 
@@ -82,9 +85,11 @@ public class ImportServlet extends HttpServlet {
         if (!user.getAdmin() && !user.getAllAvailableDevices().contains(device)) {
             throw new SecurityException("User does not have access to device with id=" + device.getId());
         }
+        if (!user.getAdmin() && !user.getManager() && applicationSettings.get().isDisallowDeviceManagementByUsers()) {
+            throw new SecurityException("User is restricted from devices management");
+        }
     }
 
-    // TODO prohibit importing for ordinary users when device management is disabled
     void gpx(Device device, InputStream inputStream, HttpServletResponse response) throws IOException {
         TimeZone tz = TimeZone.getTimeZone("UTC");
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

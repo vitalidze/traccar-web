@@ -16,8 +16,6 @@
 package org.traccar.web.server.model;
 
 import java.io.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.inject.Inject;
@@ -29,9 +27,6 @@ import javax.persistence.TypedQuery;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
@@ -45,6 +40,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Inject
     private Provider<User> sessionUser;
+
+    @Inject
+    private Provider<ApplicationSettings> applicationSettings;
 
     @Inject
     private Provider<EntityManager> entityManager;
@@ -390,16 +388,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @Override
     public ApplicationSettings getApplicationSettings() {
-        ApplicationSettings applicationSettings;
-        TypedQuery<ApplicationSettings> query = entityManager.get().createQuery("SELECT x FROM ApplicationSettings x", ApplicationSettings.class);
-        List<ApplicationSettings> resultList = query.getResultList();
-        if (resultList == null || resultList.isEmpty()) {
-            applicationSettings = new ApplicationSettings();
-            entityManager.get().persist(applicationSettings);
-        } else {
-            applicationSettings = resultList.get(0);
+        ApplicationSettings appSettings = applicationSettings.get();
+        if (appSettings == null) {
+            appSettings = new ApplicationSettings();
+            entityManager.get().persist(appSettings);
         }
-        return applicationSettings;
+        return appSettings;
     }
 
     @Transactional
