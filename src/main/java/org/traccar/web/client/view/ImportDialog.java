@@ -21,10 +21,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.box.AutoProgressMessageBox;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SubmitCompleteEvent;
 import com.sencha.gxt.widget.core.client.form.FileUploadField;
 import com.sencha.gxt.widget.core.client.form.FormPanel;
+import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Device;
 
 public class ImportDialog {
@@ -46,6 +48,9 @@ public class ImportDialog {
     @UiField(provided = true)
     Device device;
 
+    @UiField(provided = true)
+    Messages i18n = GWT.create(Messages.class);
+
     public ImportDialog(Device device) {
         this.device = device;
         uiBinder.createAndBindUi(this);
@@ -61,10 +66,15 @@ public class ImportDialog {
 
     @UiHandler("saveButton")
     public void onLoginClicked(SelectEvent event) {
+        final AutoProgressMessageBox messageBox = new AutoProgressMessageBox(window.getTitle(), i18n.importingData());
+        messageBox.auto();
+        messageBox.show();
+
         form.addSubmitCompleteHandler(new SubmitCompleteEvent.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 window.hide();
+                messageBox.hide();
                 new LogViewDialog(event.getResults()).show();
             }
         });
