@@ -98,6 +98,10 @@ public class Position implements Serializable, Cloneable {
         return device;
     }
 
+    public void setDevice(Device device) {
+        this.device = device;
+    }
+
     @Expose
     @Temporal(TemporalType.TIMESTAMP)
     private Date time;
@@ -115,6 +119,10 @@ public class Position implements Serializable, Cloneable {
 
     public Boolean getValid() {
         return valid;
+    }
+
+    public void setValid(Boolean valid) {
+        this.valid = valid;
     }
 
     @Expose

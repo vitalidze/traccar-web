@@ -109,6 +109,8 @@ public class ImportServlet extends HttpServlet {
                         position = new Position();
                         position.setLongitude(Double.parseDouble(xsr.getAttributeValue(null, "lon")));
                         position.setLatitude(Double.parseDouble(xsr.getAttributeValue(null, "lat")));
+                        position.setValid(Boolean.TRUE);
+                        position.setDevice(device);
 
                         extendedInfo = new LinkedHashMap<String, String>();
                         extendedInfo.put("protocol", "gpx_import");
@@ -136,11 +138,13 @@ public class ImportServlet extends HttpServlet {
                     position.setOther(other.toString());
 
                     boolean exist = false;
-                    // TODO check lon, lat and altitude (with some delta cuz they are doubles)
                     for (Position existing : entityManager.get().createQuery("SELECT p FROM Position p WHERE p.device=:device AND p.time=:time", Position.class)
                             .setParameter("device", device)
                             .setParameter("time", position.getTime()).getResultList()) {
-                        if (existing.getOther().equals(position.getOther())) {
+                        if (equals(existing.getLongitude(), position.getLongitude(), 0.0000000001d) &&
+                            equals(existing.getLatitude(), position.getLatitude(), 0.0000000001d) &&
+                            equals(existing.getAltitude(), position.getAltitude(), 0.00001d) &&
+                            existing.getOther().equals(position.getOther())) {
                             exist = true;
                             break;
                         }
@@ -149,9 +153,10 @@ public class ImportServlet extends HttpServlet {
                     if (exist) {
                         alreadyExist++;
                     } else {
+                        entityManager.get().persist(position);
                         imported++;
                     }
-                    // TODO persist position
+
                     position = null;
                     extendedInfo = null;
                 }
@@ -166,5 +171,9 @@ public class ImportServlet extends HttpServlet {
         } catch (ParseException pe) {
             throw new IOException(pe);
         }
+    }
+
+    private static boolean equals(Double d1, Double d2, double delta) {
+        return d1 != null && d2 != null && Math.abs(d1 - d2) < delta;
     }
 }
