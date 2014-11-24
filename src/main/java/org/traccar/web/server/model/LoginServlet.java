@@ -38,14 +38,14 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String username = req.getParameter("user");
         User currentUser = sessionUser.get();
-        if (currentUser == null || !currentUser.getLogin().equals(username)) {
-            try {
+        try {
+            if (currentUser == null) {
                 dataService.login(username, req.getParameter("password"));
-                String locale = req.getParameter("locale");
-                resp.sendRedirect("/" + (locale == null ? "" : ("?locale=" + locale)));
-            } catch (Exception ex) {
-                resp.getWriter().println("Authentication failed");
             }
+            String locale = req.getParameter("locale");
+            resp.sendRedirect("/" + (locale == null ? "" : ("?locale=" + locale)));
+        } catch (Exception ex) {
+            resp.getWriter().println("Authentication failed");
         }
     }
 }
