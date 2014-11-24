@@ -53,7 +53,7 @@ public class ImportServlet extends HttpServlet {
     @Inject
     private Provider<EntityManager> entityManager;
 
-    @Transactional
+    @Transactional(rollbackOn = { IOException.class, RuntimeException.class })
     @RequireUser
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
