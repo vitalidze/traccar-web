@@ -92,8 +92,11 @@ public class ImportServlet extends HttpServlet {
 
     void gpx(Device device, InputStream inputStream, HttpServletResponse response) throws IOException {
         TimeZone tz = TimeZone.getTimeZone("UTC");
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        dateFormat.setTimeZone(tz);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        DateFormat dateFormatWithMS = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+        dateFormatWithMS.setTimeZone(tz);
+
 
         try {
             XMLStreamReader xsr = XMLInputFactory.newFactory().createXMLStreamReader(inputStream);
@@ -121,7 +124,12 @@ public class ImportServlet extends HttpServlet {
                         extendedInfo.put("protocol", "gpx_import");
                     } else if (xsr.getLocalName().equalsIgnoreCase("time")) {
                         if (position != null) {
-                            position.setTime(dateFormat.parse(xsr.getElementText()));
+                            String strTime = xsr.getElementText();
+                            if (strTime.length() == 20) {
+                                position.setTime(dateFormat.parse(strTime));
+                            } else {
+                                position.setTime(dateFormatWithMS.parse(strTime));
+                            }
                         }
                     } else if (xsr.getLocalName().equalsIgnoreCase("ele")) {
                         if (position != null) {
