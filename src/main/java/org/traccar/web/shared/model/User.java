@@ -21,19 +21,36 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 
 @Entity
-@Table(name="users")
+@Table(name="users",
+       uniqueConstraints = { @UniqueConstraint(name = "users_ukey_login", columnNames = "login") })
 public class User implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1;
 
     public User() {
         admin = false;
+        manager = false;
     }
 
     public User(User user) {
@@ -44,16 +61,16 @@ public class User implements Serializable, Cloneable {
         manager = user.manager;
     }
 
-    @Id
-    @GeneratedValue
     @Expose
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
     public long getId() {
         return id;
     }
 
-    @Column(unique = true)
     @Expose
     private String login;
 
@@ -92,15 +109,24 @@ public class User implements Serializable, Cloneable {
     private Boolean manager;
 
     public Boolean getManager() {
-        return manager;
+        return (manager == null) ? false : manager;
     }
 
     public void setManager(Boolean manager) {
         this.manager = manager;
     }
 
+    // Hibernate bug HHH-8783: (http://hibernate.atlassian.net/browse/HHH-8783)
+    //     ForeignKey(name) has no effect in JoinTable (and others).  It is
+    //     reported as closed but the comments indicate it is still not fixed
+    //     for @JoinTable() and targeted to be fixed in 5.x :-(.
+    //                          
     @GwtTransient
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "users")
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_devices",
+               foreignKey = @ForeignKey(name = "users_devices_fkey_users_id"),
+               joinColumns = { @JoinColumn(name = "users_id", table = "users", referencedColumnName = "id") },
+               inverseJoinColumns = { @JoinColumn(name = "devices_id", table = "devices", referencedColumnName = "id") })
     private List<Device> devices = new LinkedList<Device>();
 
     public void setDevices(List<Device> devices) {
@@ -122,8 +148,9 @@ public class User implements Serializable, Cloneable {
         return devices;
     }
 
-    @OneToOne(cascade = CascadeType.ALL)
     @Expose
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))
     private UserSettings userSettings;
 
     public void setUserSettings(UserSettings userSettings) {
@@ -134,8 +161,9 @@ public class User implements Serializable, Cloneable {
         return userSettings;
     }
 
-    @ManyToOne
     @GwtTransient
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_managedby_id"))
     private User managedBy;
 
     public User getManagedBy() {

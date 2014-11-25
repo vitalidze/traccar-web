@@ -18,15 +18,29 @@ package org.traccar.web.shared.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
-import org.hibernate.annotations.Index;
+
 import org.traccar.web.client.view.MarkerIconFactory;
 
 @Entity
-@Table(name = "positions")
+@Table(name = "positions",
+       indexes = { @Index(name="positionsIndex", columnList="device_id,time") })
 public class Position implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1;
@@ -67,7 +81,8 @@ public class Position implements Serializable, Cloneable {
 
     @Expose
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
     public long getId() {
@@ -76,19 +91,27 @@ public class Position implements Serializable, Cloneable {
 
     @Expose
     @ManyToOne(fetch = FetchType.EAGER)
-    @Index(name = "positionsIndex")
+    @JoinColumn(foreignKey = @ForeignKey(name = "positions_fkey_device_id"))
     private Device device;
 
     public Device getDevice() {
         return device;
     }
 
+    public void setDevice(Device device) {
+        this.device = device;
+    }
+
     @Expose
-    @Index(name = "positionsIndex")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date time;
 
     public Date getTime() {
         return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
     }
 
     @Expose
@@ -98,11 +121,19 @@ public class Position implements Serializable, Cloneable {
         return valid;
     }
 
+    public void setValid(Boolean valid) {
+        this.valid = valid;
+    }
+
     @Expose
     private Double latitude;
 
     public Double getLatitude() {
         return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 
     @Expose
@@ -112,11 +143,19 @@ public class Position implements Serializable, Cloneable {
         return longitude;
     }
 
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
     @Expose
     private Double altitude;
 
     public Double getAltitude() {
         return altitude;
+    }
+
+    public void setAltitude(Double altitude) {
+        this.altitude = altitude;
     }
 
     @Expose
@@ -154,6 +193,10 @@ public class Position implements Serializable, Cloneable {
         return other;
     }
 
+    public void setOther(String other) {
+        this.other = other;
+    }
+
     @GwtTransient
     private transient Status status;
 
@@ -185,5 +228,21 @@ public class Position implements Serializable, Cloneable {
 
     public void setDistance(double distance) {
         this.distance = distance;
+    }
+    
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof Position)) {
+            return false;
+        }
+
+        Position p = (Position) object;
+
+        return this.id == p.id;
     }
 }

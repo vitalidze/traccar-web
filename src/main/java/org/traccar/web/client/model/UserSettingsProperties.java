@@ -47,4 +47,10 @@ public interface UserSettingsProperties extends PropertyAccess<UserSettings> {
 
     }
 
+    public static class MapTypeLabelProvider implements LabelProvider<UserSettings.MapType> {
+        @Override
+        public String getLabel(UserSettings.MapType item) {
+            return item.getName();
+        }
+    }
 }

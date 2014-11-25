@@ -11,8 +11,8 @@ public class FormatterUtil {
         return DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
     }
 
-    public DateTimeFormat getJSONtimeFormat() {
-        return DateTimeFormat.getFormat("EEE, dd MMM yyyy HH:mm:ss Z");
+    public DateTimeFormat getRequestTimeFormat() {
+        return DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss Z");
     }
 
     private class SpeedNumberFormat extends NumberFormat {
