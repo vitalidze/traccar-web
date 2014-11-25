@@ -178,6 +178,10 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
 
     String exportToGPX();
 
+    String changePassword();
+
+    String enterNewPassword(String p0);
+
     String importData();
 
     String fileToImport();

@@ -197,7 +197,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
-                // TODO: handle other users
+                // update password
+                if (currentUser.getAdmin() || currentUser.getManager()) {
+                    User existingUser = entityManager.find(User.class, user.getId());
+                    existingUser.setPassword(user.getPassword());
+                    entityManager.merge(existingUser);
+                } else {
+                    throw new SecurityException();
+                }
             }
 
             return user;
