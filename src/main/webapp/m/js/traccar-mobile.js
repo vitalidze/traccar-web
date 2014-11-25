@@ -171,6 +171,22 @@ myApp.onPageInit('map-screen', function(page) {
         }));
 
         controls.extend([attribution])
+    } else if (appState.userSettings.mapType.indexOf("BING_") == 0) {
+        var style = 'Road';
+        if (appState.userSettings.mapType == "BING_HYBRID") {
+            style = 'AerialWithLabels';
+        } else if (appState.userSettings.mapType == "BING_AERIAL") {
+            style = 'Aerial';
+        }
+
+        layers.push(new ol.layer.Tile({
+            source: new ol.source.BingMaps({
+                key: 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F',
+                imagerySet: style
+            })
+        }));
+
+        controls = ol.control.defaults({ attribution: true });
     } else if (appState.userSettings.mapType.indexOf("GOOGLE_") == 0) {
         var divGmap = document.createElement('div');
         divGmap.id = 'gmap';
