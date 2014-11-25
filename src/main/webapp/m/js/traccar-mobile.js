@@ -151,31 +151,102 @@ myApp.onPageInit('map-screen', function(page) {
 
     loadDevices();
 
-    var attribution = new ol.control.Attribution({
-        collapsible: false
-    });
+    var divOlMap = document.getElementById('map');
 
     var vectorSource = new ol.source.Vector();
     vectorLayer = new ol.layer.Vector({ source: vectorSource });
 
+    var view = new ol.View();
+    var controls = ol.control.defaults({ attribution: false });
+
+    // set up layers
+    var layers = [];
+    if (appState.userSettings.mapType == "OSM") {
+        var attribution = new ol.control.Attribution({
+            collapsible: false
+        });
+
+        layers.push(new ol.layer.Tile({
+            source: new ol.source.OSM()
+        }));
+
+        controls.extend([attribution])
+    } else if (appState.userSettings.mapType.indexOf("BING_") == 0) {
+        var style = 'Road';
+        if (appState.userSettings.mapType == "BING_HYBRID") {
+            style = 'AerialWithLabels';
+        } else if (appState.userSettings.mapType == "BING_AERIAL") {
+            style = 'Aerial';
+        }
+
+        layers.push(new ol.layer.Tile({
+            source: new ol.source.BingMaps({
+                key: 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F',
+                imagerySet: style
+            })
+        }));
+
+        controls = ol.control.defaults({ attribution: true });
+    } else if (appState.userSettings.mapType.indexOf("GOOGLE_") == 0) {
+        var divGmap = document.createElement('div');
+        divGmap.id = 'gmap';
+
+        var divOlMap = document.createElement('div');
+        divOlMap.id = 'olmap';
+
+        $$('#map').append(divGmap);
+        $$('#map').append(divOlMap);
+
+        $$('#gmap').css({height: '100%', width: '100%'});
+        $$('#olmap').css({height: '100%', width: '100%'});
+
+        // make sure the view doesn't go beyond the 22 zoom levels of Google Maps
+        view = new ol.View({ maxZoom: 21 });
+
+        var mapTypeId = google.maps.MapTypeId.ROADMAP;
+        if (appState.userSettings.mapType == "GOOGLE_HYBRID") {
+            mapTypeId = google.maps.MapTypeId.HYBRID;
+        } else if (appState.userSettings.mapType == "GOOGLE_SATELLITE") {
+            mapTypeId = google.maps.MapTypeId.SATELLITE;
+        } else if (appState.userSettings.mapType == "GOOGLE_TERRAIN") {
+            mapTypeId = google.maps.MapTypeId.TERRAIN;
+        }
+
+        var gmap = new google.maps.Map(divGmap, {
+            disableDefaultUI: true,
+            keyboardShortcuts: false,
+            draggable: false,
+            disableDoubleClickZoom: true,
+            scrollwheel: false,
+            streetViewControl: false,
+            mapTypeId: mapTypeId
+        });
+
+        view.on('change:center', function() {
+            var center = ol.proj.transform(view.getCenter(), 'EPSG:3857', 'EPSG:4326');
+            gmap.setCenter(new google.maps.LatLng(center[1], center[0]));
+        });
+        view.on('change:resolution', function() {
+            gmap.setZoom(view.getZoom());
+        });
+    }
+    layers.push(vectorLayer);
+
     map = new ol.Map({
-        target: 'map',
-        layers: [
-            new ol.layer.Tile({
-                source: new ol.source.OSM()
-            }),
-            vectorLayer
-        ],
-        controls: ol.control.defaults({ attribution: false })
-            .extend([attribution])
-            .extend([new OpenSideMenuControl()])
+        target: divOlMap,
+        layers: layers,
+        view: view,
+        controls: controls.extend([new OpenSideMenuControl()])
     });
 
     // set up map center and zoom
-    map.setView(new ol.View({
-        center: createPoint(appState.userSettings.centerLongitude, appState.userSettings.centerLatitude),
-        zoom: appState.userSettings.zoomLevel
-    }));
+    map.getView().setCenter(createPoint(appState.userSettings.centerLongitude, appState.userSettings.centerLatitude));
+    map.getView().setZoom(appState.userSettings.zoomLevel);
+
+    if (appState.userSettings.mapType.indexOf("GOOGLE_") == 0) {
+        divOlMap.parentNode.removeChild(divOlMap);
+        gmap.controls[google.maps.ControlPosition.TOP_LEFT].push(divOlMap);
+    }
 
     // start positions loading cycle
     loadPositions();

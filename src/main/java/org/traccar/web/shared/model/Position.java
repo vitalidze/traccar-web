@@ -98,12 +98,20 @@ public class Position implements Serializable, Cloneable {
         return device;
     }
 
+    public void setDevice(Device device) {
+        this.device = device;
+    }
+
     @Expose
     @Temporal(TemporalType.TIMESTAMP)
     private Date time;
 
     public Date getTime() {
         return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
     }
 
     @Expose
@@ -113,11 +121,19 @@ public class Position implements Serializable, Cloneable {
         return valid;
     }
 
+    public void setValid(Boolean valid) {
+        this.valid = valid;
+    }
+
     @Expose
     private Double latitude;
 
     public Double getLatitude() {
         return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 
     @Expose
@@ -127,11 +143,19 @@ public class Position implements Serializable, Cloneable {
         return longitude;
     }
 
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
     @Expose
     private Double altitude;
 
     public Double getAltitude() {
         return altitude;
+    }
+
+    public void setAltitude(Double altitude) {
+        this.altitude = altitude;
     }
 
     @Expose
@@ -167,6 +191,10 @@ public class Position implements Serializable, Cloneable {
 
     public String getOther() {
         return other;
+    }
+
+    public void setOther(String other) {
+        this.other = other;
     }
 
     @GwtTransient

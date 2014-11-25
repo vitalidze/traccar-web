@@ -5,20 +5,15 @@
          version="2.5"
          xmlns="http://java.sun.com/xml/ns/javaee">
 
-  <servlet>
-    <servlet-name>dataService</servlet-name>
-    <servlet-class>org.traccar.web.server.model.DataServiceImpl</servlet-class>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>dataService</servlet-name>
-    <url-pattern>/traccar/dataService</url-pattern>
-  </servlet-mapping>
+  <filter>
+    <filter-name>guiceFilter</filter-name>
+    <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
+  </filter>
 
-  <servlet-mapping>
-    <servlet-name>dataService</servlet-name>
-    <url-pattern>/traccar/rest/*</url-pattern>
-  </servlet-mapping>
+  <filter-mapping>
+    <filter-name>guiceFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
 
   <welcome-file-list>
     <welcome-file>traccar.html</welcome-file>
@@ -29,4 +24,7 @@
     <session-timeout>0</session-timeout>
   </session-config>
 
+  <listener>
+    <listener-class>org.traccar.web.server.model.GuiceServletConfig</listener-class>
+  </listener>
 </web-app>

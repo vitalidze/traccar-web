@@ -36,6 +36,7 @@
               <toolbar:ToolBar>
                 <button:TextButton ui:field="addButton" text="{i18n.add}" />
                 <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
+                <button:TextButton ui:field="changePasswordButton" text="{i18n.changePassword}" enabled="false" />
               </toolbar:ToolBar>
             </container:child>
       

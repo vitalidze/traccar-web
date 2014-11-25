@@ -48,7 +48,7 @@ This project has following features, which don't exist in original `traccar-web`
   * there is a new menu item called 'Share' to manage access to selected device
 * improved performance of positions loading when DB grows up
 * fixed issue when devices are not updated between different instances of web browser
-* moved DB transaction management and user rights checks outside of data service implementation (AOP)
+* moved DB transaction management and user rights checks outside of data service implementation (AOP) with [google guice](https://github.com/google/guice)
 * possibility to detect 'offline' devices - when signal hasn't came for some time (set up in device settings). They will be shown on a map with a marker of different colour and there will be some sign in popup that they are actually offline.
 * new device status - idle. It is shown in popup and also there will be a time of idling. Each device got new setting 'Idle when speed is <=', which is zero by default. It may be changed to some reasonable value, which is then used to consider device idle (for example to handle 'satelite drift compansation').
 * possibility to restrict ordinary users to manage (i.e. add/edit/delete) devices. Configured in global application settings.
@@ -57,7 +57,10 @@ This project has following features, which don't exist in original `traccar-web`
 * RESTful API. Available at `/traccar/rest/{methodName}` - allows to call methods from `DataService` class. Full documentation will be available by request.
 * 'Address' column in archive (hidden by default)
 * 'Distance' column in archive with total distance at the bottom
-* possibility to export archive to CSV
+* possibility to export archive to [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) and [GPX](http://en.wikipedia.org/wiki/GPS_Exchange_Format)
+* possibility to import archive from [GPX](http://en.wikipedia.org/wiki/GPS_Exchange_Format)
+* possibility to log in via GET request to a separate servlet (for example, for integration on external sites) - `http://server-ip:8082/traccar/s/login?user=your_username&password=your_password`
+* possibility to change other user's password for administrators and managers
 
 
 ## Building
