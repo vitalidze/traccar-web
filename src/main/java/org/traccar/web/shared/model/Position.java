@@ -46,17 +46,17 @@ public class Position implements Serializable, Cloneable {
     private static final long serialVersionUID = 1;
 
     public enum Status {
-        ARCHIVE(MarkerIconFactory.IconType.iconArchive),
-        OFFLINE(MarkerIconFactory.IconType.iconOffline),
-        LATEST(MarkerIconFactory.IconType.iconLatest);
+        ARCHIVE(PositionIconType.iconArchive),
+        OFFLINE(PositionIconType.iconOffline),
+        LATEST(PositionIconType.iconLatest);
 
-        final MarkerIconFactory.IconType iconType;
+        final PositionIconType iconType;
 
-        Status(MarkerIconFactory.IconType iconType) {
+        Status(PositionIconType iconType) {
             this.iconType = iconType;
         }
 
-        public MarkerIconFactory.IconType getIconType() {
+        public PositionIconType getIconType() {
             return iconType;
         }
     }
