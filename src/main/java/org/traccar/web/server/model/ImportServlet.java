@@ -40,9 +40,7 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 @Singleton
 public class ImportServlet extends HttpServlet {
@@ -101,12 +99,11 @@ public class ImportServlet extends HttpServlet {
         try {
             XMLStreamReader xsr = XMLInputFactory.newFactory().createXMLStreamReader(inputStream);
 
+            List<Position> parsedPositions = new LinkedList<Position>();
             Position position = null;
-            LinkedHashMap<String, String> extendedInfo = null;
 
             response.getWriter().println("<pre>");
 
-            int alreadyExist = 0;
             int imported = 0;
 
             while (xsr.hasNext()) {
@@ -119,9 +116,6 @@ public class ImportServlet extends HttpServlet {
                         position.setLatitude(Double.parseDouble(xsr.getAttributeValue(null, "lat")));
                         position.setValid(Boolean.TRUE);
                         position.setDevice(device);
-
-                        extendedInfo = new LinkedHashMap<String, String>();
-                        extendedInfo.put("protocol", "gpx_import");
                     } else if (xsr.getLocalName().equalsIgnoreCase("time")) {
                         if (position != null) {
                             String strTime = xsr.getElementText();
@@ -136,46 +130,55 @@ public class ImportServlet extends HttpServlet {
                             position.setAltitude(Double.parseDouble(xsr.getElementText()));
                         }
                     } else if (position != null) {
-                        extendedInfo.put(xsr.getLocalName(), xsr.getElementText());
+                        position.setOther((position.getOther() == null ? "" : position.getOther()) +
+                        "<" + xsr.getLocalName() + ">" + xsr.getElementText() + "</" + xsr.getLocalName() + ">");
                     }
                 } else if (xsr.getEventType() == XMLStreamReader.END_ELEMENT &&
                            xsr.getLocalName().equalsIgnoreCase("trkpt")) {
 
-                    StringBuilder other = new StringBuilder("<info>");
-                    for (Map.Entry<String, String> entry : extendedInfo.entrySet()) {
-                        other.append('<').append(entry.getKey()).append('>')
-                             .append(entry.getValue())
-                            .append("</").append(entry.getKey()).append('>');
-                    }
-                    other.append("</info>");
-                    position.setOther(other.toString());
-
-                    boolean exist = false;
-                    for (Position existing : entityManager.get().createQuery("SELECT p FROM Position p WHERE p.device=:device AND p.time=:time", Position.class)
-                            .setParameter("device", device)
-                            .setParameter("time", position.getTime()).getResultList()) {
-                        if (equals(existing.getLongitude(), position.getLongitude(), 0.0000000001d) &&
-                            equals(existing.getLatitude(), position.getLatitude(), 0.0000000001d) &&
-                            equals(existing.getAltitude(), position.getAltitude(), 0.00001d) &&
-                            existing.getOther().equals(position.getOther())) {
-                            exist = true;
-                            break;
-                        }
-                    }
-
-                    if (exist) {
-                        alreadyExist++;
-                    } else {
-                        entityManager.get().persist(position);
-                        imported++;
-                    }
-
+                    parsedPositions.add(position);
                     position = null;
-                    extendedInfo = null;
                 }
             }
 
-            response.getWriter().println("Already exist: " + alreadyExist);
+            for (int i = 0; i < parsedPositions.size(); i++) {
+                position = parsedPositions.get(i);
+                StringBuilder other = new StringBuilder("<info><protocol>gpx_import</protocol>");
+                other.append("<type>");
+                if (i == 0) {
+                    other.append("import_start");
+                } else if (i == parsedPositions.size() - 1) {
+                    other.append("import_end");
+                } else {
+                    other.append("import");
+                }
+                other.append("</type>");
+                if (position.getOther() != null) {
+                    other.append(position.getOther());
+                }
+                other.append("</info>");
+                position.setOther(other.toString());
+
+                boolean exist = false;
+                for (Position existing : entityManager.get().createQuery("SELECT p FROM Position p WHERE p.device=:device AND p.time=:time", Position.class)
+                        .setParameter("device", device)
+                        .setParameter("time", position.getTime()).getResultList()) {
+                    if (equals(existing.getLongitude(), position.getLongitude(), 0.0000000001d) &&
+                            equals(existing.getLatitude(), position.getLatitude(), 0.0000000001d) &&
+                            equals(existing.getAltitude(), position.getAltitude(), 0.00001d) &&
+                            existing.getOther().equals(position.getOther())) {
+                        exist = true;
+                        break;
+                    }
+                }
+
+                if (!exist) {
+                    entityManager.get().persist(position);
+                    imported++;
+                }
+            }
+
+            response.getWriter().println("Already exist: " + (parsedPositions.size() - imported));
             response.getWriter().println("Imported: " + imported);
 
             response.getWriter().println("</pre>");
