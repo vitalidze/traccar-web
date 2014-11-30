@@ -21,20 +21,7 @@ import com.google.gwt.user.client.rpc.GwtTransient;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "devices",
@@ -46,6 +33,7 @@ public class Device implements Serializable {
     public static final short DEFAULT_TIMEOUT = 5 * 60;
 
     public Device() {
+        iconType = DeviceIconType.DEFAULT;
     }
 
     public Device(Device device) {
@@ -54,6 +42,7 @@ public class Device implements Serializable {
         name = device.name;
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
+        iconType = device.iconType;
     }
 
     @Expose
@@ -167,6 +156,17 @@ public class Device implements Serializable {
 
     public void setUsers(Set<User> users) {
         this.users = users;
+    }
+
+    @Enumerated(EnumType.STRING)
+    private DeviceIconType iconType;
+
+    public DeviceIconType getIconType() {
+        return iconType;
+    }
+
+    public void setIconType(DeviceIconType iconType) {
+        this.iconType = iconType;
     }
 
     @Override

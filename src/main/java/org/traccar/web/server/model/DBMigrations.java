@@ -15,10 +15,7 @@
  */
 package org.traccar.web.server.model;
 
-import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.User;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -36,7 +33,7 @@ public class DBMigrations {
                 new SetDefaultDisallowDeviceManagementByUsers(),
                 new SetDefaultMapType(),
                 new CreateAdmin(),
-
+                new SetDefaultDeviceIconType()
         }) {
             em.getTransaction().begin();
             try {
@@ -161,6 +158,15 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + UserSettings.class.getName() + " S SET S.mapType = :mt WHERE S.mapType IS NULL")
                     .setParameter("mt", UserSettings.MapType.OSM)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultDeviceIconType implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.iconType = :iconType WHERE D.iconType IS NULL")
+                    .setParameter("iconType", DeviceIconType.DEFAULT)
                     .executeUpdate();
         }
     }

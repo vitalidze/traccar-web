@@ -121,7 +121,7 @@ public class MapPositionRenderer {
         for (Position position : positions) {
             Marker marker = new Marker(
                     mapView.createLonLat(position.getLongitude(), position.getLatitude()),
-                    MarkerIconFactory.getIcon(position.getStatus().getIconType(), false));
+                    MarkerIconFactory.getIcon(position.getIconType(), false));
             markerMap.put(position.getId(), marker);
             deviceMap.put(position.getDevice().getId(), position.getId());
             positionMap.put(position.getId(), position);
@@ -241,11 +241,11 @@ public class MapPositionRenderer {
     private boolean selectPosition(Long oldPositionId, Long newPositionId, boolean center) {
         if (oldPositionId != null && markerMap.containsKey(oldPositionId)) {
             Position oldPosition = positionMap.get(oldPositionId);
-            changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getStatus().getIconType(), false));
+            changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getIconType(), false));
         }
         if (newPositionId != null && markerMap.containsKey(newPositionId)) {
             Position newPosition = positionMap.get(newPositionId);
-            changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getStatus().getIconType(), true));
+            changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getIconType(), true));
             if (center) {
                 mapView.getMap().panTo(markerMap.get(newPositionId).getLonLat());
             }
