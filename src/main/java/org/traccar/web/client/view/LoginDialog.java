@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.core.client.Scheduler;
 import org.traccar.web.client.ApplicationContext;
 
 import com.google.gwt.core.client.GWT;
@@ -65,6 +66,12 @@ public class LoginDialog {
 
     public void show() {
         window.show();
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                login.focus();
+            }
+        });
     }
 
     public void hide() {
