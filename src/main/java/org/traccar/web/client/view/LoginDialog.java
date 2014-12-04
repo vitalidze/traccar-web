@@ -16,6 +16,9 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import org.traccar.web.client.ApplicationContext;
 
 import com.google.gwt.core.client.GWT;
@@ -62,7 +65,32 @@ public class LoginDialog {
         if (ApplicationContext.getInstance().getApplicationSettings().getRegistrationEnabled()) {
             registerButton.enable();
         }
+
+        login.addKeyDownHandler(doStuffHandler);
+        password.addKeyDownHandler(doStuffHandler);
     }
+
+    /*
+     * Idea from http://stackoverflow.com/questions/9808153/key-enter-handler-rootpanel-gwt
+     */
+    public abstract class EnterKeyHandler implements KeyDownHandler {
+        public void onKeyDown(KeyDownEvent event) {
+            if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER)
+                enterKeyDown(event);
+        }
+        public abstract void enterKeyDown(KeyDownEvent event);
+    }
+    EnterKeyHandler doStuffHandler = new EnterKeyHandler() {
+        public void enterKeyDown(KeyDownEvent event) {
+            if (login.getText().equals("")) {
+                login.focus();
+            } else if (password.getText().equals("")) {
+                password.focus();
+            } else {
+                loginHandler.onLogin(login.getText(), password.getText());
+            }
+        }
+    };
 
     public void show() {
         window.show();
