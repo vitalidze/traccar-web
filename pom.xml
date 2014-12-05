@@ -16,7 +16,7 @@
     <!-- Convenience property to set the hibernate version -->
     <hibernateVersion>4.3.7.Final</hibernateVersion>
     <!-- Convenience property to set the GWT version -->
-    <gwtVersion>2.6.0</gwtVersion>
+    <gwtVersion>2.7.0</gwtVersion>
     <!-- Convenience property to set the google guice version -->
     <guiceVersion>3.0</guiceVersion>
     <!-- GWT needs at least java 1.5 -->
@@ -35,6 +35,12 @@
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
+      <version>${gwtVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-codeserver</artifactId>
       <version>${gwtVersion}</version>
       <scope>provided</scope>
     </dependency>
@@ -98,7 +104,7 @@
     <dependency>
        <groupId>com.sencha.gxt</groupId>
        <artifactId>gxt</artifactId>
-       <version>3.1.0-beta</version>
+       <version>3.1.1</version>
        <scope>provided</scope>
     </dependency>
     <dependency>
@@ -150,7 +156,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>2.6.0</version>
+        <version>${gwtVersion}</version>
         <configuration>
           <deploy>${project.build.directory}/gwt-deploy</deploy>
           <runTarget>traccar.html</runTarget>
