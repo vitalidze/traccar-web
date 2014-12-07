@@ -58,6 +58,7 @@ public class User implements Serializable, Cloneable {
         admin = user.admin;
         login = user.login;
         password = user.password;
+        password_type = user.password_type;
         manager = user.manager;
     }
 
@@ -90,6 +91,23 @@ public class User implements Serializable, Cloneable {
 
     public String getPassword() {
         return password;
+    }
+
+    // TODO temporary nullable to migrate from old database
+    @Expose
+    private String password_type; //plain, sha512, ... <md5> ...
+
+    public void setPasswordType(String type) {
+        if (type.equals("sha512")) {
+            this.password_type = type;
+        } else {
+            this.password_type = "plain";
+        }
+    }
+
+    public String getPasswordType() {
+        // TODO temporary nullable to migrate from old database
+        return (password_type == null) ? "plain" : password_type;
     }
 
     // TODO temporary nullable to migrate from old database
