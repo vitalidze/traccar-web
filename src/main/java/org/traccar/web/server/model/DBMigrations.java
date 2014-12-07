@@ -33,7 +33,8 @@ public class DBMigrations {
                 new SetDefaultDisallowDeviceManagementByUsers(),
                 new SetDefaultMapType(),
                 new CreateAdmin(),
-                new SetDefaultDeviceIconType()
+                new SetDefaultDeviceIconType(),
+                new SetDefaultHashImplementation()
         }) {
             em.getTransaction().begin();
             try {
@@ -167,6 +168,18 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + Device.class.getName() + " D SET D.iconType = :iconType WHERE D.iconType IS NULL")
                     .setParameter("iconType", DeviceIconType.DEFAULT)
+                    .executeUpdate();
+        }
+    }
+
+    /**
+     * Set up default hashing in application settings
+     */
+    static class SetDefaultHashImplementation implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getSimpleName() + " S SET S.defaultPasswordHash = :dh WHERE S.defaultPasswordHash IS NULL")
+                    .setParameter("dh", ApplicationSettings.DEFAULT_PASSWORD_HASH)
                     .executeUpdate();
         }
     }
