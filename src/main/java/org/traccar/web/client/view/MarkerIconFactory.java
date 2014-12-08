@@ -20,12 +20,24 @@ import org.gwtopenmaps.openlayers.client.Pixel;
 import org.gwtopenmaps.openlayers.client.Size;
 import org.traccar.web.shared.model.PositionIconType;
 
-public class MarkerIconFactory {
+import java.util.HashMap;
+import java.util.Map;
 
-    private static final Size iconSize = new Size(21, 25);
-    private static final Pixel iconOffset = new Pixel(-10.5f, -25.0f);
+public class MarkerIconFactory {
+    private static final Map<PositionIconType, Size> sizes = new HashMap<PositionIconType, Size>();
+    private static final Map<PositionIconType, Pixel> offsets = new HashMap<PositionIconType, Pixel>();
 
     public static Icon getIcon(PositionIconType type, boolean selected) {
-        return type == null ? null : new Icon(type.getURL(selected), iconSize, iconOffset);
+        Size size = sizes.get(type);
+        if (size == null) {
+            size = new Size(type.getWidth(), type.getHeight());
+            sizes.put(type, size);
+        }
+        Pixel offset = offsets.get(type);
+        if (offset == null) {
+            offset = new Pixel(-type.getWidth() / 2f, -type.getHeight());
+            offsets.put(type, offset);
+        }
+        return type == null ? null : new Icon(type.getURL(selected), size, offset);
     }
 }

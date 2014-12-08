@@ -16,7 +16,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="300, 170" modal="true" headingText="{i18n.device}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="300, 200" modal="true" headingText="{i18n.device}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.name}" labelWidth="140">
@@ -57,6 +57,9 @@
 
             </form:widget>
         </form:FieldLabel>
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+          <g:VerticalPanel ui:field="devicePictures" />
       </container:child>
     </container:VerticalLayoutContainer>
       

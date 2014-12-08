@@ -16,20 +16,46 @@
 package org.traccar.web.shared.model;
 
 public enum PositionIconType {
-    iconLatest("marker-green.png", true, "marker.png", true),
-    iconOffline("marker-green.png", true, "img/marker-white.png", false),
-    iconArchive("marker-gold.png", true, "marker-blue.png", true);
+    iconLatest("marker-green.png", true, "marker.png", true, 21, 25),
+    iconOffline("marker-green.png", true, "marker-white.png", false, 21, 25),
+    iconArchive("marker-gold.png", true, "marker-blue.png", true, 21, 25),
+
+    sedanLatest("sedan-green.png", "sedan-red.png", 53, 20),
+    sedanOffline("sedan-green.png", "sedan-white.png", 53, 20),
+
+    universalLatest("universal-green.png", "universal-red.png", 48, 20),
+    universalOffline("universal-green.png", "universal-white.png", 48, 20),
+
+    minivanLatest("minivan-green.png", "minivan-red.png", 36, 20),
+    minivanOffline("minivan-green.png", "minivan-white.png", 36, 20);
 
     private final String selectedURL;
     private final String notSelectedURL;
+    private final int width;
+    private final int height;
+
+    PositionIconType(String selectedURL, String notSelectedURL, int width, int height) {
+        this(selectedURL, false, notSelectedURL, false, width, height);
+    }
 
     PositionIconType(String selectedURL, boolean selectedFromCloudFlare,
-                     String notSelectedURL, boolean notSelectedFromCloudFlare) {
-        this.selectedURL = (selectedFromCloudFlare ? "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/" : "") + selectedURL;
-        this.notSelectedURL = (notSelectedFromCloudFlare ? "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/" : "") + notSelectedURL;
+                     String notSelectedURL, boolean notSelectedFromCloudFlare,
+                     int width, int height) {
+        this.selectedURL = (selectedFromCloudFlare ? "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/" : "img/") + selectedURL;
+        this.notSelectedURL = (notSelectedFromCloudFlare ? "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/" : "img/") + notSelectedURL;
+        this.width = width;
+        this.height = height;
     }
 
     public String getURL(boolean selected) {
         return selected ? selectedURL : notSelectedURL;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 }
