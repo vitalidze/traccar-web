@@ -66,6 +66,9 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     @UiField
     NumberField<Short> updateInterval;
 
+    @UiField
+    TextField defaultHashImplementation;
+
     public ApplicationSettingsDialog(ApplicationSettings applicationSettings, ApplicationSettingsHandler applicationSettingsHandler) {
         this.applicationSettingsHandler = applicationSettingsHandler;
         uiBinder.createAndBindUi(this);
