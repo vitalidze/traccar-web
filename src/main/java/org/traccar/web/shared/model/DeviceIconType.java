@@ -17,9 +17,20 @@ package org.traccar.web.shared.model;
 
 public enum DeviceIconType {
     DEFAULT(PositionIconType.iconLatest, PositionIconType.iconOffline),
+    PHONE(PositionIconType.phoneLatest, PositionIconType.phoneOffline),
+    BICYCLE(PositionIconType.bicycleLatest, PositionIconType.bicycleOffline),
     SEDAN(PositionIconType.sedanLatest, PositionIconType.sedanOffline),
     UNIVERSAL(PositionIconType.universalLatest, PositionIconType.universalOffline),
-    MINIVAN(PositionIconType.minivanLatest, PositionIconType.minivanOffline);
+
+    MINIVAN(PositionIconType.minivanLatest, PositionIconType.minivanOffline),
+    TRUCK(PositionIconType.truckLatest, PositionIconType.truckOffline),
+    BUS(PositionIconType.busLatest, PositionIconType.busOffline),
+    LONG_TRUCK(PositionIconType.longTruckLatest, PositionIconType.longTruckOffline),
+    CAR_TRUCK(PositionIconType.carTruckLatest, PositionIconType.carTruckOffline),
+
+    PLANE(PositionIconType.planeLatest, PositionIconType.planeOffline),
+    SHIP(PositionIconType.shipLatest, PositionIconType.shipOffline),
+    TRAIN(PositionIconType.trainLatest, PositionIconType.trainOffline);
 
     private final PositionIconType iconLatest;
     private final PositionIconType iconOffline;

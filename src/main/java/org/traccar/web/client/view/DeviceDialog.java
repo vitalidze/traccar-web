@@ -17,7 +17,9 @@ package org.traccar.web.client.view;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.ToggleGroup;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.Radio;
@@ -66,7 +68,7 @@ public class DeviceDialog implements Editor<Device> {
     TextField uniqueId;
 
     @UiField
-    VerticalPanel devicePictures;
+    VerticalLayoutContainer devicePictures;
 
     @UiField(provided = true)
     NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
@@ -96,10 +98,12 @@ public class DeviceDialog implements Editor<Device> {
 
 
         HorizontalPanel nextPanel = null;
-        for (DeviceIconType deviceIconType : DeviceIconType.values()) {
-            if (nextPanel == null) {
+        DeviceIconType[] deviceIconTypes = DeviceIconType.values();
+        for (int i = 0; i < deviceIconTypes.length; i++) {
+            DeviceIconType deviceIconType = deviceIconTypes[i];
+            if (nextPanel == null || i % 5 == 0) {
                 nextPanel = new HorizontalPanel();
-                devicePictures.add(nextPanel);
+                devicePictures.add(nextPanel, new VerticalLayoutContainer.VerticalLayoutData(-1, -1, new Margins(5, 0, 5, 5)));
             }
 
             Radio radio = new Radio();

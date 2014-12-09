@@ -27,7 +27,34 @@ public enum PositionIconType {
     universalOffline("universal-green.png", "universal-white.png", 48, 20),
 
     minivanLatest("minivan-green.png", "minivan-red.png", 36, 20),
-    minivanOffline("minivan-green.png", "minivan-white.png", 36, 20);
+    minivanOffline("minivan-green.png", "minivan-white.png", 36, 20),
+
+    bicycleLatest("bicycle-green.png", "bicycle-red.png", 41, 25),
+    bicycleOffline("bicycle-green.png", "bicycle-gray.png", 41, 25),
+
+    busLatest("bus-green.png", "bus-red.png", 42, 20),
+    busOffline("bus-green.png", "bus-white.png", 42, 20),
+
+    carTruckLatest("car-truck-green.png", "car-truck-red.png", 63, 25),
+    carTruckOffline("car-truck-green.png", "car-truck-white.png", 63, 25),
+
+    longTruckLatest("long-truck-green.png", "long-truck-red.png", 63, 25),
+    longTruckOffline("long-truck-green.png", "long-truck-white.png", 63, 25),
+
+    planeLatest("plane-green.png", "plane-red.png", 55, 25),
+    planeOffline("plane-green.png", "plane-white.png", 55, 25),
+
+    shipLatest("ship-green.png", "ship-red.png", 62, 25),
+    shipOffline("ship-green.png", "ship-white.png", 62, 25),
+
+    trainLatest("train-green.png", "train-red.png", 86, 25),
+    trainOffline("train-green.png", "train-white.png", 86, 25),
+
+    truckLatest("truck-green.png", "truck-red.png", 30, 20),
+    truckOffline("truck-green.png", "truck-white.png", 30, 20),
+
+    phoneLatest("phone-green.png", "phone-red.png", 12, 20),
+    phoneOffline("phone-green.png", "phone-white.png", 12, 20);
 
     private final String selectedURL;
     private final String notSelectedURL;
