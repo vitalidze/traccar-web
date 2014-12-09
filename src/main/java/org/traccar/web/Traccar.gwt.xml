@@ -26,4 +26,5 @@
   <extend-property name="locale" values="pl" />
   <extend-property name="locale" values="tl" />
   <extend-property name="locale" values="hu" />
+  <extend-property name="locale" values="pt_PT" />
 </module>
