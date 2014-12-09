@@ -25,6 +25,7 @@ import org.gwtopenmaps.openlayers.client.Pixel;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.PositionIconType;
 
 public class PositionInfoPopup {
     private final static Messages i18n = GWT.create(Messages.class);
@@ -65,7 +66,14 @@ public class PositionInfoPopup {
 
         ToolTipConfig config = new ToolTipConfig();
 
-        config.setTitleHtml(position.getDevice().getName() + (position.getStatus() == Position.Status.OFFLINE ? " (" + i18n.offline() + ")" : ""));
+        PositionIconType iconType = position.getStatus() == Position.Status.OFFLINE ? position.getDevice().getIconType().getIconOffline() : position.getDevice().getIconType().getIconLatest();
+        String deviceTitle = position.getDevice().getName() + (position.getStatus() == Position.Status.OFFLINE ? " (" + i18n.offline() + ")" : "");
+
+        config.setTitleHtml(
+                "<table height=\"100%\"><tr>" +
+                "<td>" +"<img src=\"" + iconType.getURL(false) + "\">&nbsp;</td>" +
+                "<td valign=\"center\">" + deviceTitle + "</td>" +
+                "</tr></table>");
 
         config.setBodyHtml(body);
         config.setAutoHide(false);
