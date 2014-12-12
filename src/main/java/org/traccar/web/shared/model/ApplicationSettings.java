@@ -17,7 +17,6 @@ public class ApplicationSettings implements Serializable {
 
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_UPDATE_INTERVAL = 15000;
-    public static final String DEFAULT_PASSWORD_HASH = "plain";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +26,22 @@ public class ApplicationSettings implements Serializable {
     public ApplicationSettings() {
         registrationEnabled = true;
         updateInterval = Short.valueOf(DEFAULT_UPDATE_INTERVAL);
-        defaultPasswordHash = DEFAULT_PASSWORD_HASH;
+        defaultPasswordHash = PasswordHashMethod.PLAIN;
+    }
+
+    public enum PasswordHashMethod {
+        PLAIN("plain"),
+        SHA512("sha512");
+
+        final String method;
+
+        PasswordHashMethod(String name) {
+            this.method = name;
+        }
+
+        public String getName() {
+            return method;
+        }
     }
 
     @Expose
@@ -37,7 +51,7 @@ public class ApplicationSettings implements Serializable {
     private Short updateInterval;
 
     @Expose
-    private String defaultPasswordHash;
+    private PasswordHashMethod defaultPasswordHash;
 
     @Expose
     @Column(nullable = true)
@@ -67,16 +81,12 @@ public class ApplicationSettings implements Serializable {
         this.disallowDeviceManagementByUsers = disallowDeviceManagementByUsers;
     }
 
-    public String getDefaultHashImplementation() {
+    public PasswordHashMethod getDefaultHashImplementation() {
         return defaultPasswordHash;
     }
 
-    public void setDefaultHashImplementation(String hash) {
-        if (hash.equals("sha512")) {
-            this.defaultPasswordHash = hash;
-        } else {
-            this.defaultPasswordHash = DEFAULT_PASSWORD_HASH;
-        }
+    public void setDefaultHashImplementation(PasswordHashMethod hash) {
+        this.defaultPasswordHash = hash;
     }
 
     @Override

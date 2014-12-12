@@ -15,11 +15,16 @@
  */
 package org.traccar.web.client.view;
 
+import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
-import com.sencha.gxt.widget.core.client.form.TextField;
+import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
+import org.traccar.web.client.model.ApplicationSettingsProperties;
+import org.traccar.web.client.model.EnumKeyProvider;
+import org.traccar.web.client.model.UserSettingsProperties;
 import org.traccar.web.shared.model.ApplicationSettings;
 
 import com.google.gwt.core.client.GWT;
@@ -32,6 +37,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
+import org.traccar.web.shared.model.UserSettings;
+
+import java.util.Arrays;
 
 public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
 
@@ -67,10 +75,21 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     NumberField<Short> updateInterval;
 
     @UiField
-    TextField defaultHashImplementation;
+    ComboBox<ApplicationSettings.PasswordHashMethod> defaultHashImplementation;
 
     public ApplicationSettingsDialog(ApplicationSettings applicationSettings, ApplicationSettingsHandler applicationSettingsHandler) {
         this.applicationSettingsHandler = applicationSettingsHandler;
+
+
+        ListStore<ApplicationSettings.PasswordHashMethod> dhmStore = new ListStore<ApplicationSettings.PasswordHashMethod>(
+                new EnumKeyProvider<ApplicationSettings.PasswordHashMethod>());
+        dhmStore.addAll(Arrays.asList(ApplicationSettings.PasswordHashMethod.values()));
+        defaultHashImplementation = new ComboBox<ApplicationSettings.PasswordHashMethod>(
+                dhmStore, new ApplicationSettingsProperties.PasswordHashMethodLabelProvider());
+
+        defaultHashImplementation.setForceSelection(true);
+        defaultHashImplementation.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+
         uiBinder.createAndBindUi(this);
 
         updateInterval.addValidator(new MinNumberValidator<Short>(Short.valueOf((short) 100)));

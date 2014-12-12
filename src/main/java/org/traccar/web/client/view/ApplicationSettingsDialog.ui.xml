@@ -46,8 +46,7 @@
       <container:child layoutData="{verticalLayoutData}">
           <form:FieldLabel text="{i18n.defaultHashImplementation}" labelWidth="210">
               <form:widget>
-                  <!-- <form:ComboBox ui:field="defaultHashImplementation" allowBlank="true" forceSelection="true" triggerAction="ALL" /> -->
-                  <form:TextField ui:field="defaultHashImplementation" />
+                  <form:ComboBox ui:field="defaultHashImplementation" />
               </form:widget>
           </form:FieldLabel>
       </container:child>
