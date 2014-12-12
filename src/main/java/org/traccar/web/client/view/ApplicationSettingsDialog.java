@@ -74,12 +74,11 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     @UiField
     NumberField<Short> updateInterval;
 
-    @UiField
+    @UiField(provided = true)
     ComboBox<ApplicationSettings.PasswordHashMethod> defaultHashImplementation;
 
     public ApplicationSettingsDialog(ApplicationSettings applicationSettings, ApplicationSettingsHandler applicationSettingsHandler) {
         this.applicationSettingsHandler = applicationSettingsHandler;
-
 
         ListStore<ApplicationSettings.PasswordHashMethod> dhmStore = new ListStore<ApplicationSettings.PasswordHashMethod>(
                 new EnumKeyProvider<ApplicationSettings.PasswordHashMethod>());
