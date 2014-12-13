@@ -39,6 +39,7 @@ import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import org.traccar.web.shared.model.DeviceIconType;
+import org.traccar.web.shared.model.Position;
 
 public class DeviceDialog implements Editor<Device> {
 
@@ -107,7 +108,7 @@ public class DeviceDialog implements Editor<Device> {
             }
 
             Radio radio = new Radio();
-            radio.setBoxLabel("<img src=\"" + deviceIconType.getIconOffline().getURL(false) + "\">");
+            radio.setBoxLabel("<img src=\"" + deviceIconType.getPositionIconType(Position.Status.OFFLINE).getURL(false) + "\">");
             nextPanel.add(radio);
             iconRadioGroup.add(radio);
             radio.setValue(deviceIconType == device.getIconType());

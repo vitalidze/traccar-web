@@ -83,7 +83,7 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
                     } else {
                         for (Position position : result) {
                             position.setStatus(Position.Status.ARCHIVE);
-                            position.setIconType(device.getIconType().getIconArchive());
+                            position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
                         }
                         positionStore.addAll(result);
                     }
