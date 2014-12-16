@@ -129,7 +129,9 @@ public class DeviceDialog implements Editor<Device> {
         window.hide();
         Device device = driver.flush();
         device.setIdleSpeedThreshold(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getIdleSpeedThreshold()));
-        device.setIconType(DeviceIconType.valueOf(((Radio) iconRadioGroup.getValue()).getId()));
+        if (iconRadioGroup.getValue() != null) {
+            device.setIconType(DeviceIconType.valueOf(((Radio) iconRadioGroup.getValue()).getId()));
+        }
         deviceHandler.onSave(device);
     }
 
