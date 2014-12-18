@@ -4,10 +4,12 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap 101 Template</title>
+    <title>Traccar web UI mod - {{ page.title }}</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="/css/style.css">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -30,19 +32,26 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">News</a></li>
-                <li><a href="#installation">Installation</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#building">Building</a></li>
+                <li{% if page.title == 'News' %} class="active"{% endif %}><a href="/">News</a></li>
+                <li{% if page.title == 'Installation' %} class="active"{% endif %}><a href="/installation.html">Installation</a></li>
+                <li{% if page.title == 'Features' %} class="active"{% endif %}><a href="/features.html">Features</a></li>
+                <li{% if page.title == 'Building' %} class="active"{% endif %}><a href="/building.html">Building</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">IDE project setup <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a href="#ide-eclipse">Eclipse</a></li>
-                        <li><a href="#ide-idea">IntelliJ Idea</a></li>
-                        <li><a href="#ide-netbeans">NetBeans</a></li>
+                        <li><a href="/ide/eclipse.html">Eclipse</a></li>
+                        <li><a href="/ide/idea.html">IntelliJ Idea</a></li>
+                        <li><a href="/ide/netbeans.html">NetBeans</a></li>
                     </ul>
                 </li>
             </ul>
         </div><!--/.nav-collapse -->
     </div>
 </nav>
+<div class="container">
+    <div class="content">
+        <div class="page-header">
+            <h1>{{ page.title }}</h1>
+        </div>
+        <div class="row">
+            <div class="span12">
