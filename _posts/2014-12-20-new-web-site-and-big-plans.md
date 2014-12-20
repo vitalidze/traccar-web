@@ -8,7 +8,7 @@ I have big plans on the web site and project:
 
 1) Post new features announcements along with separate description page.
 
-2) Add short-description pages for currently implemented features (with screenshots, etc.)
+2) Add short-description pages for currently implemented [features](/features/) (with screenshots, etc.)
 
 3) Create installation package with traccar backend and traccar-web.war built with new features.
 

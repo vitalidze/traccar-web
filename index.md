@@ -5,7 +5,7 @@ title: About
 
 Web interface for [traccar](http://www.traccar.org) server.
 
-This is the modified version of [original project](https://github.com/tananaev/traccar-web) (also called "fork") with many [features](features.html) added.
+This is the modified version of [original project](https://github.com/tananaev/traccar-web) (also called "fork") with many [features](/features/) added.
 
 Web page - [http://www.traccar.org](http://www.traccar.org)
 
