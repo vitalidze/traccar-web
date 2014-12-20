@@ -11,7 +11,7 @@ Web page - [http://www.traccar.org](http://www.traccar.org)
 
 Github project - [https://github.com/vitalidze/traccar-web](https://github.com/vitalidze/traccar-web)
 
-Authors: Anton Tananaev (anton.tananaev@gmail.com), Vitaly Litvak (vitavaque@gmail.com)
+Authors: Anton Tananaev (<anton.tananaev@gmail.com>), Vitaly Litvak (<vitavaque@gmail.com>)
 
 ## License
 

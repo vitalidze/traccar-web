@@ -11,14 +11,14 @@ This project has following features, which don't exist in original `traccar-web`
 * recording device trace
 * printing time stamps at device trace points (frequency is configured in Settings >> Preferences) both for archive and recorded trace
 * translations to
-* russian language (available via ?locale=ru URL parameters)
-* german language (available via ?locale=de URL parameter)
-* italian language (available via ?locale=it URL parameter)
-* spanish language (available via ?locale=es URL parameter)
-* polish language (available via ?locale=pl URL parameter)
-* tagalog language (available via ?locale=tl URL parameter)
-* hungarian language (available via ?locale=hu URL parameter)
-* show server log menu for viewing tracker-server.log file on Web
+    * russian language (available via ?locale=ru URL parameters)
+    * german language (available via ?locale=de URL parameter)
+    * italian language (available via ?locale=it URL parameter)
+    * spanish language (available via ?locale=es URL parameter)
+    * polish language (available via ?locale=pl URL parameter)
+    * tagalog language (available via ?locale=tl URL parameter)
+    * hungarian language (available via ?locale=hu URL parameter)
+* 'show server log' menu for viewing tracker-server.log file on Web
 * speed filtering in archive view
 * change default map center position, zoom, provider (Google, OSM, Bing) (in Settings >> Preferences)
 * replaced 'current state' panel with popups. They appear either when you hover a row in 'devices' table or when you hover a marker on map

@@ -3,7 +3,7 @@ layout: default
 title: Installation
 ---
 
-1) Download latest build from http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war
+1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
 
 2) Stop Traccar service.
 
@@ -11,4 +11,4 @@ title: Installation
 
 4) Start Traccar service
 
-5) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said here http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site
+5) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
