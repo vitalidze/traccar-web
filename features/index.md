@@ -43,3 +43,4 @@ This project has following features, which don't exist in original `traccar-web`
 * possibility to log in via GET request to a separate servlet (for example, for integration on external sites) - `http://server-ip:8082/traccar/s/login?user=your_username&password=your_password`
 * possibility to change other user's password for administrators and managers
 * possibility to change device marker
+* put selected device to the center of map every time it's row is clicked by user
