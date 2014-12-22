@@ -179,7 +179,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + ApplicationSettings.class.getSimpleName() + " S SET S.defaultPasswordHash = :dh WHERE S.defaultPasswordHash IS NULL")
-                    .setParameter("dh", ApplicationSettings.PasswordHashMethod.PLAIN)
+                    .setParameter("dh", PasswordHashMethod.PLAIN)
                     .executeUpdate();
         }
     }

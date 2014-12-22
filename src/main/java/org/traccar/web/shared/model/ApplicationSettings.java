@@ -3,6 +3,8 @@ package org.traccar.web.shared.model;
 import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +12,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
 
 @Entity
 @Table(name="application_settings")
@@ -29,27 +33,13 @@ public class ApplicationSettings implements Serializable {
         defaultPasswordHash = PasswordHashMethod.PLAIN;
     }
 
-    public enum PasswordHashMethod {
-        PLAIN("plain"),
-        SHA512("sha512");
-
-        final String method;
-
-        PasswordHashMethod(String name) {
-            this.method = name;
-        }
-
-        public String getName() {
-            return method;
-        }
-    }
-
     @Expose
     private boolean registrationEnabled;
 
     @Expose
     private Short updateInterval;
 
+    @Enumerated(EnumType.STRING)
     @Expose
     private PasswordHashMethod defaultPasswordHash;
 

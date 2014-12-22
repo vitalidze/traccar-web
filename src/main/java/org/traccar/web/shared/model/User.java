@@ -93,21 +93,16 @@ public class User implements Serializable, Cloneable {
         return password;
     }
 
-    // TODO temporary nullable to migrate from old database
     @Expose
-    private String password_type; //plain, sha512, ... <md5> ...
+    private PasswordHashMethod password_type;
 
-    public void setPasswordType(String type) {
-        if (type.equals("sha512")) {
-            this.password_type = type;
-        } else {
-            this.password_type = "plain";
-        }
+    public void setPasswordType(PasswordHashMethod type) {
+        this.password_type = type;
     }
 
-    public String getPasswordType() {
+    public PasswordHashMethod getPasswordType() {
         // TODO temporary nullable to migrate from old database
-        return (password_type == null) ? "plain" : password_type;
+        return (password_type == null) ? PasswordHashMethod.PLAIN : password_type;
     }
 
     // TODO temporary nullable to migrate from old database

@@ -101,8 +101,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         if (results.isEmpty() || password.equals("")) throw new IllegalStateException();
 
-        // Go through hasher
-        if (!password_hasher(password,results.get(0).getPasswordType()).equals(results.get(0).getPassword())) {
+        if (!results.get(0).getPassword().equals(results.get(0).getPasswordType().doHash(password))) {
             throw new IllegalStateException();
         }
         User user = results.get(0);
@@ -110,9 +109,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         /*
          * If hash method has changed in application settings, rehash user password
          */
-        if (!user.getPasswordType().equals(getApplicationSettings().getDefaultHashImplementation().getName())) {
-            user.setPassword(password_hasher(password,getApplicationSettings().getDefaultHashImplementation().getName()));
-            user.setPasswordType(getApplicationSettings().getDefaultHashImplementation().getName());
+        if (!user.getPasswordType().equals(getApplicationSettings().getDefaultHashImplementation())) {
+            user.setPasswordType(getApplicationSettings().getDefaultHashImplementation());
+            user.setPassword(user.getPasswordType().doHash(password));
             getSessionEntityManager().persist(user);
         }
 
@@ -138,8 +137,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             if (results.isEmpty()) {
                     User user = new User();
                     user.setLogin(login);
-                    user.setPasswordType(getApplicationSettings().getDefaultHashImplementation().getName());
-                    user.setPassword(password_hasher(password,getApplicationSettings().getDefaultHashImplementation().getName()));
+                    user.setPasswordType(getApplicationSettings().getDefaultHashImplementation());
+                    user.setPassword(user.getPasswordType().doHash(password));
                     user.setManager(Boolean.TRUE); // registered users are always managers
                     getSessionEntityManager().persist(user);
                     setSessionUser(user);
@@ -186,8 +185,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 user.setAdmin(false);
             }
             user.setManagedBy(currentUser);
-            user.setPasswordType(getApplicationSettings().getDefaultHashImplementation().getName());
-            user.setPassword(password_hasher(user.getPassword(),getApplicationSettings().getDefaultHashImplementation().getName()));
+            user.setPasswordType(getApplicationSettings().getDefaultHashImplementation());
+            user.setPassword(user.getPasswordType().doHash(user.getPassword()));
             getSessionEntityManager().persist(user);
             return user;
         } else {
@@ -209,9 +208,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             if (currentUser.getId() == user.getId()) {
                 currentUser.setLogin(user.getLogin());
                 // Password is different or hash method has changed since login
-                if (!currentUser.getPassword().equals(user.getPassword()) || currentUser.getPasswordType().equals("plain") && !getApplicationSettings().getDefaultHashImplementation().equals("plain")) {
-                    currentUser.setPasswordType(getApplicationSettings().getDefaultHashImplementation().getName());
-                    currentUser.setPassword(password_hasher(user.getPassword(), getApplicationSettings().getDefaultHashImplementation().getName()));
+                if (!currentUser.getPassword().equals(user.getPassword()) || currentUser.getPasswordType().equals(PasswordHashMethod.PLAIN) && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
+                    currentUser.setPasswordType(getApplicationSettings().getDefaultHashImplementation());
+                    currentUser.setPassword(currentUser.getPasswordType().doHash(user.getPassword()));
                 }
                 currentUser.setUserSettings(user.getUserSettings());
                 currentUser.setAdmin(user.getAdmin());
@@ -223,9 +222,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 if (currentUser.getAdmin() || currentUser.getManager()) {
                     User existingUser = entityManager.find(User.class, user.getId());
                     // Checks if password has changed or default hash method not equal to current user hash method
-                    if (!existingUser.getPassword().equals(user.getPassword()) && !existingUser.getPassword().equals(password_hasher(user.getPassword(),existingUser.getPasswordType())) || !existingUser.getPasswordType().equals(getApplicationSettings().getDefaultHashImplementation())) {
-                        existingUser.setPasswordType(getApplicationSettings().getDefaultHashImplementation().getName());
-                        existingUser.setPassword(password_hasher(user.getPassword(),getApplicationSettings().getDefaultHashImplementation().getName()));
+                    if (!existingUser.getPassword().equals(user.getPassword()) && !existingUser.getPassword().equals(existingUser.getPasswordType().doHash(user.getPassword())) || !existingUser.getPasswordType().equals(getApplicationSettings().getDefaultHashImplementation())) {
+                        existingUser.setPasswordType(getApplicationSettings().getDefaultHashImplementation());
+                        existingUser.setPassword(existingUser.getPasswordType().doHash(user.getPassword()));
                     }
                     entityManager.merge(existingUser);
                 } else {
@@ -532,43 +531,5 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             entityManager.merge(user);
         }
-    }
-
-    /**
-     * password_hasher
-     *
-     * @param target
-     * @param hash_type
-     * @return [encrypted string]
-     */
-    private final static String password_hasher(String target, String hash_type) {
-        /*
-         * PLAIN HASH
-         */
-        if (hash_type.equals("plain")) return target;
-
-        /*
-         * SHA-512 HASH
-         */
-        if (hash_type.equals("sha512")) {
-            try {
-                final MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
-                sha512.update(target.getBytes());
-                byte data[] = sha512.digest();
-                StringBuffer hexData = new StringBuffer();
-                for (int byteIndex = 0; byteIndex < data.length; byteIndex++)
-                    hexData.append(Integer.toString((data[byteIndex] & 0xff) + 0x100, 16).substring(1));
-                return hexData.toString();
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        // Other hash algorithms can be implemented here
-
-        /*
-         * Exception...
-         */
-        throw new RuntimeException("Hash type not implemented");
     }
 }

@@ -16,7 +16,7 @@
 package org.traccar.web.client.model;
 
 import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.ApplicationSettings.PasswordHashMethod;
+import org.traccar.web.shared.model.PasswordHashMethod;
 
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.LabelProvider;
@@ -33,9 +33,9 @@ public interface ApplicationSettingsProperties extends PropertyAccess<Applicatio
 
     ValueProvider<ApplicationSettings, Boolean> disallowDeviceManagementByUsers();
 
-    public static class PasswordHashMethodLabelProvider implements LabelProvider<ApplicationSettings.PasswordHashMethod> {
+    public static class PasswordHashMethodLabelProvider implements LabelProvider<PasswordHashMethod> {
         @Override
-        public String getLabel(ApplicationSettings.PasswordHashMethod item) {
+        public String getLabel(PasswordHashMethod item) {
             return item.getName();
         }
     }

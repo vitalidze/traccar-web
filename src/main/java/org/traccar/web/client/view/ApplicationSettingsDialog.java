@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
+import org.traccar.web.shared.model.PasswordHashMethod;
 import org.traccar.web.shared.model.UserSettings;
 
 import java.util.Arrays;
@@ -75,15 +76,15 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     NumberField<Short> updateInterval;
 
     @UiField(provided = true)
-    ComboBox<ApplicationSettings.PasswordHashMethod> defaultHashImplementation;
+    ComboBox<PasswordHashMethod> defaultHashImplementation;
 
     public ApplicationSettingsDialog(ApplicationSettings applicationSettings, ApplicationSettingsHandler applicationSettingsHandler) {
         this.applicationSettingsHandler = applicationSettingsHandler;
 
-        ListStore<ApplicationSettings.PasswordHashMethod> dhmStore = new ListStore<ApplicationSettings.PasswordHashMethod>(
-                new EnumKeyProvider<ApplicationSettings.PasswordHashMethod>());
-        dhmStore.addAll(Arrays.asList(ApplicationSettings.PasswordHashMethod.values()));
-        defaultHashImplementation = new ComboBox<ApplicationSettings.PasswordHashMethod>(
+        ListStore<PasswordHashMethod> dhmStore = new ListStore<PasswordHashMethod>(
+                new EnumKeyProvider<PasswordHashMethod>());
+        dhmStore.addAll(Arrays.asList(PasswordHashMethod.values()));
+        defaultHashImplementation = new ComboBox<PasswordHashMethod>(
                 dhmStore, new ApplicationSettingsProperties.PasswordHashMethodLabelProvider());
 
         defaultHashImplementation.setForceSelection(true);
