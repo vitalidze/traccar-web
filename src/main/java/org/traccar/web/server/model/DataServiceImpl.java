@@ -101,7 +101,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         if (results.isEmpty() || password.equals("")) throw new IllegalStateException();
 
-        if (!results.get(0).getPassword().equals(results.get(0).getPasswordType().doHash(password))) {
+        if (!results.get(0).getPassword().equals(results.get(0).getPasswordHashMethod().doHash(password))) {
             throw new IllegalStateException();
         }
         User user = results.get(0);
@@ -109,9 +109,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         /*
          * If hash method has changed in application settings, rehash user password
          */
-        if (!user.getPasswordType().equals(getApplicationSettings().getDefaultHashImplementation())) {
-            user.setPasswordType(getApplicationSettings().getDefaultHashImplementation());
-            user.setPassword(user.getPasswordType().doHash(password));
+        if (!user.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation())) {
+            user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+            user.setPassword(user.getPasswordHashMethod().doHash(password));
             getSessionEntityManager().persist(user);
         }
 
@@ -137,8 +137,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             if (results.isEmpty()) {
                     User user = new User();
                     user.setLogin(login);
-                    user.setPasswordType(getApplicationSettings().getDefaultHashImplementation());
-                    user.setPassword(user.getPasswordType().doHash(password));
+                    user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+                    user.setPassword(user.getPasswordHashMethod().doHash(password));
                     user.setManager(Boolean.TRUE); // registered users are always managers
                     getSessionEntityManager().persist(user);
                     setSessionUser(user);
@@ -185,8 +185,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 user.setAdmin(false);
             }
             user.setManagedBy(currentUser);
-            user.setPasswordType(getApplicationSettings().getDefaultHashImplementation());
-            user.setPassword(user.getPasswordType().doHash(user.getPassword()));
+            user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+            user.setPassword(user.getPasswordHashMethod().doHash(user.getPassword()));
             getSessionEntityManager().persist(user);
             return user;
         } else {
@@ -208,9 +208,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             if (currentUser.getId() == user.getId()) {
                 currentUser.setLogin(user.getLogin());
                 // Password is different or hash method has changed since login
-                if (!currentUser.getPassword().equals(user.getPassword()) || currentUser.getPasswordType().equals(PasswordHashMethod.PLAIN) && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
-                    currentUser.setPasswordType(getApplicationSettings().getDefaultHashImplementation());
-                    currentUser.setPassword(currentUser.getPasswordType().doHash(user.getPassword()));
+                if (!currentUser.getPassword().equals(user.getPassword()) || currentUser.getPasswordHashMethod().equals(PasswordHashMethod.PLAIN) && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
+                    currentUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+                    currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword()));
                 }
                 currentUser.setUserSettings(user.getUserSettings());
                 currentUser.setAdmin(user.getAdmin());
@@ -222,9 +222,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 if (currentUser.getAdmin() || currentUser.getManager()) {
                     User existingUser = entityManager.find(User.class, user.getId());
                     // Checks if password has changed or default hash method not equal to current user hash method
-                    if (!existingUser.getPassword().equals(user.getPassword()) && !existingUser.getPassword().equals(existingUser.getPasswordType().doHash(user.getPassword())) || !existingUser.getPasswordType().equals(getApplicationSettings().getDefaultHashImplementation())) {
-                        existingUser.setPasswordType(getApplicationSettings().getDefaultHashImplementation());
-                        existingUser.setPassword(existingUser.getPasswordType().doHash(user.getPassword()));
+                    if (!existingUser.getPassword().equals(user.getPassword()) && !existingUser.getPassword().equals(existingUser.getPasswordHashMethod().doHash(user.getPassword())) || !existingUser.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation())) {
+                        existingUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+                        existingUser.setPassword(existingUser.getPasswordHashMethod().doHash(user.getPassword()));
                     }
                     entityManager.merge(existingUser);
                 } else {

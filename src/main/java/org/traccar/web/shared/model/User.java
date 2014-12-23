@@ -58,7 +58,7 @@ public class User implements Serializable, Cloneable {
         admin = user.admin;
         login = user.login;
         password = user.password;
-        password_type = user.password_type;
+        password_hash_method = user.password_hash_method;
         manager = user.manager;
     }
 
@@ -94,15 +94,15 @@ public class User implements Serializable, Cloneable {
     }
 
     @Expose
-    private PasswordHashMethod password_type;
+    private PasswordHashMethod password_hash_method;
 
-    public void setPasswordType(PasswordHashMethod type) {
-        this.password_type = type;
+    public void setPasswordHashMethod(PasswordHashMethod type) {
+        this.password_hash_method = type;
     }
 
-    public PasswordHashMethod getPasswordType() {
+    public PasswordHashMethod getPasswordHashMethod() {
         // TODO temporary nullable to migrate from old database
-        return (password_type == null) ? PasswordHashMethod.PLAIN : password_type;
+        return (password_hash_method == null) ? PasswordHashMethod.PLAIN : password_hash_method;
     }
 
     // TODO temporary nullable to migrate from old database
