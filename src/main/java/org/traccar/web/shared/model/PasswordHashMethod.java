@@ -40,6 +40,23 @@ public enum PasswordHashMethod {
                 throw new RuntimeException(e);
             }
         }
+    },
+    MD5("md5") {
+        @Override
+        public String doHash(String s) {
+            try {
+                final MessageDigest md5 = MessageDigest.getInstance("MD5");
+                md5.update(s.getBytes());
+                byte[] array = md5.digest();
+                StringBuffer hexData = new StringBuffer();
+                for (int i = 0; i < array.length; ++i) {
+                    hexData.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
+                }
+                return hexData.toString();
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
+        }
     };
 
     final String method;
