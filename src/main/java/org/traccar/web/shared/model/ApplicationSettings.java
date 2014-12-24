@@ -3,6 +3,8 @@ package org.traccar.web.shared.model;
 import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +12,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
 
 @Entity
 @Table(name="application_settings")
@@ -26,6 +30,7 @@ public class ApplicationSettings implements Serializable {
     public ApplicationSettings() {
         registrationEnabled = true;
         updateInterval = Short.valueOf(DEFAULT_UPDATE_INTERVAL);
+        defaultPasswordHash = PasswordHashMethod.PLAIN;
     }
 
     @Expose
@@ -33,6 +38,10 @@ public class ApplicationSettings implements Serializable {
 
     @Expose
     private Short updateInterval;
+
+    @Enumerated(EnumType.STRING)
+    @Expose
+    private PasswordHashMethod defaultPasswordHash;
 
     @Expose
     @Column(nullable = true)
@@ -60,6 +69,14 @@ public class ApplicationSettings implements Serializable {
 
     public void setDisallowDeviceManagementByUsers(boolean disallowDeviceManagementByUsers) {
         this.disallowDeviceManagementByUsers = disallowDeviceManagementByUsers;
+    }
+
+    public PasswordHashMethod getDefaultHashImplementation() {
+        return defaultPasswordHash;
+    }
+
+    public void setDefaultHashImplementation(PasswordHashMethod hash) {
+        this.defaultPasswordHash = hash;
     }
 
     @Override
