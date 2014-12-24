@@ -18,6 +18,7 @@ This project has following features, which don't exist in original `traccar-web`
     * polish language (available via ?locale=pl URL parameter)
     * tagalog language (available via ?locale=tl URL parameter)
     * hungarian language (available via ?locale=hu URL parameter)
+    * [portuguese language](portuguese.html) (available via ?locale=pt_PT URL parameter)
 * 'show server log' menu for viewing tracker-server.log file on Web
 * speed filtering in archive view
 * change default map center position, zoom, provider (Google, OSM, Bing) (in Settings >> Preferences)
@@ -44,3 +45,4 @@ This project has following features, which don't exist in original `traccar-web`
 * possibility to change other user's password for administrators and managers
 * possibility to change device marker
 * put selected device to the center of map every time it's row is clicked by user
+* [possibility to change password hashing function to store passwords in database passwords as hash sums instead of plain text](password-hashing.html)
