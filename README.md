@@ -4,6 +4,8 @@ Web page - http://traccar.litvak.su
 
 News - http://traccar.litvak.su/news.html
 
+Demo - http://traccar.litvak.su/demo.html
+
 Authors: Anton Tananaev (anton.tananaev@gmail.com), Vitaly Litvak (vitavaque@gmail.com)
 
 ## Summary
