@@ -122,7 +122,7 @@ public class ExportServlet extends HttpServlet {
 
         try {
             TimeZone tz = TimeZone.getTimeZone("UTC");
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             dateFormat.setTimeZone(tz);
 
             XMLStreamWriter xsw = XMLOutputFactory.newFactory().createXMLStreamWriter(response.getOutputStream());

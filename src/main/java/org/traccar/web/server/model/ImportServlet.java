@@ -93,6 +93,7 @@ public class ImportServlet extends HttpServlet {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         DateFormat dateFormatWithMS = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
+        dateFormat.setTimeZone(tz);
         dateFormatWithMS.setTimeZone(tz);
 
 
