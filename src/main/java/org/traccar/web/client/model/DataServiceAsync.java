@@ -30,6 +30,8 @@ public interface DataServiceAsync {
 
     void authenticated(AsyncCallback<User> callback);
 
+    void login(String login, String password, Boolean password_already_hashed, AsyncCallback<User> callback);
+
     void login(String login, String password, AsyncCallback<User> callback);
 
     void logout(AsyncCallback<Boolean> callback);
