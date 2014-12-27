@@ -3,9 +3,9 @@
     xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
-  	xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
-  	xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
-  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
+    xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+    xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+    xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
     <ui:attributes width="1" height="-1" />
@@ -41,6 +41,13 @@
                               allowDecimals="false"
                               allowBlank="false"
                               width="4" />
+          </form:widget>
+        </form:FieldLabel>
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:FieldLabel>
+          <form:widget>
+            <form:CheckBox ui:field="showInvalidPositions" boxLabel="{i18n.showInvalidPositions}" enabled="true" />
           </form:widget>
         </form:FieldLabel>
       </container:child>

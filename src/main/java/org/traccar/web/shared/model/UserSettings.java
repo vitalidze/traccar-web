@@ -23,6 +23,7 @@ public class UserSettings implements Serializable {
     public static final int DEFAULT_ZOOM_LEVEL = 1;
     public static final double DEFAULT_CENTER_LONGITUDE = 12.5;
     public static final double DEFAULT_CENTER_LATITUDE = 41.9;
+    public static final boolean DEFAULT_SHOW_INVALID_POSITIONS = true;  // Current behavior
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +37,7 @@ public class UserSettings implements Serializable {
         centerLongitude = DEFAULT_CENTER_LONGITUDE;
         centerLatitude = DEFAULT_CENTER_LATITUDE;
         mapType = MapType.OSM;
+        showInvalidPositions = DEFAULT_SHOW_INVALID_POSITIONS;
     }
 
     public enum SpeedUnit {
@@ -134,6 +136,18 @@ public class UserSettings implements Serializable {
 
     public void setTimePrintInterval(Short timePrintInterval) {
         this.timePrintInterval = timePrintInterval;
+    }
+
+    @Expose
+    @Column(nullable = true)
+    private Boolean showInvalidPositions;
+
+    public Boolean getShowInvalidPositions() {
+        return showInvalidPositions;
+    }
+
+    public void setShowInvalidPositions(Boolean showInvalidPositions) {
+        this.showInvalidPositions = showInvalidPositions;
     }
 
     @Expose

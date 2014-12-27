@@ -96,6 +96,18 @@ public class DBMigrations {
     }
 
     /**
+     * set up showInvalidPositions flag in user settings
+     */
+    static class SetShowInvalidPositions implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + UserSettings.class.getSimpleName() + " S SET S.showInvalidPositions = :pip WHERE S.showInvalidPositions IS NULL")
+                    .setParameter("pip", UserSettings.DEFAULT_SHOW_INVALID_POSITIONS)
+                    .executeUpdate();
+        }
+    }
+
+    /**
      * set up default map view settings
      */
     static class SetDefaultMapViewSettings implements Migration {
