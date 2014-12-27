@@ -39,8 +39,9 @@ public class LoginServlet extends HttpServlet {
         String username = req.getParameter("user");
         User currentUser = sessionUser.get();
         try {
+            boolean passwordHashed = req.getParameter("password_hashed") != null && req.getParameter("password_hashed").equals("1");
             if (currentUser == null) {
-                dataService.login(username, req.getParameter("password"));
+                dataService.login(username, req.getParameter("password"), passwordHashed);
             }
             String locale = req.getParameter("locale");
             resp.sendRedirect("/" + (locale == null ? "" : ("?locale=" + locale)));
