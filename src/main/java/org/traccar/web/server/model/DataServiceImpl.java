@@ -92,7 +92,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @Override
-    public User login(String login, String password, Boolean password_already_hashed) {
+    public User login(String login, String password, boolean passwordHashed) {
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT x FROM User x WHERE x.login = :login", User.class);
@@ -102,7 +102,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         if (results.isEmpty() || password.equals("")) throw new IllegalStateException();
 
         if (!results.get(0).getPassword().equals(
-                (password_already_hashed ? password : results.get(0).getPasswordHashMethod().doHash(password))
+                (passwordHashed ? password : results.get(0).getPasswordHashMethod().doHash(password))
         )) {
             throw new IllegalStateException();
         }
@@ -111,7 +111,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         /*
          * If hash method has changed in application settings and password parameter is not hashed, rehash user password
          */
-        if (!user.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation()) && !password_already_hashed) {
+        if (!user.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation()) && !passwordHashed) {
             user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
             user.setPassword(user.getPasswordHashMethod().doHash(password));
             getSessionEntityManager().persist(user);
