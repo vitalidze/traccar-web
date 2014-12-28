@@ -33,6 +33,8 @@ public interface DataService extends RemoteService {
 
     User authenticated() throws IllegalStateException;
 
+    User login(String login, String password, boolean passwordHashed);
+
     User login(String login, String password);
 
     boolean logout();
