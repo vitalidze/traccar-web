@@ -49,7 +49,7 @@ public class RESTApiServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setDateFormat("EEE, dd MMM yyyy HH:mm:ss Z").create();
+        Gson gson = GsonUtils.create();
         String methodName = req.getPathInfo().substring(1);
         Object[] args = gson.fromJson(req.getParameter("payload"), Object[].class);
         makeRestCall(gson, resp, methodName, args);
@@ -57,7 +57,7 @@ public class RESTApiServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setDateFormat("EEE, dd MMM yyyy HH:mm:ss Z").create();
+        Gson gson = GsonUtils.create();
         String methodName = req.getPathInfo().substring(1);
         Object[] args = gson.fromJson(new InputStreamReader(req.getInputStream()), Object[].class);
         makeRestCall(gson, resp, methodName, args);
