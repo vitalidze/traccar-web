@@ -26,6 +26,7 @@ public class DBMigrations {
         for (Migration migration : new Migration[] {
                 new SetUpdateInterval(),
                 new SetTimePrintInterval(),
+                new SetDefaultFilteringSettings(),
                 new SetDefaultMapViewSettings(),
                 new SetManagerFlag(),
                 new SetDefaultDeviceTimeout(),
@@ -192,6 +193,15 @@ public class DBMigrations {
                 user.setUserSettings(new UserSettings());
                 em.persist(user);
             }
+        }
+    }
+
+    static class SetDefaultFilteringSettings implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + UserSettings.class.getName() + " S SET S.hideZeroCoordinates = :false, S.hideInvalidLocations = :false, S.hideDuplicates = :false WHERE S.hideZeroCoordinates IS NULL")
+                    .setParameter("false", false)
+                    .executeUpdate();
         }
     }
 }
