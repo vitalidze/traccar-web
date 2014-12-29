@@ -65,6 +65,7 @@ public class Position implements Serializable, Cloneable {
         power = position.power;
         address = position.address;
         other = position.other;
+        trackColor = position.trackColor;
     }
 
     @Expose
@@ -183,6 +184,17 @@ public class Position implements Serializable, Cloneable {
 
     public void setOther(String other) {
         this.other = other;
+    }
+
+    @Expose
+    private String trackColor;
+
+    public String getTrackColor() {
+        return trackColor;
+    }
+
+    public void setTrackColor(String trackColor) {
+        this.trackColor = trackColor;
     }
 
     @GwtTransient

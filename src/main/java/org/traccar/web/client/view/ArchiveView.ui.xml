@@ -38,15 +38,15 @@
           <toolbar:SeparatorToolItem />
 
           <toolbar:LabelToolItem label="{i18n.from}:" />
-          <form:DateField width="125" ui:field="fromDate" />
+          <form:DateField width="100" ui:field="fromDate" />
           <toolbar:LabelToolItem width="5" />
-          <form:TimeField width="75" ui:field="fromTime" triggerAction="ALL" />
+          <form:TimeField width="60" ui:field="fromTime" triggerAction="ALL" />
           <toolbar:SeparatorToolItem />
 
           <toolbar:LabelToolItem label="{i18n.to}:" />
-          <form:DateField width="125" ui:field="toDate" />
+          <form:DateField width="100" ui:field="toDate" />
           <toolbar:LabelToolItem width="5" />
-          <form:TimeField width="75" ui:field="toTime" triggerAction="ALL" />
+          <form:TimeField width="60" ui:field="toTime" triggerAction="ALL" />
           <toolbar:LabelToolItem label="{i18n.speed}" />
           <form:ComboBox ui:field="speedModifierCombo" editable="false" allowTextSelection="false" allowBlank="false" width="40" triggerAction="ALL" />
           <form:NumberField editor="{doublePropertyEditor}"
@@ -56,6 +56,8 @@
                             allowBlank="true"
                             width="64" />
           <toolbar:LabelToolItem ui:field="speedUnits" />
+
+          <gxt:ColorPalette ui:field="colorPalette" />
 
           <toolbar:SeparatorToolItem />
 

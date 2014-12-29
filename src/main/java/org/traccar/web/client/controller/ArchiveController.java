@@ -72,7 +72,7 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     }
 
     @Override
-    public void onLoad(final Device device, Date from, Date to, String speedModifier, Double speed) {
+    public void onLoad(final Device device, Date from, Date to, String speedModifier, Double speed, final String color) {
         if (device != null && from != null && to != null) {
             Application.getDataService().getPositions(device, from, to, speedModifier, speed, new BaseAsyncCallback<List<Position>>(i18n) {
                 @Override
@@ -84,6 +84,7 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
                         for (Position position : result) {
                             position.setStatus(Position.Status.ARCHIVE);
                             position.setIconType(device.getIconType().getIconArchive());
+                            position.setTrackColor(color);
                         }
                         positionStore.addAll(result);
                     }

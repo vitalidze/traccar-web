@@ -22,6 +22,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.state.client.GridStateHandler;
+import com.sencha.gxt.widget.core.client.ColorPalette;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
@@ -53,13 +54,21 @@ import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandler<Position> {
 
     private static ArchiveViewUiBinder uiBinder = GWT.create(ArchiveViewUiBinder.class);
+    public static final String[] COLORS = new String[]{
+            "0000ff",
+            "00b6ff",
+            "27ff00",
+            "ff7f17",
+            "ff0000"
+    };
+    public static final String DEFAULT_COLOR = COLORS[0];
 
     interface ArchiveViewUiBinder extends UiBinder<Widget, ArchiveView> {
     }
 
     public interface ArchiveHandler {
         public void onSelected(Position position);
-        public void onLoad(Device device, Date from, Date to, String speedModifier, Double speed);
+        public void onLoad(Device device, Date from, Date to, String speedModifier, Double speed, String color);
         public void onClear();
     }
 
@@ -106,6 +115,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiField
     LabelToolItem speedUnits;
+
+    @UiField(provided = true)
+    ColorPalette colorPalette;
 
     @UiField
     Grid<Position> grid;
@@ -167,6 +179,20 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         speedModifierCombo.add(">=");
         speedModifierCombo.add(">");
         speedModifierCombo.setValue(">=");
+
+        this.colorPalette = new ColorPalette(COLORS, COLORS);
+        this.colorPalette.setValue(DEFAULT_COLOR, false);
+        /*
+         * If you want to debug uncomment the following lines
+         * and add "import com.sencha.gxt.widget.core.client.info.Info;"
+         *
+        colorPalette.addSelectionHandler(new SelectionHandler<String>() {
+            @Override
+            public void onSelection(SelectionEvent<String> event) {
+                Info.display("Archive color selected", "Color: " + event.getSelectedItem());
+            }
+        });
+         */
 
         uiBinder.createAndBindUi(this);
 
@@ -231,7 +257,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
                 speedModifierCombo.getText(),
-                speed.getValue());
+                speed.getValue(),
+                colorPalette.getValue()
+        );
     }
 
     @UiHandler("clearButton")

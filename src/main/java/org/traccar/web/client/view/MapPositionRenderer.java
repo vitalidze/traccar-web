@@ -17,9 +17,11 @@ package org.traccar.web.client.view;
 
 import java.util.*;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import org.gwtopenmaps.openlayers.client.Icon;
 import org.gwtopenmaps.openlayers.client.Marker;
+import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.event.EventHandler;
 import org.gwtopenmaps.openlayers.client.event.EventObject;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
@@ -206,12 +208,20 @@ public class MapPositionRenderer {
             Point[] linePoints = new Point[positions.size()];
 
             int i = 0;
+            String color = null;
             for (Position position : positions) {
+                color = position.getTrackColor();
                 linePoints[i++] = mapView.createPoint(position.getLongitude(), position.getLatitude());
             }
+            // Defaults
+            if (color == null)
+                color = ArchiveView.DEFAULT_COLOR;
+            // Assigns color to style
+            Style style = mapView.getVectorLayer().getStyle();
+            style.setStrokeColor("#" + color);
 
             LineString lineString = new LineString(linePoints);
-            VectorFeature track = new VectorFeature(lineString);
+            VectorFeature track = new VectorFeature(lineString, style);
             getVectorLayer().addFeature(track);
             tracks.add(track);
             //mapView.getMap().zoomToExtent(lineString.getBounds());
