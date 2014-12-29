@@ -60,6 +60,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     public interface ArchiveHandler {
         public void onSelected(Position position);
         public void onLoad(Device device, Date from, Date to, String speedModifier, Double speed);
+        public void onFilterSettings();
         public void onClear();
     }
 
@@ -94,18 +95,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiField(provided = true)
     ListStore<Position> positionStore;
-
-    @UiField(provided = true)
-    SimpleComboBox<String> speedModifierCombo;
-
-    @UiField(provided = true)
-    NumberPropertyEditor<Double> doublePropertyEditor = new NumberPropertyEditor.DoublePropertyEditor();
-
-    @UiField
-    NumberField<Double> speed;
-
-    @UiField
-    LabelToolItem speedUnits;
 
     @UiField
     Grid<Position> grid;
@@ -160,14 +149,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         columnModel.addAggregationRow(totals);
 
-        speedModifierCombo = new SimpleComboBox<String>(new StringLabelProvider<String>());
-        speedModifierCombo.add("<");
-        speedModifierCombo.add("<=");
-        speedModifierCombo.add("=");
-        speedModifierCombo.add(">=");
-        speedModifierCombo.add(">");
-        speedModifierCombo.setValue(">=");
-
         uiBinder.createAndBindUi(this);
 
         GridStateHandler<Position> gridStateHandler = new GridStateHandler<Position>(grid);
@@ -182,11 +163,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
             hidden.add(positionProperties.address().getPath());
             gridStateHandler.saveState();
         }
-
-        speedUnits.setLabel(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getUnit());
-
-        speed.addValidator(new MinNumberValidator<Double>(0d));
-        speed.addValidator(new MaxNumberValidator<Double>(30000d));
 
         grid.getSelectionModel().addSelectionChangedHandler(this);
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -230,8 +206,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 deviceCombo.getValue(),
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
-                speedModifierCombo.getText(),
-                speed.getValue());
+                // TODO
+                null,
+                null);
     }
 
     @UiHandler("clearButton")
@@ -246,9 +223,10 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         Window.open("/traccar/export/csv" +
                     "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                     "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
-                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                    "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
-                    "&speed=" + speed.getValue(),
+                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B"),// +
+                // TODO
+//                    "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
+//                    "&speed=" + speed.getValue(),
                     "_blank", null);
     }
 
@@ -259,9 +237,10 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         Window.open("/traccar/export/gpx" +
                     "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                     "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
-                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                    "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
-                    "&speed=" + speed.getValue(),
+                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B"),// +
+                // TODO
+//                    "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
+//                    "&speed=" + speed.getValue(),
                     "_blank", null);
     }
 
@@ -272,6 +251,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         } else {
             new ImportDialog(deviceCombo.getValue()).show();
         }
+    }
+
+    @UiHandler("filterButton")
+    public void onFilterClicked(SelectEvent event) {
+        archiveHandler.onFilterSettings();
     }
 
     private StoreHandlers<Device> deviceStoreHandlers = new BaseStoreHandlers<Device>() {

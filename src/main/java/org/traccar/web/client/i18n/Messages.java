@@ -191,4 +191,16 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String importingData();
 
     String defaultHashImplementation();
+
+    String filter();
+
+    String hideZeroCoordinates();
+
+    String hideInvalidLocations();
+
+    String hideDuplicates();
+
+    String ignoreLocationsWithDistanceFromPreviousLT();
+
+    String disableFilter();
 }

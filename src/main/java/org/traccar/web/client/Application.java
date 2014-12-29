@@ -31,6 +31,7 @@ import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.DataServiceAsync;
 import org.traccar.web.client.view.ApplicationView;
+import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.client.view.UserSettingsDialog;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -70,7 +71,7 @@ public class Application {
         mapController = new MapController(mapHandler);
         deviceController = new DeviceController(mapController, settingsController);
         deviceController.getDeviceStore().addStoreHandlers(deviceStoreHandler);
-        archiveController = new ArchiveController(archiveHanlder, deviceController.getDeviceStore());
+        archiveController = new ArchiveController(archiveHanlder, userSettingsHandler, deviceController.getDeviceStore());
         archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
 
         view = new ApplicationView(
@@ -131,7 +132,7 @@ public class Application {
 
     };
 
-    private UserSettingsDialog.UserSettingsHandler userSettingsHandler = new UserSettingsDialog.UserSettingsHandler() {
+    private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler, FilterDialog.FilterSettingsHandler {
         @Override
         public void onSave(UserSettings userSettings) {
             ApplicationContext.getInstance().setUserSettings(userSettings);
@@ -162,5 +163,7 @@ public class Application {
             centerLatitude.setValue(center.lat());
             zoomLevel.setValue(mapController.getMap().getZoom());
         }
-    };
+    }
+
+    private UserSettingsHandlerImpl userSettingsHandler = new UserSettingsHandlerImpl();
 }

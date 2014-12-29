@@ -39,16 +39,18 @@ public class UserSettings implements Serializable {
     }
 
     public enum SpeedUnit {
-        knots("kn", 1d),
-        kilometersPerHour("km/h", 1.852),
-        milesPerHour("mph", 1.150779);
+        knots("kn", 1d, DistanceUnit.km),
+        kilometersPerHour("km/h", 1.852, DistanceUnit.km),
+        milesPerHour("mph", 1.150779, DistanceUnit.mile);
 
         final String unit;
         final double factor;
+        final DistanceUnit distanceUnit;
 
-        SpeedUnit(String unit, double factor) {
+        SpeedUnit(String unit, double factor, DistanceUnit distanceUnit) {
             this.unit = unit;
             this.factor = factor;
+            this.distanceUnit = distanceUnit;
         }
 
         public double getFactor() {
@@ -57,6 +59,10 @@ public class UserSettings implements Serializable {
 
         public String getUnit() {
             return unit;
+        }
+
+        public DistanceUnit getDistanceUnit() {
+            return distanceUnit;
         }
 
         public double toKnots(double speed) {

@@ -19,11 +19,12 @@ import java.util.Date;
 import java.util.List;
 
 import org.traccar.web.client.Application;
+import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.PositionProperties;
 import org.traccar.web.client.view.ArchiveView;
-import org.traccar.web.client.view.MarkerIconFactory;
+import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -38,7 +39,9 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
         public void onSelected(Position position);
     }
 
-    private ArchiveHandler archiveHandler;
+    private final ArchiveHandler archiveHandler;
+
+    private final FilterDialog.FilterSettingsHandler filterSettingsHandler;
 
     private ListStore<Position> positionStore;
 
@@ -46,8 +49,9 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
 
     private Messages i18n = GWT.create(Messages.class);
 
-    public ArchiveController(ArchiveHandler archiveHandler, ListStore<Device> deviceStore) {
+    public ArchiveController(ArchiveHandler archiveHandler, FilterDialog.FilterSettingsHandler filterSettingsHandler, ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;
+        this.filterSettingsHandler = filterSettingsHandler;
         PositionProperties positionProperties = GWT.create(PositionProperties.class);
         positionStore = new ListStore<Position>(positionProperties.id());
         archiveView = new ArchiveView(this, positionStore, deviceStore);
@@ -97,6 +101,11 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     @Override
     public void onClear() {
         positionStore.clear();
+    }
+
+    @Override
+    public void onFilterSettings() {
+        new FilterDialog(ApplicationContext.getInstance().getUserSettings(), filterSettingsHandler).show();
     }
 
     public void selectPosition(Position position) {
