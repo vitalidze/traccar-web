@@ -148,6 +148,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
                     user.setPassword(user.getPasswordHashMethod().doHash(password));
                     user.setManager(Boolean.TRUE); // registered users are always managers
+                    user.setUserSettings(new UserSettings());
                     getSessionEntityManager().persist(user);
                     setSessionUser(user);
                     return user;
@@ -195,6 +196,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             user.setManagedBy(currentUser);
             user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
             user.setPassword(user.getPasswordHashMethod().doHash(user.getPassword()));
+            if (user.getUserSettings() == null) {
+                user.setUserSettings(new UserSettings());
+            }
             getSessionEntityManager().persist(user);
             return user;
         } else {

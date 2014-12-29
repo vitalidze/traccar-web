@@ -108,7 +108,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                     Device device = position.getDevice();
                     boolean isOffline = currentTime - position.getTime().getTime() > position.getDevice().getTimeout() * 1000;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
-                    position.setIconType(isOffline ? device.getIconType().getIconOffline() : device.getIconType().getIconLatest());
+                    position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
                     if (position.getSpeed() != null) {
                         if (position.getSpeed().doubleValue() > position.getDevice().getIdleSpeedThreshold()) {
                             latestNonIdlePositionMap.put(device.getId(), position);
@@ -214,5 +214,9 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public Position getLatestPosition(Device device) {
         return latestPositionMap.get(device.getId());
+    }
+
+    public void updateIcon(Device device) {
+        mapView.updateIcon(device);
     }
 }

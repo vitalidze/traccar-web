@@ -26,6 +26,7 @@ public class DBMigrations {
         for (Migration migration : new Migration[] {
                 new SetUpdateInterval(),
                 new SetTimePrintInterval(),
+                new SetDefaultFilteringSettings(),
                 new SetDefaultMapViewSettings(),
                 new SetManagerFlag(),
                 new SetDefaultDeviceTimeout(),
@@ -34,7 +35,8 @@ public class DBMigrations {
                 new SetDefaultMapType(),
                 new CreateAdmin(),
                 new SetDefaultDeviceIconType(),
-                new SetDefaultHashImplementation()
+                new SetDefaultHashImplementation(),
+                new SetDefaultUserSettings()
         }) {
             em.getTransaction().begin();
             try {
@@ -180,6 +182,25 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + ApplicationSettings.class.getSimpleName() + " S SET S.defaultPasswordHash = :dh WHERE S.defaultPasswordHash IS NULL")
                     .setParameter("dh", PasswordHashMethod.PLAIN)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultUserSettings implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            for (User user : em.createQuery("SELECT u FROM " + User.class.getName() + " u WHERE u.userSettings IS NULL", User.class).getResultList()) {
+                user.setUserSettings(new UserSettings());
+                em.persist(user);
+            }
+        }
+    }
+
+    static class SetDefaultFilteringSettings implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + UserSettings.class.getName() + " S SET S.hideZeroCoordinates = :false, S.hideInvalidLocations = :false, S.hideDuplicates = :false WHERE S.hideZeroCoordinates IS NULL")
+                    .setParameter("false", false)
                     .executeUpdate();
         }
     }

@@ -132,6 +132,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                     @Override
                     public void onSuccess(Device result) {
                         deviceStore.update(result);
+                        mapController.updateIcon(result);
                     }
                     @Override
                     public void onFailure(Throwable caught) {

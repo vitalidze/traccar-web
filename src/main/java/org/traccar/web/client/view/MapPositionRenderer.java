@@ -288,4 +288,15 @@ public class MapPositionRenderer {
         }
         return trackPointStyle;
     }
+
+    public void updateIcon(Device device) {
+        Long positionId = deviceMap.get(device.getId());
+        Position position = positionMap.get(positionId);
+        if (position != null) {
+            position.setDevice(device);
+            position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
+            boolean selected = selectedPositionId != null && selectedPositionId.equals(positionId);
+            changeMarkerIcon(position, MarkerIconFactory.getIcon(position.getIconType(), selected));
+        }
+    }
 }

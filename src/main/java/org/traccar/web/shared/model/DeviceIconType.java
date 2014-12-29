@@ -40,15 +40,15 @@ public enum DeviceIconType {
         this.iconOffline = iconOffline;
     }
 
-    public PositionIconType getIconLatest() {
-        return iconLatest;
-    }
-
-    public PositionIconType getIconOffline() {
-        return iconOffline;
-    }
-
-    public PositionIconType getIconArchive() {
-        return PositionIconType.iconArchive; // for now all device icons have same archive icon
+    public PositionIconType getPositionIconType(Position.Status status) {
+        switch (status) {
+            case LATEST:
+                return iconLatest;
+            case OFFLINE:
+                return iconOffline;
+            case ARCHIVE:
+                return PositionIconType.iconArchive; // for now all device icons have same archive icon
+        }
+        return null;
     }
 }

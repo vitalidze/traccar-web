@@ -158,6 +158,7 @@ public class Device implements Serializable {
         this.users = users;
     }
 
+    @Expose
     @Enumerated(EnumType.STRING)
     private DeviceIconType iconType;
 

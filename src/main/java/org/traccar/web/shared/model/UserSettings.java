@@ -178,6 +178,72 @@ public class UserSettings implements Serializable {
         this.mapType = mapType;
     }
 
+    @Column(nullable = true)
+    private boolean hideZeroCoordinates;
+    @Column(nullable = true)
+    private boolean hideInvalidLocations;
+    @Column(nullable = true)
+    private boolean hideDuplicates;
+    private Double minDistance;
+    private String speedModifier;
+    private Double speedForFilter;
+
+    public boolean isHideZeroCoordinates() {
+        return hideZeroCoordinates;
+    }
+
+    public void setHideZeroCoordinates(boolean hideZeroCoordinates) {
+        this.hideZeroCoordinates = hideZeroCoordinates;
+    }
+
+    public boolean isHideInvalidLocations() {
+        return hideInvalidLocations;
+    }
+
+    public void setHideInvalidLocations(boolean hideInvalidLocations) {
+        this.hideInvalidLocations = hideInvalidLocations;
+    }
+
+    public boolean isHideDuplicates() {
+        return hideDuplicates;
+    }
+
+    public void setHideDuplicates(boolean hideDuplicates) {
+        this.hideDuplicates = hideDuplicates;
+    }
+
+    public Double getMinDistance() {
+        return minDistance;
+    }
+
+    public void setMinDistance(Double minDistance) {
+        this.minDistance = minDistance;
+    }
+
+    public String getSpeedModifier() {
+        return speedModifier;
+    }
+
+    public void setSpeedModifier(String speedModifier) {
+        this.speedModifier = speedModifier;
+    }
+
+    public Double getSpeedForFilter() {
+        return speedForFilter;
+    }
+
+    public void setSpeedForFilter(Double speedForFilter) {
+        this.speedForFilter = speedForFilter;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
     @Override
     public int hashCode() {
         return (int) (id ^ (id >>> 32));

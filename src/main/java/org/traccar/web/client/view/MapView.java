@@ -282,4 +282,8 @@ public class MapView {
     private void hidePopup() {
         popup.hide();
     }
+
+    public void updateIcon(Device device) {
+        latestPositionRenderer.updateIcon(device);
+    }
 }
