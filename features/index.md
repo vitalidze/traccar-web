@@ -20,7 +20,7 @@ This project has following features, which don't exist in original `traccar-web`
     * hungarian language (available via ?locale=hu URL parameter)
     * [portuguese language](portuguese.html) (available via ?locale=pt_PT URL parameter)
 * 'show server log' menu for viewing tracker-server.log file on Web
-* speed filtering in archive view
+* [archive filtering](archive-filtering.html)
 * change default map center position, zoom, provider (Google, OSM, Bing) (in Settings >> Preferences)
 * replaced 'current state' panel with popups. They appear either when you hover a row in 'devices' table or when you hover a marker on map
 * archive panel is collapsed by default. There is a button in upper right hand corner to expand it
@@ -39,7 +39,7 @@ This project has following features, which don't exist in original `traccar-web`
 * RESTful API. Available at `/traccar/rest/{methodName}` - allows to call methods from `DataService` class. Full documentation will be available by request.
 * 'Address' column in archive (hidden by default)
 * 'Distance' column in archive with total distance at the bottom
-* possibility to export archive to [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) and [GPX](http://en.wikipedia.org/wiki/GPS_Exchange_Format)
+* [possibility to export archive](archive-export.html) to [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) and [GPX](http://en.wikipedia.org/wiki/GPS_Exchange_Format)
 * possibility to import archive from [GPX](http://en.wikipedia.org/wiki/GPS_Exchange_Format)
 * [possibility to log in via GET request to a separate servlet](automatic-login.html) (for example, for integration on external sites) - `http://server-ip:8082/traccar/s/login?user=your_username&password=your_password`
 * possibility to change other user's password for administrators and managers
