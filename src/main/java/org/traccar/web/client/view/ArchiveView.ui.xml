@@ -45,7 +45,9 @@
           <form:DateField width="125" ui:field="toDate" />
           <toolbar:LabelToolItem width="5" />
           <form:TimeField width="75" ui:field="toTime" triggerAction="ALL" />
+          <toolbar:LabelToolItem width="5" />
           <button:TextButton ui:field="filterButton" text="{i18n.filter}..." />
+          <toolbar:LabelToolItem width="2" />
           <form:CheckBox ui:field="disableFilter" boxLabel="{i18n.disableFilter}" />
 
           <toolbar:SeparatorToolItem />
