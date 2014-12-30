@@ -106,6 +106,10 @@ public class FilterDialog implements Editor<UserSettings> {
 
         driver.initialize(this);
         driver.edit(filterSettings);
+
+        if (filterSettings.getMinDistance() != null) {
+            minDistance.setValue(filterSettings.getMinDistance() * filterSettings.getSpeedUnit().getDistanceUnit().getFactor());
+        }
     }
 
     public void show() {
@@ -119,6 +123,10 @@ public class FilterDialog implements Editor<UserSettings> {
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
         window.hide();
+        UserSettings filterSettings = driver.flush();
+        if (filterSettings.getMinDistance() != null) {
+            filterSettings.setMinDistance(filterSettings.getMinDistance() * filterSettings.getSpeedUnit().getDistanceUnit().getFactor());
+        }
         filterSettingsHandler.onSave(driver.flush());
     }
 

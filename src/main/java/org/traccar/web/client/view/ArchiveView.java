@@ -59,7 +59,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     public interface ArchiveHandler {
         public void onSelected(Position position);
-        public void onLoad(Device device, Date from, Date to, String speedModifier, Double speed);
+        public void onLoad(Device device, Date from, Date to, boolean filter);
         public void onFilterSettings();
         public void onClear();
     }
@@ -98,6 +98,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiField
     Grid<Position> grid;
+
+    @UiField
+    CheckBox disableFilter;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
@@ -206,9 +209,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 deviceCombo.getValue(),
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
-                // TODO
-                null,
-                null);
+                !disableFilter.getValue());
     }
 
     @UiHandler("clearButton")
@@ -223,10 +224,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         Window.open("/traccar/export/csv" +
                     "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                     "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
-                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B"),// +
-                // TODO
-//                    "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
-//                    "&speed=" + speed.getValue(),
+                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+                    "&filter=" + !disableFilter.getValue(),
                     "_blank", null);
     }
 
@@ -237,10 +236,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         Window.open("/traccar/export/gpx" +
                     "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                     "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
-                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B"),// +
-                // TODO
-//                    "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
-//                    "&speed=" + speed.getValue(),
+                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+                    "&filter=" + !disableFilter.getValue(),
                     "_blank", null);
     }
 
