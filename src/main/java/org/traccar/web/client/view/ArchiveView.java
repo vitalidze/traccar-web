@@ -17,17 +17,12 @@ package org.traccar.web.client.view;
 
 import java.util.*;
 
-import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
-import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.state.client.GridStateHandler;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.form.*;
-import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
-import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import com.sencha.gxt.widget.core.client.grid.*;
-import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
@@ -154,18 +149,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         uiBinder.createAndBindUi(this);
 
-        GridStateHandler<Position> gridStateHandler = new GridStateHandler<Position>(grid);
-        gridStateHandler.loadState();
-        Set<String> hidden = gridStateHandler.getState().getHidden();
-        if (hidden == null) {
-            hidden = new HashSet<String>();
-            gridStateHandler.getState().setHidden(hidden);
-            columnConfigValid.setHidden(true);
-            columnConfigAddress.setHidden(true);
-            hidden.add(positionProperties.valid().getPath());
-            hidden.add(positionProperties.address().getPath());
-            gridStateHandler.saveState();
-        }
+        new GridStateHandler<Position>(grid).loadState();
 
         grid.getSelectionModel().addSelectionChangedHandler(this);
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);

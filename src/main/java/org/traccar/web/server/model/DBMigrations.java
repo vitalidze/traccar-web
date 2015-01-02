@@ -36,7 +36,8 @@ public class DBMigrations {
                 new CreateAdmin(),
                 new SetDefaultDeviceIconType(),
                 new SetDefaultHashImplementation(),
-                new SetDefaultUserSettings()
+                new SetDefaultUserSettings(),
+                new SetArchiveDefaultColumns()
         }) {
             em.getTransaction().begin();
             try {
@@ -202,6 +203,17 @@ public class DBMigrations {
             em.createQuery("UPDATE " + UserSettings.class.getName() + " S SET S.hideZeroCoordinates = :false, S.hideInvalidLocations = :false, S.hideDuplicates = :false WHERE S.hideZeroCoordinates IS NULL")
                     .setParameter("false", false)
                     .executeUpdate();
+        }
+    }
+
+    static class SetArchiveDefaultColumns implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            for (User user : em.createQuery("SELECT u FROM User u WHERE u NOT IN (SELECT user FROM UIStateEntry WHERE name=:archiveGridStateId)", User.class)
+                             .setParameter("archiveGridStateId", UIStateEntry.ARCHIVE_GRID_STATE_ID)
+                             .getResultList()) {
+                em.persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
+            }
         }
     }
 }

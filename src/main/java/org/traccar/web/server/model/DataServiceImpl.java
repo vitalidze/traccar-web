@@ -150,6 +150,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     user.setManager(Boolean.TRUE); // registered users are always managers
                     user.setUserSettings(new UserSettings());
                     getSessionEntityManager().persist(user);
+                    getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
                     setSessionUser(user);
                     return user;
             }
@@ -200,6 +201,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 user.setUserSettings(new UserSettings());
             }
             getSessionEntityManager().persist(user);
+            getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
             return user;
         } else {
             throw new IllegalStateException();

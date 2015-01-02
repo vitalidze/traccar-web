@@ -16,6 +16,7 @@
 package org.traccar.web.client;
 
 import com.google.gwt.core.client.GWT;
+import com.sencha.gxt.state.client.StateManager;
 import org.traccar.web.client.controller.LoginController;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
@@ -35,6 +36,8 @@ public class Traccar implements EntryPoint, LoginController.LoginHandler {
                 new LoginController().login(Traccar.this);
             }
         });
+
+        StateManager.get().setProvider(new UIStateProvider());
     }
 
     @Override
