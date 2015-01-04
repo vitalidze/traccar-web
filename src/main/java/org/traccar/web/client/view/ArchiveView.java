@@ -18,16 +18,19 @@ package org.traccar.web.client.view;
 import java.util.*;
 
 import com.google.gwt.core.client.JsonUtils;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.state.client.GridStateHandler;
-import com.sencha.gxt.widget.core.client.ColorPalette;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import com.sencha.gxt.widget.core.client.grid.*;
+import com.sencha.gxt.widget.core.client.menu.ColorMenu;
+import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
@@ -62,6 +65,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
             "ff0000"
     };
     public static final String DEFAULT_COLOR = COLORS[0];
+    public String chosenColor = DEFAULT_COLOR; // until color splitter is implemented
 
     interface ArchiveViewUiBinder extends UiBinder<Widget, ArchiveView> {
     }
@@ -117,7 +121,13 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     LabelToolItem speedUnits;
 
     @UiField(provided = true)
-    ColorPalette colorPalette;
+    ColorMenu smallColorMenu;
+
+    @UiField(provided = true)
+    ColorMenu fullColorMenu;
+
+    @UiField
+    Menu routeMarkersType;
 
     @UiField
     Grid<Position> grid;
@@ -180,19 +190,25 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         speedModifierCombo.add(">");
         speedModifierCombo.setValue(">=");
 
-        this.colorPalette = new ColorPalette(COLORS, COLORS);
-        this.colorPalette.setValue(DEFAULT_COLOR, false);
-        /*
-         * If you want to debug uncomment the following lines
-         * and add "import com.sencha.gxt.widget.core.client.info.Info;"
-         *
-        colorPalette.addSelectionHandler(new SelectionHandler<String>() {
+        smallColorMenu = new ExtColorMenu(COLORS, COLORS);
+        smallColorMenu.setColor(DEFAULT_COLOR);
+        smallColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
-            public void onSelection(SelectionEvent<String> event) {
-                Info.display("Archive color selected", "Color: " + event.getSelectedItem());
+            public void onValueChange(ValueChangeEvent<String> event) {
+                chosenColor = event.getValue();
+                smallColorMenu.hide(true);
+                fullColorMenu.getPalette().setValue("", false);
             }
         });
-         */
+        fullColorMenu = new ColorMenu();
+        fullColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                chosenColor = event.getValue();
+                fullColorMenu.hide(true);
+                smallColorMenu.getPalette().setValue("",false);
+            }
+        });
 
         uiBinder.createAndBindUi(this);
 
@@ -258,7 +274,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 getCombineDate(toDate, toTime),
                 speedModifierCombo.getText(),
                 speed.getValue(),
-                colorPalette.getValue()
+                chosenColor
         );
     }
 

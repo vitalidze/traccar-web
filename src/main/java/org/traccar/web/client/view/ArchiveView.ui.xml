@@ -7,7 +7,8 @@
     xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
     xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
     xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
-    xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form">
+    xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+    xmlns:menu="urn:import:com.sencha.gxt.widget.core.client.menu">
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="toolBarRowData">
     <ui:attributes width="1" height="-1" />
@@ -57,7 +58,34 @@
                             width="64" />
           <toolbar:LabelToolItem ui:field="speedUnits" />
 
-          <gxt:ColorPalette ui:field="colorPalette" />
+          <toolbar:ToolBar ui:field="styleToolbar">
+              <button:TextButton text="Style">
+                  <button:menu>
+                      <menu:Menu ui:field="menu1">
+                          <menu:MenuItem text="Markers">
+                              <menu:submenu>
+                                  <menu:Menu ui:field="routeMarkersType">
+                                      <menu:CheckMenuItem text="Standard markers" group="radios" checked="true" />
+                                      <menu:CheckMenuItem text="Reduced markers" group="radios" />
+                                      <menu:CheckMenuItem text="No markers" group="radios" />
+                                  </menu:Menu>
+                              </menu:submenu>
+                          </menu:MenuItem>
+                          <menu:SeparatorMenuItem />
+                          <menu:MenuItem text="Full palette">
+                              <menu:submenu>
+                                  <menu:ColorMenu ui:field="fullColorMenu" />
+                              </menu:submenu>
+                          </menu:MenuItem>
+                          <menu:MenuItem text="Small palette">
+                              <menu:submenu>
+                                  <menu:ColorMenu ui:field="smallColorMenu" />
+                              </menu:submenu>
+                          </menu:MenuItem>
+                      </menu:Menu>
+                  </button:menu>
+              </button:TextButton>
+          </toolbar:ToolBar>
 
           <toolbar:SeparatorToolItem />
 
