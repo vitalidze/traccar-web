@@ -37,7 +37,7 @@ This project has following features, which don't exist in original `traccar-web`
 * save grid columns settings (sort order, column order, visibility, etc.) in the database
 * mobile web UI based on [framework7](http://www.idangero.us/framework7/) with general functions for GPS tracking, available at `m/` URL, i.e. `http://server-ip:8082/m/` Desktop version will redirect automatically to the mobile version when accessed from mobile device unless `nomobileredirect=1` url parameter is not set.
 * RESTful API. Available at `/traccar/rest/{methodName}` - allows to call methods from `DataService` class. Full documentation will be available by request.
-* 'Address' column in archive (hidden by default)
+* ['Address' column in archive (hidden by default)](address-column-in-archive-grid.html)
 * 'Distance' column in archive with total distance at the bottom
 * [possibility to export archive](archive-export.html) to [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) and [GPX](http://en.wikipedia.org/wiki/GPS_Exchange_Format)
 * possibility to import archive from [GPX](http://en.wikipedia.org/wiki/GPS_Exchange_Format)
