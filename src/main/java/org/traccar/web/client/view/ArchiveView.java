@@ -18,6 +18,7 @@ package org.traccar.web.client.view;
 import java.util.*;
 
 import com.google.gwt.core.client.JsonUtils;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -25,6 +26,7 @@ import com.google.gwt.user.client.Window;
 import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.state.client.GridStateHandler;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
@@ -121,6 +123,12 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     LabelToolItem speedUnits;
 
     @UiField(provided = true)
+    TextButton styleButtonTrackColor;
+
+    @UiField
+    TextButton styleButton;
+
+    @UiField(provided = true)
     ColorMenu smallColorMenu;
 
     @UiField(provided = true)
@@ -190,6 +198,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         speedModifierCombo.add(">");
         speedModifierCombo.setValue(">=");
 
+        // Element that displays the current track color
+        styleButtonTrackColor = new TextButton();
+        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(DEFAULT_COLOR));
+        styleButtonTrackColor.getElement().getStyle().setCursor(Style.Cursor.TEXT);
+        // Menu with the small palette
         smallColorMenu = new ExtColorMenu(COLORS, COLORS);
         smallColorMenu.setColor(DEFAULT_COLOR);
         smallColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -198,8 +211,10 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 chosenColor = event.getValue();
                 smallColorMenu.hide(true);
                 fullColorMenu.getPalette().setValue("", false);
+                styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(chosenColor));
             }
         });
+        // Menu with the complete palette
         fullColorMenu = new ColorMenu();
         fullColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
@@ -207,6 +222,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 chosenColor = event.getValue();
                 fullColorMenu.hide(true);
                 smallColorMenu.getPalette().setValue("",false);
+                styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(chosenColor));
             }
         });
 
@@ -336,4 +352,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         grid.getSelectionModel().select(positionStore.findModel(position), false);
     }
 
+    public void selectDevice(Device device) {
+        deviceCombo.setValue(device,false);
+    }
 }

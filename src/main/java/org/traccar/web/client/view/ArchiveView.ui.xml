@@ -59,7 +59,8 @@
           <toolbar:LabelToolItem ui:field="speedUnits" />
 
           <toolbar:ToolBar ui:field="styleToolbar">
-              <button:TextButton text="Style">
+              <button:TextButton ui:field="styleButtonTrackColor" text=" " height="80%"/>
+              <button:TextButton ui:field="styleButton" text="Style">
                   <button:menu>
                       <menu:Menu ui:field="menu1">
                           <menu:MenuItem text="Markers">
