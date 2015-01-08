@@ -26,6 +26,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.state.client.GridStateHandler;
+import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
@@ -178,6 +179,13 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         grid.getSelectionModel().addSelectionChangedHandler(this);
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         grid.addRowMouseDownHandler(this);
+        grid.addCellDoubleClickHandler(new CellDoubleClickEvent.CellDoubleClickHandler() {
+            @Override
+            public void onCellClick(CellDoubleClickEvent cellDoubleClickEvent) {
+                Device selectedDevice = grid.getStore().get(cellDoubleClickEvent.getRowIndex());
+                //TODO apf: change device in Archive combobox
+            }
+        });
 
         grid.getView().setAutoFill(true);
         grid.getView().setForceFit(true);
