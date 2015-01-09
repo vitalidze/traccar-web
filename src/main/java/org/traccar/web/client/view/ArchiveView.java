@@ -30,7 +30,6 @@ import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.grid.*;
 import com.sencha.gxt.widget.core.client.menu.ColorMenu;
 import com.sencha.gxt.widget.core.client.menu.Menu;
-import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
@@ -128,9 +127,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiField
     Menu routeMarkersType;
-
-    @UiField
-    Grid<Position> grid;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);

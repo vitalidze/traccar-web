@@ -76,7 +76,7 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     }
 
     @Override
-    public void onLoad(final Device device, Date from, Date to, boolean filter, String color) {
+    public void onLoad(final Device device, Date from, Date to, boolean filter, final String color) {
         if (device != null && from != null && to != null) {
             Application.getDataService().getPositions(device, from, to, filter, new BaseAsyncCallback<List<Position>>(i18n) {
                 @Override
