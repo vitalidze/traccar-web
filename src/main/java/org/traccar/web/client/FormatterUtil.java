@@ -53,7 +53,6 @@ public class FormatterUtil {
 
     public NumberFormat getDistanceFormat() {
         UserSettings.SpeedUnit speedUnit = ApplicationContext.getInstance().getUserSettings().getSpeedUnit();
-        UserSettings.DistanceUnit distanceUnit = speedUnit == UserSettings.SpeedUnit.milesPerHour ? UserSettings.DistanceUnit.mile : UserSettings.DistanceUnit.km;
-        return new DistanceNumberFormat(distanceUnit);
+        return new DistanceNumberFormat(speedUnit.getDistanceUnit());
     }
 }

@@ -84,6 +84,11 @@ myApp.onPageInit('login-screen', function (page) {
         pageContainer.find('#form-login').trigger('submit');
     });
 
+    // set up open desktop version action
+    pageContainer.find('.open-desktop-version').on('click', function() {
+        window.location = '/?nomobileredirect=1';
+    });
+
     pageContainer.find('#form-login').on('submit', function(e) {
         e.preventDefault();
 
@@ -112,6 +117,11 @@ myApp.onPageInit('login-screen', function (page) {
 
         return false;
     });
+});
+
+// set up open desktop version action
+$$('.open-desktop-version').on('click', function() {
+    window.location = '/?nomobileredirect=1';
 });
 
 // button that opens sidebar menu

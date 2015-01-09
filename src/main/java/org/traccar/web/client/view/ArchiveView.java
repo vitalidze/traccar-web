@@ -23,13 +23,10 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
-import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.state.client.GridStateHandler;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.form.*;
-import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
-import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import com.sencha.gxt.widget.core.client.grid.*;
 import com.sencha.gxt.widget.core.client.menu.ColorMenu;
 import com.sencha.gxt.widget.core.client.menu.Menu;
@@ -74,7 +71,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     public interface ArchiveHandler {
         public void onSelected(Position position);
-        public void onLoad(Device device, Date from, Date to, String speedModifier, Double speed, String color);
+        public void onLoad(Device device, Date from, Date to, boolean filter, String color);
+        public void onFilterSettings();
         public void onClear();
     }
 
@@ -110,17 +108,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiField(provided = true)
     ListStore<Position> positionStore;
 
-    @UiField(provided = true)
-    SimpleComboBox<String> speedModifierCombo;
-
-    @UiField(provided = true)
-    NumberPropertyEditor<Double> doublePropertyEditor = new NumberPropertyEditor.DoublePropertyEditor();
+    @UiField
+    Grid<Position> grid;
 
     @UiField
-    NumberField<Double> speed;
-
-    @UiField
-    LabelToolItem speedUnits;
+    CheckBox disableFilter;
 
     @UiField(provided = true)
     TextButton styleButtonTrackColor;
@@ -190,14 +182,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         columnModel.addAggregationRow(totals);
 
-        speedModifierCombo = new SimpleComboBox<String>(new StringLabelProvider<String>());
-        speedModifierCombo.add("<");
-        speedModifierCombo.add("<=");
-        speedModifierCombo.add("=");
-        speedModifierCombo.add(">=");
-        speedModifierCombo.add(">");
-        speedModifierCombo.setValue(">=");
-
         // Element that displays the current track color
         styleButtonTrackColor = new TextButton();
         styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(DEFAULT_COLOR));
@@ -228,23 +212,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         uiBinder.createAndBindUi(this);
 
-        GridStateHandler<Position> gridStateHandler = new GridStateHandler<Position>(grid);
-        gridStateHandler.loadState();
-        Set<String> hidden = gridStateHandler.getState().getHidden();
-        if (hidden == null) {
-            hidden = new HashSet<String>();
-            gridStateHandler.getState().setHidden(hidden);
-            columnConfigValid.setHidden(true);
-            columnConfigAddress.setHidden(true);
-            hidden.add(positionProperties.valid().getPath());
-            hidden.add(positionProperties.address().getPath());
-            gridStateHandler.saveState();
-        }
-
-        speedUnits.setLabel(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getUnit());
-
-        speed.addValidator(new MinNumberValidator<Double>(0d));
-        speed.addValidator(new MaxNumberValidator<Double>(30000d));
+        new GridStateHandler<Position>(grid).loadState();
 
         grid.getSelectionModel().addSelectionChangedHandler(this);
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -288,8 +256,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 deviceCombo.getValue(),
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
-                speedModifierCombo.getText(),
-                speed.getValue(),
+                !disableFilter.getValue(),
                 chosenColor
         );
     }
@@ -304,12 +271,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
         Window.open("/traccar/export/csv" +
-                    "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
-                    "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
-                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                    "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
-                    "&speed=" + speed.getValue(),
-                    "_blank", null);
+                        "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
+                        "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
+                        "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+                        "&filter=" + !disableFilter.getValue(),
+                "_blank", null);
     }
 
     @UiHandler("gpxButton")
@@ -320,8 +286,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                     "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                     "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                     "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                    "&speedModifier=" + (speedModifierCombo.getText().isEmpty() ? null : speedModifierCombo.getText()) +
-                    "&speed=" + speed.getValue(),
+                    "&filter=" + !disableFilter.getValue(),
                     "_blank", null);
     }
 
@@ -332,6 +297,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         } else {
             new ImportDialog(deviceCombo.getValue()).show();
         }
+    }
+
+    @UiHandler("filterButton")
+    public void onFilterClicked(SelectEvent event) {
+        archiveHandler.onFilterSettings();
     }
 
     private StoreHandlers<Device> deviceStoreHandlers = new BaseStoreHandlers<Device>() {

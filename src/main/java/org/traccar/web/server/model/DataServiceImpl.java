@@ -150,6 +150,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     user.setManager(Boolean.TRUE); // registered users are always managers
                     user.setUserSettings(new UserSettings());
                     getSessionEntityManager().persist(user);
+                    getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
                     setSessionUser(user);
                     return user;
             }
@@ -200,6 +201,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 user.setUserSettings(new UserSettings());
             }
             getSessionEntityManager().persist(user);
+            getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
             return user;
         } else {
             throw new IllegalStateException();
@@ -338,9 +340,15 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         if (device.getUsers().isEmpty()) {
             device.setLatestPosition(null);
             entityManager.flush();
+
             Query query = entityManager.createQuery("DELETE FROM Position x WHERE x.device = :device");
             query.setParameter("device", device);
             query.executeUpdate();
+
+            query = entityManager.createQuery("DELETE FROM DeviceEvent x WHERE x.device = :device");
+            query.setParameter("device", device);
+            query.executeUpdate();
+
             entityManager.remove(device);
         }
         return device;
@@ -349,26 +357,46 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser
     @Override
-    public List<Position> getPositions(Device device, Date from, Date to, String speedModifier, Double speed) {
+    public List<Position> getPositions(Device device, Date from, Date to, boolean filter) {
         EntityManager entityManager = getSessionEntityManager();
+        UserSettings filters = getSessionUser().getUserSettings();
+
         List<Position> positions = new LinkedList<Position>();
-        TypedQuery<Position> query = entityManager.createQuery(
-                "SELECT x FROM Position x WHERE x.device = :device AND x.time BETWEEN :from AND :to" + (speed == null ? "" : " AND x.speed " + speedModifier + " :speed"), Position.class);
+        String queryString = "SELECT x FROM Position x WHERE x.device = :device AND x.time BETWEEN :from AND :to";
+
+        if (filter) {
+            if (filters.isHideZeroCoordinates()) {
+                queryString += " AND (x.latitude != 0 OR x.longitude != 0)";
+            }
+            if (filters.isHideInvalidLocations()) {
+                queryString += " AND x.valid = TRUE";
+            }
+            if (filters.getSpeedModifier() != null && filters.getSpeedForFilter() != null) {
+                queryString += " AND x.speed " + filters.getSpeedModifier() + " :speed";
+            }
+        }
+
+        TypedQuery<Position> query = entityManager.createQuery(queryString, Position.class);
         query.setParameter("device", device);
         query.setParameter("from", from);
         query.setParameter("to", to);
-        if (speed != null) {
-            query.setParameter("speed", getSessionUser().getUserSettings().getSpeedUnit().toKnots(speed));
+
+        if (filter) {
+            if (filters.getSpeedModifier() != null && filters.getSpeedForFilter() != null) {
+                query.setParameter("speed", filters.getSpeedUnit().toKnots(filters.getSpeedForFilter()));
+            }
         }
-        positions.addAll(query.getResultList());
+
+        List<Position> queryResult = query.getResultList();
 
         final double radKoef = Math.PI / 180;
         final double earthRadius = 6371.01; // Radius of the earth in km
 
-        for (int i = 0; i < positions.size(); i++) {
+        for (int i = 0; i < queryResult.size(); i++) {
+            boolean add = true;
             if (i > 0) {
-                Position positionA = positions.get(i - 1);
-                Position positionB = positions.get(i);
+                Position positionA = queryResult.get(i - 1);
+                Position positionB = queryResult.get(i);
 
                 double dLat = (positionA.getLatitude() - positionB.getLatitude()) * radKoef;
                 double dLon = (positionA.getLongitude() - positionB.getLongitude()) * radKoef;
@@ -379,7 +407,15 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                         ;
                 double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
                 positionB.setDistance(earthRadius * c); // Distance in km
+
+                if (filters.isHideDuplicates()) {
+                    add = !positionA.getTime().equals(positionB.getTime());
+                }
+                if (add && filters.getMinDistance() != null) {
+                    add = positionB.getDistance() >= filters.getMinDistance();
+                }
             }
+            if (add) positions.add(queryResult.get(i));
         }
         return positions;
     }
