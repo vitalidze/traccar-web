@@ -43,6 +43,8 @@ import org.traccar.web.shared.model.User;
 public class DeviceController implements ContentController, DeviceView.DeviceHandler {
     private final MapController mapController;
 
+    private final Application application;
+
     private ListStore<Device> deviceStore;
 
     private DeviceView deviceView;
@@ -51,7 +53,8 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     private final PositionInfoPopup positionInfo = new PositionInfoPopup();
 
-    public DeviceController(MapController mapController, DeviceView.SettingsHandler settingsHandler) {
+    public DeviceController(MapController mapController, DeviceView.SettingsHandler settingsHandler, Application application) {
+        this.application = application;
         this.mapController = mapController;
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         deviceStore = new ListStore<Device>(deviceProperties.id());
@@ -189,5 +192,9 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     public void selectDevice(Device device) {
         deviceView.selectDevice(device);
+    }
+
+    public void doubleClicked(Device device) {
+        application.getArchiveController().selectDevice(device);
     }
 }

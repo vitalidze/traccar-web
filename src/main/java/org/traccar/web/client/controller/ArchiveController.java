@@ -104,4 +104,7 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
         archiveView.selectPosition(position);
     }
 
+    public void selectDevice(Device device) {
+        archiveView.selectDevice(device);
+    }
 }

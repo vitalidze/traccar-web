@@ -354,5 +354,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     public void selectDevice(Device device) {
         deviceCombo.setValue(device,false);
+        positionStore.clear();
     }
 }
