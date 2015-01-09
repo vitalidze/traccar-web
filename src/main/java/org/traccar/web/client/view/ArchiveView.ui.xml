@@ -53,7 +53,7 @@
 
           <toolbar:ToolBar ui:field="styleToolbar">
               <button:TextButton ui:field="styleButtonTrackColor" text=" " height="80%"/>
-              <button:TextButton ui:field="styleButton" text="Style">
+              <button:TextButton ui:field="styleButton" text="{i18n.style}">
                   <button:menu>
                       <menu:Menu ui:field="menu1">
                           <menu:MenuItem text="Markers">
@@ -66,12 +66,12 @@
                               </menu:submenu>
                           </menu:MenuItem>
                           <menu:SeparatorMenuItem />
-                          <menu:MenuItem text="Full palette">
+                          <menu:MenuItem text="{i18n.fullPalette}">
                               <menu:submenu>
                                   <menu:ColorMenu ui:field="fullColorMenu" />
                               </menu:submenu>
                           </menu:MenuItem>
-                          <menu:MenuItem text="Small palette">
+                          <menu:MenuItem text="{i18n.smallPalette}">
                               <menu:submenu>
                                   <menu:ColorMenu ui:field="smallColorMenu" />
                               </menu:submenu>
