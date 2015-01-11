@@ -21,15 +21,18 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.box.AbstractInputMessageBox;
-import com.sencha.gxt.widget.core.client.event.HideEvent;
+import com.sencha.gxt.widget.core.client.box.MessageBox;
 import com.sencha.gxt.widget.core.client.form.PasswordField;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
+import org.traccar.web.client.model.NotificationService;
+import org.traccar.web.client.model.NotificationServiceAsync;
 import org.traccar.web.client.model.UserProperties;
 import org.traccar.web.client.view.*;
 import org.traccar.web.shared.model.ApplicationSettings;
+import org.traccar.web.shared.model.NotificationSettings;
 import org.traccar.web.shared.model.User;
 
 import com.google.gwt.core.client.GWT;
@@ -183,4 +186,39 @@ public class SettingsController implements DeviceView.SettingsHandler {
                 }).show();
     }
 
+    @Override
+    public void onNotificationsSelected() {
+        final NotificationServiceAsync service = GWT.create(NotificationService.class);
+        service.getSettings(new BaseAsyncCallback<NotificationSettings>(i18n) {
+            @Override
+            public void onSuccess(NotificationSettings settings) {
+                if (settings == null) {
+                    settings = new NotificationSettings();
+                }
+                new NotificationSettingsDialog(settings, new NotificationSettingsDialog.NotificationSettingsHandler() {
+                    @Override
+                    public void onSave(NotificationSettings notificationSettings) {
+                        service.saveSettings(notificationSettings, new BaseAsyncCallback<Void>(i18n));
+                    }
+
+                    @Override
+                    public void onTest(NotificationSettings notificationSettings) {
+                        service.checkSettings(notificationSettings, new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable throwable) {
+                                new AlertMessageBox(i18n.error(), "Error").show();
+                            }
+
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                MessageBox messageBox = new MessageBox(i18n.notificationSettings(), "All good");
+                                messageBox.setIcon(MessageBox.ICONS.info());
+                                messageBox.show();
+                            }
+                        });
+                    }
+                }).show();
+            }
+        });
+    }
 }

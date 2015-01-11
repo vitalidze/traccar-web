@@ -56,6 +56,8 @@ public class GuiceServletConfig extends GuiceServletContextListener {
                 serve("/traccar/dataService").with(DataServiceImpl.class);
                 serve("/traccar/uiStateService").with(UIStateServiceImpl.class);
                 serve("/traccar/eventService").with(EventServiceImpl.class);
+                serve("/traccar/notificationService").with(NotificationServiceImpl.class);
+
                 serve("/traccar/rest/*").with(RESTApiServlet.class);
                 serve("/traccar/export/*").with(ExportServlet.class);
                 serve("/traccar/import/*").with(ImportServlet.class);

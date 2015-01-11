@@ -19,6 +19,8 @@
     <gwtVersion>2.7.0</gwtVersion>
     <!-- Convenience property to set the google guice version -->
     <guiceVersion>3.0</guiceVersion>
+    <!-- Convenience property to set the javamail version -->
+    <javaMailVersion>1.5.2</javaMailVersion>
     <!-- GWT needs at least java 1.5 -->
     <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -112,6 +114,17 @@
        <artifactId>gwt-openlayers-client</artifactId>
        <version>1.0</version>
        <scope>provided</scope>
+    </dependency>
+    <!-- Mail dependencies -->
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>mailapi</artifactId>
+      <version>${javaMailVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>smtp</artifactId>
+      <version>${javaMailVersion}</version>
     </dependency>
     <!-- Test dependencies -->
     <dependency>
