@@ -217,4 +217,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String notifications();
 
     String notificationSettings();
+
+    String testFailed();
+
+    String testSucceeded();
 }
