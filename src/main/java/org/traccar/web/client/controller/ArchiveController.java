@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.ArchiveStyle;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.PositionProperties;
@@ -76,7 +77,7 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     }
 
     @Override
-    public void onLoad(final Device device, Date from, Date to, boolean filter, final String color) {
+    public void onLoad(final Device device, Date from, Date to, boolean filter, final ArchiveStyle style) {
         if (device != null && from != null && to != null) {
             Application.getDataService().getPositions(device, from, to, filter, new BaseAsyncCallback<List<Position>>(i18n) {
                 @Override
@@ -87,8 +88,12 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
                     } else {
                         for (Position position : result) {
                             position.setStatus(Position.Status.ARCHIVE);
-                            position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
-                            position.setTrackColor(color);
+                            if (style.getIconType() != null) { // If style is set, override device's icon
+                                position.setIconType(style.getIconType());
+                            } else {
+                                position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
+                            }
+                            position.setTrackColor(style.getTrackColor());
                         }
                         positionStore.addAll(result);
                     }

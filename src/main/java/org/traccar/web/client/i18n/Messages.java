@@ -209,4 +209,10 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String fullPalette();
 
     String smallPalette();
+
+    String markers();
+
+    String standardMarkers();
+
+    String reducedMarkers();
 }

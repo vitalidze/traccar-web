@@ -36,8 +36,7 @@ import javax.persistence.Transient;
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 
-import org.traccar.web.client.view.ArchiveView;
-import org.traccar.web.client.view.MarkerIconFactory;
+import org.traccar.web.client.ArchiveStyle;
 
 @Entity
 @Table(name = "positions",
@@ -190,7 +189,7 @@ public class Position implements Serializable, Cloneable {
     private String trackColor;
 
     public String getTrackColor() {
-        return trackColor == null ? ArchiveView.DEFAULT_COLOR : trackColor;
+        return trackColor == null ? ArchiveStyle.DEFAULT_COLOR : trackColor;
     }
 
     public void setTrackColor(String trackColor) {

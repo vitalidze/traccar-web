@@ -29,6 +29,7 @@ import org.gwtopenmaps.openlayers.client.geometry.LineString;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
+import org.traccar.web.client.ArchiveStyle;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -215,7 +216,7 @@ public class MapPositionRenderer {
             }
             // Defaults
             if (color == null)
-                color = ArchiveView.DEFAULT_COLOR;
+                color = ArchiveStyle.DEFAULT_COLOR;
             // Assigns color to style
             Style style = mapView.getVectorLayer().getStyle();
             style.setStrokeColor("#" + color);

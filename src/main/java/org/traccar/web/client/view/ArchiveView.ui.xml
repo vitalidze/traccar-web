@@ -56,22 +56,18 @@
               <button:TextButton ui:field="styleButton" text="{i18n.style}">
                   <button:menu>
                       <menu:Menu ui:field="menu1">
-                          <menu:MenuItem text="Markers">
+                          <menu:MenuItem ui:field="markersMenu" text="{i18n.markers}">
                               <menu:submenu>
-                                  <menu:Menu ui:field="routeMarkersType">
-                                      <menu:CheckMenuItem text="Standard markers" group="radios" checked="true" />
-                                      <menu:CheckMenuItem text="Reduced markers" group="radios" />
-                                      <menu:CheckMenuItem text="No markers" group="radios" />
-                                  </menu:Menu>
+                                  <menu:Menu ui:field="routeMarkersType" />
                               </menu:submenu>
                           </menu:MenuItem>
                           <menu:SeparatorMenuItem />
-                          <menu:MenuItem text="{i18n.fullPalette}">
+                          <menu:MenuItem ui:field="fullPaletteMenu" text="{i18n.fullPalette}">
                               <menu:submenu>
                                   <menu:ColorMenu ui:field="fullColorMenu" />
                               </menu:submenu>
                           </menu:MenuItem>
-                          <menu:MenuItem text="{i18n.smallPalette}">
+                          <menu:MenuItem ui:field="smallPaletteMenu" text="{i18n.smallPalette}">
                               <menu:submenu>
                                   <menu:ColorMenu ui:field="smallColorMenu" />
                               </menu:submenu>

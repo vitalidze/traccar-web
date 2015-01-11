@@ -19,6 +19,8 @@ import java.util.*;
 
 import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -28,9 +30,9 @@ import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.grid.*;
-import com.sencha.gxt.widget.core.client.menu.ColorMenu;
-import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.menu.*;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.ArchiveStyle;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
@@ -51,26 +53,20 @@ import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import org.traccar.web.shared.model.PositionIconType;
 
 public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandler<Position> {
 
     private static ArchiveViewUiBinder uiBinder = GWT.create(ArchiveViewUiBinder.class);
-    public static final String[] COLORS = new String[]{
-            "0000ff",
-            "00b6ff",
-            "27ff00",
-            "ff7f17",
-            "ff0000"
-    };
-    public static final String DEFAULT_COLOR = COLORS[0];
-    public String chosenColor = DEFAULT_COLOR; // until color splitter is implemented
+
+    public ArchiveStyle style = new ArchiveStyle();
 
     interface ArchiveViewUiBinder extends UiBinder<Widget, ArchiveView> {
     }
 
     public interface ArchiveHandler {
         public void onSelected(Position position);
-        public void onLoad(Device device, Date from, Date to, boolean filter, String color);
+        public void onLoad(Device device, Date from, Date to, boolean filter, ArchiveStyle style);
         public void onFilterSettings();
         public void onClear();
     }
@@ -125,7 +121,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiField(provided = true)
     ColorMenu fullColorMenu;
 
-    @UiField
+    @UiField(provided = true)
     Menu routeMarkersType;
 
     @UiField(provided = true)
@@ -180,18 +176,18 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         // Element that displays the current track color
         styleButtonTrackColor = new TextButton();
-        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(DEFAULT_COLOR));
+        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(style.DEFAULT_COLOR));
         styleButtonTrackColor.getElement().getStyle().setCursor(Style.Cursor.TEXT);
         // Menu with the small palette
-        smallColorMenu = new ExtColorMenu(COLORS, COLORS);
-        smallColorMenu.setColor(DEFAULT_COLOR);
+        smallColorMenu = new ExtColorMenu(style.COLORS, style.COLORS);
+        smallColorMenu.setColor(style.DEFAULT_COLOR);
         smallColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                chosenColor = event.getValue();
+                style.setTrackColor(event.getValue());
                 smallColorMenu.hide(true);
                 fullColorMenu.getPalette().setValue("", false);
-                styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(chosenColor));
+                styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(style.getTrackColor()));
             }
         });
         // Menu with the complete palette
@@ -199,12 +195,33 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         fullColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                chosenColor = event.getValue();
+                style.setTrackColor(event.getValue());
                 fullColorMenu.hide(true);
                 smallColorMenu.getPalette().setValue("",false);
-                styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(chosenColor));
+                styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(style.getTrackColor()));
             }
         });
+        // Markers
+        routeMarkersType = new Menu();
+        final CheckMenuItem item1 = new CheckMenuItem(i18n.standardMarkers());
+        item1.setGroup("markers");
+        item1.setChecked(true);
+        item1.addSelectionHandler(new SelectionHandler<Item>() {
+            @Override
+            public void onSelection(SelectionEvent<Item> selectionEvent) {
+                style.setIconType(PositionIconType.iconArchive);
+            }
+        });
+        final CheckMenuItem item2 = new CheckMenuItem(i18n.reducedMarkers());
+        item2.setGroup("markers");
+        item2.addSelectionHandler(new SelectionHandler<Item>() {
+            @Override
+            public void onSelection(SelectionEvent<Item> selectionEvent) {
+                style.setIconType(PositionIconType.dotArchive);
+            }
+        });
+        routeMarkersType.add(item1);
+        routeMarkersType.add(item2);
 
         uiBinder.createAndBindUi(this);
 
@@ -253,7 +270,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
                 !disableFilter.getValue(),
-                chosenColor
+                style
         );
     }
 
