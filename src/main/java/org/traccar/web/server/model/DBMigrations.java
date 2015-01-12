@@ -29,6 +29,7 @@ public class DBMigrations {
                 new SetDefaultFilteringSettings(),
                 new SetDefaultMapViewSettings(),
                 new SetManagerFlag(),
+                new SetNotificationsFlag(),
                 new SetDefaultDeviceTimeout(),
                 new SetDefaultIdleSpeedThreshold(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
@@ -215,5 +216,15 @@ public class DBMigrations {
                 em.persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
             }
         }
+    }
+
+    static class SetNotificationsFlag implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + User.class.getSimpleName() + " U SET U.notifications = :n WHERE U.notifications IS NULL")
+                    .setParameter("n", Boolean.FALSE)
+                    .executeUpdate();
+        }
+
     }
 }
