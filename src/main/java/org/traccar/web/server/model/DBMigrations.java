@@ -60,7 +60,7 @@ public class DBMigrations {
     static class CreateAdmin implements Migration {
         @Override
         public void migrate(EntityManager em) throws Exception {
-            TypedQuery<User> query = em.createQuery("SELECT x FROM User x WHERE x.login = 'admin'", User.class);
+            TypedQuery<User> query = em.createQuery("SELECT x FROM User x WHERE x.admin = 1", User.class);
             List<User> results = query.getResultList();
             if (results.isEmpty()) {
                 User user = new User();
