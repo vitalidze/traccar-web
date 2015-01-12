@@ -225,4 +225,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String email();
 
     String invalidEmail();
+
+    String fromAddress();
 }

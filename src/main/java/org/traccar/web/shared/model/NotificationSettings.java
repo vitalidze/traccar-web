@@ -85,6 +85,7 @@ public class NotificationSettings implements Serializable {
         return this.user.equals(other.user) && this.id == other.id;
     }
 
+    private String fromAddress;
     private String server;
     private boolean useAuthorization;
     private int port;
@@ -92,6 +93,14 @@ public class NotificationSettings implements Serializable {
     private String password;
     @Enumerated(EnumType.STRING)
     private SecureConnectionType secureConnectionType;
+
+    public String getFromAddress() {
+        return fromAddress;
+    }
+
+    public void setFromAddress(String fromAddress) {
+        this.fromAddress = fromAddress;
+    }
 
     public String getServer() {
         return server;
@@ -142,6 +151,7 @@ public class NotificationSettings implements Serializable {
     }
 
     public void copyFrom(NotificationSettings s) {
+        setFromAddress(s.getFromAddress());
         setServer(s.getServer());
         setUseAuthorization(s.isUseAuthorization());
         setPort(s.getPort());

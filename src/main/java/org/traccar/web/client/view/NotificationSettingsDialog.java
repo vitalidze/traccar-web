@@ -59,8 +59,8 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     @UiField
     Window window;
 
-    @UiField(provided = true)
-    ComboBox<NotificationSettings.SecureConnectionType> secureConnectionType;
+    @UiField
+    TextField fromAddress;
 
     @UiField
     TextField server;
@@ -70,6 +70,9 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
 
     @UiField(provided = true)
     NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
+
+    @UiField(provided = true)
+    ComboBox<NotificationSettings.SecureConnectionType> secureConnectionType;
 
     @UiField
     CheckBox useAuthorization;
