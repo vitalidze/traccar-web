@@ -227,4 +227,16 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String invalidEmail();
 
     String fromAddress();
+
+    String style();
+
+    String fullPalette();
+
+    String smallPalette();
+
+    String markers();
+
+    String standardMarkers();
+
+    String reducedMarkers();
 }

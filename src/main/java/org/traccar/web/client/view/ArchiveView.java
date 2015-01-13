@@ -17,13 +17,22 @@ package org.traccar.web.client.view;
 
 import java.util.*;
 
+import com.google.gwt.core.client.JsonUtils;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.sencha.gxt.state.client.GridStateHandler;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.grid.*;
+import com.sencha.gxt.widget.core.client.menu.*;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.ArchiveStyle;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
@@ -44,17 +53,20 @@ import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import org.traccar.web.shared.model.PositionIconType;
 
 public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandler<Position> {
 
     private static ArchiveViewUiBinder uiBinder = GWT.create(ArchiveViewUiBinder.class);
+
+    public ArchiveStyle style = new ArchiveStyle();
 
     interface ArchiveViewUiBinder extends UiBinder<Widget, ArchiveView> {
     }
 
     public interface ArchiveHandler {
         public void onSelected(Position position);
-        public void onLoad(Device device, Date from, Date to, boolean filter);
+        public void onLoad(Device device, Date from, Date to, boolean filter, ArchiveStyle style);
         public void onFilterSettings();
         public void onClear();
     }
@@ -96,6 +108,21 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiField
     CheckBox disableFilter;
+
+    @UiField(provided = true)
+    TextButton styleButtonTrackColor;
+
+    @UiField
+    TextButton styleButton;
+
+    @UiField(provided = true)
+    ColorMenu smallColorMenu;
+
+    @UiField(provided = true)
+    ColorMenu fullColorMenu;
+
+    @UiField(provided = true)
+    Menu routeMarkersType;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
@@ -147,6 +174,55 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         columnModel.addAggregationRow(totals);
 
+        // Element that displays the current track color
+        styleButtonTrackColor = new TextButton();
+        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(style.DEFAULT_COLOR));
+        styleButtonTrackColor.getElement().getStyle().setCursor(Style.Cursor.TEXT);
+        // Menu with the small palette
+        smallColorMenu = new ExtColorMenu(style.COLORS, style.COLORS);
+        smallColorMenu.setColor(style.DEFAULT_COLOR);
+        smallColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                style.setTrackColor(event.getValue());
+                smallColorMenu.hide(true);
+                fullColorMenu.getPalette().setValue("", false);
+                styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(style.getTrackColor()));
+            }
+        });
+        // Menu with the complete palette
+        fullColorMenu = new ColorMenu();
+        fullColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                style.setTrackColor(event.getValue());
+                fullColorMenu.hide(true);
+                smallColorMenu.getPalette().setValue("",false);
+                styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(style.getTrackColor()));
+            }
+        });
+        // Markers
+        routeMarkersType = new Menu();
+        final CheckMenuItem item1 = new CheckMenuItem(i18n.standardMarkers());
+        item1.setGroup("markers");
+        item1.setChecked(true);
+        item1.addSelectionHandler(new SelectionHandler<Item>() {
+            @Override
+            public void onSelection(SelectionEvent<Item> selectionEvent) {
+                style.setIconType(PositionIconType.iconArchive);
+            }
+        });
+        final CheckMenuItem item2 = new CheckMenuItem(i18n.reducedMarkers());
+        item2.setGroup("markers");
+        item2.addSelectionHandler(new SelectionHandler<Item>() {
+            @Override
+            public void onSelection(SelectionEvent<Item> selectionEvent) {
+                style.setIconType(PositionIconType.dotArchive);
+            }
+        });
+        routeMarkersType.add(item1);
+        routeMarkersType.add(item2);
+
         uiBinder.createAndBindUi(this);
 
         new GridStateHandler<Position>(grid).loadState();
@@ -193,7 +269,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 deviceCombo.getValue(),
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
-                !disableFilter.getValue());
+                !disableFilter.getValue(),
+                style
+        );
     }
 
     @UiHandler("clearButton")
@@ -206,11 +284,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
         Window.open("/traccar/export/csv" +
-                    "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
-                    "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
-                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                    "&filter=" + !disableFilter.getValue(),
-                    "_blank", null);
+                        "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
+                        "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
+                        "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+                        "&filter=" + !disableFilter.getValue(),
+                "_blank", null);
     }
 
     @UiHandler("gpxButton")
@@ -257,4 +335,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         grid.getSelectionModel().select(positionStore.findModel(position), false);
     }
 
+    public void selectDevice(Device device) {
+        deviceCombo.setValue(device,false);
+        positionStore.clear();
+    }
 }

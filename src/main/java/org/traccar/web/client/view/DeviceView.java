@@ -26,6 +26,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.state.client.GridStateHandler;
+import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
@@ -58,7 +59,7 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 
-public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler<Device>, RowMouseDownEvent.RowMouseDownHandler {
+public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler<Device>, RowMouseDownEvent.RowMouseDownHandler, CellDoubleClickEvent.CellDoubleClickHandler {
 
     private static DeviceViewUiBinder uiBinder = GWT.create(DeviceViewUiBinder.class);
 
@@ -73,6 +74,7 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         public void onRemove(Device device);
         public void onMouseOver(int mouseX, int mouseY, Device device);
         public void onMouseOut(int mouseX, int mouseY, Device device);
+        public void doubleClicked(Device device);
     }
 
     private DeviceHandler deviceHandler;
@@ -181,6 +183,7 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         grid.getSelectionModel().addSelectionChangedHandler(this);
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         grid.addRowMouseDownHandler(this);
+        grid.addCellDoubleClickHandler(this);
 
         grid.getView().setAutoFill(true);
         grid.getView().setForceFit(true);
@@ -225,6 +228,11 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     @Override
     public void onRowMouseDown(RowMouseDownEvent event) {
         deviceHandler.onSelected(grid.getSelectionModel().getSelectedItem());
+    }
+
+    @Override
+    public void onCellClick(CellDoubleClickEvent cellDoubleClickEvent) {
+        deviceHandler.doubleClicked(grid.getSelectionModel().getSelectedItem());
     }
 
     @UiHandler("addButton")

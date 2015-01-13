@@ -7,7 +7,8 @@
     xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
     xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
     xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
-    xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form">
+    xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+    xmlns:menu="urn:import:com.sencha.gxt.widget.core.client.menu">
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="toolBarRowData">
     <ui:attributes width="1" height="-1" />
@@ -49,6 +50,32 @@
           <button:TextButton ui:field="filterButton" text="{i18n.filter}..." />
           <toolbar:LabelToolItem width="2" />
           <form:CheckBox ui:field="disableFilter" boxLabel="{i18n.disableFilter}" />
+
+          <toolbar:ToolBar ui:field="styleToolbar">
+              <button:TextButton ui:field="styleButtonTrackColor" text=" " height="80%"/>
+              <button:TextButton ui:field="styleButton" text="{i18n.style}">
+                  <button:menu>
+                      <menu:Menu ui:field="menu1">
+                          <menu:MenuItem ui:field="markersMenu" text="{i18n.markers}">
+                              <menu:submenu>
+                                  <menu:Menu ui:field="routeMarkersType" />
+                              </menu:submenu>
+                          </menu:MenuItem>
+                          <menu:SeparatorMenuItem />
+                          <menu:MenuItem ui:field="fullPaletteMenu" text="{i18n.fullPalette}">
+                              <menu:submenu>
+                                  <menu:ColorMenu ui:field="fullColorMenu" />
+                              </menu:submenu>
+                          </menu:MenuItem>
+                          <menu:MenuItem ui:field="smallPaletteMenu" text="{i18n.smallPalette}">
+                              <menu:submenu>
+                                  <menu:ColorMenu ui:field="smallColorMenu" />
+                              </menu:submenu>
+                          </menu:MenuItem>
+                      </menu:Menu>
+                  </button:menu>
+              </button:TextButton>
+          </toolbar:ToolBar>
 
           <toolbar:SeparatorToolItem />
 
