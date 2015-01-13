@@ -282,7 +282,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @ManagesDevices
     @Override
-    public Device addDevice(Device device) {
+    public Device addDevice(Device device) throws TraccarException {
+        if (device.getName() == null || device.getName().trim().isEmpty() ||
+            device.getUniqueId() == null || device.getUniqueId().isEmpty()) {
+            throw new ValidationException();
+        }
+
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<Device> query = entityManager.createQuery("SELECT x FROM Device x WHERE x.uniqueId = :id", Device.class);
         query.setParameter("id", device.getUniqueId());
@@ -296,7 +301,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             entityManager.persist(device);
             return device;
         } else {
-            throw new IllegalStateException();
+            throw new DeviceExistsException();
         }
     }
 
@@ -304,7 +309,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @ManagesDevices
     @Override
-    public Device updateDevice(Device device) {
+    public Device updateDevice(Device device) throws TraccarException {
+        if (device.getName() == null || device.getName().trim().isEmpty() ||
+            device.getUniqueId() == null || device.getUniqueId().isEmpty()) {
+            throw new ValidationException();
+        }
+
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<Device> query = entityManager.createQuery("SELECT x FROM Device x WHERE x.uniqueId = :id AND x.id <> :primary_id", Device.class);
         query.setParameter("primary_id", device.getId());
@@ -320,7 +330,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setIconType(device.getIconType());
             return tmp_device;
         } else {
-            throw new IllegalStateException();
+            throw new DeviceExistsException();
         }
     }
 
