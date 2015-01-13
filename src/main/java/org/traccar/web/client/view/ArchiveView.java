@@ -280,7 +280,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     }
 
     @UiHandler("csvButton")
-    public void onCSVClicked(SelectEvent event) {
+    public void onCSVClicked(SelectionEvent<Item> event) {
         DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
         Window.open("/traccar/export/csv" +
@@ -292,7 +292,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     }
 
     @UiHandler("gpxButton")
-    public void onGPXClicked(SelectEvent event) {
+    public void onGPXClicked(SelectionEvent<Item> event) {
         DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
         Window.open("/traccar/export/gpx" +
@@ -304,7 +304,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     }
 
     @UiHandler("importButton")
-    public void onImportClicked(SelectEvent event) {
+    public void onImportClicked(SelectionEvent<Item> event) {
         if (deviceCombo.getValue() == null) {
             new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
         } else {
