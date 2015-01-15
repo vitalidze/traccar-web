@@ -260,6 +260,15 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     public User removeUser(User user) {
         EntityManager entityManager = getSessionEntityManager();
         user = entityManager.merge(user);
+        // Don't allow user to delete himself
+        if (user.equals(getSessionUser())) {
+            throw new IllegalArgumentException();
+        }
+        // Allow manager to remove users only managed by himself
+        if (!user.getAdmin() && !user.getAllManagedUsers().contains(user)) {
+            throw new SecurityException();
+        }
+        entityManager.createQuery("DELETE FROM UIStateEntry s WHERE s.user=:user").setParameter("user", user).executeUpdate();
         for (Device device : user.getDevices()) {
             device.getUsers().remove(user);
         }
