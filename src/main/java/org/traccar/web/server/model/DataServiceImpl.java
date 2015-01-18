@@ -265,7 +265,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             throw new IllegalArgumentException();
         }
         // Allow manager to remove users only managed by himself
-        if (!user.getAdmin() && !user.getAllManagedUsers().contains(user)) {
+        if (!getSessionUser().getAdmin() && !getSessionUser().getAllManagedUsers().contains(user)) {
             throw new SecurityException();
         }
         entityManager.createQuery("DELETE FROM UIStateEntry s WHERE s.user=:user").setParameter("user", user).executeUpdate();
