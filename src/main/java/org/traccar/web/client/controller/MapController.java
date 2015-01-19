@@ -169,16 +169,7 @@ public class MapController implements ContentController, MapView.MapHandler {
     public void showArchivePositions(Track track) {
         mapView.showArchiveTrack(track);
         mapView.showArchivePositions(track);
-        List<Position> sortedPositions = track.getSortedPositions();
-        List<Position> withTime = new ArrayList<Position>();
-        long prevTime = -1;
-        for (Position position : sortedPositions) {
-            if (prevTime < 0 ||
-                (position.getTime().getTime() - prevTime >= ApplicationContext.getInstance().getUserSettings().getTimePrintInterval() * 60 * 1000)) {
-                withTime.add(position);
-                prevTime = position.getTime().getTime();
-            }
-        }
+        List<Position> withTime = track.getTimePositions(ApplicationContext.getInstance().getUserSettings().getTimePrintInterval());
         mapView.showArchiveTime(withTime);
     }
 

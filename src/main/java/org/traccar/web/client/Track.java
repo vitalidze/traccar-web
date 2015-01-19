@@ -18,6 +18,7 @@ package org.traccar.web.client;
 import org.traccar.web.client.TrackSegment;
 import org.traccar.web.shared.model.Position;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -72,4 +73,17 @@ public class Track {
         return sortedPositions;
     }
 
+    public List<Position> getTimePositions(long timePrintInterval) {
+        List<Position> sortedPositions = this.getSortedPositions();
+        List<Position> withTime = new ArrayList<Position>();
+        long prevTime = -1;
+        for (Position position : sortedPositions) {
+            if (prevTime < 0 ||
+                    (position.getTime().getTime() - prevTime >= timePrintInterval * 60 * 1000)) {
+                withTime.add(position);
+                prevTime = position.getTime().getTime();
+            }
+        }
+        return withTime;
+    }
 }

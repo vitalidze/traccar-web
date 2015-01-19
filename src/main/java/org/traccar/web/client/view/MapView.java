@@ -221,6 +221,9 @@ public class MapView {
 
     public void showLatestTrack(Track track) {
         track.getStyle().clearExisting = false;
+        // Do not zoom to track with 'latest' track
+        if (track.getStyle().getZoomToTrack())
+            track.getStyle().toggleZoomToTrack();
         latestPositionTrackRenderer.showTrack(track);
     }
 
