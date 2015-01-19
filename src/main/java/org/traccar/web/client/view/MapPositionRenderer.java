@@ -30,6 +30,7 @@ import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.traccar.web.client.ArchiveStyle;
+import org.traccar.web.client.Track;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -196,36 +197,34 @@ public class MapPositionRenderer {
         }
     }
 
-    public void showTrack(List<Position> positions, boolean clearExisting) {
-        if (clearExisting) {
-            for (VectorFeature track : tracks) {
-                getVectorLayer().removeFeature(track);
-                track.destroy();
+    public void showTrack(Track track) {
+        if (track.getStyle().clearExisting) {
+            for (VectorFeature mapTrack : tracks) {
+                getVectorLayer().removeFeature(mapTrack);
+                mapTrack.destroy();
             }
             tracks.clear();
         }
+
+        List<Position> positions = track.getSortedPositions();
 
         if (!positions.isEmpty()) {
             Point[] linePoints = new Point[positions.size()];
 
             int i = 0;
-            String color = null;
             for (Position position : positions) {
-                color = position.getTrackColor();
                 linePoints[i++] = mapView.createPoint(position.getLongitude(), position.getLatitude());
             }
-            // Defaults
-            if (color == null)
-                color = ArchiveStyle.DEFAULT_COLOR;
             // Assigns color to style
             Style style = mapView.getVectorLayer().getStyle();
-            style.setStrokeColor("#" + color);
+            style.setStrokeColor("#" + track.getStyle().getTrackColor());
 
             LineString lineString = new LineString(linePoints);
-            VectorFeature track = new VectorFeature(lineString, style);
-            getVectorLayer().addFeature(track);
-            tracks.add(track);
-            //mapView.getMap().zoomToExtent(lineString.getBounds());
+            VectorFeature mapTrack = new VectorFeature(lineString, style);
+            getVectorLayer().addFeature(mapTrack);
+            tracks.add(mapTrack);
+            if (track.getStyle().getZoomToTrack())
+                mapView.getMap().zoomToExtent(lineString.getBounds());
         }
     }
 

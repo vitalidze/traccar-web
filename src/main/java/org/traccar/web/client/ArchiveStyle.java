@@ -30,6 +30,8 @@ public class ArchiveStyle {
 
     private String trackColor = DEFAULT_COLOR;
     private PositionIconType iconType = null;
+    public boolean clearExisting = false;
+    private boolean zoomToTrack = false;
 
     public ArchiveStyle() {
 
@@ -51,4 +53,11 @@ public class ArchiveStyle {
         return iconType;
     }
 
+    public void toggleZoomToTrack() {
+        zoomToTrack = !zoomToTrack;
+    }
+
+    public boolean getZoomToTrack() {
+        return zoomToTrack;
+    }
 }

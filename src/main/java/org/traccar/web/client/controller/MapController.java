@@ -27,6 +27,7 @@ import java.util.Map;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.Track;
 import org.traccar.web.client.view.MapView;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -137,7 +138,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                         }
                         if (ApplicationContext.getInstance().isRecordingTrace(device)) {
                             mapView.showLatestTrackPositions(Arrays.asList(prevPosition));
-                            mapView.showLatestTrack(Arrays.asList(prevPosition, position));
+                            mapView.showLatestTrack(new Track(Arrays.asList(prevPosition, position)));
                         }
                     }
                     if (ApplicationContext.getInstance().isRecordingTrace(device)) {
@@ -165,19 +166,13 @@ public class MapController implements ContentController, MapView.MapHandler {
         mapView.selectDevice(device);
     }
 
-    public void showArchivePositions(List<Position> positions) {
-        List<Position> sortedPositions = new LinkedList<Position>(positions);
-        Collections.sort(sortedPositions, new Comparator<Position>() {
-            @Override
-            public int compare(Position o1, Position o2) {
-                return o1.getTime().compareTo(o2.getTime());
-            }
-        });
-        mapView.showArchiveTrack(sortedPositions);
-        mapView.showArchivePositions(sortedPositions);
+    public void showArchivePositions(Track track) {
+        mapView.showArchiveTrack(track);
+        mapView.showArchivePositions(track);
+        List<Position> sortedPositions = track.getSortedPositions();
         List<Position> withTime = new ArrayList<Position>();
         long prevTime = -1;
-        for (Position position : positions) {
+        for (Position position : sortedPositions) {
             if (prevTime < 0 ||
                 (position.getTime().getTime() - prevTime >= ApplicationContext.getInstance().getUserSettings().getTimePrintInterval() * 60 * 1000)) {
                 withTime.add(position);

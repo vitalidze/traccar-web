@@ -215,4 +215,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String standardMarkers();
 
     String reducedMarkers();
+
+    String zoomToTrack();
 }
