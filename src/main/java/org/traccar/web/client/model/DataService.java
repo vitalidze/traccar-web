@@ -20,10 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -51,9 +48,9 @@ public interface DataService extends RemoteService {
 
     List<Device> getDevices();
 
-    Device addDevice(Device device);
+    Device addDevice(Device device) throws TraccarException;
 
-    Device updateDevice(Device device);
+    Device updateDevice(Device device) throws TraccarException;
 
     Device removeDevice(Device device);
 

@@ -69,7 +69,7 @@ public class Application {
     public Application() {
         settingsController = new SettingsController(userSettingsHandler);
         mapController = new MapController(mapHandler);
-        deviceController = new DeviceController(mapController, settingsController);
+        deviceController = new DeviceController(mapController, settingsController, this);
         deviceController.getDeviceStore().addStoreHandlers(deviceStoreHandler);
         archiveController = new ArchiveController(archiveHanlder, userSettingsHandler, deviceController.getDeviceStore());
         archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
@@ -108,6 +108,10 @@ public class Application {
         }
 
     };
+
+    public ArchiveController getArchiveController() {
+        return archiveController;
+    }
 
     private StoreHandlers<Device> deviceStoreHandler = new BaseStoreHandlers<Device>() {
 

@@ -17,7 +17,6 @@ package org.traccar.web.server.model;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
-import com.google.inject.persist.UnitOfWork;
 import org.traccar.web.client.model.EventService;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.DeviceEvent;
@@ -36,22 +35,6 @@ import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class EventServiceImpl extends RemoteServiceServlet implements EventService {
-    public static abstract class ScheduledTask implements Runnable {
-        @Inject
-        private UnitOfWork unitOfWork;
-
-        @Override
-        public final void run() {
-            unitOfWork.begin();
-            try {
-                doWork();
-            } finally {
-                unitOfWork.end();
-            }
-        }
-
-        public abstract void doWork();
-    }
 
     public static class OfflineDetector extends ScheduledTask {
         @Inject

@@ -41,6 +41,8 @@ public class DeviceEvent {
     @JoinColumn(foreignKey = @ForeignKey(name = "events_fkey_position_id"))
     private Position position;
 
+    private boolean notificationSent;
+
     public DeviceEvent() {
     }
 
@@ -82,6 +84,14 @@ public class DeviceEvent {
 
     public void setPosition(Position position) {
         this.position = position;
+    }
+
+    public boolean isNotificationSent() {
+        return notificationSent;
+    }
+
+    public void setNotificationSent(boolean notificationSent) {
+        this.notificationSent = notificationSent;
     }
 
     @Override

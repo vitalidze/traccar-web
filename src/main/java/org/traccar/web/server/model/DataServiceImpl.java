@@ -229,6 +229,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 currentUser.setUserSettings(user.getUserSettings());
                 currentUser.setAdmin(user.getAdmin());
                 currentUser.setManager(user.getManager());
+                currentUser.setEmail(user.getEmail());
+                currentUser.setNotifications(user.isNotifications());
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
@@ -258,6 +260,15 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     public User removeUser(User user) {
         EntityManager entityManager = getSessionEntityManager();
         user = entityManager.merge(user);
+        // Don't allow user to delete himself
+        if (user.equals(getSessionUser())) {
+            throw new IllegalArgumentException();
+        }
+        // Allow manager to remove users only managed by himself
+        if (!getSessionUser().getAdmin() && !getSessionUser().getAllManagedUsers().contains(user)) {
+            throw new SecurityException();
+        }
+        entityManager.createQuery("DELETE FROM UIStateEntry s WHERE s.user=:user").setParameter("user", user).executeUpdate();
         for (Device device : user.getDevices()) {
             device.getUsers().remove(user);
         }
@@ -280,7 +291,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @ManagesDevices
     @Override
-    public Device addDevice(Device device) {
+    public Device addDevice(Device device) throws TraccarException {
+        if (device.getName() == null || device.getName().trim().isEmpty() ||
+            device.getUniqueId() == null || device.getUniqueId().isEmpty()) {
+            throw new ValidationException();
+        }
+
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<Device> query = entityManager.createQuery("SELECT x FROM Device x WHERE x.uniqueId = :id", Device.class);
         query.setParameter("id", device.getUniqueId());
@@ -294,7 +310,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             entityManager.persist(device);
             return device;
         } else {
-            throw new IllegalStateException();
+            throw new DeviceExistsException();
         }
     }
 
@@ -302,7 +318,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @ManagesDevices
     @Override
-    public Device updateDevice(Device device) {
+    public Device updateDevice(Device device) throws TraccarException {
+        if (device.getName() == null || device.getName().trim().isEmpty() ||
+            device.getUniqueId() == null || device.getUniqueId().isEmpty()) {
+            throw new ValidationException();
+        }
+
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<Device> query = entityManager.createQuery("SELECT x FROM Device x WHERE x.uniqueId = :id AND x.id <> :primary_id", Device.class);
         query.setParameter("primary_id", device.getId());
@@ -318,7 +339,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setIconType(device.getIconType());
             return tmp_device;
         } else {
-            throw new IllegalStateException();
+            throw new DeviceExistsException();
         }
     }
 

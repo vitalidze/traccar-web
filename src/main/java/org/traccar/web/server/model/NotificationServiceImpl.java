@@ -18,19 +18,25 @@ package org.traccar.web.server.model;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.NotificationService;
+import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.DeviceEvent;
 import org.traccar.web.shared.model.NotificationSettings;
 import org.traccar.web.shared.model.User;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import javax.mail.Authenticator;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
+import javax.mail.*;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
-import java.util.List;
-import java.util.Properties;
+import javax.servlet.ServletException;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 @Singleton
 public class NotificationServiceImpl extends RemoteServiceServlet implements NotificationService {
@@ -40,10 +46,161 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @Inject
     private Provider<EntityManager> entityManager;
 
+    public static class NotificationSender extends ScheduledTask {
+        @Inject
+        Provider<EntityManager> entityManager;
+
+        @Transactional
+        @Override
+        public void doWork() throws Exception {
+            Map<User, Set<DeviceEvent>> events = new HashMap<User, Set<DeviceEvent>>();
+            List<User> admins = null;
+
+            for (DeviceEvent event : entityManager.get().createQuery("SELECT e FROM DeviceEvent e WHERE e.notificationSent = :false", DeviceEvent.class)
+                                    .setParameter("false", false)
+                                    .getResultList()) {
+                Device device = event.getDevice();
+
+                for (User user : device.getUsers()) {
+                    if (user.isNotifications()) {
+                        addEvent(events, user, event);
+                    }
+                }
+
+                if (admins == null) {
+                    admins = entityManager.get().createQuery("SELECT u FROM User u WHERE u.admin=:true AND u.notifications=:true", User.class)
+                            .setParameter("true", true)
+                            .getResultList();
+                }
+
+                for (User admin : admins) {
+                    addEvent(events, admin, event);
+                }
+            }
+
+            for (Map.Entry<User, Set<DeviceEvent>> entry : events.entrySet()) {
+                User user = entry.getKey();
+                if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+                    logger.warning("User '" + user.getLogin() + "' has empty email field");
+                    continue;
+                }
+
+                NotificationSettings settings = findNotificationSettings(user);
+                if (settings == null) {
+                    logger.warning("Unable to find notification settings for '" + user.getLogin() + "' (id=" + user.getId() + "), thus he won't receive any notifications.");
+                    continue;
+                }
+
+                List<DeviceEvent> deviceEvents = new ArrayList<DeviceEvent>(entry.getValue());
+                Collections.sort(deviceEvents, new Comparator<DeviceEvent>() {
+                    @Override
+                    public int compare(DeviceEvent o1, DeviceEvent o2) {
+                        int r = o1.getDevice().getName().compareTo(o2.getDevice().getName());
+                        if (r == 0) {
+                            return o1.getTime().compareTo(o2.getTime());
+                        }
+                        return r;
+                    }
+                });
+
+                logger.info("Sending notification to '" + user.getEmail() + "'...");
+
+                Session session = getSession(settings);
+                Message msg = new MimeMessage(session);
+                Transport transport = null;
+                try {
+                    msg.setFrom(new InternetAddress(settings.getFromAddress()));
+                    msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getLogin() + " <" + user.getEmail() + ">", false));
+                    msg.setSubject("[traccar-web] Notification");
+                    if (deviceEvents.size() == 1) {
+                        DeviceEvent event = deviceEvents.get(0);
+                        msg.setText("Device '" + event.getDevice().getName() + "' went offline at " + event.getTime());
+                    } else {
+                        StringBuilder body = new StringBuilder("Following devices went offline:\n");
+                        for (DeviceEvent event : deviceEvents) {
+                            body.append("\n  '").append(event.getDevice().getName()).append("' (").append(event.getDevice().getUniqueId()).append(") at ").append(event.getTime());
+                        }
+                        msg.setText(body.toString());
+                    }
+                    msg.setHeader("X-Mailer", "traccar-web.sendmail");
+                    msg.setSentDate(new Date());
+
+                    transport = session.getTransport("smtp");
+                    transport.connect();
+                    transport.sendMessage(msg, msg.getAllRecipients());
+
+                    for (DeviceEvent event : deviceEvents) {
+                        event.setNotificationSent(true);
+                    }
+                } catch (MessagingException me) {
+                    logger.log(Level.SEVERE, "Unable to send Email message", me);
+                } finally {
+                    if (transport != null) {
+                        transport.close();
+                    }
+                }
+            }
+        }
+
+        private void addEvent(Map<User, Set<DeviceEvent>> events, User user, DeviceEvent event) {
+            Set<DeviceEvent> userEvents = events.get(user);
+            if (userEvents == null) {
+                userEvents = new HashSet<DeviceEvent>();
+                events.put(user, userEvents);
+            }
+            userEvents.add(event);
+        }
+
+        private NotificationSettings findNotificationSettings(User user) {
+            NotificationSettings s = getNotificationSettings(user);
+
+            // lookup settings in manager hierarchy
+            if (s == null) {
+                User manager = user.getManagedBy();
+                while (s == null && manager != null) {
+                    s = getNotificationSettings(manager);
+                    manager = manager.getManagedBy();
+                }
+            }
+
+            // take settings from first admin ordered by id
+            if (s == null) {
+                List<NotificationSettings> settings = entityManager.get().createQuery("SELECT s FROM NotificationSettings s WHERE s.user.admin=:true ORDER BY s.user.id ASC", NotificationSettings.class)
+                        .setParameter("true", true)
+                        .getResultList();
+                if (!settings.isEmpty()) {
+                    s = settings.get(0);
+                }
+            }
+
+            return s;
+        }
+
+        private NotificationSettings getNotificationSettings(User user) {
+            List<NotificationSettings> settings = entityManager.get().createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
+                    .setParameter("user", user)
+                    .getResultList();
+            return settings.isEmpty() ? null : settings.get(0);
+        }
+    }
+
+    @Inject
+    private NotificationSender notificationSender;
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+
+        scheduler.scheduleAtFixedRate(notificationSender, 0, 1, TimeUnit.MINUTES);
+    }
+
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
     public void checkSettings(NotificationSettings settings) {
+        // Validate smtp settings
         try {
             Session s = getSession(settings);
             Transport t = s.getTransport("smtp");
@@ -51,6 +208,12 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             t.close();
         } catch (Exception ex) {
             throw new IllegalArgumentException(ex);
+        }
+        // Validate 'From Address'
+        try {
+            new InternetAddress(settings.getFromAddress(), true);
+        } catch (AddressException ae) {
+            throw new IllegalArgumentException(ae);
         }
     }
 

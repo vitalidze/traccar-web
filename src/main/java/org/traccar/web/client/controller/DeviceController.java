@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
+import com.sencha.gxt.widget.core.client.box.MessageBox;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
@@ -39,9 +40,12 @@ import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.User;
+import org.traccar.web.shared.model.ValidationException;
 
 public class DeviceController implements ContentController, DeviceView.DeviceHandler {
     private final MapController mapController;
+
+    private final Application application;
 
     private ListStore<Device> deviceStore;
 
@@ -51,7 +55,8 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     private final PositionInfoPopup positionInfo = new PositionInfoPopup();
 
-    public DeviceController(MapController mapController, DeviceView.SettingsHandler settingsHandler) {
+    public DeviceController(MapController mapController, DeviceView.SettingsHandler settingsHandler, Application application) {
+        this.application = application;
         this.mapController = mapController;
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         deviceStore = new ListStore<Device>(deviceProperties.id());
@@ -106,9 +111,9 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     @Override
     public void onAdd() {
-        new DeviceDialog(new Device(), new DeviceDialog.DeviceHandler() {
+        class AddHandler implements DeviceDialog.DeviceHandler {
             @Override
-            public void onSave(Device device) {
+            public void onSave(final Device device) {
                 Application.getDataService().addDevice(device, new BaseAsyncCallback<Device>(i18n) {
                     @Override
                     public void onSuccess(Device result) {
@@ -116,18 +121,34 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                     }
                     @Override
                     public void onFailure(Throwable caught) {
-                        new AlertMessageBox(i18n.error(), i18n.errDeviceExists()).show();
-                    }                    
+                        MessageBox msg = null;
+                        if (caught instanceof ValidationException) {
+                            msg = new AlertMessageBox(i18n.error(), i18n.errNoDeviceNameOrId());
+                        } else {
+                            msg = new AlertMessageBox(i18n.error(), i18n.errDeviceExists());
+                        }
+                        if (msg != null) {
+                            msg.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+                                @Override
+                                public void onDialogHide(DialogHideEvent event) {
+                                    new DeviceDialog(device, AddHandler.this).show();
+                                }
+                            });
+                            msg.show();
+                        }
+                    }
                 });
             }
-        }).show();
+        }
+
+        new DeviceDialog(new Device(), new AddHandler()).show();
     }
 
     @Override
     public void onEdit(Device device) {
-        new DeviceDialog(new Device(device), new DeviceDialog.DeviceHandler() {
+        class UpdateHandler implements DeviceDialog.DeviceHandler {
             @Override
-            public void onSave(Device device) {
+            public void onSave(final Device device) {
                 Application.getDataService().updateDevice(device, new BaseAsyncCallback<Device>(i18n) {
                     @Override
                     public void onSuccess(Device result) {
@@ -136,11 +157,27 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                     }
                     @Override
                     public void onFailure(Throwable caught) {
-                        new AlertMessageBox(i18n.error(), i18n.errDeviceExists()).show();
-                    }                     
+                        MessageBox msg = null;
+                        if (caught instanceof ValidationException) {
+                            msg = new AlertMessageBox(i18n.error(), i18n.errNoDeviceNameOrId());
+                        } else {
+                            msg = new AlertMessageBox(i18n.error(), i18n.errDeviceExists());
+                        }
+                        if (msg != null) {
+                            msg.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+                                @Override
+                                public void onDialogHide(DialogHideEvent event) {
+                                    new DeviceDialog(device, UpdateHandler.this).show();
+                                }
+                            });
+                            msg.show();
+                        }
+                    }
                 });
             }
-        }).show();
+        }
+
+        new DeviceDialog(new Device(device), new UpdateHandler()).show();
     }
 
     @Override
@@ -189,5 +226,9 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     public void selectDevice(Device device) {
         deviceView.selectDevice(device);
+    }
+
+    public void doubleClicked(Device device) {
+        application.getArchiveController().selectDevice(device);
     }
 }
