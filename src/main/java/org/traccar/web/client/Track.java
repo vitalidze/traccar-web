@@ -49,7 +49,10 @@ public class Track {
     }
 
     public ArchiveStyle getStyle() {
-        return segments.get(0).getStyle();
+        if (segments.size() > 0)
+            return segments.get(0).getStyle();
+        else
+            return new ArchiveStyle();
     }
 
     public List<Position> getPositions() {
