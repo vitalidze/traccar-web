@@ -53,7 +53,7 @@ public class Application {
         return dataService;
     }
 
-    private static Logger logger = Logger.getLogger("");
+    private static final Logger logger = Logger.getLogger("");
 
     public static Logger getLogger() {
         return logger;
@@ -64,7 +64,7 @@ public class Application {
     private final MapController mapController;
     private final ArchiveController archiveController;
 
-    private ApplicationView view;
+    private final ApplicationView view;
 
     public Application() {
         settingsController = new SettingsController(userSettingsHandler);
@@ -86,7 +86,7 @@ public class Application {
         archiveController.run();
     }
 
-    private MapController.MapHandler mapHandler = new MapController.MapHandler() {
+    private final MapController.MapHandler mapHandler = new MapController.MapHandler() {
 
         @Override
         public void onDeviceSelected(Device device) {
@@ -100,7 +100,7 @@ public class Application {
 
     };
 
-    private ArchiveController.ArchiveHandler archiveHanlder = new ArchiveController.ArchiveHandler() {
+    private final ArchiveController.ArchiveHandler archiveHanlder = new ArchiveController.ArchiveHandler() {
 
         @Override
         public void onSelected(Position position) {
@@ -113,7 +113,7 @@ public class Application {
         return archiveController;
     }
 
-    private StoreHandlers<Device> deviceStoreHandler = new BaseStoreHandlers<Device>() {
+    private final StoreHandlers<Device> deviceStoreHandler = new BaseStoreHandlers<Device>() {
 
         @Override
         public void onAdd(StoreAddEvent<Device> event) {
@@ -127,7 +127,7 @@ public class Application {
 
     };
 
-    private StoreHandlers<Position> archiveStoreHandler = new BaseStoreHandlers<Position>() {
+    private final StoreHandlers<Position> archiveStoreHandler = new BaseStoreHandlers<Position>() {
 
         @Override
         public void onAnything() {
@@ -169,5 +169,5 @@ public class Application {
         }
     }
 
-    private UserSettingsHandlerImpl userSettingsHandler = new UserSettingsHandlerImpl();
+    private final UserSettingsHandlerImpl userSettingsHandler = new UserSettingsHandlerImpl();
 }

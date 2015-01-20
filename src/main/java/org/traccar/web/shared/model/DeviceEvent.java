@@ -104,9 +104,7 @@ public class DeviceEvent {
         if (!device.equals(that.device)) return false;
         if (type != that.type) return false;
         if (position != null ? !position.equals(that.position) : that.position != null) return false;
-        if (!time.equals(that.time)) return false;
-
-        return true;
+        return time.equals(that.time);
     }
 
     @Override

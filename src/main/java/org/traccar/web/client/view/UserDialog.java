@@ -35,12 +35,12 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 
 public class UserDialog implements Editor<User> {
 
-    private static UserDialogUiBinder uiBinder = GWT.create(UserDialogUiBinder.class);
+    private static final UserDialogUiBinder uiBinder = GWT.create(UserDialogUiBinder.class);
 
     interface UserDialogUiBinder extends UiBinder<Widget, UserDialog> {
     }
 
-    private UserDriver driver = GWT.create(UserDriver.class);
+    private final UserDriver driver = GWT.create(UserDriver.class);
 
     interface UserDriver extends SimpleBeanEditorDriver<User, UserDialog> {
     }
@@ -49,7 +49,7 @@ public class UserDialog implements Editor<User> {
         public void onSave(User user);
     }
 
-    private UserHandler userHandler;
+    private final UserHandler userHandler;
 
     @UiField
     Window window;

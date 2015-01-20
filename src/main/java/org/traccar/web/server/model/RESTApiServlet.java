@@ -16,7 +16,6 @@
 package org.traccar.web.server.model;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.traccar.web.client.model.DataService;
 
 import javax.inject.Inject;
@@ -132,7 +131,7 @@ public class RESTApiServlet extends HttpServlet {
             } catch (Exception ex) {}
         } catch (InvocationTargetException ite) {
             log("Error during method '" + methodName + "' call: " + ite.getLocalizedMessage(), ite);
-            int errorCode = 0;
+            int errorCode;
             if (ite.getCause() instanceof SecurityException) {
                 errorCode = HttpServletResponse.SC_UNAUTHORIZED;
             } else {

@@ -17,7 +17,6 @@ package org.traccar.web.client.view;
 
 import java.util.*;
 
-import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -57,7 +56,7 @@ import org.traccar.web.shared.model.PositionIconType;
 
 public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandler<Position> {
 
-    private static ArchiveViewUiBinder uiBinder = GWT.create(ArchiveViewUiBinder.class);
+    private static final ArchiveViewUiBinder uiBinder = GWT.create(ArchiveViewUiBinder.class);
 
     public ArchiveStyle style = new ArchiveStyle();
 
@@ -71,7 +70,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         public void onClear();
     }
 
-    private ArchiveHandler archiveHandler;
+    private final ArchiveHandler archiveHandler;
 
     @UiField
     ContentPanel contentPanel;
@@ -176,11 +175,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         // Element that displays the current track color
         styleButtonTrackColor = new TextButton();
-        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(style.DEFAULT_COLOR));
+        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(ArchiveStyle.DEFAULT_COLOR));
         styleButtonTrackColor.getElement().getStyle().setCursor(Style.Cursor.TEXT);
         // Menu with the small palette
-        smallColorMenu = new ExtColorMenu(style.COLORS, style.COLORS);
-        smallColorMenu.setColor(style.DEFAULT_COLOR);
+        smallColorMenu = new ExtColorMenu(ArchiveStyle.COLORS, ArchiveStyle.COLORS);
+        smallColorMenu.setColor(ArchiveStyle.DEFAULT_COLOR);
         smallColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
@@ -317,7 +316,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         archiveHandler.onFilterSettings();
     }
 
-    private StoreHandlers<Device> deviceStoreHandlers = new BaseStoreHandlers<Device>() {
+    private final StoreHandlers<Device> deviceStoreHandlers = new BaseStoreHandlers<Device>() {
 
         @Override
         public void onAnything() {

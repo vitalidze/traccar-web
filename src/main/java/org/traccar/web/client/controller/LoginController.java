@@ -29,7 +29,7 @@ public class LoginController implements LoginDialog.LoginHandler {
 
     private LoginDialog dialog;
 
-    private Messages i18n = GWT.create(Messages.class);
+    private final Messages i18n = GWT.create(Messages.class);
 
     public interface LoginHandler {
         public void onLogin();

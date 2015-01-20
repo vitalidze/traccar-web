@@ -33,18 +33,17 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.NotificationSettingsProperties;
 import org.traccar.web.shared.model.NotificationSettings;
-import org.traccar.web.shared.model.UserSettings;
 
 import java.util.Arrays;
 
 public class NotificationSettingsDialog implements Editor<NotificationSettings> {
 
-    private static NotificationSettingsDialogUiBinder uiBinder = GWT.create(NotificationSettingsDialogUiBinder.class);
+    private static final NotificationSettingsDialogUiBinder uiBinder = GWT.create(NotificationSettingsDialogUiBinder.class);
 
     interface NotificationSettingsDialogUiBinder extends UiBinder<Widget, NotificationSettingsDialog> {
     }
 
-    private NotificationSettingsDriver driver = GWT.create(NotificationSettingsDriver.class);
+    private final NotificationSettingsDriver driver = GWT.create(NotificationSettingsDriver.class);
 
     interface NotificationSettingsDriver extends SimpleBeanEditorDriver<NotificationSettings, NotificationSettingsDialog> {
     }
@@ -54,7 +53,7 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
         public void onTest(NotificationSettings notificationSettings);
     }
 
-    private NotificationSettingsHandler notificationSettingsHandler;
+    private final NotificationSettingsHandler notificationSettingsHandler;
 
     @UiField
     Window window;
@@ -98,8 +97,8 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
 
         uiBinder.createAndBindUi(this);
 
-        port.addValidator(new MinNumberValidator<Integer>(Integer.valueOf(1)));
-        port.addValidator(new MaxNumberValidator<Integer>(Integer.valueOf(65535)));
+        port.addValidator(new MinNumberValidator<Integer>(1));
+        port.addValidator(new MaxNumberValidator<Integer>(65535));
 
         driver.initialize(this);
         driver.edit(notificationSettings);

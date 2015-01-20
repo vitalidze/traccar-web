@@ -50,18 +50,18 @@ public class MapView {
 
     private MapHandler mapHandler;
 
-    private ContentPanel contentPanel;
+    private final ContentPanel contentPanel;
 
     public ContentPanel getView() {
         return contentPanel;
     }
 
-    private MapWidget mapWidget;
+    private final MapWidget mapWidget;
     private Map map;
-    private Vector vectorLayer;
-    private Markers markerLayer;
+    private final Vector vectorLayer;
+    private final Markers markerLayer;
 
-    private Messages i18n = GWT.create(Messages.class);
+    private final Messages i18n = GWT.create(Messages.class);
 
     public Map getMap() {
         return map;
@@ -237,7 +237,7 @@ public class MapView {
         archivePositionRenderer.selectPosition(position, true);
     }
 
-    private MapPositionRenderer.SelectHandler latestPositionSelectHandler = new MapPositionRenderer.SelectHandler() {
+    private final MapPositionRenderer.SelectHandler latestPositionSelectHandler = new MapPositionRenderer.SelectHandler() {
 
         @Override
         public void onSelected(Position position) {
@@ -246,7 +246,7 @@ public class MapView {
 
     };
 
-    private MapPositionRenderer.MouseHandler positionMouseHandler = new MapPositionRenderer.MouseHandler() {
+    private final MapPositionRenderer.MouseHandler positionMouseHandler = new MapPositionRenderer.MouseHandler() {
 
         @Override
         public void onMouseOver(Position position) {
@@ -260,7 +260,7 @@ public class MapView {
 
     };
 
-    private MapPositionRenderer.SelectHandler archivePositionSelectHandler = new MapPositionRenderer.SelectHandler() {
+    private final MapPositionRenderer.SelectHandler archivePositionSelectHandler = new MapPositionRenderer.SelectHandler() {
 
         @Override
         public void onSelected(Position position) {
@@ -273,7 +273,7 @@ public class MapView {
         latestPositionRenderer.catchPosition(position);
     }
 
-    private PositionInfoPopup popup = new PositionInfoPopup();
+    private final PositionInfoPopup popup = new PositionInfoPopup();
 
     private void showPopup(Position position) {
         popup.show(this, position);

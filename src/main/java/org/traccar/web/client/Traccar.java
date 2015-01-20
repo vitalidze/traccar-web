@@ -25,7 +25,7 @@ import org.traccar.web.shared.model.ApplicationSettings;
 import com.google.gwt.core.client.EntryPoint;
 
 public class Traccar implements EntryPoint, LoginController.LoginHandler {
-    private Messages i18n = GWT.create(Messages.class);
+    private final Messages i18n = GWT.create(Messages.class);
 
     @Override
     public void onModuleLoad() {

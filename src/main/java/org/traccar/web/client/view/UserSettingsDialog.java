@@ -41,12 +41,12 @@ import com.sencha.gxt.widget.core.client.form.ComboBox;
 
 public class UserSettingsDialog implements Editor<UserSettings> {
 
-    private static UserSettingsDialogUiBinder uiBinder = GWT.create(UserSettingsDialogUiBinder.class);
+    private static final UserSettingsDialogUiBinder uiBinder = GWT.create(UserSettingsDialogUiBinder.class);
 
     interface UserSettingsDialogUiBinder extends UiBinder<Widget, UserSettingsDialog> {
     }
 
-    private UserSettingsDriver driver = GWT.create(UserSettingsDriver.class);
+    private final UserSettingsDriver driver = GWT.create(UserSettingsDriver.class);
 
     interface UserSettingsDriver extends SimpleBeanEditorDriver<UserSettings, UserSettingsDialog> {
     }
@@ -59,7 +59,7 @@ public class UserSettingsDialog implements Editor<UserSettings> {
                                           NumberField<Integer> zoomLevel);
     }
 
-    private UserSettingsHandler userSettingsHandler;
+    private final UserSettingsHandler userSettingsHandler;
 
     @UiField
     Window window;
@@ -117,8 +117,8 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
         uiBinder.createAndBindUi(this);
 
-        timePrintInterval.addValidator(new MinNumberValidator<Short>(Short.valueOf((short) 1)));
-        timePrintInterval.addValidator(new MaxNumberValidator<Short>(Short.valueOf((short) 512)));
+        timePrintInterval.addValidator(new MinNumberValidator<Short>((short) 1));
+        timePrintInterval.addValidator(new MaxNumberValidator<Short>((short) 512));
 
         driver.initialize(this);
         driver.edit(userSettings);

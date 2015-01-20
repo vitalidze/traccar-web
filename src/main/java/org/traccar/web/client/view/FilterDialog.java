@@ -34,12 +34,12 @@ import org.traccar.web.shared.model.UserSettings;
 
 public class FilterDialog implements Editor<UserSettings> {
 
-    private static FilterDialogDialogUiBinder uiBinder = GWT.create(FilterDialogDialogUiBinder.class);
+    private static final FilterDialogDialogUiBinder uiBinder = GWT.create(FilterDialogDialogUiBinder.class);
 
     interface FilterDialogDialogUiBinder extends UiBinder<Widget, FilterDialog> {
     }
 
-    private FilterSettingsDriver driver = GWT.create(FilterSettingsDriver.class);
+    private final FilterSettingsDriver driver = GWT.create(FilterSettingsDriver.class);
 
     interface FilterSettingsDriver extends SimpleBeanEditorDriver<UserSettings, FilterDialog> {
     }
@@ -48,7 +48,7 @@ public class FilterDialog implements Editor<UserSettings> {
         public void onSave(UserSettings filterSettings);
     }
 
-    private FilterSettingsHandler filterSettingsHandler;
+    private final FilterSettingsHandler filterSettingsHandler;
 
     @UiField
     Window window;

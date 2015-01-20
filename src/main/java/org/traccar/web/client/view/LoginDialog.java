@@ -32,7 +32,7 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 
 public class LoginDialog {
 
-    private static LoginDialogUiBinder uiBinder = GWT.create(LoginDialogUiBinder.class);
+    private static final LoginDialogUiBinder uiBinder = GWT.create(LoginDialogUiBinder.class);
 
     interface LoginDialogUiBinder extends UiBinder<Widget, LoginDialog> {
     }
@@ -42,7 +42,7 @@ public class LoginDialog {
         public void onRegister(String login, String password);
     }
 
-    private LoginHandler loginHandler;
+    private final LoginHandler loginHandler;
 
     @UiField
     Window window;

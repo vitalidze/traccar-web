@@ -28,15 +28,11 @@ import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.Window;
-import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
-import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
-import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.UserProperties;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.User;
 
@@ -44,7 +40,7 @@ import java.util.*;
 
 public class DeviceShareDialog {
 
-    private static UsersDialogUiBinder uiBinder = GWT.create(UsersDialogUiBinder.class);
+    private static final UsersDialogUiBinder uiBinder = GWT.create(UsersDialogUiBinder.class);
 
     interface UsersDialogUiBinder extends UiBinder<Widget, DeviceShareDialog> {
     }

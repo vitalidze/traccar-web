@@ -46,9 +46,9 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
 
     private ListStore<Position> positionStore;
 
-    private ArchiveView archiveView;
+    private final ArchiveView archiveView;
 
-    private Messages i18n = GWT.create(Messages.class);
+    private final Messages i18n = GWT.create(Messages.class);
 
     public ArchiveController(ArchiveHandler archiveHandler, FilterDialog.FilterSettingsHandler filterSettingsHandler, ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;

@@ -1,7 +1,6 @@
 package org.traccar.web.client.model;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.RemoteService;
 import org.traccar.web.shared.model.NotificationSettings;
 
 public interface NotificationServiceAsync {

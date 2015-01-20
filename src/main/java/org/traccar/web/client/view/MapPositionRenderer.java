@@ -17,7 +17,6 @@ package org.traccar.web.client.view;
 
 import java.util.*;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import org.gwtopenmaps.openlayers.client.Icon;
 import org.gwtopenmaps.openlayers.client.Marker;
@@ -101,12 +100,12 @@ public class MapPositionRenderer {
         getMarkerLayer().removeMarker(oldMarker);
     }
 
-    private Map<Long, Marker> markerMap = new HashMap<Long, Marker>(); // Position.id -> Marker
-    private Map<Long, Long> deviceMap = new HashMap<Long, Long>(); // Device.id -> Position.id
-    private Map<Long, Position> positionMap = new HashMap<Long, Position>(); // Position.id -> Position
+    private final Map<Long, Marker> markerMap = new HashMap<Long, Marker>(); // Position.id -> Marker
+    private final Map<Long, Long> deviceMap = new HashMap<Long, Long>(); // Device.id -> Position.id
+    private final Map<Long, Position> positionMap = new HashMap<Long, Position>(); // Position.id -> Position
 
-    private List<VectorFeature> tracks = new ArrayList<VectorFeature>();
-    private List<VectorFeature> labels = new ArrayList<VectorFeature>();
+    private final List<VectorFeature> tracks = new ArrayList<VectorFeature>();
+    private final List<VectorFeature> labels = new ArrayList<VectorFeature>();
 
     private final DateTimeFormat timeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE);
 

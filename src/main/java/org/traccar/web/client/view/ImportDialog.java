@@ -31,7 +31,7 @@ import org.traccar.web.shared.model.Device;
 
 public class ImportDialog {
 
-    private static ImportDialogUiBinder uiBinder = GWT.create(ImportDialogUiBinder.class);
+    private static final ImportDialogUiBinder uiBinder = GWT.create(ImportDialogUiBinder.class);
 
     interface ImportDialogUiBinder extends UiBinder<Widget, ImportDialog> {
     }
