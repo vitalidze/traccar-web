@@ -29,6 +29,7 @@ public class DBMigrations {
                 new SetDefaultFilteringSettings(),
                 new SetDefaultMapViewSettings(),
                 new SetManagerFlag(),
+                new SetNotificationsFlag(),
                 new SetDefaultDeviceTimeout(),
                 new SetDefaultIdleSpeedThreshold(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
@@ -60,8 +61,8 @@ public class DBMigrations {
     static class CreateAdmin implements Migration {
         @Override
         public void migrate(EntityManager em) throws Exception {
-            TypedQuery<User> query = em.createQuery("SELECT x FROM User x WHERE x.login = 'admin'", User.class);
-            List<User> results = query.getResultList();
+            TypedQuery<User> query = em.createQuery("SELECT x FROM User x WHERE x.admin = :adminValue", User.class);
+            List<User> results = query.setParameter("adminValue", true).getResultList();
             if (results.isEmpty()) {
                 User user = new User();
                 user.setLogin("admin");
@@ -215,5 +216,15 @@ public class DBMigrations {
                 em.persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
             }
         }
+    }
+
+    static class SetNotificationsFlag implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + User.class.getSimpleName() + " U SET U.notifications = :n WHERE U.notifications IS NULL")
+                    .setParameter("n", Boolean.FALSE)
+                    .executeUpdate();
+        }
+
     }
 }

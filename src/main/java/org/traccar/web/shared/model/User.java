@@ -60,6 +60,8 @@ public class User implements Serializable, Cloneable {
         password = user.password;
         password_hash_method = user.password_hash_method;
         manager = user.manager;
+        email = user.email;
+        notifications = user.notifications;
     }
 
     @Expose
@@ -208,6 +210,26 @@ public class User implements Serializable, Cloneable {
             }
         }
         return result;
+    }
+
+    private String email;
+    @Column(nullable = true)
+    private boolean notifications;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public boolean isNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(boolean notifications) {
+        this.notifications = notifications;
     }
 
     @Override

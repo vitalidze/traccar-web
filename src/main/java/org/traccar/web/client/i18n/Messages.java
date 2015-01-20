@@ -204,6 +204,30 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
 
     String disableFilter();
 
+    String server();
+
+    String port();
+
+    String secureConnectionType();
+
+    String useAuthorization();
+
+    String test();
+
+    String notifications();
+
+    String notificationSettings();
+
+    String testFailed();
+
+    String testSucceeded();
+
+    String email();
+
+    String invalidEmail();
+
+    String fromAddress();
+
     String style();
 
     String fullPalette();
@@ -217,4 +241,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String reducedMarkers();
 
     String zoomToTrack();
+
+    String exportData();
+
+    String errNoDeviceNameOrId();
 }

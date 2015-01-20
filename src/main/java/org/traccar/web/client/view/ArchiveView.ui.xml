@@ -83,11 +83,15 @@
 
           <button:TextButton ui:field="loadButton" text="{i18n.load}" />
           <toolbar:SeparatorToolItem />
-          <button:TextButton ui:field="csvButton" text="{i18n.exportToCSV}" />
-          <toolbar:SeparatorToolItem />
-          <button:TextButton ui:field="gpxButton" text="{i18n.exportToGPX}" />
-          <toolbar:SeparatorToolItem />
-          <button:TextButton ui:field="importButton" text="{i18n.importData}" />
+          <button:TextButton text="{i18n.importData} / {i18n.exportData}">
+              <button:menu>
+                  <menu:Menu>
+                      <menu:MenuItem ui:field="csvButton" text="{i18n.exportToCSV}"/>
+                      <menu:MenuItem ui:field="gpxButton" text="{i18n.exportToGPX}"/>
+                      <menu:MenuItem ui:field="importButton" text="{i18n.importData}"/>
+                  </menu:Menu>
+              </button:menu>
+          </button:TextButton>
           <toolbar:FillToolItem />
           <button:TextButton ui:field="clearButton" text="{i18n.clear}" />
 

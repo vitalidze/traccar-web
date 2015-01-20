@@ -21,14 +21,14 @@
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.name}" labelWidth="140">
           <form:widget>
-            <form:TextField ui:field="name" />
+            <form:TextField ui:field="name" allowBlank="false" />
           </form:widget>
         </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.uniqueIdentifier}" labelWidth="140">
           <form:widget>
-            <form:TextField ui:field="uniqueId" />
+            <form:TextField ui:field="uniqueId" allowBlank="false" />
           </form:widget>
         </form:FieldLabel>
       </container:child>

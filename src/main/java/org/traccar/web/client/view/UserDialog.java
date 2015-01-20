@@ -15,7 +15,9 @@
  */
 package org.traccar.web.client.view;
 
+import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.User;
 
 import com.google.gwt.core.client.GWT;
@@ -64,6 +66,15 @@ public class UserDialog implements Editor<User> {
     @UiField
     CheckBox manager;
 
+    @UiField
+    TextField email;
+
+    @UiField
+    CheckBox notifications;
+
+    @UiField(provided = true)
+    Messages i18n = GWT.create(Messages.class);
+
     public UserDialog(User user, UserHandler userHandler) {
         this.userHandler = userHandler;
         uiBinder.createAndBindUi(this);
@@ -76,6 +87,8 @@ public class UserDialog implements Editor<User> {
             ApplicationContext.getInstance().getUser().getManager()) {
             manager.setEnabled(true);
         }
+
+        email.addValidator(new RegExValidator(".+@.+\\.[a-z]+", i18n.invalidEmail()));
 
         driver.initialize(this);
         driver.edit(user);

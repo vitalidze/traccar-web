@@ -120,6 +120,9 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     MenuItem settingsGlobal;
 
     @UiField
+    MenuItem settingsNotifications;
+
+    @UiField
     MenuItem showTrackerServerLog;
 
     @UiField(provided = true)
@@ -199,6 +202,7 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         settingsGlobal.setVisible(admin);
         showTrackerServerLog.setVisible(admin);
         settingsUsers.setVisible(admin || manager);
+        settingsNotifications.setVisible(admin || manager);
         shareButton.setVisible(admin || manager);
 
         addButton.setVisible(allowDeviceManagement || admin || manager);
@@ -270,6 +274,7 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         public void onPreferencesSelected();
         public void onUsersSelected();
         public void onApplicationSelected();
+        public void onNotificationsSelected();
     }
 
     private SettingsHandler settingsHandler;
@@ -292,6 +297,11 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     @UiHandler("settingsGlobal")
     public void onSettingsGlobalSelected(SelectionEvent<Item> event) {
         settingsHandler.onApplicationSelected();
+    }
+
+    @UiHandler("settingsNotifications")
+    public void onSettingsNotificationsSelected(SelectionEvent<Item> event) {
+        settingsHandler.onNotificationsSelected();
     }
 
     @UiHandler("showTrackerServerLog")
