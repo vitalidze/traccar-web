@@ -197,8 +197,8 @@ public class MapPositionRenderer {
         }
     }
 
-    public void showTrack(Track track) {
-        if (track.getStyle().clearExisting) {
+    public void showTrack(Track track, boolean clearExisting) {
+        if (clearExisting) {
             for (VectorFeature mapTrack : tracks) {
                 getVectorLayer().removeFeature(mapTrack);
                 mapTrack.destroy();
