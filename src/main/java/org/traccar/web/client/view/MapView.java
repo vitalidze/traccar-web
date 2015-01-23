@@ -220,9 +220,6 @@ public class MapView {
     }
 
     public void showLatestTrack(Track track) {
-        // Do not zoom to track with 'latest' track
-        if (track.getStyle().getZoomToTrack())
-            track.getStyle().toggleZoomToTrack();
         latestPositionTrackRenderer.showTrack(track, false);
     }
 

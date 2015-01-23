@@ -52,8 +52,8 @@ public class ArchiveStyle {
         return iconType;
     }
 
-    public void toggleZoomToTrack() {
-        zoomToTrack = !zoomToTrack;
+    public void setZoomToTrack(boolean zoomToTrack) {
+        this.zoomToTrack = zoomToTrack;
     }
 
     public boolean getZoomToTrack() {

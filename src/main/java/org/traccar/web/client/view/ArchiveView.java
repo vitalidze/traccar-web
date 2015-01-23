@@ -252,7 +252,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiHandler("zoomToTrackMenu")
     public void onMenuSelection(SelectionEvent<Item> event) {
-        style.toggleZoomToTrack();
+        style.setZoomToTrack(!style.getZoomToTrack());
     }
 
     @SuppressWarnings("deprecation")
