@@ -67,7 +67,7 @@ Note `Set-Cookie` header with `JSESSIONID`. This should be put in all next reque
 
 * Load list of devices (`getDevices` method)
 
-````bash
+{% highlight bash %}
 curl -v --cookie "JSESSIONID=xxxxxxxxxxx" http://d.traccar.litvak.su/traccar/rest/getDevices
 * Hostname was NOT found in DNS cache
 *   Trying 188.166.50.6...
@@ -87,13 +87,13 @@ curl -v --cookie "JSESSIONID=xxxxxxxxxxx" http://d.traccar.litvak.su/traccar/res
 < Connection: keep-alive
 <
 [{"id":3,"uniqueId":"123","name":"Phone","timeout":300,"idleSpeedThreshold":0.0,"iconType":{"ARCHIVE":{"width":21,"height":25,"urls":["http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker-blue.png","http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker-gold.png"]},"OFFLINE":{"width":63,"height":25,"urls":["/img/long-truck-white.png","/img/long-truck-green.png"]},"LATEST":{"width":63,"height":25,"urls":["/img/long-truck-red.png","/img/long-truck-green.png"]}}}]%
-````
+{% endhighlight %}
 
 Take full JSON of device and put it to `getPositions` method.
 
 * Load archived positions (`getPositions` method)
 
-````bash
+{% highlight bash %}
 curl -v --cookie "JSESSIONID=xxxxxxxxx" -X POST --data "[{\"id\":3,\"uniqueId\":\"123\",\"name\":\"Phone\"},\"2015-01-01 00:00:00 GMT\",\"2015-01-01 23:59:59 GMT\",false]" http://d.traccar.litvak.su/traccar/rest/getPositions
 * Hostname was NOT found in DNS cache
 *   Trying 188.166.50.6...
@@ -117,13 +117,13 @@ curl -v --cookie "JSESSIONID=xxxxxxxxx" -X POST --data "[{\"id\":3,\"uniqueId\":
 <
 * Connection #0 to host d.traccar.litvak.su left intact
 []%
-````
+{% endhighlight %}
 
 In this concrete example there are no positions in reply.
 
 * log out (`logout` method)
 
-````bash
+{% highlight bash %}
 ~  curl -v --cookie "JSESSIONID=xxxxxxxx" http://d.traccar.litvak.su/traccar/rest/logout
 * Hostname was NOT found in DNS cache
 *   Trying 188.166.50.6...
@@ -144,4 +144,4 @@ In this concrete example there are no positions in reply.
 <
 * Connection #0 to host d.traccar.litvak.su left intact
 true%
-````
+{% endhighlight %}
