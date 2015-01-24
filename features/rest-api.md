@@ -36,7 +36,7 @@ Authentication info is held in HTTP session, so you should have corresponding co
 
 * Login (`login` method)
 
-````bash
+{% highlight bash %}
  ~  curl -v -X POST --data "[\"user\",\"password\"]" http://d.traccar.litvak.su/traccar/rest/login
 * Hostname was NOT found in DNS cache
 *   Trying 188.166.50.6...
@@ -61,7 +61,7 @@ Authentication info is held in HTTP session, so you should have corresponding co
 <
 * Connection #0 to host d.traccar.litvak.su left intact
 {"id":2,"login":"user","password_hash_method":"MD5","admin":true,"manager":true,"userSettings":{"speedUnit":"knots","timePrintInterval":10,"zoomLevel":1,"centerLongitude":12.5,"centerLatitude":41.9,"mapType":"OSM"}}%
-````
+{% endhighlight %}
 
 Note `Set-Cookie` header with `JSESSIONID`. This should be put in all next requests.
 
