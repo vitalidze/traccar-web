@@ -61,7 +61,7 @@ import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 
 public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler<Device>, RowMouseDownEvent.RowMouseDownHandler, CellDoubleClickEvent.CellDoubleClickHandler {
 
-    private static DeviceViewUiBinder uiBinder = GWT.create(DeviceViewUiBinder.class);
+    private static final DeviceViewUiBinder uiBinder = GWT.create(DeviceViewUiBinder.class);
 
     interface DeviceViewUiBinder extends UiBinder<Widget, DeviceView> {
     }

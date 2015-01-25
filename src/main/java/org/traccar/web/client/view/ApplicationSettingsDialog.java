@@ -24,7 +24,6 @@ import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.model.ApplicationSettingsProperties;
 import org.traccar.web.client.model.EnumKeyProvider;
-import org.traccar.web.client.model.UserSettingsProperties;
 import org.traccar.web.shared.model.ApplicationSettings;
 
 import com.google.gwt.core.client.GWT;
@@ -38,18 +37,17 @@ import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import org.traccar.web.shared.model.PasswordHashMethod;
-import org.traccar.web.shared.model.UserSettings;
 
 import java.util.Arrays;
 
 public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
 
-    private static ApplicationSettingsDialogUiBinder uiBinder = GWT.create(ApplicationSettingsDialogUiBinder.class);
+    private static final ApplicationSettingsDialogUiBinder uiBinder = GWT.create(ApplicationSettingsDialogUiBinder.class);
 
     interface ApplicationSettingsDialogUiBinder extends UiBinder<Widget, ApplicationSettingsDialog> {
     }
 
-    private ApplicationSettingsDriver driver = GWT.create(ApplicationSettingsDriver.class);
+    private final ApplicationSettingsDriver driver = GWT.create(ApplicationSettingsDriver.class);
 
     interface ApplicationSettingsDriver extends SimpleBeanEditorDriver<ApplicationSettings, ApplicationSettingsDialog> {
     }
@@ -58,7 +56,7 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
         public void onSave(ApplicationSettings applicationSettings);
     }
 
-    private ApplicationSettingsHandler applicationSettingsHandler;
+    private final ApplicationSettingsHandler applicationSettingsHandler;
 
     @UiField
     Window window;
@@ -92,8 +90,8 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
 
         uiBinder.createAndBindUi(this);
 
-        updateInterval.addValidator(new MinNumberValidator<Short>(Short.valueOf((short) 100)));
-        updateInterval.addValidator(new MaxNumberValidator<Short>(Short.valueOf((short) 30000)));
+        updateInterval.addValidator(new MinNumberValidator<Short>((short) 100));
+        updateInterval.addValidator(new MaxNumberValidator<Short>((short) 30000));
 
         driver.initialize(this);
         driver.edit(applicationSettings);

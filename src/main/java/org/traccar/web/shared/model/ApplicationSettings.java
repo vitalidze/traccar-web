@@ -3,8 +3,6 @@ package org.traccar.web.shared.model;
 import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,7 +27,7 @@ public class ApplicationSettings implements Serializable {
 
     public ApplicationSettings() {
         registrationEnabled = true;
-        updateInterval = Short.valueOf(DEFAULT_UPDATE_INTERVAL);
+        updateInterval = DEFAULT_UPDATE_INTERVAL;
         defaultPasswordHash = PasswordHashMethod.PLAIN;
     }
 

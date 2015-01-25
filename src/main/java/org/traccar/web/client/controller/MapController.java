@@ -43,9 +43,9 @@ public class MapController implements ContentController, MapView.MapHandler {
         public void onArchivePositionSelected(Position position);
     }
 
-    private MapHandler mapHandler;
+    private final MapHandler mapHandler;
 
-    private MapView mapView;
+    private final MapView mapView;
 
     public MapController(MapHandler mapHandler) {
         this.mapHandler = mapHandler;
@@ -89,11 +89,11 @@ public class MapController implements ContentController, MapView.MapHandler {
         });
     }
 
-    private Map<Long, Position> latestPositionMap = new HashMap<Long, Position>();
+    private final Map<Long, Position> latestPositionMap = new HashMap<Long, Position>();
 
-    private Map<Long, Position> latestNonIdlePositionMap = new HashMap<Long, Position>();
+    private final Map<Long, Position> latestNonIdlePositionMap = new HashMap<Long, Position>();
 
-    private Map<Long, Position> timestampMap = new HashMap<Long, Position>();
+    private final Map<Long, Position> timestampMap = new HashMap<Long, Position>();
 
     public void update() {
         updateTimer.cancel();
@@ -110,7 +110,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
                     position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
                     if (position.getSpeed() != null) {
-                        if (position.getSpeed().doubleValue() > position.getDevice().getIdleSpeedThreshold()) {
+                        if (position.getSpeed() > position.getDevice().getIdleSpeedThreshold()) {
                             latestNonIdlePositionMap.put(device.getId(), position);
                         } else {
                             Position latestNonIdlePosition = latestNonIdlePositionMap.get(device.getId());

@@ -32,7 +32,7 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 
 public class TrackerServerLogViewDialog {
-    private static TrackerServerLogViewDialogUiBinder uiBinder = GWT.create(TrackerServerLogViewDialogUiBinder.class);
+    private static final TrackerServerLogViewDialogUiBinder uiBinder = GWT.create(TrackerServerLogViewDialogUiBinder.class);
 
     interface TrackerServerLogViewDialogUiBinder extends UiBinder<Widget, TrackerServerLogViewDialog> {
     }

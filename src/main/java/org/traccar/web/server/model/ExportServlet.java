@@ -49,7 +49,7 @@ public class ExportServlet extends HttpServlet {
     @Inject
     private DataService dataService;
 
-    private SimpleDateFormat requestDateFormat = new SimpleDateFormat(RESTApiServlet.REQUEST_DATE_PATTERN);
+    private final SimpleDateFormat requestDateFormat = new SimpleDateFormat(RESTApiServlet.REQUEST_DATE_PATTERN);
 
     @Transactional
     @RequireUser
@@ -67,12 +67,15 @@ public class ExportServlet extends HttpServlet {
             Device device = entityManager.get().find(Device.class, deviceId);
             checkAccess(device);
 
-            if (exportType.equals("csv")) {
-                csv(resp, device, from, to, filter);
-            } else if (exportType.equals("gpx")) {
-                gpx(resp, device, from, to, filter);
-            } else {
-                throw new ServletException("Unsupported export type: " + exportType);
+            switch (exportType) {
+                case "csv":
+                    csv(resp, device, from, to, filter);
+                    break;
+                case "gpx":
+                    gpx(resp, device, from, to, filter);
+                    break;
+                default:
+                    throw new ServletException("Unsupported export type: " + exportType);
             }
         } catch (NumberFormatException nfe) {
             throw new ServletException(nfe);

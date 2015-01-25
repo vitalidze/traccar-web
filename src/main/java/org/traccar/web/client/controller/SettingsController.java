@@ -44,7 +44,7 @@ import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 
 public class SettingsController implements DeviceView.SettingsHandler {
 
-    private Messages i18n = GWT.create(Messages.class);
+    private final Messages i18n = GWT.create(Messages.class);
     private final UserSettingsDialog.UserSettingsHandler userSettingsHandler;
 
     public SettingsController(UserSettingsDialog.UserSettingsHandler userSettingsHandler) {

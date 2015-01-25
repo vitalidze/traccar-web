@@ -15,16 +15,13 @@
  */
 package org.traccar.web.client.view;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
-import com.sencha.gxt.data.shared.Store;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.UserProperties;
-import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.User;
 
 import com.google.gwt.core.client.GWT;
@@ -44,7 +41,7 @@ import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 
 public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandler<User> {
 
-    private static UsersDialogUiBinder uiBinder = GWT.create(UsersDialogUiBinder.class);
+    private static final UsersDialogUiBinder uiBinder = GWT.create(UsersDialogUiBinder.class);
 
     interface UsersDialogUiBinder extends UiBinder<Widget, UsersDialog> {
     }
@@ -56,7 +53,7 @@ public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandle
         public void onSaveRoles();
     }
 
-    private UserHandler userHandler;
+    private final UserHandler userHandler;
 
     @UiField
     Window window;

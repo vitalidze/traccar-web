@@ -38,20 +38,20 @@ import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
-import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.User;
 import org.traccar.web.shared.model.ValidationException;
 
 public class DeviceController implements ContentController, DeviceView.DeviceHandler {
+
     private final MapController mapController;
 
     private final Application application;
 
-    private ListStore<Device> deviceStore;
+    private final ListStore<Device> deviceStore;
 
-    private DeviceView deviceView;
+    private final DeviceView deviceView;
 
-    private Messages i18n = GWT.create(Messages.class);
+    private final Messages i18n = GWT.create(Messages.class);
 
     private final PositionInfoPopup positionInfo = new PositionInfoPopup();
 
@@ -63,21 +63,26 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         deviceStore.addStoreRecordChangeHandler(new StoreRecordChangeEvent.StoreRecordChangeHandler<Device>() {
             @Override
             public void onRecordChange(StoreRecordChangeEvent<Device> event) {
-                if (event.getProperty().getPath().equals("follow")) {
-                    boolean follow = (Boolean) event.getRecord().getValue(event.getProperty());
-                    Device device = event.getRecord().getModel();
-                    if (follow) {
-                        ApplicationContext.getInstance().follow(device);
-                    } else {
-                        ApplicationContext.getInstance().stopFollowing(device);
+                switch (event.getProperty().getPath()) {
+                    case "follow": {
+                        boolean follow = (Boolean) event.getRecord().getValue(event.getProperty());
+                        Device device = event.getRecord().getModel();
+                        if (follow) {
+                            ApplicationContext.getInstance().follow(device);
+                        } else {
+                            ApplicationContext.getInstance().stopFollowing(device);
+                        }
+                        break;
                     }
-                } else if (event.getProperty().getPath().equals("recordTrace")) {
-                    boolean recordTrace = (Boolean) event.getRecord().getValue(event.getProperty());
-                    Device device = event.getRecord().getModel();
-                    if (recordTrace) {
-                        ApplicationContext.getInstance().recordTrace(device);
-                    } else {
-                        ApplicationContext.getInstance().stopRecordingTrace(device);
+                    case "recordTrace": {
+                        boolean recordTrace = (Boolean) event.getRecord().getValue(event.getProperty());
+                        Device device = event.getRecord().getModel();
+                        if (recordTrace) {
+                            ApplicationContext.getInstance().recordTrace(device);
+                        } else {
+                            ApplicationContext.getInstance().stopRecordingTrace(device);
+                        }
+                        break;
                     }
                 }
             }
@@ -112,6 +117,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     @Override
     public void onAdd() {
         class AddHandler implements DeviceDialog.DeviceHandler {
+
             @Override
             public void onSave(final Device device) {
                 Application.getDataService().addDevice(device, new BaseAsyncCallback<Device>(i18n) {
@@ -119,6 +125,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                     public void onSuccess(Device result) {
                         deviceStore.add(result);
                     }
+
                     @Override
                     public void onFailure(Throwable caught) {
                         MessageBox msg = null;
@@ -147,6 +154,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     @Override
     public void onEdit(Device device) {
         class UpdateHandler implements DeviceDialog.DeviceHandler {
+
             @Override
             public void onSave(final Device device) {
                 Application.getDataService().updateDevice(device, new BaseAsyncCallback<Device>(i18n) {
@@ -155,6 +163,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                         deviceStore.update(result);
                         mapController.updateIcon(result);
                     }
+
                     @Override
                     public void onFailure(Throwable caught) {
                         MessageBox msg = null;
@@ -199,18 +208,18 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     public void onRemove(final Device device) {
         final ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmDeviceRemoval());
         dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
-			@Override
-			public void onDialogHide(DialogHideEvent event) {
-				if (event.getHideButton() == PredefinedButton.YES) {
+            @Override
+            public void onDialogHide(DialogHideEvent event) {
+                if (event.getHideButton() == PredefinedButton.YES) {
                     Application.getDataService().removeDevice(device, new BaseAsyncCallback<Device>(i18n) {
                         @Override
                         public void onSuccess(Device result) {
                             deviceStore.remove(device);
                         }
                     });
-				}
-			}
-		});
+                }
+            }
+        });
         dialog.show();
     }
 
@@ -228,6 +237,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         deviceView.selectDevice(device);
     }
 
+    @Override
     public void doubleClicked(Device device) {
         application.getArchiveController().selectDevice(device);
     }

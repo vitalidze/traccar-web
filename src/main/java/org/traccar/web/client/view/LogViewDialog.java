@@ -22,17 +22,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.form.NumberField;
-import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.TextArea;
-import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
-import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
-import org.traccar.web.client.Application;
-import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseAsyncCallback;
 
 public class LogViewDialog {
-    private static LogViewDialogUiBinder uiBinder = GWT.create(LogViewDialogUiBinder.class);
+    private static final LogViewDialogUiBinder uiBinder = GWT.create(LogViewDialogUiBinder.class);
 
     interface LogViewDialogUiBinder extends UiBinder<Widget, LogViewDialog> {
     }

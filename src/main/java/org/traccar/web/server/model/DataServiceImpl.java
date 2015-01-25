@@ -16,8 +16,6 @@
 package org.traccar.web.server.model;
 
 import java.io.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 import javax.inject.Inject;
@@ -522,7 +520,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             RandomAccessFile raf = null;
             try {
                 raf = new RandomAccessFile(logFile, "r");
-                int length = 0;
+                int length;
                 if (raf.length() > Integer.MAX_VALUE) {
                     length = Integer.MAX_VALUE;
                 } else {
@@ -536,12 +534,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 raf.read(result);
                 return new String(result);
             } catch (Exception ex) {
-                ex.printStackTrace();
             } finally {
                 try {
                     raf.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
                 }
             }
         }
@@ -593,7 +589,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         for (User user : getUsers()) {
             Boolean shared = share.get(user);
             if (shared == null) continue;
-            if (shared.booleanValue()) {
+            if (shared) {
                 device.getUsers().add(user);
             } else {
                 device.getUsers().remove(user);

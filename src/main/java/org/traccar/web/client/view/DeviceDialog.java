@@ -16,7 +16,6 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.ToggleGroup;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -43,12 +42,12 @@ import org.traccar.web.shared.model.Position;
 
 public class DeviceDialog implements Editor<Device> {
 
-    private static DeviceDialogUiBinder uiBinder = GWT.create(DeviceDialogUiBinder.class);
+    private static final DeviceDialogUiBinder uiBinder = GWT.create(DeviceDialogUiBinder.class);
 
     interface DeviceDialogUiBinder extends UiBinder<Widget, DeviceDialog> {
     }
 
-    private DeviceDriver driver = GWT.create(DeviceDriver.class);
+    private final DeviceDriver driver = GWT.create(DeviceDriver.class);
 
     interface DeviceDriver extends SimpleBeanEditorDriver<Device, DeviceDialog> {
     }
@@ -57,7 +56,7 @@ public class DeviceDialog implements Editor<Device> {
         public void onSave(Device device);
     }
 
-    private DeviceHandler deviceHandler;
+    private final DeviceHandler deviceHandler;
 
     @UiField
     Window window;
