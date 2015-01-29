@@ -32,3 +32,10 @@ Important notes:
  * Administrators receives notifications for all devices.
  * Notification settings are taken first from current user and then from all managers hierarchy. If none of managers have notification settings then they are taken from some administrator. If no notification settings found then no email will be sent.
  * Once any notification for event is sent it will NEVER be sent again. This also means that until ANY notification is sent event is in 'pending' outbox.
+
+Disable event recording
+-----------------------
+
+By default all devices events are always recorded. However, this can be disabled from in Global settings menu (Settings >> Global).
+
+![Disabling event recording](http://i58.tinypic.com/wulzti.png)
