@@ -29,8 +29,9 @@ public class ApplicationSettings implements Serializable {
 
     public ApplicationSettings() {
         registrationEnabled = true;
-        updateInterval = Short.valueOf(DEFAULT_UPDATE_INTERVAL);
+        updateInterval = DEFAULT_UPDATE_INTERVAL;
         defaultPasswordHash = PasswordHashMethod.PLAIN;
+        eventRecordingEnabled = true;
     }
 
     @Expose
@@ -46,6 +47,9 @@ public class ApplicationSettings implements Serializable {
     @Expose
     @Column(nullable = true)
     private boolean disallowDeviceManagementByUsers;
+
+    @Column(nullable = true)
+    private boolean eventRecordingEnabled;
 
     public void setRegistrationEnabled(boolean registrationEnabled) {
         this.registrationEnabled = registrationEnabled;
@@ -77,6 +81,14 @@ public class ApplicationSettings implements Serializable {
 
     public void setDefaultHashImplementation(PasswordHashMethod hash) {
         this.defaultPasswordHash = hash;
+    }
+
+    public boolean isEventRecordingEnabled() {
+        return eventRecordingEnabled;
+    }
+
+    public void setEventRecordingEnabled(boolean eventRecordingEnabled) {
+        this.eventRecordingEnabled = eventRecordingEnabled;
     }
 
     @Override
