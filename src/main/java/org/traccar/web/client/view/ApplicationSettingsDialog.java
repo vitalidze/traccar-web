@@ -69,6 +69,9 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     @UiField
     CheckBox disallowDeviceManagementByUsers;
 
+    @UiField
+    CheckBox eventRecordingEnabled;
+
     @UiField(provided = true)
     NumberPropertyEditor<Short> shortPropertyEditor = new NumberPropertyEditor.ShortPropertyEditor();
 
@@ -92,8 +95,8 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
 
         uiBinder.createAndBindUi(this);
 
-        updateInterval.addValidator(new MinNumberValidator<Short>(Short.valueOf((short) 100)));
-        updateInterval.addValidator(new MaxNumberValidator<Short>(Short.valueOf((short) 30000)));
+        updateInterval.addValidator(new MinNumberValidator<Short>((short) 100));
+        updateInterval.addValidator(new MaxNumberValidator<Short>((short) 30000));
 
         driver.initialize(this);
         driver.edit(applicationSettings);

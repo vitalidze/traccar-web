@@ -20,4 +20,5 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("eventService")
 public interface EventService extends RemoteService {
+    void applicationSettingsChanged();
 }
