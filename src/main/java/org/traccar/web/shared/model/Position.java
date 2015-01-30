@@ -40,7 +40,7 @@ import org.traccar.web.client.ArchiveStyle;
 
 @Entity
 @Table(name = "positions",
-       indexes = { @Index(name="positionsIndex", columnList="device_id,time") })
+       indexes = { @Index(name="positionsIndex", columnList="time,device_id") })
 public class Position implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1;
