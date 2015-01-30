@@ -33,6 +33,7 @@ public class DBMigrations {
                 new SetDefaultDeviceTimeout(),
                 new SetDefaultIdleSpeedThreshold(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
+                new SetDefaultEventRecordingEnabled(),
                 new SetDefaultMapType(),
                 new CreateAdmin(),
                 new SetDefaultDeviceIconType(),
@@ -225,6 +226,14 @@ public class DBMigrations {
                     .setParameter("n", Boolean.FALSE)
                     .executeUpdate();
         }
+    }
 
+    static class SetDefaultEventRecordingEnabled implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.eventRecordingEnabled = :b WHERE S.eventRecordingEnabled IS NULL")
+                    .setParameter("b", Boolean.TRUE)
+                    .executeUpdate();
+        }
     }
 }

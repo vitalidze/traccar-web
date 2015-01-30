@@ -32,6 +32,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 
 import org.traccar.web.client.model.DataService;
+import org.traccar.web.client.model.EventService;
 import org.traccar.web.shared.model.*;
 
 @Singleton
@@ -49,6 +50,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Inject
     private Provider<HttpServletRequest> request;
+
+    @Inject
+    private EventService eventService;
 
     @Override
     public void init() throws ServletException {
@@ -501,6 +505,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Override
     public void updateApplicationSettings(ApplicationSettings applicationSettings) {
         getSessionEntityManager().merge(applicationSettings);
+        eventService.applicationSettingsChanged();
     }
 
     @Transactional

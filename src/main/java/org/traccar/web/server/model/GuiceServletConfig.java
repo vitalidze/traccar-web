@@ -23,6 +23,7 @@ import com.google.inject.persist.jpa.JpaPersistModule;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import org.traccar.web.client.model.DataService;
+import org.traccar.web.client.model.EventService;
 import org.traccar.web.shared.model.ApplicationSettings;
 import org.traccar.web.shared.model.User;
 
@@ -72,6 +73,7 @@ public class GuiceServletConfig extends GuiceServletContextListener {
                 bind(User.class).toProvider(CurrentUserProvider.class);
                 bind(ApplicationSettings.class).toProvider(ApplicationSettingsProvider.class);
                 bind(DataService.class).to(DataServiceImpl.class);
+                bind(EventService.class).to(EventServiceImpl.class);
             }
         });
     }

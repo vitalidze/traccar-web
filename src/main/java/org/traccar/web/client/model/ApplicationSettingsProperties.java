@@ -33,6 +33,8 @@ public interface ApplicationSettingsProperties extends PropertyAccess<Applicatio
 
     ValueProvider<ApplicationSettings, Boolean> disallowDeviceManagementByUsers();
 
+    ValueProvider<ApplicationSettings, Boolean> eventRecordingEnabled();
+
     public static class PasswordHashMethodLabelProvider implements LabelProvider<PasswordHashMethod> {
         @Override
         public String getLabel(PasswordHashMethod item) {

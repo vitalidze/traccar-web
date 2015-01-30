@@ -18,6 +18,7 @@ package org.traccar.web.server.model;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.EventService;
+import org.traccar.web.shared.model.ApplicationSettings;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.DeviceEvent;
 import org.traccar.web.shared.model.DeviceEventType;
@@ -31,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
@@ -72,6 +74,9 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
 
     @Inject
     private OfflineDetector offlineDetector;
+    private ScheduledFuture<?> detectorFuture;
+    @Inject
+    private Provider<ApplicationSettings> applicationSettings;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -79,6 +84,32 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
     public void init() throws ServletException {
         super.init();
 
-        scheduler.scheduleAtFixedRate(offlineDetector, 0, 1, TimeUnit.MINUTES);
+        if (applicationSettings.get().isEventRecordingEnabled()) {
+            startOfflineDetector();
+        }
+    }
+
+    private synchronized void startOfflineDetector() {
+        if (detectorFuture == null) {
+            detectorFuture = scheduler.scheduleAtFixedRate(offlineDetector, 0, 1, TimeUnit.MINUTES);
+        }
+    }
+
+    private synchronized void stopOfflineDetector() {
+        if (detectorFuture != null) {
+            detectorFuture.cancel(true);
+            detectorFuture = null;
+        }
+    }
+
+    @Transactional
+    @RequireUser(roles = { Role.ADMIN })
+    @Override
+    public void applicationSettingsChanged() {
+        if (applicationSettings.get().isEventRecordingEnabled()) {
+            startOfflineDetector();
+        } else {
+            stopOfflineDetector();
+        }
     }
 }

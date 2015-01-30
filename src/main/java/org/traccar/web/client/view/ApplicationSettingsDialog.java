@@ -67,6 +67,9 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     @UiField
     CheckBox disallowDeviceManagementByUsers;
 
+    @UiField
+    CheckBox eventRecordingEnabled;
+
     @UiField(provided = true)
     NumberPropertyEditor<Short> shortPropertyEditor = new NumberPropertyEditor.ShortPropertyEditor();
 
