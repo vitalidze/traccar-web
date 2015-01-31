@@ -30,6 +30,7 @@ import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
+import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -60,6 +61,7 @@ public class MapView {
     private Map map;
     private Vector vectorLayer;
     private Markers markerLayer;
+    private Vector archiveLayer;
 
     private Messages i18n = GWT.create(Messages.class);
 
@@ -73,6 +75,10 @@ public class MapView {
 
     public Markers getMarkerLayer() {
         return markerLayer;
+    }
+
+    public Vector getArchiveLayer() {
+        return archiveLayer;
     }
 
     public LonLat createLonLat(double longitude, double latitude) {
@@ -147,7 +153,7 @@ public class MapView {
         vectorLayer = new Vector("Vector", vectorOptions);
 
         MarkersOptions markersOptions = new MarkersOptions();
-        markerLayer = new Markers("Markers", markersOptions);
+        markerLayer = new Markers(i18n.markers(), markersOptions);
 
         initMapLayers(map);
 
@@ -213,15 +219,16 @@ public class MapView {
         latestPositionTrackRenderer.showTime(positions, true, false);
     }
 
-    public void showLatestTrack(List<Position> positions) {
-        latestPositionTrackRenderer.showTrack(positions, false);
+    public void showLatestTrack(Track track) {
+        latestPositionTrackRenderer.showTrack(track, false);
     }
 
-    public void showArchiveTrack(List<Position> positions) {
-        archivePositionRenderer.showTrack(positions, true);
+    public void showArchiveTrack(Track track) {
+        archivePositionRenderer.showTrack(track, true);
     }
 
-    public void showArchivePositions(List<Position> positions) {
+    public void showArchivePositions(Track track) {
+        List<Position> positions = track.getSortedPositions();
         archivePositionRenderer.showPositions(positions);
     }
 

@@ -93,7 +93,6 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
                             } else {
                                 position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
                             }
-                            position.setTrackColor(style.getTrackColor());
                         }
                         positionStore.addAll(result);
                     }
@@ -120,5 +119,9 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
 
     public void selectDevice(Device device) {
         archiveView.selectDevice(device);
+    }
+
+    public ArchiveStyle getStyle() {
+        return archiveView.style;
     }
 }

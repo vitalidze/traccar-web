@@ -250,6 +250,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         }
     }
 
+    @UiHandler("zoomToTrackMenu")
+    public void onMenuSelection(SelectionEvent<Item> event) {
+        style.setZoomToTrack(((CheckMenuItem) event.getSelectedItem()).isChecked());
+    }
+
     @SuppressWarnings("deprecation")
     private static Date getCombineDate(DateField dateField, TimeField timeField) {
         Date result = null;

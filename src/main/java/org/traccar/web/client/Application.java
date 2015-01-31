@@ -71,7 +71,7 @@ public class Application {
         mapController = new MapController(mapHandler);
         deviceController = new DeviceController(mapController, settingsController, this);
         deviceController.getDeviceStore().addStoreHandlers(deviceStoreHandler);
-        archiveController = new ArchiveController(archiveHanlder, userSettingsHandler, deviceController.getDeviceStore());
+        archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
         archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
 
         view = new ApplicationView(
@@ -100,7 +100,7 @@ public class Application {
 
     };
 
-    private ArchiveController.ArchiveHandler archiveHanlder = new ArchiveController.ArchiveHandler() {
+    private ArchiveController.ArchiveHandler archiveHandler = new ArchiveController.ArchiveHandler() {
 
         @Override
         public void onSelected(Position position) {
@@ -131,7 +131,12 @@ public class Application {
 
         @Override
         public void onAnything() {
-            mapController.showArchivePositions(archiveController.getPositionStore().getAll());
+            mapController.showArchivePositions(
+                    new Track(
+                            archiveController.getPositionStore().getAll(),
+                            archiveController.getStyle()
+                    )
+            );
         }
 
     };
