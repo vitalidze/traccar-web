@@ -53,3 +53,4 @@ This project has following features, which don't exist in original `traccar-web`
 * disable login dialog moving and resizing
 * prohibit empty device name and id
 * do not create user with name 'admin' when any other user with 'administrator' role present
+* [possibility to fit line of archived track the current map view](zoom-to-track.html)
