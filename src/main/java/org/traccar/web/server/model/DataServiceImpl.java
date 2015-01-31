@@ -366,11 +366,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             device.setLatestPosition(null);
             entityManager.flush();
 
-            Query query = entityManager.createQuery("DELETE FROM Position x WHERE x.device = :device");
+            Query query = entityManager.createQuery("DELETE FROM DeviceEvent x WHERE x.device = :device");
             query.setParameter("device", device);
             query.executeUpdate();
 
-            query = entityManager.createQuery("DELETE FROM DeviceEvent x WHERE x.device = :device");
+            query = entityManager.createQuery("DELETE FROM Position x WHERE x.device = :device");
             query.setParameter("device", device);
             query.executeUpdate();
 
