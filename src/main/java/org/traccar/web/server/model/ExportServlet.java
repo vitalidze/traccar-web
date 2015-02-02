@@ -16,6 +16,7 @@
 package org.traccar.web.server.model;
 
 import com.google.inject.persist.Transactional;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -170,6 +171,11 @@ public class ExportServlet extends HttpServlet {
                 xsw.writeStartElement("time");
                 xsw.writeCharacters(dateFormat.format(p.getTime()));
                 xsw.writeEndElement();
+                if (p.getOther() != null) {
+                    xsw.writeStartElement("other");
+                    xsw.writeCharacters(StringEscapeUtils.escapeXml(p.getOther().toString()));
+                    xsw.writeEndElement();
+                }
                 xsw.writeEndElement();
             }
             xsw.writeEndElement();
