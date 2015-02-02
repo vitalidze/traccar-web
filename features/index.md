@@ -14,7 +14,7 @@ This project has following features, which don't exist in original `traccar-web`
     * russian language (available via ?locale=ru URL parameters)
     * german language (available via ?locale=de URL parameter)
     * italian language (available via ?locale=it URL parameter)
-    * spanish language (available via ?locale=es URL parameter)
+    * [spanish language](spanish.html) (available via ?locale=es URL parameter)
     * polish language (available via ?locale=pl URL parameter)
     * tagalog language (available via ?locale=tl URL parameter)
     * hungarian language (available via ?locale=hu URL parameter)
