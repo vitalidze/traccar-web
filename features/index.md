@@ -12,7 +12,7 @@ This project has following features, which don't exist in original `traccar-web`
 * printing time stamps at device trace points (frequency is configured in Settings >> Preferences) both for archive and recorded trace
 * translations to
     * russian language (available via ?locale=ru URL parameters)
-    * german language (available via ?locale=de URL parameter)
+    * [german language](german.html) (available via ?locale=de URL parameter)
     * italian language (available via ?locale=it URL parameter)
     * [spanish language](spanish.html) (available via ?locale=es URL parameter)
     * polish language (available via ?locale=pl URL parameter)
