@@ -3,4 +3,4 @@ layout: feature
 title: Italian translation
 ---
 
-![Italian UI screen shot](http://i58.tinypic.com/21jd2kx.png)
+![Italian UI screen shot](http://i59.tinypic.com/289zjvc.png)
