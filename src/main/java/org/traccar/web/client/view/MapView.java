@@ -228,7 +228,7 @@ public class MapView {
     }
 
     public void showArchivePositions(Track track) {
-        List<Position> positions = track.getSortedPositions();
+        List<Position> positions = track.getPositions();
         archivePositionRenderer.showPositions(positions);
     }
 

@@ -15,12 +15,9 @@
  */
 package org.traccar.web.client;
 
-import org.traccar.web.client.TrackSegment;
 import org.traccar.web.shared.model.Position;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,17 +26,14 @@ public class Track {
     public List<TrackSegment> segments = new LinkedList<TrackSegment>();
 
     public Track() {
-
     }
 
     public Track(List<Position> positions) {
-        segments.clear();
-        segments.add(new TrackSegment(positions,new ArchiveStyle()));
+        segments.add(new TrackSegment(positions, new ArchiveStyle()));
     }
 
     public Track(List<Position> positions, ArchiveStyle style) {
-        segments.clear();
-        segments.add(new TrackSegment(positions,style));
+        segments.add(new TrackSegment(positions, style));
     }
 
     public void setStyle(ArchiveStyle style) {
@@ -56,31 +50,25 @@ public class Track {
     }
 
     public List<Position> getPositions() {
-        List<Position> positions = new LinkedList<Position>();
-        for (TrackSegment segment : segments) {
-            for (Position position : segment.getPositions()) {
-                positions.add(position);
+        if (segments.isEmpty()) {
+            return Collections.emptyList();
+        } else if (segments.size() == 1) {
+            return segments.get(0).getPositions();
+        } else {
+            List<Position> positions = new LinkedList<Position>();
+            for (TrackSegment segment : segments) {
+                for (Position position : segment.getPositions()) {
+                    positions.add(position);
+                }
             }
+            return positions;
         }
-        return positions;
-    }
-
-    public List<Position> getSortedPositions() {
-        List<Position> sortedPositions = new LinkedList<Position>(this.getPositions());
-        Collections.sort(sortedPositions, new Comparator<Position>() {
-            @Override
-            public int compare(Position o1, Position o2) {
-                return o1.getTime().compareTo(o2.getTime());
-            }
-        });
-        return sortedPositions;
     }
 
     public List<Position> getTimePositions(long timePrintInterval) {
-        List<Position> sortedPositions = this.getSortedPositions();
-        List<Position> withTime = new ArrayList<Position>();
+        List<Position> withTime = new LinkedList<Position>();
         long prevTime = -1;
-        for (Position position : sortedPositions) {
+        for (Position position : getPositions()) {
             if (prevTime < 0 ||
                     (position.getTime().getTime() - prevTime >= timePrintInterval * 60 * 1000)) {
                 withTime.add(position);

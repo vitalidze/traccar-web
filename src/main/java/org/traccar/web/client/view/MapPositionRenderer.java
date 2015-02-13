@@ -206,7 +206,7 @@ public class MapPositionRenderer {
             tracks.clear();
         }
 
-        List<Position> positions = track.getSortedPositions();
+        List<Position> positions = track.getPositions();
 
         if (!positions.isEmpty()) {
             Point[] linePoints = new Point[positions.size()];
