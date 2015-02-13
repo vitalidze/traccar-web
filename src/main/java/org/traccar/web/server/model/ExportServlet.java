@@ -139,6 +139,7 @@ public class ExportServlet extends HttpServlet {
         xsw.writeStartElement("gpx");
         xsw.writeAttribute("xmlns", "http://www.topografix.com/GPX/1/1");
         xsw.writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        xsw.writeAttribute("xmlns:traccar", "http://www.traccar.org");
         xsw.writeAttribute("creator", "Traccar WEB UI");
         xsw.writeAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd");
 
@@ -179,9 +180,11 @@ public class ExportServlet extends HttpServlet {
             xsw.writeStartElement("time");
             xsw.writeCharacters(dateFormat.format(p.getTime()));
             xsw.writeEndElement();
-            if (p.getOther() != null) {
-                xsw.writeStartElement("other");
+            if (p.getOther() != null && !p.getOther().trim().isEmpty()) {
+                xsw.writeStartElement("extensions");
+                xsw.writeStartElement("traccar:other");
                 xsw.writeCharacters(StringEscapeUtils.escapeXml(p.getOther().toString()));
+                xsw.writeEndElement();
                 xsw.writeEndElement();
             }
             xsw.writeEndElement();
