@@ -286,26 +286,34 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiHandler("csvButton")
     public void onCSVClicked(SelectionEvent<Item> event) {
-        DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
+        if (deviceCombo.getValue() == null) {
+            new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
+        } else {
+            DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-        Window.open("/traccar/export/csv" +
-                        "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
-                        "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
-                        "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                        "&filter=" + !disableFilter.getValue(),
-                "_blank", null);
+            Window.open("/traccar/export/csv" +
+                            "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
+                            "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
+                            "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+                            "&filter=" + !disableFilter.getValue(),
+                    "_blank", null);
+        }
     }
 
     @UiHandler("gpxButton")
     public void onGPXClicked(SelectionEvent<Item> event) {
-        DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
+        if (deviceCombo.getValue() == null) {
+            new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
+        } else {
+            DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-        Window.open("/traccar/export/gpx" +
-                    "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
-                    "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
-                    "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                    "&filter=" + !disableFilter.getValue(),
-                    "_blank", null);
+            Window.open("/traccar/export/gpx" +
+                            "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
+                            "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
+                            "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+                            "&filter=" + !disableFilter.getValue(),
+                     "_blank", null);
+        }
     }
 
     @UiHandler("importButton")

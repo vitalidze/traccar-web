@@ -19,6 +19,7 @@ import com.google.inject.persist.Transactional;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.traccar.web.shared.model.ApplicationSettings;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -129,6 +130,10 @@ public class ImportServlet extends HttpServlet {
                     } else if (xsr.getLocalName().equalsIgnoreCase("ele")) {
                         if (position != null) {
                             position.setAltitude(Double.parseDouble(xsr.getElementText()));
+                        }
+                    } else if (xsr.getLocalName().equalsIgnoreCase("other")) {
+                        if (position != null) {
+                            position.setOther(StringEscapeUtils.unescapeXml(xsr.getElementText()));
                         }
                     } else if (position != null) {
                         position.setOther((position.getOther() == null ? "" : position.getOther()) +
