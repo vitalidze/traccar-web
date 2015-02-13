@@ -40,6 +40,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Singleton
 public class ExportServlet extends HttpServlet {
@@ -49,6 +51,8 @@ public class ExportServlet extends HttpServlet {
     private Provider<EntityManager> entityManager;
     @Inject
     private DataService dataService;
+    @Inject
+    protected Logger logger;
 
     private SimpleDateFormat requestDateFormat = new SimpleDateFormat(RESTApiServlet.REQUEST_DATE_PATTERN);
 
@@ -79,6 +83,11 @@ public class ExportServlet extends HttpServlet {
             throw new ServletException(nfe);
         } catch (ParseException pe) {
             throw new ServletException(pe);
+        } catch (XMLStreamException xse) {
+            throw new ServletException(xse);
+        } catch (IOException ioex) {
+            logger.log(Level.WARNING, ioex.getLocalizedMessage(), ioex);
+            throw ioex;
         }
     }
 
@@ -116,77 +125,76 @@ public class ExportServlet extends HttpServlet {
         return result.toString();
     }
 
-    void gpx(HttpServletResponse response, Device device, Date from, Date to, boolean filter) throws IOException {
+    void gpx(HttpServletResponse response, Device device, Date from, Date to, boolean filter) throws IOException, XMLStreamException {
         response.setContentType("text/xml;charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=traccar-positions.gpx");
 
-        try {
-            TimeZone tz = TimeZone.getTimeZone("UTC");
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-            dateFormat.setTimeZone(tz);
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        dateFormat.setTimeZone(tz);
 
-            XMLStreamWriter xsw = XMLOutputFactory.newFactory().createXMLStreamWriter(response.getOutputStream());
+        XMLStreamWriter xsw = XMLOutputFactory.newFactory().createXMLStreamWriter(response.getOutputStream());
 
-            xsw.writeStartDocument("UTF-8", "1.0");
-            xsw.writeStartElement("gpx");
-            xsw.writeAttribute("xmlns", "http://www.topografix.com/GPX/1/1");
-            xsw.writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-            xsw.writeAttribute("creator", "Traccar WEB UI");
-            xsw.writeAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd");
+        xsw.writeStartDocument("UTF-8", "1.0");
+        xsw.writeStartElement("gpx");
+        xsw.writeAttribute("xmlns", "http://www.topografix.com/GPX/1/1");
+        xsw.writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        xsw.writeAttribute("xmlns:traccar", "http://www.traccar.org");
+        xsw.writeAttribute("creator", "Traccar WEB UI");
+        xsw.writeAttribute("xsi:schemaLocation", "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd");
 
-            // metadata
-            xsw.writeStartElement("metadata");
-            xsw.writeStartElement("link");
-            xsw.writeAttribute("href", "https://github.com/vitalidze/traccar-web");
-            xsw.writeStartElement("text");
-            xsw.writeCharacters("Traccar WEB UI");
-            xsw.writeEndElement();
-            xsw.writeEndElement();
-            xsw.writeStartElement("time");
-            xsw.writeCharacters(dateFormat.format(new Date()));
-            xsw.writeEndElement();
-            xsw.writeEndElement();
+        // metadata
+        xsw.writeStartElement("metadata");
+        xsw.writeStartElement("link");
+        xsw.writeAttribute("href", "https://github.com/vitalidze/traccar-web");
+        xsw.writeStartElement("text");
+        xsw.writeCharacters("Traccar WEB UI");
+        xsw.writeEndElement();
+        xsw.writeEndElement();
+        xsw.writeStartElement("time");
+        xsw.writeCharacters(dateFormat.format(new Date()));
+        xsw.writeEndElement();
+        xsw.writeEndElement();
 
-            // track
-            xsw.writeStartElement("trk");
-            xsw.writeStartElement("name");
-            xsw.writeCharacters(device.getName());
-            xsw.writeEndElement();
-            xsw.writeStartElement("desc");
-            xsw.writeCharacters("Archive records for " + device.getName() + " from " + dateFormat.format(from) + " to " + dateFormat.format(to));
-            xsw.writeEndElement();
-            xsw.writeStartElement("src");
-            xsw.writeCharacters("Traccar archive");
-            xsw.writeEndElement();
-            xsw.writeStartElement("trkseg");
-            for (Position p : dataService.getPositions(device, from, to, filter)) {
-                xsw.writeStartElement("trkpt");
-                xsw.writeAttribute("lat", p.getLatitude().toString());
-                xsw.writeAttribute("lon", p.getLongitude().toString());
-                if (p.getAltitude() != null && p.getAltitude() != 0) {
-                    xsw.writeStartElement("ele");
-                    xsw.writeCharacters(p.getAltitude().toString());
-                    xsw.writeEndElement();
-                }
-                xsw.writeStartElement("time");
-                xsw.writeCharacters(dateFormat.format(p.getTime()));
+        // track
+        xsw.writeStartElement("trk");
+        xsw.writeStartElement("name");
+        xsw.writeCharacters(device.getName());
+        xsw.writeEndElement();
+        xsw.writeStartElement("desc");
+        xsw.writeCharacters("Archive records for " + device.getName() + " from " + dateFormat.format(from) + " to " + dateFormat.format(to));
+        xsw.writeEndElement();
+        xsw.writeStartElement("src");
+        xsw.writeCharacters("Traccar archive");
+        xsw.writeEndElement();
+        xsw.writeStartElement("trkseg");
+        for (Position p : dataService.getPositions(device, from, to, filter)) {
+            xsw.writeStartElement("trkpt");
+            xsw.writeAttribute("lat", p.getLatitude().toString());
+            xsw.writeAttribute("lon", p.getLongitude().toString());
+            if (p.getAltitude() != null && p.getAltitude() != 0) {
+                xsw.writeStartElement("ele");
+                xsw.writeCharacters(p.getAltitude().toString());
                 xsw.writeEndElement();
-                if (p.getOther() != null) {
-                    xsw.writeStartElement("other");
-                    xsw.writeCharacters(StringEscapeUtils.escapeXml(p.getOther().toString()));
-                    xsw.writeEndElement();
-                }
+            }
+            xsw.writeStartElement("time");
+            xsw.writeCharacters(dateFormat.format(p.getTime()));
+            xsw.writeEndElement();
+            if (p.getOther() != null && !p.getOther().trim().isEmpty()) {
+                xsw.writeStartElement("extensions");
+                xsw.writeStartElement("traccar:other");
+                xsw.writeCharacters(StringEscapeUtils.escapeXml(p.getOther().toString()));
+                xsw.writeEndElement();
                 xsw.writeEndElement();
             }
             xsw.writeEndElement();
-            xsw.writeEndElement();
-
-            xsw.writeEndElement();
-            xsw.writeEndDocument();
-
-            xsw.flush();
-        } catch (XMLStreamException xse) {
-            throw new IOException(xse);
         }
+        xsw.writeEndElement();
+        xsw.writeEndElement();
+
+        xsw.writeEndElement();
+        xsw.writeEndDocument();
+
+        xsw.flush();
     }
 }

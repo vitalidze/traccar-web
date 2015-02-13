@@ -42,6 +42,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Singleton
 public class ImportServlet extends HttpServlet {
@@ -51,6 +53,8 @@ public class ImportServlet extends HttpServlet {
     private Provider<ApplicationSettings> applicationSettings;
     @Inject
     private Provider<EntityManager> entityManager;
+    @Inject
+    protected Logger logger;
 
     @Transactional(rollbackOn = { IOException.class, RuntimeException.class })
     @RequireUser
@@ -72,7 +76,11 @@ public class ImportServlet extends HttpServlet {
                     gpx(device, fileItemIterator.next().openStream(), resp);
                 }
             } catch (FileUploadException fue) {
+                logger.log(Level.WARNING, fue.getLocalizedMessage(), fue);
                 throw new IOException(fue);
+            } catch (IOException ioex) {
+                logger.log(Level.WARNING, ioex.getLocalizedMessage(), ioex);
+                throw ioex;
             }
         } else {
             throw new ServletException("Unsupported import type: " + importType);

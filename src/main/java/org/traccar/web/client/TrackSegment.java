@@ -17,7 +17,7 @@ package org.traccar.web.client;
 
 import org.traccar.web.shared.model.Position;
 
-import java.util.List;
+import java.util.*;
 
 public class TrackSegment {
 
@@ -25,11 +25,16 @@ public class TrackSegment {
     private List<Position> positions;
 
     public TrackSegment() {
-        this.style = new ArchiveStyle();
     }
 
     public TrackSegment(List<Position> positions, ArchiveStyle style) {
-        this.positions = positions;
+        this.positions = new ArrayList<Position>(positions);
+        Collections.sort(this.positions, new Comparator<Position>() {
+            @Override
+            public int compare(Position o1, Position o2) {
+            return o1.getTime().compareTo(o2.getTime());
+            }
+        });
         this.style = style;
     }
 
