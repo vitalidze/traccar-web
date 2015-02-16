@@ -111,6 +111,7 @@ public class ImportServlet extends HttpServlet {
 
             List<Position> parsedPositions = new LinkedList<Position>();
             Position position = null;
+            Position latestPosition = null;
 
             response.getWriter().println("<pre>");
 
@@ -155,6 +156,9 @@ public class ImportServlet extends HttpServlet {
                            xsr.getLocalName().equalsIgnoreCase("trkpt")) {
 
                     parsedPositions.add(position);
+                    if (latestPosition == null || position.getTime().compareTo(position.getTime()) < 0) {
+                        latestPosition = position;
+                    }
                     position = null;
                 }
             }
@@ -194,6 +198,10 @@ public class ImportServlet extends HttpServlet {
                     entityManager.get().persist(position);
                     imported++;
                 }
+            }
+
+            if (latestPosition != null && device.getLatestPosition() == null || device.getLatestPosition().getTime().compareTo(latestPosition.getTime()) < 0) {
+                device.setLatestPosition(latestPosition);
             }
 
             response.getWriter().println("Already exist: " + (parsedPositions.size() - imported));
