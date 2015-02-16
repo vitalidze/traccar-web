@@ -135,15 +135,19 @@ public class ImportServlet extends HttpServlet {
                                 position.setTime(dateFormatWithMS.parse(strTime));
                             }
                         }
-                    } else if (xsr.getLocalName().equalsIgnoreCase("ele")) {
-                        if (position != null) {
-                            position.setAltitude(Double.parseDouble(xsr.getElementText()));
-                        }
-                    } else if (xsr.getLocalName().equalsIgnoreCase("other")) {
-                        if (position != null) {
-                            position.setOther(StringEscapeUtils.unescapeXml(xsr.getElementText()));
-                        }
-                    } else if (position != null) {
+                    } else if (xsr.getLocalName().equalsIgnoreCase("ele") && position != null) {
+                        position.setAltitude(Double.parseDouble(xsr.getElementText()));
+                    } else if (xsr.getLocalName().equalsIgnoreCase("address") && position != null) {
+                        position.setAddress(StringEscapeUtils.unescapeXml(xsr.getElementText()));
+                    } else if (xsr.getLocalName().equalsIgnoreCase("speed") && position != null) {
+                        position.setSpeed(Double.parseDouble(xsr.getElementText()));
+                    } else if (xsr.getLocalName().equalsIgnoreCase("power") && position != null) {
+                        position.setPower(Double.parseDouble(xsr.getElementText()));
+                    } else if (xsr.getLocalName().equalsIgnoreCase("course") && position != null) {
+                        position.setCourse(Double.parseDouble(xsr.getElementText()));
+                    } else if (xsr.getLocalName().equalsIgnoreCase("other") && position != null) {
+                        position.setOther(StringEscapeUtils.unescapeXml(xsr.getElementText()));
+                    } else if (!xsr.getLocalName().equalsIgnoreCase("extensions") && position != null) {
                         position.setOther((position.getOther() == null ? "" : position.getOther()) +
                         "<" + xsr.getLocalName() + ">" + xsr.getElementText() + "</" + xsr.getLocalName() + ">");
                     }
