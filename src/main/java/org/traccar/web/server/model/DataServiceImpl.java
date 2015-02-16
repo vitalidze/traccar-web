@@ -433,10 +433,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
                 positionB.setDistance(earthRadius * c); // Distance in km
 
-                if (filters.isHideDuplicates()) {
+                if (filter && filters.isHideDuplicates()) {
                     add = !positionA.getTime().equals(positionB.getTime());
                 }
-                if (add && filters.getMinDistance() != null) {
+                if (add && filter && filters.getMinDistance() != null) {
                     add = positionB.getDistance() >= filters.getMinDistance();
                 }
             }
