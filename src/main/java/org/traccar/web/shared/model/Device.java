@@ -15,6 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 
 import java.io.Serializable;
@@ -23,13 +24,16 @@ import java.util.Set;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "devices")
+@Table(name = "devices",
+       indexes = { @Index(name = "devices_pkey", columnList = "id") },
+       uniqueConstraints = { @UniqueConstraint(name = "devices_ukey_uniqueid", columnNames = "uniqueid") })
 public class Device implements Serializable {
 
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_TIMEOUT = 5 * 60;
 
     public Device() {
+        iconType = DeviceIconType.DEFAULT;
     }
 
     public Device(Device device) {
@@ -38,18 +42,22 @@ public class Device implements Serializable {
         name = device.name;
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
+        iconType = device.iconType;
     }
 
+    @Expose
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
     public long getId() {
         return id;
     }
 
-    @OneToOne(fetch = FetchType.EAGER)
     @GwtTransient
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_position_id"))
     private Position latestPosition;
 
     public void setLatestPosition(Position latestPosition) {
@@ -60,7 +68,7 @@ public class Device implements Serializable {
         return latestPosition;
     }
 
-    @Column(unique = true)
+    @Expose
     private String uniqueId;
 
     public void setUniqueId(String uniqueId) {
@@ -71,6 +79,7 @@ public class Device implements Serializable {
         return uniqueId;
     }
 
+    @Expose
     private String name;
 
     public void setName(String name) {
@@ -104,6 +113,8 @@ public class Device implements Serializable {
     /**
      * Consider device offline after 'timeout' seconds spent from last position
      */
+    @Expose
+    @Column(nullable = true)
     private int timeout = DEFAULT_TIMEOUT;
 
     public int getTimeout() {
@@ -114,6 +125,8 @@ public class Device implements Serializable {
         this.timeout = timeout;
     }
 
+    @Expose
+    @Column(nullable = true)
     private double idleSpeedThreshold;
 
     public double getIdleSpeedThreshold() {
@@ -124,11 +137,17 @@ public class Device implements Serializable {
         this.idleSpeedThreshold = idleSpeedThreshold;
     }
 
+    // Hibernate bug HHH-8783: (http://hibernate.atlassian.net/browse/HHH-8783)
+    //     ForeignKey(name) has no effect in JoinTable (and others).  It is
+    //     reported as closed but the comments indicate it is still not fixed
+    //     for @JoinTable() and targeted to be fixed in 5.x :-(.
+    //                          
     @GwtTransient
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_devices",
-            joinColumns = { @JoinColumn(name = "devices_id", referencedColumnName = "id") },
-            inverseJoinColumns = { @JoinColumn(name = "users_id", referencedColumnName = "id") })
+               foreignKey = @ForeignKey(name = "users_devices_fkey_devices_id"),
+               joinColumns = { @JoinColumn(name = "devices_id", table = "devices", referencedColumnName = "id") },
+               inverseJoinColumns = { @JoinColumn(name = "users_id", table = "users", referencedColumnName = "id") })
     private Set<User> users;
 
     public Set<User> getUsers() {
@@ -137,6 +156,18 @@ public class Device implements Serializable {
 
     public void setUsers(Set<User> users) {
         this.users = users;
+    }
+
+    @Expose
+    @Enumerated(EnumType.STRING)
+    private DeviceIconType iconType;
+
+    public DeviceIconType getIconType() {
+        return iconType;
+    }
+
+    public void setIconType(DeviceIconType iconType) {
+        this.iconType = iconType;
     }
 
     @Override

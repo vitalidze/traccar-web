@@ -24,10 +24,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.Track;
 import org.traccar.web.client.view.MapView;
-import org.traccar.web.client.view.MarkerIconFactory;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -101,12 +102,24 @@ public class MapController implements ContentController, MapView.MapHandler {
             @Override
             public void onSuccess(List<Position> result) {
                 /**
-                 * Set up icon
+                 * Set up icon and 'idle since'
                  */
                 long currentTime = System.currentTimeMillis();
                 for (Position position : result) {
+                    Device device = position.getDevice();
                     boolean isOffline = currentTime - position.getTime().getTime() > position.getDevice().getTimeout() * 1000;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
+                    position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
+                    if (position.getSpeed() != null) {
+                        if (position.getSpeed().doubleValue() > position.getDevice().getIdleSpeedThreshold()) {
+                            latestNonIdlePositionMap.put(device.getId(), position);
+                        } else {
+                            Position latestNonIdlePosition = latestNonIdlePositionMap.get(device.getId());
+                            if (latestNonIdlePosition != null) {
+                                position.setIdleSince(latestNonIdlePosition.getTime());
+                            }
+                        }
+                    }
                 }
                 /**
                  * Draw positions
@@ -125,26 +138,16 @@ public class MapController implements ContentController, MapView.MapHandler {
                         }
                         if (ApplicationContext.getInstance().isRecordingTrace(device)) {
                             mapView.showLatestTrackPositions(Arrays.asList(prevPosition));
-                            mapView.showLatestTrack(Arrays.asList(prevPosition, position));
+                            mapView.showLatestTrack(new Track(Arrays.asList(prevPosition, position)));
                         }
                     }
                     if (ApplicationContext.getInstance().isRecordingTrace(device)) {
                         Position prevTimestampPosition = timestampMap.get(device.getId());
 
                         if (prevTimestampPosition == null ||
-                                (position.getTime().getTime() - prevTimestampPosition.getTime().getTime() >= ApplicationContext.getInstance().getUserSettings().getTimePrintInterval() * 60 * 1000)) {
+                            (position.getTime().getTime() - prevTimestampPosition.getTime().getTime() >= ApplicationContext.getInstance().getUserSettings().getTimePrintInterval() * 60 * 1000)) {
                             mapView.showLatestTime(Arrays.asList(position));
                             timestampMap.put(device.getId(), position);
-                        }
-                    }
-                    if (position.getSpeed() != null) {
-                        if (position.getSpeed().doubleValue() > position.getDevice().getIdleSpeedThreshold()) {
-                            latestNonIdlePositionMap.put(device.getId(), position);
-                        } else {
-                            Position latestNonIdlePosition = latestNonIdlePositionMap.get(device.getId());
-                            if (latestNonIdlePosition != null) {
-                                position.setIdleSince(latestNonIdlePosition.getTime());
-                            }
                         }
                     }
                     latestPositionMap.put(device.getId(), position);
@@ -163,25 +166,10 @@ public class MapController implements ContentController, MapView.MapHandler {
         mapView.selectDevice(device);
     }
 
-    public void showArchivePositions(List<Position> positions) {
-        List<Position> sortedPositions = new LinkedList<Position>(positions);
-        Collections.sort(sortedPositions, new Comparator<Position>() {
-            @Override
-            public int compare(Position o1, Position o2) {
-                return o1.getTime().compareTo(o2.getTime());
-            }
-        });
-        mapView.showArchiveTrack(sortedPositions);
-        mapView.showArchivePositions(sortedPositions);
-        List<Position> withTime = new ArrayList<Position>();
-        long prevTime = -1;
-        for (Position position : positions) {
-            if (prevTime < 0 ||
-                (position.getTime().getTime() - prevTime >= ApplicationContext.getInstance().getUserSettings().getTimePrintInterval() * 60 * 1000)) {
-                withTime.add(position);
-                prevTime = position.getTime().getTime();
-            }
-        }
+    public void showArchivePositions(Track track) {
+        mapView.showArchiveTrack(track);
+        mapView.showArchivePositions(track);
+        List<Position> withTime = track.getTimePositions(ApplicationContext.getInstance().getUserSettings().getTimePrintInterval());
         mapView.showArchiveTime(withTime);
     }
 
@@ -201,10 +189,20 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public void loadMapSettings() {
         UserSettings userSettings = ApplicationContext.getInstance().getUserSettings();
+        for (Layer map : mapView.getMap().getLayers()) {
+            if (map.getName().equals(userSettings.getMapType().getName())) {
+                mapView.getMap().setBaseLayer(map);
+                break;
+            }
+        }
         mapView.getMap().setCenter(mapView.createLonLat(userSettings.getCenterLongitude(), userSettings.getCenterLatitude()), userSettings.getZoomLevel());
     }
 
     public Position getLatestPosition(Device device) {
         return latestPositionMap.get(device.getId());
+    }
+
+    public void updateIcon(Device device) {
+        mapView.updateIcon(device);
     }
 }

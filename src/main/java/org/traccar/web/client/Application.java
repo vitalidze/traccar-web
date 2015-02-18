@@ -17,6 +17,7 @@ package org.traccar.web.client;
 
 import java.util.logging.Logger;
 
+import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Projection;
@@ -30,6 +31,7 @@ import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.DataServiceAsync;
 import org.traccar.web.client.view.ApplicationView;
+import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.client.view.UserSettingsDialog;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -67,9 +69,9 @@ public class Application {
     public Application() {
         settingsController = new SettingsController(userSettingsHandler);
         mapController = new MapController(mapHandler);
-        deviceController = new DeviceController(mapController, settingsController);
+        deviceController = new DeviceController(mapController, settingsController, this);
         deviceController.getDeviceStore().addStoreHandlers(deviceStoreHandler);
-        archiveController = new ArchiveController(archiveHanlder, deviceController.getDeviceStore());
+        archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
         archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
 
         view = new ApplicationView(
@@ -98,7 +100,7 @@ public class Application {
 
     };
 
-    private ArchiveController.ArchiveHandler archiveHanlder = new ArchiveController.ArchiveHandler() {
+    private ArchiveController.ArchiveHandler archiveHandler = new ArchiveController.ArchiveHandler() {
 
         @Override
         public void onSelected(Position position) {
@@ -106,6 +108,10 @@ public class Application {
         }
 
     };
+
+    public ArchiveController getArchiveController() {
+        return archiveController;
+    }
 
     private StoreHandlers<Device> deviceStoreHandler = new BaseStoreHandlers<Device>() {
 
@@ -125,12 +131,17 @@ public class Application {
 
         @Override
         public void onAnything() {
-            mapController.showArchivePositions(archiveController.getPositionStore().getAll());
+            mapController.showArchivePositions(
+                    new Track(
+                            archiveController.getPositionStore().getAll(),
+                            archiveController.getStyle()
+                    )
+            );
         }
 
     };
 
-    private UserSettingsDialog.UserSettingsHandler userSettingsHandler = new UserSettingsDialog.UserSettingsHandler() {
+    private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler, FilterDialog.FilterSettingsHandler {
         @Override
         public void onSave(UserSettings userSettings) {
             ApplicationContext.getInstance().setUserSettings(userSettings);
@@ -144,12 +155,24 @@ public class Application {
         }
 
         @Override
-        public void onTakeCurrentMapState(NumberField<Double> centerLongitude, NumberField<Double> centerLatitude, NumberField<Integer> zoomLevel) {
+        public void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
+                                          NumberField<Double> centerLongitude,
+                                          NumberField<Double> centerLatitude,
+                                          NumberField<Integer> zoomLevel) {
+            String layerName = mapController.getMap().getBaseLayer().getName();
+            for (UserSettings.MapType mapTypeXX : UserSettings.MapType.values()) {
+                if (layerName.equals(mapTypeXX.getName())) {
+                    mapType.setValue(mapTypeXX);
+                    break;
+                }
+            }
             LonLat center = mapController.getMap().getCenter();
             center.transform(mapController.getMap().getProjection(), new Projection("EPSG:4326").getProjectionCode());
             centerLongitude.setValue(center.lon());
             centerLatitude.setValue(center.lat());
             zoomLevel.setValue(mapController.getMap().getZoom());
         }
-    };
+    }
+
+    private UserSettingsHandlerImpl userSettingsHandler = new UserSettingsHandlerImpl();
 }

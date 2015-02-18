@@ -15,8 +15,14 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.core.client.util.ToggleGroup;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
+import com.sencha.gxt.widget.core.client.form.Radio;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.ApplicationContext;
@@ -32,6 +38,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.TextField;
+import org.traccar.web.shared.model.DeviceIconType;
+import org.traccar.web.shared.model.Position;
 
 public class DeviceDialog implements Editor<Device> {
 
@@ -60,6 +68,9 @@ public class DeviceDialog implements Editor<Device> {
     @UiField
     TextField uniqueId;
 
+    @UiField
+    VerticalLayoutContainer devicePictures;
+
     @UiField(provided = true)
     NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
 
@@ -72,6 +83,8 @@ public class DeviceDialog implements Editor<Device> {
     @UiField
     NumberField<Double> idleSpeedThreshold;
 
+    ToggleGroup iconRadioGroup = new ToggleGroup();
+
     public DeviceDialog(Device device, DeviceHandler deviceHandler) {
         this.deviceHandler = deviceHandler;
         uiBinder.createAndBindUi(this);
@@ -83,6 +96,24 @@ public class DeviceDialog implements Editor<Device> {
         driver.edit(device);
 
         idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
+
+
+        HorizontalPanel nextPanel = null;
+        DeviceIconType[] deviceIconTypes = DeviceIconType.values();
+        for (int i = 0; i < deviceIconTypes.length; i++) {
+            DeviceIconType deviceIconType = deviceIconTypes[i];
+            if (nextPanel == null || i % 5 == 0) {
+                nextPanel = new HorizontalPanel();
+                devicePictures.add(nextPanel, new VerticalLayoutContainer.VerticalLayoutData(-1, -1, new Margins(5, 0, 5, 5)));
+            }
+
+            Radio radio = new Radio();
+            radio.setBoxLabel("<img src=\"" + deviceIconType.getPositionIconType(Position.Status.OFFLINE).getURL(false) + "\">");
+            nextPanel.add(radio);
+            iconRadioGroup.add(radio);
+            radio.setValue(deviceIconType == device.getIconType());
+            radio.setId(deviceIconType.name());
+        }
     }
 
     public void show() {
@@ -98,6 +129,9 @@ public class DeviceDialog implements Editor<Device> {
         window.hide();
         Device device = driver.flush();
         device.setIdleSpeedThreshold(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getIdleSpeedThreshold()));
+        if (iconRadioGroup.getValue() != null) {
+            device.setIconType(DeviceIconType.valueOf(((Radio) iconRadioGroup.getValue()).getId()));
+        }
         deviceHandler.onSave(device);
     }
 

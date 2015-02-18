@@ -25,6 +25,7 @@ import org.gwtopenmaps.openlayers.client.Pixel;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.PositionIconType;
 
 public class PositionInfoPopup {
     private final static Messages i18n = GWT.create(Messages.class);
@@ -43,8 +44,8 @@ public class PositionInfoPopup {
                 (position.getIdleSince() == null ? "" : ("<tr><td style=\"font-size: 11pt; border-width: 0px 1px 1px 0px; border-style: solid; border-color: #000000; padding: 3px 10px 3px 0px;\" valign=\"center\">" + i18n.idle() + "</td><td style=\"border-width: 0px 0px 1px 0px; border-style: solid; border-color: #000000; padding: 3px 10px 3px 10px;\" colspan=\"2\">" + formatDateTimeDiff(current - position.getIdleSince().getTime()) + "<br>(" + i18n.since(ApplicationContext.getInstance().getFormatterUtil().getTimeFormat().format(position.getIdleSince())) + ")</td></tr>")) +
                 (position.getAddress() == null || position.getAddress().isEmpty() ? "" : ("<tr><td style=\"border-width: 0px 0px 1px 0px; border-style: solid; border-color: #000000; padding: 3px 0px 3px 0px;\" colspan=\"2\">" + position.getAddress() + "</td></tr>")) +
                 "<tr>" +
-                "<td style=\"font-size: 12pt; border-width: 0px 1px 1px 0px; border-style: solid; border-color: #000000; padding: 3px 10px 3px 0px;\" valign=\"bottom\">" + ApplicationContext.getInstance().getFormatterUtil().getSpeedFormat().format(position.getSpeed()) + "</td>" +
-                "<td style=\"font-size: 10pt; border-bottom: 1px solid #000000; padding: 3px 10px 3px 10px;\" valign=\"bottom\">" + position.getAltitude() + " " + i18n.meter() + "</td>" +
+                (position.getSpeed() == null ? "" : ("<td style=\"font-size: 12pt; border-width: 0px 1px 1px 0px; border-style: solid; border-color: #000000; padding: 3px 10px 3px 0px;\" valign=\"bottom\">" + ApplicationContext.getInstance().getFormatterUtil().getSpeedFormat().format(position.getSpeed()) + "</td>")) +
+                (position.getAltitude() == null ? "" : ("<td style=\"font-size: 10pt; border-bottom: 1px solid #000000; padding: 3px 10px 3px 10px;\" valign=\"bottom\"" + (position.getSpeed() == null ? " colspan=\"2\" align=\"right\"" : "") + ">" + position.getAltitude() + " " + i18n.meter() + "</td>")) +
                 "</tr>";
         String other = position.getOther();
         if (other != null) {
@@ -65,7 +66,14 @@ public class PositionInfoPopup {
 
         ToolTipConfig config = new ToolTipConfig();
 
-        config.setTitleHtml(position.getDevice().getName() + (position.getStatus() == Position.Status.OFFLINE ? " (" + i18n.offline() + ")" : ""));
+        PositionIconType iconType = position.getDevice().getIconType().getPositionIconType(position.getStatus());
+        String deviceTitle = position.getDevice().getName() + (position.getStatus() == Position.Status.OFFLINE ? " (" + i18n.offline() + ")" : "");
+
+        config.setTitleHtml(
+                "<table height=\"100%\"><tr>" +
+                "<td>" +"<img src=\"" + iconType.getURL(false) + "\">&nbsp;</td>" +
+                "<td valign=\"center\">" + deviceTitle + "</td>" +
+                "</tr></table>");
 
         config.setBodyHtml(body);
         config.setAutoHide(false);

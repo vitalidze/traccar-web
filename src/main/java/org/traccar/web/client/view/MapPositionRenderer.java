@@ -17,9 +17,11 @@ package org.traccar.web.client.view;
 
 import java.util.*;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import org.gwtopenmaps.openlayers.client.Icon;
 import org.gwtopenmaps.openlayers.client.Marker;
+import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.event.EventHandler;
 import org.gwtopenmaps.openlayers.client.event.EventObject;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
@@ -27,6 +29,8 @@ import org.gwtopenmaps.openlayers.client.geometry.LineString;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
+import org.traccar.web.client.ArchiveStyle;
+import org.traccar.web.client.Track;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -121,7 +125,7 @@ public class MapPositionRenderer {
         for (Position position : positions) {
             Marker marker = new Marker(
                     mapView.createLonLat(position.getLongitude(), position.getLatitude()),
-                    MarkerIconFactory.getIcon(position.getStatus().getIconType(), false));
+                    MarkerIconFactory.getIcon(position.getIconType(), false));
             markerMap.put(position.getId(), marker);
             deviceMap.put(position.getDevice().getId(), position.getId());
             positionMap.put(position.getId(), position);
@@ -193,14 +197,16 @@ public class MapPositionRenderer {
         }
     }
 
-    public void showTrack(List<Position> positions, boolean clearExisting) {
+    public void showTrack(Track track, boolean clearExisting) {
         if (clearExisting) {
-            for (VectorFeature track : tracks) {
-                getVectorLayer().removeFeature(track);
-                track.destroy();
+            for (VectorFeature mapTrack : tracks) {
+                getVectorLayer().removeFeature(mapTrack);
+                mapTrack.destroy();
             }
             tracks.clear();
         }
+
+        List<Position> positions = track.getPositions();
 
         if (!positions.isEmpty()) {
             Point[] linePoints = new Point[positions.size()];
@@ -209,12 +215,16 @@ public class MapPositionRenderer {
             for (Position position : positions) {
                 linePoints[i++] = mapView.createPoint(position.getLongitude(), position.getLatitude());
             }
+            // Assigns color to style
+            Style style = mapView.getVectorLayer().getStyle();
+            style.setStrokeColor("#" + track.getStyle().getTrackColor());
 
             LineString lineString = new LineString(linePoints);
-            VectorFeature track = new VectorFeature(lineString);
-            getVectorLayer().addFeature(track);
-            tracks.add(track);
-            //mapView.getMap().zoomToExtent(lineString.getBounds());
+            VectorFeature mapTrack = new VectorFeature(lineString, style);
+            getVectorLayer().addFeature(mapTrack);
+            tracks.add(mapTrack);
+            if (track.getStyle().getZoomToTrack())
+                mapView.getMap().zoomToExtent(lineString.getBounds());
         }
     }
 
@@ -241,11 +251,11 @@ public class MapPositionRenderer {
     private boolean selectPosition(Long oldPositionId, Long newPositionId, boolean center) {
         if (oldPositionId != null && markerMap.containsKey(oldPositionId)) {
             Position oldPosition = positionMap.get(oldPositionId);
-            changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getStatus().getIconType(), false));
+            changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getIconType(), false));
         }
         if (newPositionId != null && markerMap.containsKey(newPositionId)) {
             Position newPosition = positionMap.get(newPositionId);
-            changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getStatus().getIconType(), true));
+            changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getIconType(), true));
             if (center) {
                 mapView.getMap().panTo(markerMap.get(newPositionId).getLonLat());
             }
@@ -277,5 +287,16 @@ public class MapPositionRenderer {
             trackPointStyle.setFillOpacity(1d);
         }
         return trackPointStyle;
+    }
+
+    public void updateIcon(Device device) {
+        Long positionId = deviceMap.get(device.getId());
+        Position position = positionMap.get(positionId);
+        if (position != null) {
+            position.setDevice(device);
+            position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
+            boolean selected = selectedPositionId != null && selectedPositionId.equals(positionId);
+            changeMarkerIcon(position, MarkerIconFactory.getIcon(position.getIconType(), selected));
+        }
     }
 }

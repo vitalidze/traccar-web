@@ -15,10 +15,7 @@
  */
 package org.traccar.web.server.model;
 
-import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.User;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -27,13 +24,22 @@ import java.util.List;
 public class DBMigrations {
     public void migrate(EntityManager em) throws Exception {
         for (Migration migration : new Migration[] {
-                new CreateAdmin(),
                 new SetUpdateInterval(),
                 new SetTimePrintInterval(),
+                new SetDefaultFilteringSettings(),
                 new SetDefaultMapViewSettings(),
                 new SetManagerFlag(),
-                new SetDefaultDeviceTimeout()
-
+                new SetNotificationsFlag(),
+                new SetDefaultDeviceTimeout(),
+                new SetDefaultIdleSpeedThreshold(),
+                new SetDefaultDisallowDeviceManagementByUsers(),
+                new SetDefaultEventRecordingEnabled(),
+                new SetDefaultMapType(),
+                new CreateAdmin(),
+                new SetDefaultDeviceIconType(),
+                new SetDefaultHashImplementation(),
+                new SetDefaultUserSettings(),
+                new SetArchiveDefaultColumns()
         }) {
             em.getTransaction().begin();
             try {
@@ -56,13 +62,14 @@ public class DBMigrations {
     static class CreateAdmin implements Migration {
         @Override
         public void migrate(EntityManager em) throws Exception {
-            TypedQuery<User> query = em.createQuery("SELECT x FROM User x WHERE x.login = 'admin'", User.class);
-            List<User> results = query.getResultList();
+            TypedQuery<User> query = em.createQuery("SELECT x FROM User x WHERE x.admin = :adminValue", User.class);
+            List<User> results = query.setParameter("adminValue", true).getResultList();
             if (results.isEmpty()) {
                 User user = new User();
                 user.setLogin("admin");
                 user.setPassword("admin");
                 user.setAdmin(true);
+                user.setManager(false);
                 em.persist(user);
             }
         }
@@ -126,6 +133,106 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.timeout = :tmout WHERE D.timeout IS NULL OR D.timeout <= 0")
                     .setParameter("tmout", Integer.valueOf(Device.DEFAULT_TIMEOUT))
+                    .executeUpdate();
+        }
+    }
+
+    /**
+     * set up default idle speed threshold to 0
+     */
+    static class SetDefaultIdleSpeedThreshold implements Migration {
+
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.idleSpeedThreshold = :idleSpeedThreshold WHERE D.idleSpeedThreshold IS NULL")
+                    .setParameter("idleSpeedThreshold", Double.valueOf(0))
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultDisallowDeviceManagementByUsers implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.disallowDeviceManagementByUsers = :ddmbu WHERE S.disallowDeviceManagementByUsers IS NULL")
+                    .setParameter("ddmbu", Boolean.FALSE)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultMapType implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + UserSettings.class.getName() + " S SET S.mapType = :mt WHERE S.mapType IS NULL")
+                    .setParameter("mt", UserSettings.MapType.OSM)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultDeviceIconType implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.iconType = :iconType WHERE D.iconType IS NULL")
+                    .setParameter("iconType", DeviceIconType.DEFAULT)
+                    .executeUpdate();
+        }
+    }
+
+    /**
+     * Set up default hashing in application settings
+     */
+    static class SetDefaultHashImplementation implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getSimpleName() + " S SET S.defaultPasswordHash = :dh WHERE S.defaultPasswordHash IS NULL")
+                    .setParameter("dh", PasswordHashMethod.PLAIN)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultUserSettings implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            for (User user : em.createQuery("SELECT u FROM " + User.class.getName() + " u WHERE u.userSettings IS NULL", User.class).getResultList()) {
+                user.setUserSettings(new UserSettings());
+                em.persist(user);
+            }
+        }
+    }
+
+    static class SetDefaultFilteringSettings implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + UserSettings.class.getName() + " S SET S.hideZeroCoordinates = :false, S.hideInvalidLocations = :false, S.hideDuplicates = :false WHERE S.hideZeroCoordinates IS NULL")
+                    .setParameter("false", false)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetArchiveDefaultColumns implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            for (User user : em.createQuery("SELECT u FROM User u WHERE u NOT IN (SELECT user FROM UIStateEntry WHERE name=:archiveGridStateId)", User.class)
+                             .setParameter("archiveGridStateId", UIStateEntry.ARCHIVE_GRID_STATE_ID)
+                             .getResultList()) {
+                em.persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
+            }
+        }
+    }
+
+    static class SetNotificationsFlag implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + User.class.getSimpleName() + " U SET U.notifications = :n WHERE U.notifications IS NULL")
+                    .setParameter("n", Boolean.FALSE)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultEventRecordingEnabled implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.eventRecordingEnabled = :b WHERE S.eventRecordingEnabled IS NULL")
+                    .setParameter("b", Boolean.TRUE)
                     .executeUpdate();
         }
     }

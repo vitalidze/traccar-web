@@ -9,18 +9,25 @@
   <groupId>org.traccar</groupId>
   <artifactId>traccar-web</artifactId>
   <packaging>war</packaging>
-  <version>2.9-SNAPSHOT</version>
+  <version>2.11-SNAPSHOT</version>
   <name>Traccar Web UI</name>
 
   <properties>
+    <!-- Convenience property to set the hibernate version -->
+    <hibernateVersion>4.3.7.Final</hibernateVersion>
     <!-- Convenience property to set the GWT version -->
-    <gwtVersion>2.6.0</gwtVersion>
+    <gwtVersion>2.7.0</gwtVersion>
+    <!-- Convenience property to set the google guice version -->
+    <guiceVersion>3.0</guiceVersion>
+    <!-- Convenience property to set the javamail version -->
+    <javaMailVersion>1.5.2</javaMailVersion>
     <!-- GWT needs at least java 1.5 -->
     <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
+    <!-- GWT dependencies -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-servlet</artifactId>
@@ -34,36 +41,72 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-codeserver</artifactId>
+      <version>${gwtVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- Hibernate dependencies -->
+    <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>4.1.10.Final</version>
+      <version>${hibernateVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
-      <version>4.3.1.Final</version>
+      <version>4.3.2.Final</version>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-entitymanager</artifactId>
-      <version>4.1.10.Final</version>
+      <version>${hibernateVersion}</version>
     </dependency>
+    <dependency>
+      <groupId>org.hibernate.javax.persistence</groupId>
+      <artifactId>hibernate-jpa-2.1-api</artifactId>
+      <version>1.0.0.Final</version>
+    </dependency>
+    <!-- Google guice -->
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>${guiceVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-persist</artifactId>
+      <version>${guiceVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-servlet</artifactId>
+      <version>${guiceVersion}</version>
+    </dependency>
+    <!-- Database drivers -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.180</version>
+      <version>1.4.184</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
        <groupId>mysql</groupId>
        <artifactId>mysql-connector-java</artifactId>
-       <version>5.1.31</version>
+       <version>5.1.34</version>
        <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>9.3-1102-jdbc4</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- Mapping dependencies -->
+    <dependency>
        <groupId>com.sencha.gxt</groupId>
        <artifactId>gxt</artifactId>
-       <version>3.1.0-beta</version>
+       <version>3.1.1</version>
        <scope>provided</scope>
     </dependency>
     <dependency>
@@ -72,11 +115,39 @@
        <version>1.0</version>
        <scope>provided</scope>
     </dependency>
+    <!-- Mail dependencies -->
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>mailapi</artifactId>
+      <version>${javaMailVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>smtp</artifactId>
+      <version>${javaMailVersion}</version>
+    </dependency>
+    <!-- Test dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.7</version>
+      <version>4.12</version>
       <scope>test</scope>
+    </dependency>
+    <!-- Other dependencies -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>1.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.3.2</version>
     </dependency>
   </dependencies>
 
@@ -103,7 +174,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>2.6.0</version>
+        <version>${gwtVersion}</version>
         <configuration>
           <deploy>${project.build.directory}/gwt-deploy</deploy>
           <runTarget>traccar.html</runTarget>

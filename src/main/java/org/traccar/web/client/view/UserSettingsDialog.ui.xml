@@ -23,7 +23,7 @@
 
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="doublePropertyEditor" />
 
-  <gxt:Window ui:field="window" pixelSize="300, 255" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="300, 280" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.speedUnits}" labelWidth="160">
@@ -47,6 +47,13 @@
       <container:child layoutData="{verticalLayoutData}">
           <gxt:FramedPanel headingText="{i18n.defaultMapState}">
               <container:VerticalLayoutContainer>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.map}">
+                          <form:widget>
+                              <form:ComboBox ui:field="mapType" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
                   <container:child layoutData="{verticalLayoutData}">
                       <form:FieldLabel text="{i18n.longitude}">
                           <form:widget>
@@ -72,7 +79,7 @@
                   <container:child layoutData="{verticalLayoutData}">
                       <form:FieldLabel text="{i18n.zoom}">
                           <form:widget>
-                              <form:NumberField editor="{shortPropertyEditor}"
+                              <form:NumberField editor="{integerPropertyEditor}"
                                                 ui:field="zoomLevel"
                                                 allowNegative="false"
                                                 allowDecimals="false"

@@ -16,97 +16,75 @@
 package org.traccar.web.server.model;
 
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.inject.persist.Transactional;
+
 import org.traccar.web.client.model.DataService;
+import org.traccar.web.client.model.EventService;
 import org.traccar.web.shared.model.*;
 
-public class DataServiceImpl extends AOPRemoteServiceServlet implements DataService {
-
+@Singleton
+public class DataServiceImpl extends RemoteServiceServlet implements DataService {
     private static final long serialVersionUID = 1;
 
-    private static final String PERSISTENCE_DATASTORE = "java:/DefaultDS";
-    private static final String PERSISTENCE_UNIT_DEBUG = "debug";
-    private static final String PERSISTENCE_UNIT_RELEASE = "release";
-    private static final String ATTRIBUTE_USER_ID = "traccar.user.id";
+    @Inject
+    private Provider<User> sessionUser;
 
-    private EntityManagerFactory entityManagerFactory;
-    private ThreadLocal<EntityManager> entityManager;
+    @Inject
+    private Provider<ApplicationSettings> applicationSettings;
 
-    public DataServiceImpl() {
-        super(DataService.class);
-    }
+    @Inject
+    private Provider<EntityManager> entityManager;
+
+    @Inject
+    private Provider<HttpServletRequest> request;
+
+    @Inject
+    private EventService eventService;
 
     @Override
     public void init() throws ServletException {
         super.init();
 
-        String persistenceUnit;
-        try {
-            Context context = new InitialContext();
-            context.lookup(PERSISTENCE_DATASTORE);
-            persistenceUnit = PERSISTENCE_UNIT_RELEASE;
-        } catch (NamingException e) {
-            persistenceUnit = PERSISTENCE_UNIT_DEBUG;
-        }
-
-        entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnit);
-        entityManager = new ThreadLocal<EntityManager>();
-
         /**
          * Perform database migrations
          */
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
         try {
-            new DBMigrations().migrate(entityManager);
+            new DBMigrations().migrate(entityManager.get());
         } catch (Exception e) {
             throw new RuntimeException("Unable to perform DB migrations", e);
-        } finally {
-            entityManager.close();
         }
     }
 
-    @Override
     EntityManager getSessionEntityManager() {
-        if (entityManager.get() == null) {
-            entityManager.set(entityManagerFactory.createEntityManager());
-        }
         return entityManager.get();
     }
 
-    @Override
-    void closeSessionEntityManager() {
-        if (entityManager.get() != null) {
-            entityManager.get().close();
-            entityManager.set(null);
-        }
-    }
-
     private void setSessionUser(User user) {
-        HttpSession session = getThreadLocalRequest().getSession();
+        HttpSession session = request.get().getSession();
         if (user != null) {
-            session.setAttribute(ATTRIBUTE_USER_ID, user.getId());
+            session.setAttribute(CurrentUserProvider.ATTRIBUTE_USER_ID, user.getId());
         } else {
-            session.removeAttribute(ATTRIBUTE_USER_ID);
+            session.removeAttribute(CurrentUserProvider.ATTRIBUTE_USER_ID);
         }
     }
 
-    @Override
     User getSessionUser() {
-        HttpSession session = getThreadLocalRequest().getSession();
-        Long userId = (Long) session.getAttribute(ATTRIBUTE_USER_ID);
-        return userId == null ? null : getSessionEntityManager().find(User.class, userId);
+        return sessionUser.get();
     }
 
     @Transactional
@@ -118,19 +96,39 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
 
     @Transactional
     @Override
-    public User login(String login, String password) {
+    public User login(String login, String password, boolean passwordHashed) {
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT x FROM User x WHERE x.login = :login", User.class);
         query.setParameter("login", login);
         List<User> results = query.getResultList();
 
-        if (!results.isEmpty() && password.equals(results.get(0).getPassword())) {
-            User user = results.get(0);
-            setSessionUser(user);
-            return user;
+        if (results.isEmpty() || password.equals("")) throw new IllegalStateException();
+
+        if (!results.get(0).getPassword().equals(
+                (passwordHashed ? password : results.get(0).getPasswordHashMethod().doHash(password))
+        )) {
+            throw new IllegalStateException();
         }
-        throw new IllegalStateException();
+        User user = results.get(0);
+
+        /*
+         * If hash method has changed in application settings and password parameter is not hashed, rehash user password
+         */
+        if (!user.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation()) && !passwordHashed) {
+            user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+            user.setPassword(user.getPasswordHashMethod().doHash(password));
+            getSessionEntityManager().persist(user);
+        }
+
+        setSessionUser(user);
+        return user;
+    }
+
+    @Transactional
+    @Override
+    public User login(String login, String password) {
+        return this.login(login, password, false);
     }
 
     @RequireUser
@@ -140,7 +138,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
         return true;
     }
 
-    @Transactional(commit = true)
+    @Transactional
     @Override
     public User register(String login, String password) {
         if (getApplicationSettings().getRegistrationEnabled()) {
@@ -151,9 +149,12 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
             if (results.isEmpty()) {
                     User user = new User();
                     user.setLogin(login);
-                    user.setPassword(password);
+                    user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+                    user.setPassword(user.getPasswordHashMethod().doHash(password));
                     user.setManager(Boolean.TRUE); // registered users are always managers
+                    user.setUserSettings(new UserSettings());
                     getSessionEntityManager().persist(user);
+                    getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
                     setSessionUser(user);
                     return user;
             }
@@ -180,7 +181,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
         return users;
     }
 
-    @Transactional(commit = true)
+    @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
     public User addUser(User user) {
@@ -198,14 +199,20 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
                 user.setAdmin(false);
             }
             user.setManagedBy(currentUser);
+            user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+            user.setPassword(user.getPasswordHashMethod().doHash(user.getPassword()));
+            if (user.getUserSettings() == null) {
+                user.setUserSettings(new UserSettings());
+            }
             getSessionEntityManager().persist(user);
+            getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
             return user;
         } else {
             throw new IllegalStateException();
         }
     }
 
-    @Transactional(commit = true)
+    @Transactional
     @RequireUser
     @Override
     public User updateUser(User user) {
@@ -218,14 +225,31 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
             // TODO: better solution?
             if (currentUser.getId() == user.getId()) {
                 currentUser.setLogin(user.getLogin());
-                currentUser.setPassword(user.getPassword());
+                // Password is different or hash method has changed since login
+                if (!currentUser.getPassword().equals(user.getPassword()) || currentUser.getPasswordHashMethod().equals(PasswordHashMethod.PLAIN) && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
+                    currentUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+                    currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword()));
+                }
                 currentUser.setUserSettings(user.getUserSettings());
                 currentUser.setAdmin(user.getAdmin());
                 currentUser.setManager(user.getManager());
+                currentUser.setEmail(user.getEmail());
+                currentUser.setNotifications(user.isNotifications());
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
-                // TODO: handle other users
+                // update password
+                if (currentUser.getAdmin() || currentUser.getManager()) {
+                    User existingUser = entityManager.find(User.class, user.getId());
+                    // Checks if password has changed or default hash method not equal to current user hash method
+                    if (!existingUser.getPassword().equals(user.getPassword()) && !existingUser.getPassword().equals(existingUser.getPasswordHashMethod().doHash(user.getPassword())) || !existingUser.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation())) {
+                        existingUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+                        existingUser.setPassword(existingUser.getPasswordHashMethod().doHash(user.getPassword()));
+                    }
+                    entityManager.merge(existingUser);
+                } else {
+                    throw new SecurityException();
+                }
             }
 
             return user;
@@ -234,12 +258,21 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
         }
     }
 
-    @Transactional(commit = true)
+    @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
     public User removeUser(User user) {
         EntityManager entityManager = getSessionEntityManager();
         user = entityManager.merge(user);
+        // Don't allow user to delete himself
+        if (user.equals(getSessionUser())) {
+            throw new IllegalArgumentException();
+        }
+        // Allow manager to remove users only managed by himself
+        if (!getSessionUser().getAdmin() && !getSessionUser().getAllManagedUsers().contains(user)) {
+            throw new SecurityException();
+        }
+        entityManager.createQuery("DELETE FROM UIStateEntry s WHERE s.user=:user").setParameter("user", user).executeUpdate();
         for (Device device : user.getDevices()) {
             device.getUsers().remove(user);
         }
@@ -258,11 +291,16 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
         return user.getAllAvailableDevices();
     }
 
-    @Transactional(commit = true)
+    @Transactional
     @RequireUser
     @ManagesDevices
     @Override
-    public Device addDevice(Device device) {
+    public Device addDevice(Device device) throws TraccarException {
+        if (device.getName() == null || device.getName().trim().isEmpty() ||
+            device.getUniqueId() == null || device.getUniqueId().isEmpty()) {
+            throw new ValidationException();
+        }
+
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<Device> query = entityManager.createQuery("SELECT x FROM Device x WHERE x.uniqueId = :id", Device.class);
         query.setParameter("id", device.getUniqueId());
@@ -276,15 +314,20 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
             entityManager.persist(device);
             return device;
         } else {
-            throw new IllegalStateException();
+            throw new DeviceExistsException();
         }
     }
 
-    @Transactional(commit = true)
+    @Transactional
     @RequireUser
     @ManagesDevices
     @Override
-    public Device updateDevice(Device device) {
+    public Device updateDevice(Device device) throws TraccarException {
+        if (device.getName() == null || device.getName().trim().isEmpty() ||
+            device.getUniqueId() == null || device.getUniqueId().isEmpty()) {
+            throw new ValidationException();
+        }
+
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<Device> query = entityManager.createQuery("SELECT x FROM Device x WHERE x.uniqueId = :id AND x.id <> :primary_id", Device.class);
         query.setParameter("primary_id", device.getId());
@@ -297,13 +340,14 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
             tmp_device.setUniqueId(device.getUniqueId());
             tmp_device.setTimeout(device.getTimeout());
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
+            tmp_device.setIconType(device.getIconType());
             return tmp_device;
         } else {
-            throw new IllegalStateException();
+            throw new DeviceExistsException();
         }
     }
 
-    @Transactional(commit = true)
+    @Transactional
     @RequireUser
     @ManagesDevices
     @Override
@@ -321,9 +365,15 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
         if (device.getUsers().isEmpty()) {
             device.setLatestPosition(null);
             entityManager.flush();
-            Query query = entityManager.createQuery("DELETE FROM Position x WHERE x.device = :device");
+
+            Query query = entityManager.createQuery("DELETE FROM DeviceEvent x WHERE x.device = :device");
             query.setParameter("device", device);
             query.executeUpdate();
+
+            query = entityManager.createQuery("DELETE FROM Position x WHERE x.device = :device");
+            query.setParameter("device", device);
+            query.executeUpdate();
+
             entityManager.remove(device);
         }
         return device;
@@ -332,18 +382,66 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
     @Transactional
     @RequireUser
     @Override
-    public List<Position> getPositions(Device device, Date from, Date to, String speedModifier, Double speed) {
+    public List<Position> getPositions(Device device, Date from, Date to, boolean filter) {
         EntityManager entityManager = getSessionEntityManager();
+        UserSettings filters = getSessionUser().getUserSettings();
+
         List<Position> positions = new LinkedList<Position>();
-        TypedQuery<Position> query = entityManager.createQuery(
-                "SELECT x FROM Position x WHERE x.device = :device AND x.time BETWEEN :from AND :to" + (speed == null ? "" : " AND speed " + speedModifier + " :speed"), Position.class);
+        String queryString = "SELECT x FROM Position x WHERE x.device = :device AND x.time BETWEEN :from AND :to";
+
+        if (filter) {
+            if (filters.isHideZeroCoordinates()) {
+                queryString += " AND (x.latitude != 0 OR x.longitude != 0)";
+            }
+            if (filters.isHideInvalidLocations()) {
+                queryString += " AND x.valid = TRUE";
+            }
+            if (filters.getSpeedModifier() != null && filters.getSpeedForFilter() != null) {
+                queryString += " AND x.speed " + filters.getSpeedModifier() + " :speed";
+            }
+        }
+
+        TypedQuery<Position> query = entityManager.createQuery(queryString, Position.class);
         query.setParameter("device", device);
         query.setParameter("from", from);
         query.setParameter("to", to);
-        if (speed != null) {
-            query.setParameter("speed", getSessionUser().getUserSettings().getSpeedUnit().toKnots(speed));
+
+        if (filter) {
+            if (filters.getSpeedModifier() != null && filters.getSpeedForFilter() != null) {
+                query.setParameter("speed", filters.getSpeedUnit().toKnots(filters.getSpeedForFilter()));
+            }
         }
-        positions.addAll(query.getResultList());
+
+        List<Position> queryResult = query.getResultList();
+
+        final double radKoef = Math.PI / 180;
+        final double earthRadius = 6371.01; // Radius of the earth in km
+
+        for (int i = 0; i < queryResult.size(); i++) {
+            boolean add = true;
+            if (i > 0) {
+                Position positionA = queryResult.get(i - 1);
+                Position positionB = queryResult.get(i);
+
+                double dLat = (positionA.getLatitude() - positionB.getLatitude()) * radKoef;
+                double dLon = (positionA.getLongitude() - positionB.getLongitude()) * radKoef;
+                double a =
+                        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                                Math.cos(positionA.getLatitude() * radKoef) * Math.cos(positionB.getLatitude() * radKoef) *
+                                Math.sin(dLon / 2) * Math.sin(dLon / 2)
+                        ;
+                double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                positionB.setDistance(earthRadius * c); // Distance in km
+
+                if (filter && filters.isHideDuplicates()) {
+                    add = !positionA.getTime().equals(positionB.getTime());
+                }
+                if (add && filter && filters.getMinDistance() != null) {
+                    add = positionB.getDistance() >= filters.getMinDistance();
+                }
+            }
+            if (add) positions.add(queryResult.get(i));
+        }
         return positions;
     }
 
@@ -373,50 +471,43 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
             EntityManager entityManager = getSessionEntityManager();
 
             for (Device device : devices) {
-                Position position = (Position) entityManager.createQuery("SELECT p FROM Position p WHERE p.device = :device AND p.speed > 0 ORDER BY time DESC")
+                List<Position> position = entityManager.createQuery("SELECT p FROM Position p WHERE p.device = :device AND p.speed > 0 ORDER BY time DESC", Position.class)
                         .setParameter("device", device)
                         .setMaxResults(1)
-                        .getSingleResult();
+                        .getResultList();
 
-                if (position != null) {
-                    positions.add(position);
+                if (position.isEmpty()) {
+                    position = entityManager.createQuery("SELECT p FROM Position p WHERE p.device = :device ORDER BY time ASC", Position.class)
+                        .setParameter("device", device)
+                        .setMaxResults(1)
+                        .getResultList();
+                }
+
+                if (!position.isEmpty()) {
+                    positions.add(position.get(0));
                 }
             }
         }
         return positions;
     }
 
+    @Transactional
     @Override
     public ApplicationSettings getApplicationSettings() {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        try {
-            ApplicationSettings applicationSettings;
-            TypedQuery<ApplicationSettings> query = entityManager.createQuery("SELECT x FROM ApplicationSettings x", ApplicationSettings.class);
-            List<ApplicationSettings> resultList = query.getResultList();
-            if (resultList == null || resultList.isEmpty()) {
-                applicationSettings = new ApplicationSettings();
-                entityManager.getTransaction().begin();
-                try {
-                    entityManager.persist(applicationSettings);
-                    entityManager.getTransaction().commit();
-                } catch (Throwable t) {
-                    entityManager.getTransaction().rollback();
-                    throw new IllegalStateException("Unable to save application settings");
-                }
-            } else {
-                applicationSettings = resultList.get(0);
-            }
-            return applicationSettings;
-        } finally {
-            entityManager.close();
+        ApplicationSettings appSettings = applicationSettings.get();
+        if (appSettings == null) {
+            appSettings = new ApplicationSettings();
+            entityManager.get().persist(appSettings);
         }
+        return appSettings;
     }
 
-    @Transactional(commit = true)
+    @Transactional
     @RequireUser(roles = { Role.ADMIN })
     @Override
     public void updateApplicationSettings(ApplicationSettings applicationSettings) {
         getSessionEntityManager().merge(applicationSettings);
+        eventService.applicationSettingsChanged();
     }
 
     @Transactional
@@ -465,7 +556,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
                 ", " + logFile3.getAbsolutePath());
     }
 
-    @Transactional(commit = true)
+    @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
     public void saveRoles(List<User> users) {
@@ -497,7 +588,7 @@ public class DataServiceImpl extends AOPRemoteServiceServlet implements DataServ
         return result;
     }
 
-    @Transactional(commit = true)
+    @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
     public void saveDeviceShare(Device device, Map<User, Boolean> share) {

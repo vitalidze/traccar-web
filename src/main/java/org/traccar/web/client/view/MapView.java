@@ -26,6 +26,7 @@ import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
+import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -35,6 +36,7 @@ import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Command;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import org.traccar.web.shared.model.UserSettings;
 
 public class MapView {
 
@@ -55,6 +57,7 @@ public class MapView {
     private Map map;
     private Vector vectorLayer;
     private Markers markerLayer;
+    private Vector archiveLayer;
 
     private Messages i18n = GWT.create(Messages.class);
 
@@ -70,6 +73,10 @@ public class MapView {
         return markerLayer;
     }
 
+    public Vector getArchiveLayer() {
+        return archiveLayer;
+    }
+
     public LonLat createLonLat(double longitude, double latitude) {
         LonLat lonLat = new LonLat(longitude, latitude);
         lonLat.transform(new Projection("EPSG:4326").getProjectionCode(), map.getProjection());
@@ -83,40 +90,43 @@ public class MapView {
     }
 
     private void initMapLayers(Map map) {
-        map.addLayer(OSM.Mapnik("OpenStreetMap"));
+        for (UserSettings.MapType mapType : UserSettings.MapType.values()) {
+            map.addLayer(createMap(mapType));
+        }
+    }
 
-        TMSOptions seamarkOptions = new TMSOptions();
-        seamarkOptions.setType("png");
-        seamarkOptions.setGetURL(getTileURL());
-        seamarkOptions.setNumZoomLevels(20);
-        seamarkOptions.setIsBaseLayer(false);
-        seamarkOptions.setDisplayOutsideMaxExtent(true);
-        map.addLayer(new TMS(i18n.seamark(), "http://t1.openseamap.org/seamark/", seamarkOptions));
-
-        GoogleV3Options gHybridOptions = new GoogleV3Options();
-        gHybridOptions.setNumZoomLevels(20);
-        gHybridOptions.setType(GoogleV3MapType.G_HYBRID_MAP);
-        map.addLayer(new GoogleV3("Google Hybrid", gHybridOptions));
-
-        GoogleV3Options gNormalOptions = new GoogleV3Options();
-        gNormalOptions.setNumZoomLevels(22);
-        gNormalOptions.setType(GoogleV3MapType.G_NORMAL_MAP);
-        map.addLayer(new GoogleV3("Google Normal", gNormalOptions));
-
-        GoogleV3Options gSatelliteOptions = new GoogleV3Options();
-        gSatelliteOptions.setNumZoomLevels(20);
-        gSatelliteOptions.setType(GoogleV3MapType.G_SATELLITE_MAP);
-        map.addLayer(new GoogleV3("Google Satellite", gSatelliteOptions));
-
-        GoogleV3Options gTerrainOptions = new GoogleV3Options();
-        gTerrainOptions.setNumZoomLevels(16);
-        gTerrainOptions.setType(GoogleV3MapType.G_TERRAIN_MAP);
-        map.addLayer(new GoogleV3("Google Terrain", gTerrainOptions));
-
-        final String bingKey = "AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F";
-        map.addLayer(new Bing(new BingOptions("Bing Road", bingKey, BingType.ROAD)));
-        map.addLayer(new Bing(new BingOptions("Bing Hybrid", bingKey, BingType.HYBRID)));
-        map.addLayer(new Bing(new BingOptions("Bing Aerial", bingKey, BingType.AERIAL)));
+    private Layer createMap(UserSettings.MapType mapType) {
+        switch (mapType) {
+            case OSM:
+                return OSM.Mapnik(mapType.getName());
+            case GOOGLE_HYBRID:
+                GoogleV3Options gHybridOptions = new GoogleV3Options();
+                gHybridOptions.setNumZoomLevels(20);
+                gHybridOptions.setType(GoogleV3MapType.G_HYBRID_MAP);
+                return new GoogleV3(mapType.getName(), gHybridOptions);
+            case GOOGLE_NORMAL:
+                GoogleV3Options gNormalOptions = new GoogleV3Options();
+                gNormalOptions.setNumZoomLevels(22);
+                gNormalOptions.setType(GoogleV3MapType.G_NORMAL_MAP);
+                return new GoogleV3(mapType.getName(), gNormalOptions);
+            case GOOGLE_SATELLITE:
+                GoogleV3Options gSatelliteOptions = new GoogleV3Options();
+                gSatelliteOptions.setNumZoomLevels(20);
+                gSatelliteOptions.setType(GoogleV3MapType.G_SATELLITE_MAP);
+                return new GoogleV3(mapType.getName(), gSatelliteOptions);
+            case GOOGLE_TERRAIN:
+                GoogleV3Options gTerrainOptions = new GoogleV3Options();
+                gTerrainOptions.setNumZoomLevels(16);
+                gTerrainOptions.setType(GoogleV3MapType.G_TERRAIN_MAP);
+                return new GoogleV3(mapType.getName(), gTerrainOptions);
+            case BING_ROAD:
+                return new Bing(new BingOptions(mapType.getName(), mapType.getBingKey(), BingType.ROAD));
+            case BING_HYBRID:
+                return new Bing(new BingOptions(mapType.getName(), mapType.getBingKey(), BingType.HYBRID));
+            case BING_AERIAL:
+                return new Bing(new BingOptions(mapType.getName(), mapType.getBingKey(), BingType.AERIAL));
+        }
+        throw new IllegalArgumentException("Unsupported map type: " + mapType);
     }
 
     public static native JSObject getTileURL() /*-{
@@ -144,7 +154,7 @@ public class MapView {
         vectorLayer = new Vector("Vector", vectorOptions);
 
         MarkersOptions markersOptions = new MarkersOptions();
-        markerLayer = new Markers("Markers", markersOptions);
+        markerLayer = new Markers(i18n.markers(), markersOptions);
 
         initMapLayers(map);
 
@@ -210,15 +220,16 @@ public class MapView {
         latestPositionTrackRenderer.showTime(positions, true, false);
     }
 
-    public void showLatestTrack(List<Position> positions) {
-        latestPositionTrackRenderer.showTrack(positions, false);
+    public void showLatestTrack(Track track) {
+        latestPositionTrackRenderer.showTrack(track, false);
     }
 
-    public void showArchiveTrack(List<Position> positions) {
-        archivePositionRenderer.showTrack(positions, true);
+    public void showArchiveTrack(Track track) {
+        archivePositionRenderer.showTrack(track, true);
     }
 
-    public void showArchivePositions(List<Position> positions) {
+    public void showArchivePositions(Track track) {
+        List<Position> positions = track.getPositions();
         archivePositionRenderer.showPositions(positions);
     }
 
@@ -278,5 +289,9 @@ public class MapView {
 
     private void hidePopup() {
         popup.hide();
+    }
+
+    public void updateIcon(Device device) {
+        latestPositionRenderer.updateIcon(device);
     }
 }

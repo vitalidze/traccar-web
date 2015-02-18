@@ -172,5 +172,81 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
 
     String idleWhenSpeedIsLE();
 
+    String distance();
+
+    String exportToCSV();
+
+    String exportToGPX();
+
+    String changePassword();
+
+    String enterNewPassword(String p0);
+
+    String importData();
+
+    String fileToImport();
+
+    String log();
+
+    String importingData();
+
+    String defaultHashImplementation();
+
+    String filter();
+
+    String hideZeroCoordinates();
+
+    String hideInvalidLocations();
+
+    String hideDuplicates();
+
+    String ignoreLocationsWithDistanceFromPreviousLT();
+
+    String disableFilter();
+
+    String server();
+
+    String port();
+
+    String secureConnectionType();
+
+    String useAuthorization();
+
+    String test();
+
+    String notifications();
+
+    String notificationSettings();
+
+    String testFailed();
+
+    String testSucceeded();
+
+    String email();
+
+    String invalidEmail();
+
+    String fromAddress();
+
+    String style();
+
+    String fullPalette();
+
+    String smallPalette();
+
+    String markers();
+
+    String standardMarkers();
+
+    String reducedMarkers();
+
+    String zoomToTrack();
+
+    String exportData();
+
+    String errNoDeviceNameOrId();
+
+    String eventRecordingEnabled();
+
     String seamark();
 }

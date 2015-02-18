@@ -15,14 +15,12 @@
  */
 package org.traccar.web.client.model;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -31,6 +29,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface DataService extends RemoteService {
 
     User authenticated() throws IllegalStateException;
+
+    User login(String login, String password, boolean passwordHashed);
 
     User login(String login, String password);
 
@@ -48,9 +48,9 @@ public interface DataService extends RemoteService {
 
     List<Device> getDevices();
 
-    Device addDevice(Device device);
+    Device addDevice(Device device) throws TraccarException;
 
-    Device updateDevice(Device device);
+    Device updateDevice(Device device) throws TraccarException;
 
     Device removeDevice(Device device);
 
@@ -58,7 +58,7 @@ public interface DataService extends RemoteService {
 
     void saveDeviceShare(Device device, Map<User, Boolean> share);
 
-    List<Position> getPositions(Device device, Date from, Date to, String speedModifier, Double speed);
+    List<Position> getPositions(Device device, Date from, Date to, boolean filter);
 
     List<Position> getLatestPositions();
 

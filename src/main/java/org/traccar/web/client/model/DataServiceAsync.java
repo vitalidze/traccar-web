@@ -30,6 +30,8 @@ public interface DataServiceAsync {
 
     void authenticated(AsyncCallback<User> callback);
 
+    void login(String login, String password, boolean passwordHashed, AsyncCallback<User> callback);
+
     void login(String login, String password, AsyncCallback<User> callback);
 
     void logout(AsyncCallback<Boolean> callback);
@@ -54,7 +56,7 @@ public interface DataServiceAsync {
 
     void getLatestPositions(AsyncCallback<List<Position>> callback);
 
-    void getPositions(Device device, Date from, Date to, String speedModifier, Double speed, AsyncCallback<List<Position>> callback);
+    void getPositions(Device device, Date from, Date to, boolean filter, AsyncCallback<List<Position>> callback);
 
     void updateApplicationSettings(ApplicationSettings applicationSettings, AsyncCallback<Void> callback);
 

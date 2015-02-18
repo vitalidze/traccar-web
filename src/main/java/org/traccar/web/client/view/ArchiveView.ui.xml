@@ -7,7 +7,8 @@
     xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
     xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
     xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
-    xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form">
+    xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+    xmlns:menu="urn:import:com.sencha.gxt.widget.core.client.menu">
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="toolBarRowData">
     <ui:attributes width="1" height="-1" />
@@ -22,8 +23,6 @@
   <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view">
     <ui:attributes stripeRows="true" autoFill="true" />
   </ui:with>
-
-  <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="doublePropertyEditor" />
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
@@ -47,19 +46,52 @@
           <form:DateField width="125" ui:field="toDate" />
           <toolbar:LabelToolItem width="5" />
           <form:TimeField width="75" ui:field="toTime" triggerAction="ALL" />
-          <toolbar:LabelToolItem label="{i18n.speed}" />
-          <form:ComboBox ui:field="speedModifierCombo" editable="false" allowTextSelection="false" allowBlank="false" width="40" triggerAction="ALL" />
-          <form:NumberField editor="{doublePropertyEditor}"
-                            ui:field="speed"
-                            allowNegative="false"
-                            allowDecimals="true"
-                            allowBlank="true"
-                            width="64" />
-          <toolbar:LabelToolItem ui:field="speedUnits" />
+          <toolbar:LabelToolItem width="5" />
+          <button:TextButton ui:field="filterButton" text="{i18n.filter}..." />
+          <toolbar:LabelToolItem width="2" />
+          <form:CheckBox ui:field="disableFilter" boxLabel="{i18n.disableFilter}" />
+
+          <toolbar:ToolBar ui:field="styleToolbar">
+              <button:TextButton ui:field="styleButtonTrackColor" text=" " height="80%"/>
+              <button:TextButton ui:field="styleButton" text="{i18n.style}">
+                  <button:menu>
+                      <menu:Menu ui:field="menu1">
+                          <menu:CheckMenuItem ui:field="zoomToTrackMenu" text="{i18n.zoomToTrack}" />
+                          <menu:SeparatorMenuItem />
+                          <menu:MenuItem ui:field="markersMenu" text="{i18n.markers}">
+                              <menu:submenu>
+                                  <menu:Menu ui:field="routeMarkersType" />
+                              </menu:submenu>
+                          </menu:MenuItem>
+                          <menu:SeparatorMenuItem />
+                          <menu:MenuItem ui:field="fullPaletteMenu" text="{i18n.fullPalette}">
+                              <menu:submenu>
+                                  <menu:ColorMenu ui:field="fullColorMenu" />
+                              </menu:submenu>
+                          </menu:MenuItem>
+                          <menu:MenuItem ui:field="smallPaletteMenu" text="{i18n.smallPalette}">
+                              <menu:submenu>
+                                  <menu:ColorMenu ui:field="smallColorMenu" />
+                              </menu:submenu>
+                          </menu:MenuItem>
+                      </menu:Menu>
+                  </button:menu>
+              </button:TextButton>
+          </toolbar:ToolBar>
 
           <toolbar:SeparatorToolItem />
 
           <button:TextButton ui:field="loadButton" text="{i18n.load}" />
+          <toolbar:SeparatorToolItem />
+          <button:TextButton text="{i18n.importData} / {i18n.exportData}">
+              <button:menu>
+                  <menu:Menu>
+                      <menu:MenuItem ui:field="csvButton" text="{i18n.exportToCSV}"/>
+                      <menu:MenuItem ui:field="gpxButton" text="{i18n.exportToGPX}"/>
+                      <menu:MenuItem ui:field="importButton" text="{i18n.importData}"/>
+                  </menu:Menu>
+              </button:menu>
+          </button:TextButton>
           <toolbar:FillToolItem />
           <button:TextButton ui:field="clearButton" text="{i18n.clear}" />
 
@@ -67,7 +99,7 @@
       </container:child>
       
       <container:child layoutData="{layoutData}">
-        <grid:Grid ui:field="grid" store="{positionStore}" cm="{columnModel}" view="{view}" />
+        <grid:Grid ui:field="grid" store="{positionStore}" cm="{columnModel}" view="{view}" stateful="true" stateId="archiveGrid" />
       </container:child>
 
     </container:VerticalLayoutContainer>

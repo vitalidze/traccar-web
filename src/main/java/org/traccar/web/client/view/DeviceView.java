@@ -15,25 +15,22 @@
  */
 package org.traccar.web.client.view;
 
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
+import com.sencha.gxt.state.client.GridStateHandler;
+import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
+import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
-import com.sencha.gxt.widget.core.client.tips.ToolTip;
-import com.sencha.gxt.widget.core.client.tips.ToolTipConfig;
 import com.sencha.gxt.widget.core.client.toolbar.FillToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.SeparatorToolItem;
 import org.traccar.web.client.Application;
@@ -62,7 +59,7 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 
-public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler<Device> {
+public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler<Device>, RowMouseDownEvent.RowMouseDownHandler, CellDoubleClickEvent.CellDoubleClickHandler {
 
     private static DeviceViewUiBinder uiBinder = GWT.create(DeviceViewUiBinder.class);
 
@@ -77,6 +74,7 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         public void onRemove(Device device);
         public void onMouseOver(int mouseX, int mouseY, Device device);
         public void onMouseOut(int mouseX, int mouseY, Device device);
+        public void doubleClicked(Device device);
     }
 
     private DeviceHandler deviceHandler;
@@ -120,6 +118,9 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
 
     @UiField
     MenuItem settingsGlobal;
+
+    @UiField
+    MenuItem settingsNotifications;
 
     @UiField
     MenuItem showTrackerServerLog;
@@ -181,9 +182,13 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
 
         grid.getSelectionModel().addSelectionChangedHandler(this);
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        grid.addRowMouseDownHandler(this);
+        grid.addCellDoubleClickHandler(this);
 
         grid.getView().setAutoFill(true);
         grid.getView().setForceFit(true);
+
+        new GridStateHandler<Device>(grid).loadState();
 
         GridEditing<Device> editing = new GridInlineEditing<Device>(grid);
         grid.getView().setShowDirtyCells(false);
@@ -197,6 +202,7 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         settingsGlobal.setVisible(admin);
         showTrackerServerLog.setVisible(admin);
         settingsUsers.setVisible(admin || manager);
+        settingsNotifications.setVisible(admin || manager);
         shareButton.setVisible(admin || manager);
 
         addButton.setVisible(allowDeviceManagement || admin || manager);
@@ -217,6 +223,16 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         } else {
             deviceHandler.onSelected(event.getSelection().get(0));
         }
+    }
+
+    @Override
+    public void onRowMouseDown(RowMouseDownEvent event) {
+        deviceHandler.onSelected(grid.getSelectionModel().getSelectedItem());
+    }
+
+    @Override
+    public void onCellClick(CellDoubleClickEvent cellDoubleClickEvent) {
+        deviceHandler.doubleClicked(grid.getSelectionModel().getSelectedItem());
     }
 
     @UiHandler("addButton")
@@ -258,6 +274,7 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         public void onPreferencesSelected();
         public void onUsersSelected();
         public void onApplicationSelected();
+        public void onNotificationsSelected();
     }
 
     private SettingsHandler settingsHandler;
@@ -280,6 +297,11 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     @UiHandler("settingsGlobal")
     public void onSettingsGlobalSelected(SelectionEvent<Item> event) {
         settingsHandler.onApplicationSelected();
+    }
+
+    @UiHandler("settingsNotifications")
+    public void onSettingsNotificationsSelected(SelectionEvent<Item> event) {
+        settingsHandler.onNotificationsSelected();
     }
 
     @UiHandler("showTrackerServerLog")

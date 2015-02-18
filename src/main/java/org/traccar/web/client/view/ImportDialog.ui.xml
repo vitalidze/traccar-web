@@ -1,0 +1,39 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+        xmlns:ui="urn:ui:com.google.gwt.uibinder"
+        xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+        xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+        xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+        xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
+
+    <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
+        <ui:attributes width="1" height="-1" />
+    </ui:with>
+
+    <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
+
+    <ui:with field='device' type='org.traccar.web.shared.model.Device' />
+
+    <gxt:Window ui:field="window" pixelSize="300, 70" modal="true" headingText="{device.getName} {i18n.importData}" focusWidget="{saveButton}">
+        <form:FormPanel action="/traccar/import/gpx" method="POST" encoding="MULTIPART" ui:field="form">
+            <container:VerticalLayoutContainer>
+                <container:child layoutData="{verticalLayoutData}">
+                        <form:FieldLabel text="{i18n.fileToImport}">
+                            <form:widget>
+                                <form:FileUploadField ui:field="fileToImport" />
+                            </form:widget>
+                        </form:FieldLabel>
+                </container:child>
+            </container:VerticalLayoutContainer>
+        </form:FormPanel>
+
+        <gxt:button>
+            <button:TextButton ui:field="saveButton" text="{i18n.importData}" />
+        </gxt:button>
+        <gxt:button>
+            <button:TextButton ui:field="cancelButton" text="{i18n.cancel}" />
+        </gxt:button>
+    </gxt:Window>
+
+</ui:UiBinder>
