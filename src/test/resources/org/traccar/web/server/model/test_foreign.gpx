@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1"
+     creator="GlobalMotion" version="1.1"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+    <trk>
+        <number>1</number>
+        <trkseg>
+            <trkpt lat="10.02591601" lon="11.01236986">
+                <ele>109.43</ele>
+                <time>2014-07-07T18:43:52.655Z</time>
+            </trkpt>
+            <trkpt lat="12.02595470" lon="13.01249098">
+                <ele>104.76</ele>
+                <time>2014-07-07T18:44:04.193Z</time>
+            </trkpt>
+            <trkpt lat="14.02606332" lon="15.01255586">
+                <ele>105.04</ele>
+                <time>2014-07-07T18:44:09.182Z</time>
+            </trkpt>
+            <trkpt lat="16.02613562" lon="17.01263875">
+                <ele>107.89</ele>
+                <time>2014-07-07T18:44:12.179Z</time>
+            </trkpt>
+            <trkpt lat="18.02623771" lon="19.01269516">
+                <ele>108.71</ele>
+                <time>2014-07-07T18:44:16.194Z</time>
+            </trkpt>
+            <trkpt lat="20.02631864" lon="21.01279424">
+                <ele>108.77</ele>
+                <time>2014-07-07T18:44:20.181Z</time>
+            </trkpt>
+        </trkseg>
+    </trk>
+</gpx>

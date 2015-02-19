@@ -180,13 +180,34 @@ public class ExportServlet extends HttpServlet {
             xsw.writeStartElement("time");
             xsw.writeCharacters(dateFormat.format(p.getTime()));
             xsw.writeEndElement();
-            if (p.getOther() != null && !p.getOther().trim().isEmpty()) {
-                xsw.writeStartElement("extensions");
-                xsw.writeStartElement("traccar:other");
-                xsw.writeCharacters(StringEscapeUtils.escapeXml(p.getOther().toString()));
-                xsw.writeEndElement();
+            // traccar extensions
+            xsw.writeStartElement("extensions");
+            if (p.getAddress() != null && !p.getAddress().trim().isEmpty()) {
+                xsw.writeStartElement("traccar:address");
+                xsw.writeCharacters(StringEscapeUtils.escapeXml(p.getAddress()));
                 xsw.writeEndElement();
             }
+            if (p.getSpeed() != null) {
+                xsw.writeStartElement("traccar:speed");
+                xsw.writeCharacters(p.getSpeed().toString());
+                xsw.writeEndElement();
+            }
+            if (p.getCourse() != null) {
+                xsw.writeStartElement("traccar:course");
+                xsw.writeCharacters(p.getCourse().toString());
+                xsw.writeEndElement();
+            }
+            if (p.getPower() != null) {
+                xsw.writeStartElement("traccar:power");
+                xsw.writeCharacters(p.getPower().toString());
+                xsw.writeEndElement();
+            }
+            if (p.getOther() != null && !p.getOther().trim().isEmpty()) {
+                xsw.writeStartElement("traccar:other");
+                xsw.writeCharacters(StringEscapeUtils.escapeXml(p.getOther()));
+                xsw.writeEndElement();
+            }
+            xsw.writeEndElement();
             xsw.writeEndElement();
         }
         xsw.writeEndElement();

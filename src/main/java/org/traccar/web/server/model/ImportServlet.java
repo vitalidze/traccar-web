@@ -19,7 +19,6 @@ import com.google.inject.persist.Transactional;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.traccar.web.shared.model.ApplicationSettings;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -33,9 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -107,72 +104,13 @@ public class ImportServlet extends HttpServlet {
 
 
         try {
-            XMLStreamReader xsr = XMLInputFactory.newFactory().createXMLStreamReader(inputStream);
-
-            List<Position> parsedPositions = new LinkedList<Position>();
-            Position position = null;
+            GPXParser.Result parsed = new GPXParser().parse(inputStream, device);
 
             response.getWriter().println("<pre>");
 
             int imported = 0;
 
-            while (xsr.hasNext()) {
-                xsr.next();
-                if (xsr.getEventType() == XMLStreamReader.START_ELEMENT) {
-
-                    if (xsr.getLocalName().equalsIgnoreCase("trkpt")) {
-                        position = new Position();
-                        position.setLongitude(Double.parseDouble(xsr.getAttributeValue(null, "lon")));
-                        position.setLatitude(Double.parseDouble(xsr.getAttributeValue(null, "lat")));
-                        position.setValid(Boolean.TRUE);
-                        position.setDevice(device);
-                    } else if (xsr.getLocalName().equalsIgnoreCase("time")) {
-                        if (position != null) {
-                            String strTime = xsr.getElementText();
-                            if (strTime.length() == 20) {
-                                position.setTime(dateFormat.parse(strTime));
-                            } else {
-                                position.setTime(dateFormatWithMS.parse(strTime));
-                            }
-                        }
-                    } else if (xsr.getLocalName().equalsIgnoreCase("ele")) {
-                        if (position != null) {
-                            position.setAltitude(Double.parseDouble(xsr.getElementText()));
-                        }
-                    } else if (xsr.getLocalName().equalsIgnoreCase("other")) {
-                        if (position != null) {
-                            position.setOther(StringEscapeUtils.unescapeXml(xsr.getElementText()));
-                        }
-                    } else if (position != null) {
-                        position.setOther((position.getOther() == null ? "" : position.getOther()) +
-                        "<" + xsr.getLocalName() + ">" + xsr.getElementText() + "</" + xsr.getLocalName() + ">");
-                    }
-                } else if (xsr.getEventType() == XMLStreamReader.END_ELEMENT &&
-                           xsr.getLocalName().equalsIgnoreCase("trkpt")) {
-
-                    parsedPositions.add(position);
-                    position = null;
-                }
-            }
-
-            for (int i = 0; i < parsedPositions.size(); i++) {
-                position = parsedPositions.get(i);
-                StringBuilder other = new StringBuilder("<info><protocol>gpx_import</protocol>");
-                other.append("<type>");
-                if (i == 0) {
-                    other.append("import_start");
-                } else if (i == parsedPositions.size() - 1) {
-                    other.append("import_end");
-                } else {
-                    other.append("import");
-                }
-                other.append("</type>");
-                if (position.getOther() != null) {
-                    other.append(position.getOther());
-                }
-                other.append("</info>");
-                position.setOther(other.toString());
-
+            for (Position position : parsed.positions) {
                 boolean exist = false;
                 for (Position existing : entityManager.get().createQuery("SELECT p FROM Position p WHERE p.device=:device AND p.time=:time", Position.class)
                         .setParameter("device", device)
@@ -192,7 +130,11 @@ public class ImportServlet extends HttpServlet {
                 }
             }
 
-            response.getWriter().println("Already exist: " + (parsedPositions.size() - imported));
+            if (parsed.latestPosition != null && device.getLatestPosition() == null || device.getLatestPosition().getTime().compareTo(parsed.latestPosition.getTime()) < 0) {
+                device.setLatestPosition(parsed.latestPosition);
+            }
+
+            response.getWriter().println("Already exist: " + (parsed.positions.size() - imported));
             response.getWriter().println("Imported: " + imported);
 
             response.getWriter().println("</pre>");

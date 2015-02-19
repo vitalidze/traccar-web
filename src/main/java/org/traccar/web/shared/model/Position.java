@@ -153,11 +153,19 @@ public class Position implements Serializable, Cloneable {
         return speed;
     }
 
+    public void setSpeed(Double speed) {
+        this.speed = speed;
+    }
+
     @Expose
     private Double course;
 
     public Double getCourse() {
         return course;
+    }
+
+    public void setCourse(Double course) {
+        this.course = course;
     }
 
     @Expose
@@ -167,11 +175,19 @@ public class Position implements Serializable, Cloneable {
         return power;
     }
 
+    public void setPower(Double power) {
+        this.power = power;
+    }
+
     @Expose
     private String address;
 
     public String getAddress() {
         return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     @Expose
