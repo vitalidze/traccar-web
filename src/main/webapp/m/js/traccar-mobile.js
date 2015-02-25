@@ -343,6 +343,31 @@ function drawDeviceDetails(deviceId, position) {
         if (position == undefined) {
             deviceDetails.html('<div class="content-block">No data available</div>');
         } else {
+            // parse 'other' field
+            if (window.DOMParser)  {
+                parser = new DOMParser();
+                xmlDoc = parser.parseFromString(position.other, "text/xml");
+            // Internet Explorer
+            } else {
+                xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+                xmlDoc.async = false;
+                xmlDoc.loadXML(position.other);
+            }
+
+            if (xmlDoc.documentElement == null) {
+                position.other = null;
+            } else {
+                position.other = {};
+                var nodes = xmlDoc.documentElement.childNodes;
+                for (i = 0; i < nodes.length; i++) {
+                    if (nodes[i].textContent == null) {
+                        position.other[nodes[i].nodeName] = nodes[i].nodeValue;
+                    } else {
+                        position.other[nodes[i].nodeName] = nodes[i].textContent;
+                    }
+                }
+            }
+
             var source   = $$('#device-details-template').html();
             var template = Handlebars.compile(source);
 
