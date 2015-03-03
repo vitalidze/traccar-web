@@ -26,6 +26,10 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.state.client.GridStateHandler;
+import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
+import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
+import com.sencha.gxt.widget.core.client.ListView;
+import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
@@ -105,6 +109,9 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     SeparatorToolItem separatorItem;
 
     @UiField(provided = true)
+    TabPanel objectsTabs;
+
+    @UiField(provided = true)
     ColumnModel<Device> columnModel;
 
     @UiField(provided = true)
@@ -112,6 +119,12 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
 
     @UiField
     Grid<Device> grid;
+
+    @UiField(provided = true)
+    ListStore<Device> geoFenceStore;
+
+    @UiField(provided = true)
+    ListView<Device, String> geoFenceList;
 
     @UiField
     MenuItem settingsUsers;
@@ -177,6 +190,14 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         columnConfigList.add(colRecordTrace);
 
         columnModel = new ColumnModel<Device>(columnConfigList);
+
+        // geo-fences
+        geoFenceStore = new ListStore<Device>(deviceProperties.id());
+        geoFenceList = new ListView<Device, String>(geoFenceStore, deviceProperties.name());
+        geoFenceList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+        // tab panel
+        objectsTabs = new TabPanel(GWT.<TabPanelAppearance>create(BlueTabPanelBottomAppearance.class));
 
         uiBinder.createAndBindUi(this);
 
