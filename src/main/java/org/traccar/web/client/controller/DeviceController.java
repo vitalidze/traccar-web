@@ -55,7 +55,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     private final PositionInfoPopup positionInfo = new PositionInfoPopup();
 
-    public DeviceController(MapController mapController, DeviceView.SettingsHandler settingsHandler, Application application) {
+    public DeviceController(MapController mapController, DeviceView.GeoFenceHandler geoFenceHandler, DeviceView.SettingsHandler settingsHandler, Application application) {
         this.application = application;
         this.mapController = mapController;
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
@@ -82,7 +82,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                 }
             }
         });
-        deviceView = new DeviceView(this, settingsHandler, deviceStore);
+        deviceView = new DeviceView(this, geoFenceHandler, settingsHandler, deviceStore);
     }
 
     public ListStore<Device> getDeviceStore() {

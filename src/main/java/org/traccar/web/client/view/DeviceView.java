@@ -30,6 +30,7 @@ import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
 import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.TabPanel;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
@@ -42,6 +43,7 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.DeviceProperties;
+import org.traccar.web.client.model.GeoFenceProperties;
 import org.traccar.web.shared.model.Device;
 
 import com.google.gwt.core.client.GWT;
@@ -62,6 +64,7 @@ import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import org.traccar.web.shared.model.GeoFence;
 
 public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler<Device>, RowMouseDownEvent.RowMouseDownHandler, CellDoubleClickEvent.CellDoubleClickHandler {
 
@@ -81,7 +84,13 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         public void doubleClicked(Device device);
     }
 
-    private DeviceHandler deviceHandler;
+    public interface GeoFenceHandler {
+        public void onAdd();
+    }
+
+    private final DeviceHandler deviceHandler;
+
+    private final GeoFenceHandler geoFenceHandler;
 
     @UiField
     ContentPanel contentPanel;
@@ -121,10 +130,10 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     Grid<Device> grid;
 
     @UiField(provided = true)
-    ListStore<Device> geoFenceStore;
+    ListStore<GeoFence> geoFenceStore;
 
     @UiField(provided = true)
-    ListView<Device, String> geoFenceList;
+    ListView<GeoFence, String> geoFenceList;
 
     @UiField
     MenuItem settingsUsers;
@@ -141,8 +150,9 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public DeviceView(final DeviceHandler deviceHandler, SettingsHandler settingsHandler, final ListStore<Device> deviceStore) {
+    public DeviceView(final DeviceHandler deviceHandler, final GeoFenceHandler geoFenceHandler, SettingsHandler settingsHandler, final ListStore<Device> deviceStore) {
         this.deviceHandler = deviceHandler;
+        this.geoFenceHandler = geoFenceHandler;
         this.settingsHandler = settingsHandler;
         this.deviceStore = deviceStore;
 
@@ -192,8 +202,10 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         columnModel = new ColumnModel<Device>(columnConfigList);
 
         // geo-fences
-        geoFenceStore = new ListStore<Device>(deviceProperties.id());
-        geoFenceList = new ListView<Device, String>(geoFenceStore, deviceProperties.name());
+        GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
+
+        geoFenceStore = new ListStore<GeoFence>(geoFenceProperties.id());
+        geoFenceList = new ListView<GeoFence, String>(geoFenceStore, geoFenceProperties.name());
         geoFenceList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
         // tab panel
@@ -258,7 +270,11 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
 
     @UiHandler("addButton")
     public void onAddClicked(SelectEvent event) {
-        deviceHandler.onAdd();
+        if (objectsTabs.getActiveWidget() == geoFenceList) {
+            geoFenceHandler.onAdd();
+        } else {
+            deviceHandler.onAdd();
+        }
     }
 
     @UiHandler("editButton")

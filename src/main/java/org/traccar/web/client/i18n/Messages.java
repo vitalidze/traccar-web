@@ -251,4 +251,16 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String geoFences();
 
     String objects();
+
+    String description();
+
+    String geoFence();
+
+    String type();
+
+    String width();
+
+    String radius();
+
+    String color();
 }
