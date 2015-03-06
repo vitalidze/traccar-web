@@ -17,6 +17,9 @@ package org.traccar.web.shared.model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 @Entity
 @Table(name = "geofences",
@@ -121,6 +124,31 @@ public class GeoFence implements Serializable {
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (type != null ? type.hashCode() : 0);
+        return result;
+    }
+
+    public static class LonLat {
+        public final double lon;
+        public final double lat;
+
+        public LonLat(double lon, double lat) {
+            this.lon = lon;
+            this.lat = lat;
+        }
+    }
+
+    public List<LonLat> points() {
+        if (getPoints() == null || getPoints().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<LonLat> result = new LinkedList<LonLat>();
+        for (String strPoint : getPoints().split(",")) {
+            int space = strPoint.indexOf(' ');
+            double lon = Double.parseDouble(strPoint.substring(0, space));
+            double lat = Double.parseDouble(strPoint.substring(space + 1));
+            result.add(new LonLat(lon, lat));
+        }
         return result;
     }
 }
