@@ -16,15 +16,17 @@
 package org.traccar.web.shared.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "geofences",
        indexes = { @Index(name = "geofences_pkey", columnList = "id") })
-public class GeoFence {
+public class GeoFence implements Serializable {
 
     public GeoFence() {
         type = GeoFenceType.LINE;
-        color = "0000ff";
+        color = "4169E1";
+        radius = 30d;
     }
 
     @Id
