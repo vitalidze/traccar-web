@@ -606,4 +606,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             entityManager.merge(user);
         }
     }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public List<GeoFence> getGeoFences() {
+        return getSessionEntityManager().createQuery("SELECT g FROM GeoFence g", GeoFence.class).getResultList();
+    }
 }
