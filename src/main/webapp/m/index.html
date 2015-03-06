@@ -113,6 +113,14 @@
             <div class="col-66">{{address}}</div>
         </div>
         {{/if}}
+        {{#if other}}
+            {{#each other}}
+        <div class="row">
+            <div class="col-33">{{@key}}</div>
+            <div class="col-66">{{this}}</div>
+        </div>
+            {{/each}}
+        {{/if}}
     </div>
 </script>
 <!-- Path to your app js-->
