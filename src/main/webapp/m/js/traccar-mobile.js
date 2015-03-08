@@ -88,7 +88,7 @@ myApp.onPageInit('login-screen', function (page) {
         var password = pageContainer.find('input[name="password"]').val();
 
         if (username.trim().length == 0 || password.trim().length == 0) {
-            myApp.alert("User name and password must not be empty");
+            myApp.alert(i18n.user_name_and_password_must_not_be_empty);
             return false;
         }
 
@@ -101,7 +101,7 @@ myApp.onPageInit('login-screen', function (page) {
 
                        mainView.loadPage('pages/map.html');
                    },
-                   error: function() { myApp.alert("User name or password is invalid"); },
+                   error: function() { myApp.alert(i18n.user_name_or_password_is_invalid); },
                    showIndicator: true });
 
         return false;
@@ -325,7 +325,7 @@ function loadDevices() {
                         $$('#map').html('');
                     },
                     error: function() {
-                        myApp.alert("Unexpected error");
+                        myApp.alert(i18n.unexpected_error);
                         mainView.loadPage('pages/login.html');
                     }
                 });
@@ -346,7 +346,7 @@ function drawDeviceDetails(deviceId, position) {
     var deviceDetails = $$('#device-' + deviceId + '-details');
     if (deviceDetails != undefined) {
         if (position == undefined) {
-            deviceDetails.html('<div class="content-block">No data available</div>');
+            deviceDetails.html('<div class="content-block">' + i18n.no_data_available + '</div>');
         } else {
             // parse 'other' field
             if (window.DOMParser)  {
