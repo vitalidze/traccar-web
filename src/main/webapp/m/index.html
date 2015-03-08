@@ -13,6 +13,29 @@
     <link rel="stylesheet" href="css/traccar-mobile.css">
     <!-- OpenLayers -->
     <link rel="stylesheet" href="http://openlayers.org/en/v3.0.0/css/ol.css" type="text/css">
+    <!-- i18n -->
+    <script type="text/javascript">
+        function loadJSfile(filename) {
+            var fileref = document.createElement('script');
+            fileref.setAttribute("type","text/javascript");
+            fileref.setAttribute("src", filename);
+            if (typeof fileref != "undefined") {
+                document.getElementsByTagName("head")[0].appendChild(fileref)
+                return true;
+            }
+            return false;
+        }
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+            results = regex.exec(location.search);
+            return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+        var locale = getParameterByName("locale");
+        if (locale === null || !loadJSfile("js/i18n/Messages_" + locale + ".js")) {
+            loadJSfile("js/i18n/Messages.js");
+        }
+    </script>
 </head>
 <body>
 <!-- Status bar overlay for full screen mode (PhoneGap) -->
@@ -22,10 +45,6 @@
 <!-- Left panel with reveal effect-->
 <div class="panel panel-left panel-cover">
     <div id="devicesList"></div>
-    <div class="content-block">
-        <p><a href="/?nomobileredirect=1" class="button button-fill open-desktop-version">Open Desktop version</a></p>
-        <p><a href="#" id="logout" class="button button-fill color-red">Logout</a></p>
-    </div>
 </div>
 <!-- Views -->
 <div class="views">
@@ -41,11 +60,9 @@
 <script type="text/javascript" src="http://openlayers.org/en/v3.0.0/build/ol.js"></script>
 <!-- Google maps -->
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
-<!-- handlebars.js -->
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min.js"></script>
-<!-- handlebars templates -->
-<script id="devices-list-template" type="text/x-handlebars-template">
-    <div class="content-block-title">Devices</div>
+<!-- template7 templates -->
+<script id="devices-list-template" type="text/template7">
+    <div class="content-block-title">{{i18n.devices}}</div>
     <div class="list-block accordion-list">
         <ul>
             {{#each devices}}
@@ -60,12 +77,16 @@
             {{/each}}
         </ul>
     </div>
+    <div class="content-block">
+        <p><a href="/?nomobileredirect=1" class="button button-fill open-desktop-version">{{i18n.open_desktop_version}}</a></p>
+        <p><a href="#" id="logout" class="button button-fill color-red">{{i18n.logout}}</a></p>
+    </div>
 </script>
-<script id="device-details-template" type="text/x-handlebars-template">
+<script id="device-details-template" type="text/template7">
     <div class="content-block">
         <div class="row">
             <div class="col-100">
-                <a href="#" class="button button-fill color-green" id="device-{{device.id}}-select-on-map">Select on map</a>
+                <a href="#" class="button button-fill color-green" id="device-{{device.id}}-select-on-map">{{i18n.select_on_map}}</a>
             </div>
         </div>
         <!-- div class="row" style="padding-top: 20px;">
@@ -82,34 +103,34 @@
     </div>
     <div class="content-block">
         <div class="row">
-            <div class="col-33">Time</div>
+            <div class="col-33">{{i18n.time}}</div>
             <div class="col-66" style="white-space: nowrap;">{{formatDate time}}</div>
         </div>
         <div class="row">
-            <div class="col-33">Latitude</div>
-            <div class="col-66">{{formatDouble latitude 4}}</div>
+            <div class="col-33">{{i18n.latitude}}</div>
+            <div class="col-66">{{formatDouble latitude n="4"}}</div>
         </div>
         <div class="row">
-            <div class="col-33">Longitude</div>
-            <div class="col-66">{{formatDouble longitude 4}}</div>
+            <div class="col-33">{{i18n.longitude}}</div>
+            <div class="col-66">{{formatDouble longitude n="4"}}</div>
         </div>
         {{#if altitude}}
         <div class="row">
-            <div class="col-33">Altitude</div>
-            <div class="col-66">{{formatDouble altitude 4}}</div>
+            <div class="col-33">{{i18n.altitude}}</div>
+            <div class="col-66">{{formatDouble altitude n="4"}}</div>
         </div>
         {{/if}}
         <div class="row">
-            <div class="col-33">Speed</div>
+            <div class="col-33">{{i18n.speed}}</div>
             <div class="col-66">{{formatSpeed speed}}</div>
         </div>
         <div class="row">
-            <div class="col-33">Course</div>
-            <div class="col-66">{{formatDouble course 2}}</div>
+            <div class="col-33">{{i18n.course}}</div>
+            <div class="col-66">{{formatDouble course n="2"}}</div>
         </div>
         {{#if address}}
         <div class="row">
-            <div class="col-33">Address</div>
+            <div class="col-33">{{i18n.address}}</div>
             <div class="col-66">{{address}}</div>
         </div>
         {{/if}}

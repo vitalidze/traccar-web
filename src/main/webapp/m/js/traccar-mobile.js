@@ -1,14 +1,19 @@
 // Initialize app
 var myApp = new Framework7({
     modalTitle: '',
-    swipeBackPage: false
-});
+    swipeBackPage: false,
+    template7Pages: true, // enable Template7 rendering for Ajax and Dynamic pages
+    //Specify templates/pages data
+    template7Data: {
+        'page:login-screen' : { i18n : i18n }
+    }
+    });
 
 // If we need to use custom DOM library, let's save it to $$ variable:
 var $$ = Dom7;
 
-// register handlebars helpers
-Handlebars.registerHelper('formatDate', function(timestamp) {
+// register template7 helpers
+Template7.registerHelper('formatDate', function(timestamp) {
     var date = new Date(timestamp);
     var month = date.getMonth() + 1;
 
@@ -20,11 +25,11 @@ Handlebars.registerHelper('formatDate', function(timestamp) {
         (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
 });
 
-Handlebars.registerHelper('formatDouble', function(double, n) {
-    return double.toFixed(n);
+Template7.registerHelper('formatDouble', function(double, options) {
+    return double.toFixed(options.hash.n);
 });
 
-Handlebars.registerHelper('formatSpeed', function(speed) {
+Template7.registerHelper('formatSpeed', function(speed) {
     var factor = 1;
     var suffix = 'kn';
 
@@ -57,22 +62,6 @@ callGet({ method: 'authenticated',
           },
           error: function() { mainView.loadPage({url: 'pages/login.html', animatePages: false}); }
         });
-
-// set up logout action
-$$('#logout').on('click', function() {
-    callGet({ method: 'logout',
-        success: function() {
-            myApp.closePanel();
-            mainView.loadPage('pages/login.html');
-            appState = {};
-            $$('#map').html('');
-        },
-        error: function() {
-            myApp.alert("Unexpected error");
-            mainView.loadPage('pages/login.html');
-        }
-    });
-});
 
 myApp.onPageInit('login-screen', function (page) {
     myApp.params.swipePanel = false;
@@ -117,11 +106,6 @@ myApp.onPageInit('login-screen', function (page) {
 
         return false;
     });
-});
-
-// set up open desktop version action
-$$('.open-desktop-version').on('click', function() {
-    window.location = '/?nomobileredirect=1';
 });
 
 // button that opens sidebar menu
@@ -320,15 +304,36 @@ function loadDevices() {
             appState.devices = devices;
 
             var source   = $$('#devices-list-template').html();
-            var template = Handlebars.compile(source);
+            var template = Template7.compile(source);
 
-            devicesList.html(template({devices: devices}));
+            devicesList.html(template({ devices: devices, i18n : i18n }));
 
             $$('.device-details-link').on('click', function(e) {
                 var deviceId = e.currentTarget.id.substring(7);
                 deviceId = deviceId.substring(0, deviceId.indexOf('-'));
                 drawDeviceDetails(deviceId, appState.latestPositions[deviceId]);
                 myApp.accordionToggle($$('#device-' + deviceId + '-list-item'));
+            });
+
+            // set up logout action
+            $$('#logout').on('click', function() {
+                callGet({ method: 'logout',
+                    success: function() {
+                        myApp.closePanel();
+                        mainView.loadPage('pages/login.html');
+                        appState = {};
+                        $$('#map').html('');
+                    },
+                    error: function() {
+                        myApp.alert("Unexpected error");
+                        mainView.loadPage('pages/login.html');
+                    }
+                });
+            });
+
+            // set up open desktop version action
+            $$('.open-desktop-version').on('click', function() {
+                window.location = '/?nomobileredirect=1';
             });
         },
         error: function() {
@@ -369,7 +374,8 @@ function drawDeviceDetails(deviceId, position) {
             }
 
             var source   = $$('#device-details-template').html();
-            var template = Handlebars.compile(source);
+            var template = Template7.compile(source);
+            position.i18n = i18n;
 
             deviceDetails.html(template(position));
 
