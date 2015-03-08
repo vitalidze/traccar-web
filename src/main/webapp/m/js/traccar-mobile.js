@@ -73,9 +73,30 @@ myApp.onPageInit('login-screen', function (page) {
         pageContainer.find('#form-login').trigger('submit');
     });
 
+    var locale = getParameterByName('locale');
+    var language = pageContainer.find('#language');
+    if (locale != null) {
+        var sel = language[0];
+        var opts = sel.options;
+        for(var j = 0; j < opts.length; j++) {
+            if (opts[j].value == locale) {
+                sel.selectedIndex = j;
+                break;
+            }
+        }
+    }
+
+    // set up redirect when language changes
+    language.on('change', function() {
+        var sel = pageContainer.find('#language')[0];
+        var newLocale = sel.options[sel.selectedIndex].value;
+        window.location = newLocale == 'en' ? '?' : ('?locale=' + newLocale);
+    });
+
     // set up open desktop version action
     pageContainer.find('.open-desktop-version').on('click', function() {
-        window.location = '/?nomobileredirect=1';
+        var locale = getParameterByName('locale');
+        window.location = '/?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
     });
 
     pageContainer.find('#form-login').on('submit', function(e) {
