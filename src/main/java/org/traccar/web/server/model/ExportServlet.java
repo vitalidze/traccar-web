@@ -133,7 +133,7 @@ public class ExportServlet extends HttpServlet {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         dateFormat.setTimeZone(tz);
 
-        XMLStreamWriter xsw = XMLOutputFactory.newFactory().createXMLStreamWriter(response.getOutputStream());
+        XMLStreamWriter xsw = XMLOutputFactory.newFactory().createXMLStreamWriter(response.getOutputStream(), "UTF-8");
 
         xsw.writeStartDocument("UTF-8", "1.0");
         xsw.writeStartElement("gpx");
