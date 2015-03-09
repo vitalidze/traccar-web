@@ -1,3 +1,13 @@
+// set up locale
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+    results = regex.exec(location.search);
+    return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+var locale = getParameterByName("locale");
+i18n = i18n[locale === null ? 'en' : locale];
+
 // Initialize app
 var myApp = new Framework7({
     modalTitle: '',
@@ -73,16 +83,13 @@ myApp.onPageInit('login-screen', function (page) {
         pageContainer.find('#form-login').trigger('submit');
     });
 
-    var locale = getParameterByName('locale');
     var language = pageContainer.find('#language');
-    if (locale != null) {
-        var sel = language[0];
-        var opts = sel.options;
-        for(var j = 0; j < opts.length; j++) {
-            if (opts[j].value == locale) {
-                sel.selectedIndex = j;
-                break;
-            }
+    var sel = language[0];
+    var opts = sel.options;
+    for(var j = 0; j < opts.length; j++) {
+        if (opts[j].value == locale) {
+            sel.selectedIndex = j;
+            break;
         }
     }
 
@@ -95,7 +102,6 @@ myApp.onPageInit('login-screen', function (page) {
 
     // set up open desktop version action
     pageContainer.find('.open-desktop-version').on('click', function() {
-        var locale = getParameterByName('locale');
         window.location = '/?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
     });
 
@@ -354,7 +360,7 @@ function loadDevices() {
 
             // set up open desktop version action
             $$('.open-desktop-version').on('click', function() {
-                window.location = '/?nomobileredirect=1';
+                window.location = '/?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
             });
         },
         error: function() {

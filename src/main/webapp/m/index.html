@@ -14,28 +14,7 @@
     <!-- OpenLayers -->
     <link rel="stylesheet" href="http://openlayers.org/en/v3.0.0/css/ol.css" type="text/css">
     <!-- i18n -->
-    <script type="text/javascript">
-        function loadJSfile(filename) {
-            var fileref = document.createElement('script');
-            fileref.setAttribute("type","text/javascript");
-            fileref.setAttribute("src", filename);
-            if (typeof fileref != "undefined") {
-                document.getElementsByTagName("head")[0].appendChild(fileref)
-                return true;
-            }
-            return false;
-        }
-        function getParameterByName(name) {
-            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-            results = regex.exec(location.search);
-            return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
-        }
-        var locale = getParameterByName("locale");
-        if (locale === null || !loadJSfile("js/i18n/Messages_" + locale + ".js")) {
-            loadJSfile("js/i18n/Messages.js");
-        }
-    </script>
+    <script type="text/javascript" src="js/i18n/Messages.js"></script>
 </head>
 <body>
 <!-- Status bar overlay for full screen mode (PhoneGap) -->
@@ -78,7 +57,7 @@
         </ul>
     </div>
     <div class="content-block">
-        <p><a href="/?nomobileredirect=1" class="button button-fill open-desktop-version">{{i18n.open_desktop_version}}</a></p>
+        <p><a href="#" class="button button-fill open-desktop-version">{{i18n.open_desktop_version}}</a></p>
         <p><a href="#" id="logout" class="button button-fill color-red">{{i18n.logout}}</a></p>
     </div>
 </script>
