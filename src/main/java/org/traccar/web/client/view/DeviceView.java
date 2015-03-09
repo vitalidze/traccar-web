@@ -114,6 +114,15 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     Grid<Device> grid;
 
     @UiField
+    TextButton settingsButton;
+
+    @UiField
+    MenuItem settingsAccount;
+
+    @UiField
+    MenuItem settingsPreferences;
+
+    @UiField
     MenuItem settingsUsers;
 
     @UiField
@@ -195,21 +204,26 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         editing.addEditor(colFollow, new CheckBox());
         editing.addEditor(colRecordTrace, new CheckBox());
 
+        boolean readOnly = ApplicationContext.getInstance().getUser().getReadOnly();
         boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
         boolean manager = ApplicationContext.getInstance().getUser().getManager();
         boolean allowDeviceManagement = !ApplicationContext.getInstance().getApplicationSettings().isDisallowDeviceManagementByUsers();
 
-        settingsGlobal.setVisible(admin);
-        showTrackerServerLog.setVisible(admin);
-        settingsUsers.setVisible(admin || manager);
-        settingsNotifications.setVisible(admin || manager);
-        shareButton.setVisible(admin || manager);
+        settingsButton.setVisible(admin || !readOnly);
+        settingsAccount.setVisible(!readOnly);
+        settingsPreferences.setVisible(!readOnly);
 
-        addButton.setVisible(allowDeviceManagement || admin || manager);
-        editButton.setVisible(allowDeviceManagement || admin || manager);
-        removeButton.setVisible(allowDeviceManagement || admin || manager);
-        fillItem.setVisible(allowDeviceManagement || admin || manager);
-        separatorItem.setVisible(allowDeviceManagement || admin || manager);
+        settingsGlobal.setVisible(!readOnly && admin);
+        showTrackerServerLog.setVisible(admin);
+        settingsUsers.setVisible(!readOnly && (admin || manager));
+        settingsNotifications.setVisible(!readOnly && (admin || manager));
+        shareButton.setVisible(!readOnly && (admin || manager));
+
+        addButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
+        editButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
+        removeButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
+        fillItem.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
+        separatorItem.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
     }
 
     @Override
