@@ -78,7 +78,9 @@
                             </button:menu>
                         </button:TextButton>
                     </toolbar:ToolBar>
+
                     <toolbar:SeparatorToolItem />
+
                     <button:TextButton ui:field="loadButton" text="{i18n.load}" />
                     <toolbar:SeparatorToolItem />
                     <button:TextButton ui:field="clearButton" text="{i18n.clear}" />

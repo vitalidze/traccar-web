@@ -13,7 +13,6 @@
     <!-- GXT Stylesheet -->
     <stylesheet src="reset.css" />
     <!-- GXT Theme -->
-
     <inherits name='com.sencha.gxt.theme.gray.Gray' />
     <set-property name="gwt.logging.enabled" value="FALSE"/>
     <set-property name="gwt.logging.consoleHandler" value="DISABLED"/>
