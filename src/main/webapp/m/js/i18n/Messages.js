@@ -2,6 +2,7 @@ var i18n = {
     en: {
         _name_: 'English',
         // login screen
+        language: 'Language',
         username: 'Username',
         password: 'Password',
         your_username: 'Your username',
@@ -28,6 +29,7 @@ var i18n = {
     de: {
         _name_: 'German',
         // login screen
+        language: 'Language',
         username: 'User',
         password: 'Passwort',
         your_username: 'Your username',
@@ -54,6 +56,7 @@ var i18n = {
     es: {
         _name_: 'Spanish',
         // login screen
+        language: 'Language',
         username: 'Usuario',
         password: 'Contraseña',
         your_username: 'Your username',
@@ -80,6 +83,7 @@ var i18n = {
     hu: {
         _name_: 'Hungarian',
         // login screen
+        language: 'Language',
         username: 'Felhasználó',
         password: 'Jelszó',
         your_username: 'Your username',
@@ -106,6 +110,7 @@ var i18n = {
     it: {
         _name_: 'Italian',
         // login screen
+        language: 'Language',
         username: 'Utente',
         password: 'Password',
         your_username: 'Your username',
@@ -132,6 +137,7 @@ var i18n = {
     lt: {
         _name_: 'Latvian',
         // login screen
+        language: 'Language',
         username: 'Vardas',
         password: 'Slaptažodis',
         your_username: 'Your username',
@@ -158,6 +164,7 @@ var i18n = {
     nl: {
         _name_: 'Danish',
         // login screen
+        language: 'Language',
         username: 'Gebruiker',
         password: 'Wachtwoord',
         your_username: 'Your username',
@@ -184,6 +191,7 @@ var i18n = {
     pl: {
         _name_: 'Polish',
         // login screen
+        language: 'Language',
         username: 'U\u017Cytkownik',
         password: 'Has\u0142o',
         your_username: 'Your username',
@@ -210,6 +218,7 @@ var i18n = {
     pt_PT: {
         _name_: 'Portuguese',
         // login screen
+        language: 'Language',
         username: 'Utilizador',
         password: 'Palavra-passe',
         your_username: 'Your username',
@@ -236,6 +245,7 @@ var i18n = {
     ru: {
         _name_: 'Russian',
         // login screen
+        language: 'Язык',
         username: 'Имя пользователя',
         password: 'Пароль',
         your_username: 'Ваше имя пользователя',
@@ -262,6 +272,7 @@ var i18n = {
     tl: {
         _name_: 'Tagalog',
         // login screen
+        language: 'Language',
         username: 'Username',
         password: 'Password',
         your_username: 'Your username',
