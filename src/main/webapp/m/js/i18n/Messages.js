@@ -212,7 +212,7 @@ var i18n = {
         longitude: 'D\u0142ugo\u015B\u0107',
         altitude: 'Wysoko\u015B\u0107',
         speed: 'Pr\u0119dko\u015B\u0107',
-        course: 'Kierunek',
+        course: 'Przebieg',
         address: 'Adres'
     },
     pt_PT: {
