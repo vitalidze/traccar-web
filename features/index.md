@@ -15,7 +15,7 @@ This project has following features, which don't exist in original `traccar-web`
     * [german language](german.html) (available via ?locale=de URL parameter)
     * [italian language](italian.html) (available via ?locale=it URL parameter)
     * [spanish language](spanish.html) (available via ?locale=es URL parameter)
-    * polish language (available via ?locale=pl URL parameter)
+    * [polish language](polish.html) (available via ?locale=pl URL parameter)
     * tagalog language (available via ?locale=tl URL parameter)
     * hungarian language (available via ?locale=hu URL parameter)
     * [portuguese language](portuguese.html) (available via ?locale=pt_PT URL parameter)
@@ -36,6 +36,7 @@ This project has following features, which don't exist in original `traccar-web`
 * possibility to detect 'offline' devices - when signal hasn't came for some time (set up in device settings). They will be shown on a map with a marker of different colour and there will be some sign in popup that they are actually offline.
 * new device status - idle. It is shown in popup and also there will be a time of idling. Each device got new setting 'Idle when speed is <=', which is zero by default. It may be changed to some reasonable value, which is then used to consider device idle (for example to handle 'satelite drift compansation').
 * possibility to restrict ordinary users to manage (i.e. add/edit/delete) devices. Configured in global application settings.
+* [possibility to mark user as read-only](read-only-users.html)
 * save grid columns settings (sort order, column order, visibility, etc.) in the database
 * mobile web UI based on [framework7](http://www.idangero.us/framework7/) with general functions for GPS tracking, available at `m/` URL, i.e. `http://server-ip:8082/m/` Desktop version will redirect automatically to the mobile version when accessed from mobile device unless `nomobileredirect=1` url parameter is not set.
 * [RESTful API](rest-api.html). Available at `/traccar/rest/{methodName}` - allows to call methods from `DataService` class.
@@ -54,3 +55,4 @@ This project has following features, which don't exist in original `traccar-web`
 * prohibit empty device name and id
 * do not create user with name 'admin' when any other user with 'administrator' role present
 * [possibility to fit line of archived track the current map view](zoom-to-track.html)
+* [language selector at login screen](language-selector-on-login-screen.html)
