@@ -16,8 +16,6 @@
 package org.traccar.web.server.model;
 
 import java.io.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 import javax.inject.Inject;
@@ -183,6 +181,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
     @Override
     public User addUser(User user) {
         User currentUser = getSessionUser();
@@ -214,6 +213,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser
+    @RequireWrite
     @Override
     public User updateUser(User user) {
         User currentUser = getSessionUser();
@@ -260,6 +260,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
     @Override
     public User removeUser(User user) {
         EntityManager entityManager = getSessionEntityManager();
@@ -294,6 +295,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser
     @ManagesDevices
+    @RequireWrite
     @Override
     public Device addDevice(Device device) throws TraccarException {
         if (device.getName() == null || device.getName().trim().isEmpty() ||
@@ -320,6 +322,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser
+    @RequireWrite
     @ManagesDevices
     @Override
     public Device updateDevice(Device device) throws TraccarException {
@@ -349,6 +352,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser
+    @RequireWrite
     @ManagesDevices
     @Override
     public Device removeDevice(Device device) {
@@ -504,6 +508,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN })
+    @RequireWrite
     @Override
     public void updateApplicationSettings(ApplicationSettings applicationSettings) {
         getSessionEntityManager().merge(applicationSettings);
@@ -558,6 +563,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
     @Override
     public void saveRoles(List<User> users) {
         if (users == null || users.isEmpty()) {
@@ -572,6 +578,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 user.setAdmin(_user.getAdmin());
             }
             user.setManager(_user.getManager());
+            user.setReadOnly(_user.getReadOnly());
         }
     }
 
@@ -590,6 +597,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
     @Override
     public void saveDeviceShare(Device device, Map<User, Boolean> share) {
         EntityManager entityManager = getSessionEntityManager();
