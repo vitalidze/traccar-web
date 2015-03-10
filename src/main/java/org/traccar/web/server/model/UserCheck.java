@@ -36,6 +36,8 @@ public class UserCheck implements MethodInterceptor {
         if (requireUser != null) checkRequireUser(requireUser);
         ManagesDevices managesDevices = methodInvocation.getMethod().getAnnotation(ManagesDevices.class);
         if (managesDevices != null) checkDeviceManagementAccess(managesDevices);
+        RequireWrite requireWrite = methodInvocation.getMethod().getAnnotation(RequireWrite.class);
+        if (requireWrite != null) checkRequireWrite(requireWrite);
         return methodInvocation.proceed();
     }
 
@@ -69,6 +71,16 @@ public class UserCheck implements MethodInterceptor {
             if (applicationSettings.isDisallowDeviceManagementByUsers()) {
                 throw new SecurityException("Users are not allowed to manage devices");
             }
+        }
+    }
+
+    void checkRequireWrite(RequireWrite requireWrite) {
+        User user = sessionUser.get();
+        if (user == null) {
+            throw new SecurityException("Not logged in");
+        }
+        if (user.getReadOnly()) {
+            throw new SecurityException("User is not allowed to make any changes");
         }
     }
 }

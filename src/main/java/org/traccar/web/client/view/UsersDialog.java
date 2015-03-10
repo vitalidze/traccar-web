@@ -101,6 +101,10 @@ public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandle
         colManager.setCell(new CheckBoxCell());
         columnConfigList.add(colManager);
 
+        ColumnConfig<User, Boolean> colReadOnly = new ColumnConfig<User, Boolean>(userProperties.readOnly(), 25, i18n.readOnly());
+        colReadOnly.setCell(new CheckBoxCell());
+        columnConfigList.add(colReadOnly);
+
         columnModel = new ColumnModel<User>(columnConfigList);
 
         uiBinder.createAndBindUi(this);

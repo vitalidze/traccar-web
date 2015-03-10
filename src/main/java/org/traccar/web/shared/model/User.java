@@ -232,6 +232,18 @@ public class User implements Serializable, Cloneable {
         this.notifications = notifications;
     }
 
+    @Expose
+    @Column(nullable = true)
+    private boolean readOnly;
+
+    public boolean getReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
