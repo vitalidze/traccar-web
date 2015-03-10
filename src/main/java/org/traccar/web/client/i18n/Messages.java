@@ -251,4 +251,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String language();
 
     String readOnly();
+
+    String protocol();
 }
