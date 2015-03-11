@@ -1,14 +1,29 @@
+// set up locale
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+    results = regex.exec(location.search);
+    return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+var locale = getParameterByName("locale");
+i18n = i18n[locale === null ? 'en' : locale];
+
 // Initialize app
 var myApp = new Framework7({
     modalTitle: '',
-    swipeBackPage: false
-});
+    swipeBackPage: false,
+    template7Pages: true, // enable Template7 rendering for Ajax and Dynamic pages
+    //Specify templates/pages data
+    template7Data: {
+        'page:login-screen' : { i18n : i18n }
+    }
+    });
 
 // If we need to use custom DOM library, let's save it to $$ variable:
 var $$ = Dom7;
 
-// register handlebars helpers
-Handlebars.registerHelper('formatDate', function(timestamp) {
+// register template7 helpers
+Template7.registerHelper('formatDate', function(timestamp) {
     var date = new Date(timestamp);
     var month = date.getMonth() + 1;
 
@@ -20,11 +35,11 @@ Handlebars.registerHelper('formatDate', function(timestamp) {
         (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
 });
 
-Handlebars.registerHelper('formatDouble', function(double, n) {
-    return double.toFixed(n);
+Template7.registerHelper('formatDouble', function(double, options) {
+    return double.toFixed(options.hash.n);
 });
 
-Handlebars.registerHelper('formatSpeed', function(speed) {
+Template7.registerHelper('formatSpeed', function(speed) {
     var factor = 1;
     var suffix = 'kn';
 
@@ -58,22 +73,6 @@ callGet({ method: 'authenticated',
           error: function() { mainView.loadPage({url: 'pages/login.html', animatePages: false}); }
         });
 
-// set up logout action
-$$('#logout').on('click', function() {
-    callGet({ method: 'logout',
-        success: function() {
-            myApp.closePanel();
-            mainView.loadPage('pages/login.html');
-            appState = {};
-            $$('#map').html('');
-        },
-        error: function() {
-            myApp.alert("Unexpected error");
-            mainView.loadPage('pages/login.html');
-        }
-    });
-});
-
 myApp.onPageInit('login-screen', function (page) {
     myApp.params.swipePanel = false;
 
@@ -84,9 +83,26 @@ myApp.onPageInit('login-screen', function (page) {
         pageContainer.find('#form-login').trigger('submit');
     });
 
+    var language = pageContainer.find('#language');
+    var sel = language[0];
+    var opts = sel.options;
+    for(var j = 0; j < opts.length; j++) {
+        if (opts[j].value == locale) {
+            sel.selectedIndex = j;
+            break;
+        }
+    }
+
+    // set up redirect when language changes
+    language.on('change', function() {
+        var sel = pageContainer.find('#language')[0];
+        var newLocale = sel.options[sel.selectedIndex].value;
+        window.location = newLocale == 'en' ? '?' : ('?locale=' + newLocale);
+    });
+
     // set up open desktop version action
     pageContainer.find('.open-desktop-version').on('click', function() {
-        window.location = '/?nomobileredirect=1';
+        window.location = '/?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
     });
 
     pageContainer.find('#form-login').on('submit', function(e) {
@@ -99,7 +115,7 @@ myApp.onPageInit('login-screen', function (page) {
         var password = pageContainer.find('input[name="password"]').val();
 
         if (username.trim().length == 0 || password.trim().length == 0) {
-            myApp.alert("User name and password must not be empty");
+            myApp.alert(i18n.user_name_and_password_must_not_be_empty);
             return false;
         }
 
@@ -112,16 +128,11 @@ myApp.onPageInit('login-screen', function (page) {
 
                        mainView.loadPage('pages/map.html');
                    },
-                   error: function() { myApp.alert("User name or password is invalid"); },
+                   error: function() { myApp.alert(i18n.user_name_or_password_is_invalid); },
                    showIndicator: true });
 
         return false;
     });
-});
-
-// set up open desktop version action
-$$('.open-desktop-version').on('click', function() {
-    window.location = '/?nomobileredirect=1';
 });
 
 // button that opens sidebar menu
@@ -320,15 +331,36 @@ function loadDevices() {
             appState.devices = devices;
 
             var source   = $$('#devices-list-template').html();
-            var template = Handlebars.compile(source);
+            var template = Template7.compile(source);
 
-            devicesList.html(template({devices: devices}));
+            devicesList.html(template({ devices: devices, i18n : i18n }));
 
             $$('.device-details-link').on('click', function(e) {
                 var deviceId = e.currentTarget.id.substring(7);
                 deviceId = deviceId.substring(0, deviceId.indexOf('-'));
                 drawDeviceDetails(deviceId, appState.latestPositions[deviceId]);
                 myApp.accordionToggle($$('#device-' + deviceId + '-list-item'));
+            });
+
+            // set up logout action
+            $$('#logout').on('click', function() {
+                callGet({ method: 'logout',
+                    success: function() {
+                        myApp.closePanel();
+                        mainView.loadPage('pages/login.html');
+                        appState = {};
+                        $$('#map').html('');
+                    },
+                    error: function() {
+                        myApp.alert(i18n.unexpected_error);
+                        mainView.loadPage('pages/login.html');
+                    }
+                });
+            });
+
+            // set up open desktop version action
+            $$('.open-desktop-version').on('click', function() {
+                window.location = '/?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
             });
         },
         error: function() {
@@ -341,7 +373,7 @@ function drawDeviceDetails(deviceId, position) {
     var deviceDetails = $$('#device-' + deviceId + '-details');
     if (deviceDetails != undefined) {
         if (position == undefined) {
-            deviceDetails.html('<div class="content-block">No data available</div>');
+            deviceDetails.html('<div class="content-block">' + i18n.no_data_available + '</div>');
         } else {
             // parse 'other' field
             if (window.DOMParser)  {
@@ -369,7 +401,8 @@ function drawDeviceDetails(deviceId, position) {
             }
 
             var source   = $$('#device-details-template').html();
-            var template = Handlebars.compile(source);
+            var template = Template7.compile(source);
+            position.i18n = i18n;
 
             deviceDetails.html(template(position));
 

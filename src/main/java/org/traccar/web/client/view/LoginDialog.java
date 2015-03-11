@@ -17,6 +17,13 @@ package org.traccar.web.client.view;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
+import com.sencha.gxt.data.shared.LabelProvider;
+import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.widget.core.client.form.ComboBox;
 import org.traccar.web.client.ApplicationContext;
 
 import com.google.gwt.core.client.GWT;
@@ -29,6 +36,10 @@ import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.PasswordField;
 import com.sencha.gxt.widget.core.client.form.TextField;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class LoginDialog {
 
@@ -47,6 +58,9 @@ public class LoginDialog {
     @UiField
     Window window;
 
+    @UiField(provided = true)
+    ComboBox<String> language;
+
     @UiField
     TextField login;
 
@@ -58,6 +72,24 @@ public class LoginDialog {
 
     public LoginDialog(LoginHandler loginHandler) {
         this.loginHandler = loginHandler;
+        // language selector
+        ListStore<String> languages = new ListStore<String>(new ModelKeyProvider<String>() {
+            @Override
+            public String getKey(String item) {
+                return item;
+            }
+        });
+        language = new ComboBox<String>(languages, new LabelProvider<String>() {
+            @Override
+            public String getLabel(String item) {
+                return (item.equals("default") ? "english" : LocaleInfo.getLocaleNativeDisplayName(item));
+            }
+        });
+        language.getStore().addAll(Arrays.asList(LocaleInfo.getAvailableLocaleNames()));
+        language.setForceSelection(true);
+        language.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+        language.setValue(LocaleInfo.getCurrentLocale().getLocaleName());
+
         uiBinder.createAndBindUi(this);
 
         if (ApplicationContext.getInstance().getApplicationSettings().getRegistrationEnabled()) {
@@ -94,4 +126,16 @@ public class LoginDialog {
         }
     }
 
+    @UiHandler("language")
+    public void onLanguageChanged(SelectionEvent<String> event) {
+        Map<String, List<String>> params = com.google.gwt.user.client.Window.Location.getParameterMap();
+        String queryString = "?locale=" + event.getSelectedItem();
+        for (String paramName : params.keySet()) {
+            if (paramName.equals("locale")) continue;
+            for (String paramValue : params.get(paramName)) {
+                queryString += "&" + paramName + "=" + paramValue;
+            }
+        }
+        com.google.gwt.user.client.Window.Location.assign(queryString);
+    }
 }

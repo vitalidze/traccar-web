@@ -36,4 +36,6 @@ public interface UserProperties extends PropertyAccess<User> {
     ValueProvider<User, String> email();
 
     ValueProvider<User, Boolean> notifications();
+
+    ValueProvider<User, Boolean> readOnly();
 }

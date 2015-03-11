@@ -30,6 +30,7 @@ public class DBMigrations {
                 new SetDefaultMapViewSettings(),
                 new SetManagerFlag(),
                 new SetNotificationsFlag(),
+                new SetReadOnlyFlag(),
                 new SetDefaultDeviceTimeout(),
                 new SetDefaultIdleSpeedThreshold(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
@@ -233,6 +234,15 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.eventRecordingEnabled = :b WHERE S.eventRecordingEnabled IS NULL")
                     .setParameter("b", Boolean.TRUE)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetReadOnlyFlag implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + User.class.getSimpleName() + " U SET U.readOnly = :ro WHERE U.readOnly IS NULL")
+                    .setParameter("ro", Boolean.FALSE)
                     .executeUpdate();
         }
     }

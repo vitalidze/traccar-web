@@ -248,6 +248,12 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
 
     String eventRecordingEnabled();
 
+    String language();
+
+    String readOnly();
+
+    String protocol();
+
     String geoFences();
 
     String objects();
