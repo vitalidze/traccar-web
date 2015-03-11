@@ -247,4 +247,10 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String errNoDeviceNameOrId();
 
     String eventRecordingEnabled();
+
+    String language();
+
+    String readOnly();
+
+    String protocol();
 }

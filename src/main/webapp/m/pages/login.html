@@ -7,17 +7,37 @@
                     <ul>
                         <li class="item-content">
                             <div class="item-inner">
-                                <div class="item-title label">Username</div>
+                                <div class="item-title label">{{i18n.language}}</div>
                                 <div class="item-input">
-                                    <input type="text" name="username" placeholder="Your username" autocapitalize="off" autocorrect="off">
+                                    <select id="language" name="language">
+                                        <option value="en">English</option>
+                                        <option value="de">German</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="hu">Hungarian</option>
+                                        <option value="it">Italian</option>
+                                        <option value="lt">Latvian</option>
+                                        <option value="nl">Danish</option>
+                                        <option value="pl">Polish</option>
+                                        <option value="pt_PT">Portuguese</option>
+                                        <option value="ru">Russian</option>
+                                        <option value="tl">Tagalog</option>
+                                    </select>
                                 </div>
                             </div>
                         </li>
                         <li class="item-content">
                             <div class="item-inner">
-                                <div class="item-title label">Password</div>
+                                <div class="item-title label">{{i18n.username}}</div>
                                 <div class="item-input">
-                                    <input type="password" name="password" placeholder="Your password">
+                                    <input type="text" name="username" placeholder="{{i18n.your_username}}" autocapitalize="off" autocorrect="off">
+                                </div>
+                            </div>
+                        </li>
+                        <li class="item-content">
+                            <div class="item-inner">
+                                <div class="item-title label">{{i18n.password}}</div>
+                                <div class="item-input">
+                                    <input type="password" name="password" placeholder="{{i18n.your_password}}">
                                 </div>
                             </div>
                         </li>
@@ -25,14 +45,14 @@
                 </div>
                 <div class="list-block">
                     <ul>
-                        <li><a href="#" class="item-link list-button" id="sign-in">Sign In</a></li>
+                        <li><a href="#" class="item-link list-button" id="sign-in">{{i18n.sign_in}}</a></li>
                     </ul>
                 </div>
                 <!-- to enable login by hitting 'GO' button -->
                 <div style="margin-left: -9999px;"><input type="submit" value="Hidden submit"></div>
             </form>
             <div class="content-block">
-                <p><a href="/?nomobileredirect=1" class="list-button open-desktop-version">Open Desktop version</a></p>
+                <p><a href="#" class="list-button open-desktop-version">{{i18n.open_desktop_version}}</a></p>
             </div>
         </div>
     </div>
