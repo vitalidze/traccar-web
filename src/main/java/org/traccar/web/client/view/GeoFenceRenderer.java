@@ -21,12 +21,14 @@ import org.gwtopenmaps.openlayers.client.geometry.*;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.shared.model.GeoFence;
-import org.traccar.web.shared.model.Position;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GeoFenceRenderer {
     private final MapView mapView;
+    private final Map<Long, VectorFeature> drawings = new HashMap<Long, VectorFeature>();
 
     public GeoFenceRenderer(MapView mapView) {
         this.mapView = mapView;
@@ -36,20 +38,22 @@ public class GeoFenceRenderer {
         return mapView.getGeofenceLayer();
     }
 
-    public void showGeoFences(List<GeoFence> geoFences) {
-        for (GeoFence geoFence : geoFences) {
-            switch (geoFence.getType()) {
-                case CIRCLE:
-                    drawCircle(geoFence);
-                    break;
-                case POLYGON:
-                    drawPolygon(geoFence);
-                    break;
-                case LINE:
-                    drawLine(geoFence);
-                    break;
-            }
+    public void drawGeoFence(GeoFence geoFence) {
+        switch (geoFence.getType()) {
+            case CIRCLE:
+                drawCircle(geoFence);
+                break;
+            case POLYGON:
+                drawPolygon(geoFence);
+                break;
+            case LINE:
+                drawLine(geoFence);
+                break;
         }
+    }
+
+    public void removeGeoFence(GeoFence geoFence) {
+        // TODO
     }
 
     private void drawCircle(GeoFence circle) {
@@ -63,8 +67,10 @@ public class GeoFenceRenderer {
         st.setStrokeColor('#' + circle.getColor());
         st.setFillColor('#' + circle.getColor());
 
-        getVectorLayer().addFeature(new VectorFeature(circleShape, st));
+        VectorFeature drawing = new VectorFeature(circleShape, st);
+        getVectorLayer().addFeature(drawing);
         drawName(circle.getName(), mapView.createPoint(center.lon, center.lat));
+        drawings.put(circle.getId(), drawing);
     }
 
     private void drawPolygon(GeoFence polygon) {
@@ -83,9 +89,11 @@ public class GeoFenceRenderer {
         st.setStrokeColor('#' + polygon.getColor());
         st.setFillColor('#' + polygon.getColor());
 
-        getVectorLayer().addFeature(new VectorFeature(polygonShape, st));
+        VectorFeature drawing = new VectorFeature(polygonShape, st);
+        getVectorLayer().addFeature(drawing);
         Point center = getCollectionCentroid(polygonShape);
         drawName(polygon.getName(), center);
+        drawings.put(polygon.getId(), drawing);
     }
 
     private void drawLine(GeoFence line) {
@@ -104,6 +112,7 @@ public class GeoFenceRenderer {
 
         getVectorLayer().addFeature(lineFeature);
         drawName(line.getName(), getCollectionCentroid(lineString));
+        drawings.put(line.getId(), lineFeature);
     }
 
     private void drawName(String name, Point point) {
@@ -126,4 +135,8 @@ public class GeoFenceRenderer {
     public static native JSObject getCollectionCentroid(JSObject collection) /*-{
         return collection.getCentroid(false);
     }-*/;
+
+    public VectorFeature getDrawing(GeoFence geoFence) {
+        return drawings.get(geoFence.getId());
+    }
 }

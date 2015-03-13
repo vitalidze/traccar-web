@@ -159,11 +159,16 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public DeviceView(final DeviceHandler deviceHandler, final GeoFenceHandler geoFenceHandler, SettingsHandler settingsHandler, final ListStore<Device> deviceStore) {
+    public DeviceView(final DeviceHandler deviceHandler,
+                      GeoFenceHandler geoFenceHandler,
+                      SettingsHandler settingsHandler,
+                      final ListStore<Device> deviceStore,
+                      final ListStore<GeoFence> geoFenceStore) {
         this.deviceHandler = deviceHandler;
         this.geoFenceHandler = geoFenceHandler;
         this.settingsHandler = settingsHandler;
         this.deviceStore = deviceStore;
+        this.geoFenceStore = geoFenceStore;
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
 
@@ -213,7 +218,6 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         // geo-fences
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
 
-        geoFenceStore = new ListStore<GeoFence>(geoFenceProperties.id());
         geoFenceList = new ListView<GeoFence, String>(geoFenceStore, geoFenceProperties.name());
         geoFenceList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 

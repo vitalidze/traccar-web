@@ -30,16 +30,13 @@ import org.traccar.web.client.model.DataServiceAsync;
 import org.traccar.web.client.view.ApplicationView;
 import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.client.view.UserSettingsDialog;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.data.shared.event.StoreAddEvent;
 import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.data.shared.event.StoreRemoveEvent;
-import org.traccar.web.shared.model.User;
-import org.traccar.web.shared.model.UserSettings;
 
 public class Application {
 
@@ -68,7 +65,8 @@ public class Application {
         settingsController = new SettingsController(userSettingsHandler);
         mapController = new MapController(mapHandler);
         geoFenceController = new GeoFenceController(mapController);
-        deviceController = new DeviceController(mapController, geoFenceController, settingsController, this);
+        geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
+        deviceController = new DeviceController(mapController, geoFenceController, settingsController, geoFenceController.getGeoFenceStore(), this);
         deviceController.getDeviceStore().addStoreHandlers(deviceStoreHandler);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
         archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
@@ -83,6 +81,7 @@ public class Application {
         deviceController.run();
         mapController.run();
         archiveController.run();
+        geoFenceController.run();
     }
 
     private MapController.MapHandler mapHandler = new MapController.MapHandler() {
@@ -138,6 +137,20 @@ public class Application {
             );
         }
 
+    };
+
+    private StoreHandlers<GeoFence> geoFenceStoreHandler = new BaseStoreHandlers<GeoFence>() {
+        @Override
+        public void onAdd(StoreAddEvent<GeoFence> event) {
+            for (GeoFence geoFence : event.getItems()) {
+                mapController.drawGeoFence(geoFence);
+            }
+        }
+
+        @Override
+        public void onRemove(StoreRemoveEvent<GeoFence> event) {
+            mapController.removeGeoFence(event.getItem());
+        }
     };
 
     private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler, FilterDialog.FilterSettingsHandler {

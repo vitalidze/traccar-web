@@ -29,7 +29,7 @@ import org.traccar.web.client.view.DeviceDialog;
 import org.traccar.web.client.view.DeviceShareDialog;
 import org.traccar.web.client.view.DeviceView;
 import org.traccar.web.client.view.PositionInfoPopup;
-import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
@@ -38,9 +38,6 @@ import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.User;
-import org.traccar.web.shared.model.ValidationException;
 
 public class DeviceController implements ContentController, DeviceView.DeviceHandler {
     private final MapController mapController;
@@ -55,7 +52,11 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     private final PositionInfoPopup positionInfo = new PositionInfoPopup();
 
-    public DeviceController(MapController mapController, DeviceView.GeoFenceHandler geoFenceHandler, DeviceView.SettingsHandler settingsHandler, Application application) {
+    public DeviceController(MapController mapController,
+                            DeviceView.GeoFenceHandler geoFenceHandler,
+                            DeviceView.SettingsHandler settingsHandler,
+                            ListStore<GeoFence> geoFenceStore,
+                            Application application) {
         this.application = application;
         this.mapController = mapController;
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
@@ -82,7 +83,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                 }
             }
         });
-        deviceView = new DeviceView(this, geoFenceHandler, settingsHandler, deviceStore);
+        deviceView = new DeviceView(this, geoFenceHandler, settingsHandler, deviceStore, geoFenceStore);
     }
 
     public ListStore<Device> getDeviceStore() {

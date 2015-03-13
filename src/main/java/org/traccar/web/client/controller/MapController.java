@@ -93,7 +93,6 @@ public class MapController implements ContentController, MapView.MapHandler {
                 update();
             }
         });
-        drawGeoFences();
     }
 
     private Map<Long, Position> latestPositionMap = new HashMap<Long, Position>();
@@ -168,13 +167,12 @@ public class MapController implements ContentController, MapView.MapHandler {
         });
     }
 
-    public void drawGeoFences() {
-        Application.getDataService().getGeoFences(new BaseAsyncCallback<List<GeoFence>>(i18n) {
-            @Override
-            public void onSuccess(List<GeoFence> result) {
-                mapView.showGeoFences(result);
-            }
-        });
+    public void drawGeoFence(GeoFence geoFence) {
+        mapView.drawGeoFence(geoFence);
+    }
+
+    public void removeGeoFence(GeoFence geoFence) {
+        mapView.removeGeoFence(geoFence);
     }
 
     public void selectDevice(Device device) {

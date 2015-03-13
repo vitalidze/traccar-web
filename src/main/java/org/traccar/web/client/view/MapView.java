@@ -312,8 +312,12 @@ public class MapView {
         latestPositionRenderer.updateIcon(device);
     }
 
-    public void showGeoFences(List<GeoFence> geoFences) {
-        geoFenceRenderer.showGeoFences(geoFences);
+    public void drawGeoFence(GeoFence geoFence) {
+        geoFenceRenderer.drawGeoFence(geoFence);
+    }
+
+    public void removeGeoFence(GeoFence geoFence) {
+        geoFenceRenderer.removeGeoFence(geoFence);
     }
 
     /**
