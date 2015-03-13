@@ -51,6 +51,16 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
     }
 
     @Override
+    public void onEdit(GeoFence geoFence) {
+        new GeoFenceWindow(geoFence, mapController.getMap(), mapController.getGeoFenceLayer(),
+        new GeoFenceWindow.GeoFenceHandler() {
+            @Override
+            public void onSave(GeoFence device) {
+            }
+        }).show();
+    }
+
+    @Override
     public ContentPanel getView() {
         return null;
     }
