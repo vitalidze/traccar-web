@@ -22,14 +22,19 @@ import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
+import org.gwtopenmaps.openlayers.client.OpenLayersStyle;
 import org.gwtopenmaps.openlayers.client.Projection;
 import org.gwtopenmaps.openlayers.client.Style;
+import org.gwtopenmaps.openlayers.client.StyleMap;
+import org.gwtopenmaps.openlayers.client.StyleOptions;
+import org.gwtopenmaps.openlayers.client.StyleRules;
 import org.gwtopenmaps.openlayers.client.control.LayerSwitcher;
 import org.gwtopenmaps.openlayers.client.control.ScaleLine;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
+import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Device;
@@ -161,7 +166,11 @@ public class MapView {
         MarkersOptions markersOptions = new MarkersOptions();
         markerLayer = new Markers(i18n.markers(), markersOptions);
 
-        geofenceLayer = new Vector(i18n.geoFences(), new VectorOptions());
+        vectorOptions = new VectorOptions();
+        OpenLayersStyle olStyle = new OpenLayersStyle(new StyleRules(), new StyleOptions());
+        olStyle.setJSObject(getGeoFenceLineStyle(map.getJSObject()));
+        vectorOptions.setStyleMap(new StyleMap(olStyle, null, null));
+        geofenceLayer = new Vector(i18n.geoFences(), vectorOptions);
 
         initMapLayers(map);
 
@@ -306,4 +315,39 @@ public class MapView {
     public void showGeoFences(List<GeoFence> geoFences) {
         geoFenceRenderer.showGeoFences(geoFences);
     }
+
+    /**
+     * This style is used to dynamically calculate width of 'LINE' geo-fence
+     *
+     * <p>See:
+     * <ul>
+     * <li>http://gis.stackexchange.com/questions/56754/features-on-a-vector-layer-to-have-a-scalable-stroke</li>
+     * <li>http://stackoverflow.com/questions/6037969/get-radius-size-in-meters-of-a-drawn-point</li>
+     * <li>http://stackoverflow.com/questions/21672508/gwt-openlayers-set-sum-of-values-of-underlying-vectorfeatures-on-cluster-point</li>
+     * </ul>
+     * </p>
+     */
+    public static native JSObject getGeoFenceLineStyle(JSObject map) /*-{
+        var context =
+        {
+            getWidth: function (feature)
+            {
+                return feature.attributes.widthInMeters / map.getResolution();
+            },
+            getLineColor: function (feature)
+            {
+                return feature.attributes.lineColor;
+            }
+        };
+
+        return new $wnd.OpenLayers.Style(
+        {
+            strokeWidth: "${getWidth}",
+            strokeColor: "${getLineColor}",
+            strokeOpacity: 0.3
+        },
+        {
+            context: context
+        });
+    }-*/;
 }

@@ -17,13 +17,11 @@ package org.traccar.web.client.view;
 
 import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
-import org.gwtopenmaps.openlayers.client.geometry.Collection;
-import org.gwtopenmaps.openlayers.client.geometry.LinearRing;
-import org.gwtopenmaps.openlayers.client.geometry.Point;
-import org.gwtopenmaps.openlayers.client.geometry.Polygon;
+import org.gwtopenmaps.openlayers.client.geometry.*;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.Position;
 
 import java.util.List;
 
@@ -58,7 +56,7 @@ public class GeoFenceRenderer {
         GeoFence.LonLat center = circle.points().get(0);
         Polygon circleShape = Polygon.createRegularPolygon(mapView.createPoint(center.lon, center.lat), circle.getRadius(), 40, 0f);
 
-        Style st = new org.gwtopenmaps.openlayers.client.Style();
+        Style st = new Style();
         st.setFillOpacity(0.3);
         st.setStrokeWidth(1.5);
         st.setStrokeOpacity(0.8);
@@ -78,7 +76,7 @@ public class GeoFenceRenderer {
         }
         Polygon polygonShape = new Polygon(new LinearRing[] { new LinearRing(points) });
 
-        Style st = new org.gwtopenmaps.openlayers.client.Style();
+        Style st = new Style();
         st.setFillOpacity(0.3);
         st.setStrokeWidth(1.5);
         st.setStrokeOpacity(0.8);
@@ -91,7 +89,21 @@ public class GeoFenceRenderer {
     }
 
     private void drawLine(GeoFence line) {
+        List<GeoFence.LonLat> lonLats = line.points();
+        Point[] linePoints = new Point[lonLats.size()];
 
+        int i = 0;
+        for (GeoFence.LonLat lonLat : lonLats) {
+            linePoints[i++] = mapView.createPoint(lonLat.lon, lonLat.lat);
+        }
+
+        LineString lineString = new LineString(linePoints);
+        VectorFeature lineFeature = new VectorFeature(lineString);
+        lineFeature.getAttributes().setAttribute("widthInMeters", line.getRadius());
+        lineFeature.getAttributes().setAttribute("lineColor", '#' + line.getColor());
+
+        getVectorLayer().addFeature(lineFeature);
+        drawName(line.getName(), getCollectionCentroid(lineString));
     }
 
     private void drawName(String name, Point point) {
