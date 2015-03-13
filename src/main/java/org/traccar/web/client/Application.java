@@ -67,7 +67,7 @@ public class Application {
     public Application() {
         settingsController = new SettingsController(userSettingsHandler);
         mapController = new MapController(mapHandler);
-        geoFenceController = new GeoFenceController();
+        geoFenceController = new GeoFenceController(mapController);
         deviceController = new DeviceController(mapController, geoFenceController, settingsController, this);
         deviceController.getDeviceStore().addStoreHandlers(deviceStoreHandler);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());

@@ -15,29 +15,30 @@
  */
 package org.traccar.web.client.controller;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.gwtopenmaps.openlayers.client.layer.Layer;
-import org.traccar.web.client.Application;
-import org.traccar.web.client.ApplicationContext;
-import org.traccar.web.client.Track;
-import org.traccar.web.client.view.MapView;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
-
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import org.gwtopenmaps.openlayers.client.layer.Layer;
+import org.gwtopenmaps.openlayers.client.layer.Vector;
+import org.traccar.web.client.Application;
+import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.Track;
+import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.model.BaseAsyncCallback;
+import org.traccar.web.client.view.MapView;
+import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.UserSettings;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class MapController implements ContentController, MapView.MapHandler {
+    private final static Messages i18n = GWT.create(Messages.class);
 
     public interface MapHandler {
         public void onDeviceSelected(Device device);
@@ -61,6 +62,10 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public org.gwtopenmaps.openlayers.client.Map getMap() {
         return mapView.getMap();
+    }
+
+    public Vector getGeoFenceLayer() {
+        return mapView.getGeofenceLayer();
     }
 
     private Timer updateTimer;
@@ -88,6 +93,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                 update();
             }
         });
+        drawGeoFences();
     }
 
     private Map<Long, Position> latestPositionMap = new HashMap<Long, Position>();
@@ -158,6 +164,15 @@ public class MapController implements ContentController, MapView.MapHandler {
             @Override
             public void onFailure(Throwable caught) {
                 updateTimer.schedule(ApplicationContext.getInstance().getApplicationSettings().getUpdateInterval());
+            }
+        });
+    }
+
+    public void drawGeoFences() {
+        Application.getDataService().getGeoFences(new BaseAsyncCallback<List<GeoFence>>(i18n) {
+            @Override
+            public void onSuccess(List<GeoFence> result) {
+                mapView.showGeoFences(result);
             }
         });
     }

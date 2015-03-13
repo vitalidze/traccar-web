@@ -20,9 +20,16 @@ import org.traccar.web.client.view.GeoFenceWindow;
 import org.traccar.web.shared.model.GeoFence;
 
 public class GeoFenceController implements DeviceView.GeoFenceHandler {
+    private final MapController mapController;
+
+    public GeoFenceController(MapController mapController) {
+        this.mapController = mapController;
+    }
+
     @Override
     public void onAdd() {
-        new GeoFenceWindow(new GeoFence(), new GeoFenceWindow.GeoFenceHandler() {
+        new GeoFenceWindow(new GeoFence(), mapController.getMap(), mapController.getGeoFenceLayer(),
+        new GeoFenceWindow.GeoFenceHandler() {
             @Override
             public void onSave(GeoFence device) {
             }

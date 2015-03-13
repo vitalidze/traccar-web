@@ -31,7 +31,7 @@ public interface GeoFenceProperties extends PropertyAccess<GeoFence> {
 
     ValueProvider<GeoFence, String> color();
 
-    ValueProvider<GeoFence, Double> radius();
+    ValueProvider<GeoFence, Float> radius();
 
     ValueProvider<GeoFence, GeoFenceType> type();
 

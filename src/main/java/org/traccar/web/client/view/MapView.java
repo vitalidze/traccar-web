@@ -33,6 +33,7 @@ import org.gwtopenmaps.openlayers.client.layer.*;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.Position;
 
 import com.google.gwt.core.client.Scheduler;
@@ -61,6 +62,7 @@ public class MapView {
     private Map map;
     private Vector vectorLayer;
     private Markers markerLayer;
+    private Vector geofenceLayer;
     private Vector archiveLayer;
 
     private Messages i18n = GWT.create(Messages.class);
@@ -71,6 +73,10 @@ public class MapView {
 
     public Vector getVectorLayer() {
         return vectorLayer;
+    }
+
+    public Vector getGeofenceLayer() {
+        return geofenceLayer;
     }
 
     public Markers getMarkerLayer() {
@@ -87,8 +93,8 @@ public class MapView {
         return lonLat;
     }
 
-    public Point createPoint(double x, double y) {
-        Point point = new Point(x, y);
+    public Point createPoint(double longitude, double latitude) {
+        Point point = new Point(longitude, latitude);
         point.transform(new Projection("EPSG:4326"), new Projection(map.getProjection()));
         return point;
     }
@@ -155,10 +161,13 @@ public class MapView {
         MarkersOptions markersOptions = new MarkersOptions();
         markerLayer = new Markers(i18n.markers(), markersOptions);
 
+        geofenceLayer = new Vector(i18n.geoFences(), new VectorOptions());
+
         initMapLayers(map);
 
         map.addLayer(vectorLayer);
         map.addLayer(markerLayer);
+        map.addLayer(geofenceLayer);
 
         map.addControl(new LayerSwitcher());
         map.addControl(new ScaleLine());
@@ -195,13 +204,13 @@ public class MapView {
         latestPositionRenderer = new MapPositionRenderer(this, latestPositionSelectHandler, positionMouseHandler);
         archivePositionRenderer = new MapPositionRenderer(this, archivePositionSelectHandler, positionMouseHandler);
         latestPositionTrackRenderer = new MapPositionRenderer(this, null, null);
+        geoFenceRenderer = new GeoFenceRenderer(this);
     }
 
     private final MapPositionRenderer latestPositionRenderer;
-
     private final MapPositionRenderer archivePositionRenderer;
-
     private final MapPositionRenderer latestPositionTrackRenderer;
+    private final GeoFenceRenderer geoFenceRenderer;
 
     public void showLatestPositions(List<Position> positions) {
         latestPositionRenderer.showPositions(positions);
@@ -292,5 +301,9 @@ public class MapView {
 
     public void updateIcon(Device device) {
         latestPositionRenderer.updateIcon(device);
+    }
+
+    public void showGeoFences(List<GeoFence> geoFences) {
+        geoFenceRenderer.showGeoFences(geoFences);
     }
 }

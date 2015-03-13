@@ -29,7 +29,7 @@ public class GeoFence implements Serializable {
     public GeoFence() {
         type = GeoFenceType.LINE;
         color = "4169E1";
-        radius = 30d;
+        radius = 30f;
     }
 
     @Id
@@ -95,13 +95,13 @@ public class GeoFence implements Serializable {
     }
 
     // for circular geo-fence contains radius, for line it's width
-    private double radius;
+    private float radius;
 
-    public double getRadius() {
+    public float getRadius() {
         return radius;
     }
 
-    public void setRadius(double radius) {
+    public void setRadius(float radius) {
         this.radius = radius;
     }
 
