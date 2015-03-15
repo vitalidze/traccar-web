@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSession;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 
+import org.hibernate.proxy.HibernateProxy;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
 import org.traccar.web.shared.model.*;
@@ -89,6 +90,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public User authenticated() throws IllegalStateException {
+        if (getSessionUser().getUserSettings() instanceof HibernateProxy) {
+            UserSettings settings = (UserSettings) ((HibernateProxy) getSessionUser().getUserSettings()).getHibernateLazyInitializer().getImplementation();
+            getSessionUser().setUserSettings(settings);
+        }
         return getSessionUser();
     }
 
@@ -119,6 +124,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             getSessionEntityManager().persist(user);
         }
 
+        if (user.getUserSettings() instanceof HibernateProxy) {
+            UserSettings settings = (UserSettings) ((HibernateProxy) user.getUserSettings()).getHibernateLazyInitializer().getImplementation();
+            user.setUserSettings(settings);
+        }
         setSessionUser(user);
         return user;
     }
