@@ -22,13 +22,12 @@ import org.traccar.web.shared.model.User;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.persistence.EntityManager;
 
 public class UserCheck implements MethodInterceptor {
     @Inject
     private Provider<User> sessionUser;
     @Inject
-    private Provider<EntityManager> entityManager;
+    private Provider<ApplicationSettings> applicationSettings;
 
     @Override
     public Object invoke(MethodInvocation methodInvocation) throws Throwable {
@@ -38,10 +37,33 @@ public class UserCheck implements MethodInterceptor {
         if (managesDevices != null) checkDeviceManagementAccess(managesDevices);
         RequireWrite requireWrite = methodInvocation.getMethod().getAnnotation(RequireWrite.class);
         if (requireWrite != null) checkRequireWrite(requireWrite);
-        return methodInvocation.proceed();
+        try {
+            return methodInvocation.proceed();
+        } finally {
+            cleanUp();
+        }
     }
 
+    private final ThreadLocal<Role[]> rolesChecked = new ThreadLocal<Role[]>();
     void checkRequireUser(RequireUser requireUser) {
+        if (rolesChecked.get() != null) {
+            // this method require an logged in user
+            // so if rolesChecked thread local returns some value
+            // then this check already passed for sure
+            if (requireUser.roles().length == 0) {
+                return;
+            }
+            // check role
+            Role[] checkedRoles = rolesChecked.get();
+            for (Role role : requireUser.roles()) {
+                for (int i = 0; i < checkedRoles.length; i++) {
+                    if (role == checkedRoles[i]) {
+                        return;
+                    }
+                }
+            }
+        }
+
         User user = sessionUser.get();
         if (user == null) {
             throw new SecurityException("Not logged in");
@@ -54,27 +76,38 @@ public class UserCheck implements MethodInterceptor {
                 }
                 roles.append(role.toString());
                 if (role.has(user)) {
+                    rolesChecked.set(requireUser.roles());
                     return;
                 }
             }
             throw new SecurityException("User must have " + roles + " role");
+        } else {
+            rolesChecked.set(requireUser.roles());
         }
     }
 
+    final ThreadLocal<Boolean> checkedDeviceManagement = new ThreadLocal<Boolean>();
     void checkDeviceManagementAccess(ManagesDevices managesDevices) throws Throwable {
+        if (checkedDeviceManagement.get() != null) {
+            return;
+        }
         User user = sessionUser.get();
         if (user == null) {
             throw new SecurityException("Not logged in");
         }
         if (!user.getAdmin() && !user.getManager()) {
-            ApplicationSettings applicationSettings = entityManager.get().createQuery("SELECT x FROM ApplicationSettings x", ApplicationSettings.class).getSingleResult();
-            if (applicationSettings.isDisallowDeviceManagementByUsers()) {
+            if (applicationSettings.get().isDisallowDeviceManagementByUsers()) {
                 throw new SecurityException("Users are not allowed to manage devices");
             }
+            checkedDeviceManagement.set(Boolean.TRUE);
         }
     }
 
+    final ThreadLocal<Boolean> checkedRequireWrite = new ThreadLocal<Boolean>();
     void checkRequireWrite(RequireWrite requireWrite) {
+        if (checkedRequireWrite.get() != null) {
+            return;
+        }
         User user = sessionUser.get();
         if (user == null) {
             throw new SecurityException("Not logged in");
@@ -82,5 +115,12 @@ public class UserCheck implements MethodInterceptor {
         if (user.getReadOnly()) {
             throw new SecurityException("User is not allowed to make any changes");
         }
+        checkedRequireWrite.set(Boolean.TRUE);
+    }
+
+    void cleanUp() {
+        rolesChecked.remove();
+        checkedDeviceManagement.remove();
+        checkedRequireWrite.remove();
     }
 }

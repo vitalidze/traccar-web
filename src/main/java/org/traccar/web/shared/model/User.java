@@ -137,7 +137,7 @@ public class User implements Serializable, Cloneable {
     //     for @JoinTable() and targeted to be fixed in 5.x :-(.
     //                          
     @GwtTransient
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_devices",
                foreignKey = @ForeignKey(name = "users_devices_fkey_users_id"),
                joinColumns = { @JoinColumn(name = "users_id", table = "users", referencedColumnName = "id") },
@@ -164,7 +164,7 @@ public class User implements Serializable, Cloneable {
     }
 
     @Expose
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))
     private UserSettings userSettings;
 
@@ -190,7 +190,7 @@ public class User implements Serializable, Cloneable {
     }
 
     @GwtTransient
-    @OneToMany(mappedBy = "managedBy", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "managedBy", fetch = FetchType.LAZY)
     private Set<User> managedUsers;
 
     public Set<User> getManagedUsers() {
