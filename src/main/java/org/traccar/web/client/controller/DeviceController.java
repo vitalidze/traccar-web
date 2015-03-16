@@ -18,6 +18,7 @@ package org.traccar.web.client.controller;
 import java.util.List;
 import java.util.Map;
 
+import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
 import org.traccar.web.client.Application;
@@ -44,21 +45,24 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     private final Application application;
 
-    private ListStore<Device> deviceStore;
+    private final ListStore<Device> deviceStore;
 
-    private DeviceView deviceView;
+    private final DeviceView deviceView;
 
     private Messages i18n = GWT.create(Messages.class);
 
     private final PositionInfoPopup positionInfo = new PositionInfoPopup();
 
+    private final StoreHandlers<Device> deviceStoreHandler;
+
     public DeviceController(MapController mapController,
-                            DeviceView.GeoFenceHandler geoFenceHandler,
                             DeviceView.SettingsHandler settingsHandler,
                             ListStore<GeoFence> geoFenceStore,
+                            StoreHandlers<Device> deviceStoreHandler,
                             Application application) {
         this.application = application;
         this.mapController = mapController;
+        this.deviceStoreHandler = deviceStoreHandler;
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         deviceStore = new ListStore<Device>(deviceProperties.id());
         deviceStore.addStoreRecordChangeHandler(new StoreRecordChangeEvent.StoreRecordChangeHandler<Device>() {
@@ -101,6 +105,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
             @Override
             public void onSuccess(List<Device> result) {
                 deviceStore.addAll(result);
+                deviceStore.addStoreHandlers(deviceStoreHandler);
             }
         });
     }

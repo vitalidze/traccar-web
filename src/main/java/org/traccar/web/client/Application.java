@@ -66,8 +66,7 @@ public class Application {
         mapController = new MapController(mapHandler);
         geoFenceController = new GeoFenceController(mapController);
         geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
-        deviceController = new DeviceController(mapController, geoFenceController, settingsController, geoFenceController.getGeoFenceStore(), this);
-        deviceController.getDeviceStore().addStoreHandlers(deviceStoreHandler);
+        deviceController = new DeviceController(mapController, geoFenceController, settingsController, geoFenceController.getGeoFenceStore(), deviceStoreHandler, this);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
         archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
 

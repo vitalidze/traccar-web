@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSession;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 
+import org.hibernate.proxy.HibernateProxy;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
 import org.traccar.web.shared.model.*;
@@ -89,7 +90,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public User authenticated() throws IllegalStateException {
-        return getSessionUser();
+        return fillUserSettings(getSessionUser());
     }
 
     @Transactional
@@ -120,7 +121,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
 
         setSessionUser(user);
-        return user;
+        return fillUserSettings(user);
     }
 
     @Transactional
@@ -154,7 +155,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     getSessionEntityManager().persist(user);
                     getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
                     setSessionUser(user);
-                    return user;
+                    return fillUserSettings(user);
             }
             else
             {
@@ -175,6 +176,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             users.addAll(getSessionEntityManager().createQuery("SELECT x FROM User x", User.class).getResultList());
         } else {
             users.addAll(currentUser.getAllManagedUsers());
+        }
+        for (User user : users) {
+            fillUserSettings(user);
         }
         return users;
     }
@@ -205,7 +209,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             getSessionEntityManager().persist(user);
             getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
-            return user;
+            return fillUserSettings(user);
         } else {
             throw new IllegalStateException();
         }
@@ -252,7 +256,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 }
             }
 
-            return user;
+            return fillUserSettings(user);
         } else {
             throw new SecurityException();
         }
@@ -278,7 +282,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             device.getUsers().remove(user);
         }
         entityManager.remove(user);
-        return user;
+        return fillUserSettings(user);
     }
 
     @Transactional
@@ -590,7 +594,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         List<User> users = getUsers();
         Map<User, Boolean> result = new HashMap<User, Boolean>(users.size());
         for (User user : users) {
-            result.put(user, device.getUsers().contains(user));
+            result.put(fillUserSettings(user), device.getUsers().contains(user));
         }
         return result;
     }
@@ -613,6 +617,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             entityManager.merge(user);
         }
+    }
+
+    private User fillUserSettings(User user) {
+        if (user.getUserSettings() instanceof HibernateProxy) {
+            UserSettings settings = (UserSettings) ((HibernateProxy) user.getUserSettings()).getHibernateLazyInitializer().getImplementation();
+            user.setUserSettings(settings);
+        }
+        return user;
     }
 
     @Transactional

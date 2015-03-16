@@ -38,7 +38,11 @@ public class GuiceServletConfig extends GuiceServletContextListener {
 
     @Override
     protected Injector getInjector() {
-        return Guice.createInjector(new ServletModule() {
+        return Guice.createInjector(getModule());
+    }
+
+    ServletModule getModule() {
+        return new ServletModule() {
             @Override
             protected void configureServlets() {
                 String persistenceUnit;
@@ -69,12 +73,13 @@ public class GuiceServletConfig extends GuiceServletContextListener {
 
                 bindInterceptor(Matchers.any(), Matchers.annotatedWith(RequireUser.class), userCheck);
                 bindInterceptor(Matchers.any(), Matchers.annotatedWith(ManagesDevices.class), userCheck);
+                bindInterceptor(Matchers.any(), Matchers.annotatedWith(RequireWrite.class), userCheck);
 
                 bind(User.class).toProvider(CurrentUserProvider.class);
                 bind(ApplicationSettings.class).toProvider(ApplicationSettingsProvider.class);
                 bind(DataService.class).to(DataServiceImpl.class);
                 bind(EventService.class).to(EventServiceImpl.class);
             }
-        });
+        };
     }
 }
