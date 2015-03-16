@@ -56,6 +56,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     private final StoreHandlers<Device> deviceStoreHandler;
 
     public DeviceController(MapController mapController,
+                            DeviceView.GeoFenceHandler geoFenceHandler,
                             DeviceView.SettingsHandler settingsHandler,
                             ListStore<GeoFence> geoFenceStore,
                             StoreHandlers<Device> deviceStoreHandler,
