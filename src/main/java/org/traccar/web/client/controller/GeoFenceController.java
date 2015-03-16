@@ -42,7 +42,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
 
     @Override
     public void onAdd() {
-        new GeoFenceWindow(new GeoFence(), mapController.getMap(), mapController.getGeoFenceLayer(),
+        new GeoFenceWindow(new GeoFence(), null, mapController.getMap(), mapController.getGeoFenceLayer(),
         new GeoFenceWindow.GeoFenceHandler() {
             @Override
             public void onSave(GeoFence device) {
@@ -52,7 +52,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
 
     @Override
     public void onEdit(GeoFence geoFence) {
-        new GeoFenceWindow(geoFence, mapController.getMap(), mapController.getGeoFenceLayer(),
+        new GeoFenceWindow(geoFence, mapController.getGeoFenceDrawing(geoFence), mapController.getMap(), mapController.getGeoFenceLayer(),
         new GeoFenceWindow.GeoFenceHandler() {
             @Override
             public void onSave(GeoFence device) {

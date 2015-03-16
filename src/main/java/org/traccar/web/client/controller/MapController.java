@@ -19,13 +19,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.view.MapView;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
@@ -173,6 +173,10 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public void removeGeoFence(GeoFence geoFence) {
         mapView.removeGeoFence(geoFence);
+    }
+
+    public VectorFeature getGeoFenceDrawing(GeoFence geoFence) {
+        return mapView.getGeoFenceDrawing(geoFence);
     }
 
     public void selectDevice(Device device) {

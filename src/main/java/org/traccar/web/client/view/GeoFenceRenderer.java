@@ -56,6 +56,10 @@ public class GeoFenceRenderer {
         // TODO
     }
 
+    public VectorFeature getGeoFenceDrawing(GeoFence geoFence) {
+        return drawings.get(geoFence.getId());
+    }
+
     private void drawCircle(GeoFence circle) {
         GeoFence.LonLat center = circle.points().get(0);
         Polygon circleShape = Polygon.createRegularPolygon(mapView.createPoint(center.lon, center.lat), circle.getRadius(), 40, 0f);

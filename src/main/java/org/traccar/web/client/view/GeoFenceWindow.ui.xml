@@ -11,11 +11,11 @@
     <ui:attributes width="1" height="-1" />
   </ui:with>
 
-  <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="doublePropertyEditor" />
+  <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="floatPropertyEditor" />
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="250, 280" position="6, 60" modal="false" headingText="{i18n.geoFence}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="264, 284" position="6, 60" modal="false" headingText="{i18n.geoFence}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.name}" labelWidth="64">
@@ -41,7 +41,7 @@
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.width}/{i18n.radius} ({i18n.meter})">
             <form:widget>
-                <form:NumberField editor="{doublePropertyEditor}"
+                <form:NumberField editor="{floatPropertyEditor}"
                                   ui:field="radius"
                                   allowNegative="false"
                                   allowDecimals="true"
@@ -60,6 +60,9 @@
       
     <gxt:button>
       <button:TextButton ui:field="saveButton" text="{i18n.save}" />
+    </gxt:button>
+    <gxt:button>
+      <button:TextButton ui:field="clearButton" text="{i18n.clear}" />
     </gxt:button>
     <gxt:button>
       <button:TextButton ui:field="cancelButton" text="{i18n.cancel}" />

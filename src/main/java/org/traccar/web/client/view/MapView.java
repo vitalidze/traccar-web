@@ -32,6 +32,7 @@ import org.gwtopenmaps.openlayers.client.control.LayerSwitcher;
 import org.gwtopenmaps.openlayers.client.control.ScaleLine;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
+import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
@@ -167,9 +168,9 @@ public class MapView {
         markerLayer = new Markers(i18n.markers(), markersOptions);
 
         vectorOptions = new VectorOptions();
-        OpenLayersStyle olStyle = new OpenLayersStyle(new StyleRules(), new StyleOptions());
-        olStyle.setJSObject(getGeoFenceLineStyle(map.getJSObject()));
-        vectorOptions.setStyleMap(new StyleMap(olStyle, null, null));
+        OpenLayersStyle defaultStyle = new OpenLayersStyle(new StyleRules(), new StyleOptions());
+        defaultStyle.setJSObject(getGeoFenceLineStyle(map.getJSObject()));
+        vectorOptions.setStyleMap(new StyleMap(defaultStyle, null, null));
         geofenceLayer = new Vector(i18n.geoFences(), vectorOptions);
 
         initMapLayers(map);
@@ -320,6 +321,10 @@ public class MapView {
         geoFenceRenderer.removeGeoFence(geoFence);
     }
 
+    public VectorFeature getGeoFenceDrawing(GeoFence geoFence) {
+        return geoFenceRenderer.getGeoFenceDrawing(geoFence);
+    }
+
     /**
      * This style is used to dynamically calculate width of 'LINE' geo-fence
      *
@@ -334,13 +339,20 @@ public class MapView {
     public static native JSObject getGeoFenceLineStyle(JSObject map) /*-{
         var context =
         {
-            getWidth: function (feature)
-            {
-                return feature.attributes.widthInMeters / map.getResolution();
+            getWidth: function (feature) {
+                if (feature.attributes.widthInMeters === undefined) {
+                    return 2;
+                } else {
+                    return feature.attributes.widthInMeters / map.getResolution();
+                }
             },
             getLineColor: function (feature)
             {
-                return feature.attributes.lineColor;
+                if (feature.attributes.lineColor === undefined) {
+                    return '#000000';
+                } else {
+                    return feature.attributes.lineColor;
+                }
             }
         };
 
@@ -348,7 +360,11 @@ public class MapView {
         {
             strokeWidth: "${getWidth}",
             strokeColor: "${getLineColor}",
-            strokeOpacity: 0.3
+            strokeOpacity: 0.3,
+            // for editing
+            pointRadius: 5,
+            fillColor: '#00ffff',
+            fillOpacity: '0.5'
         },
         {
             context: context
