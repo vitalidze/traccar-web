@@ -143,7 +143,7 @@ public class Device implements Serializable {
     //     for @JoinTable() and targeted to be fixed in 5.x :-(.
     //                          
     @GwtTransient
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_devices",
                foreignKey = @ForeignKey(name = "users_devices_fkey_devices_id"),
                joinColumns = { @JoinColumn(name = "devices_id", table = "devices", referencedColumnName = "id") },

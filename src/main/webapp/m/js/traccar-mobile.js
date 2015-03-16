@@ -141,7 +141,7 @@ var OpenSideMenuControl = function(opt_options) {
 
     var anchor = document.createElement('a');
     anchor.href = '#open-side-menu';
-    anchor.innerHTML = '<span role="tooltip">Open sidebar</span>&gt;';
+    anchor.innerHTML = '&gt;';
 
     var handleOpenSideMenu = function(e) {
         e.preventDefault();
