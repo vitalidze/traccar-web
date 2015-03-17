@@ -198,6 +198,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
     @Override
     public void checkSettings(NotificationSettings settings) {
         // Validate smtp settings
@@ -268,6 +269,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
     @Override
     public void saveSettings(NotificationSettings settings) {
         NotificationSettings currentSettings = getSettings();
