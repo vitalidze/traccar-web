@@ -15,6 +15,8 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gwt.user.client.rpc.GwtTransient;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -49,6 +51,7 @@ public class NotificationSettings implements Serializable {
     @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
+    @GwtTransient
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "nsettings_fkey_user_id"))
     private User user;
