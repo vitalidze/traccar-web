@@ -32,12 +32,12 @@ Hope this helps you get started. Feel free to ask me questions.
 Examples with cURL
 ------------------
 
-Authentication info is held in HTTP session, so you should have corresponding cookie in every request after logging in. Below are examples of logging in an fetching data with `curl` (with demo site at http://d.traccar.litvak.su).
+Authentication info is held in HTTP session, so you should have corresponding cookie in every request after logging in. Below are examples of logging in an fetching data with `curl` (with demo site at https://d.traccar.litvak.su).
 
 * Login (`login` method)
 
 {% highlight bash %}
- ~  curl -v -X POST --data "[\"user\",\"password\"]" http://d.traccar.litvak.su/traccar/rest/login
+ ~  curl -v -X POST --data "[\"user\",\"password\"]" https://d.traccar.litvak.su/traccar/rest/login
 * Hostname was NOT found in DNS cache
 *   Trying 188.166.50.6...
 * Connected to d.traccar.litvak.su (188.166.50.6) port 80 (#0)
@@ -68,7 +68,7 @@ Note `Set-Cookie` header with `JSESSIONID`. This should be put in all next reque
 * Load list of devices (`getDevices` method)
 
 {% highlight bash %}
-curl -v --cookie "JSESSIONID=xxxxxxxxxxx" http://d.traccar.litvak.su/traccar/rest/getDevices
+curl -v --cookie "JSESSIONID=xxxxxxxxxxx" https://d.traccar.litvak.su/traccar/rest/getDevices
 * Hostname was NOT found in DNS cache
 *   Trying 188.166.50.6...
 * Connected to d.traccar.litvak.su (188.166.50.6) port 80 (#0)
@@ -94,7 +94,7 @@ Take full JSON of device and put it to `getPositions` method.
 * Load archived positions (`getPositions` method)
 
 {% highlight bash %}
-curl -v --cookie "JSESSIONID=xxxxxxxxx" -X POST --data "[{\"id\":3,\"uniqueId\":\"123\",\"name\":\"Phone\"},\"2015-01-01 00:00:00 GMT\",\"2015-01-01 23:59:59 GMT\",false]" http://d.traccar.litvak.su/traccar/rest/getPositions
+curl -v --cookie "JSESSIONID=xxxxxxxxx" -X POST --data "[{\"id\":3,\"uniqueId\":\"123\",\"name\":\"Phone\"},\"2015-01-01 00:00:00 GMT\",\"2015-01-01 23:59:59 GMT\",false]" https://d.traccar.litvak.su/traccar/rest/getPositions
 * Hostname was NOT found in DNS cache
 *   Trying 188.166.50.6...
 * Connected to d.traccar.litvak.su (188.166.50.6) port 80 (#0)
@@ -124,7 +124,7 @@ In this concrete example there are no positions in reply.
 * log out (`logout` method)
 
 {% highlight bash %}
-~  curl -v --cookie "JSESSIONID=xxxxxxxx" http://d.traccar.litvak.su/traccar/rest/logout
+~  curl -v --cookie "JSESSIONID=xxxxxxxx" https://d.traccar.litvak.su/traccar/rest/logout
 * Hostname was NOT found in DNS cache
 *   Trying 188.166.50.6...
 * Connected to d.traccar.litvak.su (188.166.50.6) port 80 (#0)
