@@ -375,15 +375,17 @@ function drawDeviceDetails(deviceId, position) {
         if (position == undefined) {
             deviceDetails.html('<div class="content-block">' + i18n.no_data_available + '</div>');
         } else {
+            var otherXML = position.other;
+
             // parse 'other' field
             if (window.DOMParser)  {
                 parser = new DOMParser();
-                xmlDoc = parser.parseFromString(position.other, "text/xml");
+                xmlDoc = parser.parseFromString(otherXML, "text/xml");
             // Internet Explorer
             } else {
                 xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
                 xmlDoc.async = false;
-                xmlDoc.loadXML(position.other);
+                xmlDoc.loadXML(otherXML);
             }
 
             if (xmlDoc.documentElement == null) {
@@ -405,6 +407,8 @@ function drawDeviceDetails(deviceId, position) {
             position.i18n = i18n;
 
             deviceDetails.html(template(position));
+            // restore back XML
+            position.other = otherXML;
 
             $$('#device-' + deviceId +'-select-on-map').on('click', function() {
                 position = appState.latestPositions[deviceId];

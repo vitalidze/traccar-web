@@ -25,7 +25,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
-import com.sencha.gxt.state.client.GridStateHandler;
 import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
 import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.ListView;
@@ -43,6 +42,7 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.GeoFenceProperties;
+import org.traccar.web.client.state.GridStateHandler;
 import org.traccar.web.shared.model.Device;
 
 import com.google.gwt.core.client.GWT;
