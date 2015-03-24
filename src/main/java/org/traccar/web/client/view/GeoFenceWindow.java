@@ -20,7 +20,6 @@ import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -29,21 +28,16 @@ import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ColorPalette;
 import com.sencha.gxt.widget.core.client.Window;
-import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
-import com.sencha.gxt.widget.core.client.event.CloseEvent;
-import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.*;
-import org.gwtopenmaps.openlayers.client.LonLat;
-import org.gwtopenmaps.openlayers.client.Map;
-import org.gwtopenmaps.openlayers.client.Style;
-import org.gwtopenmaps.openlayers.client.StyleMap;
+import org.gwtopenmaps.openlayers.client.*;
 import org.gwtopenmaps.openlayers.client.control.DrawFeature;
 import org.gwtopenmaps.openlayers.client.control.DrawFeatureOptions;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Geometry;
+import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.handler.*;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.traccar.web.client.GeoFenceDrawing;
@@ -247,12 +241,37 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     private GeoFence flush() {
         GeoFence updated = driver.flush();
         Geometry geometry = geoFenceDrawing.getShape().getGeometry();
+        Projection mapProjection = new Projection(map.getProjection());
+        Projection epsg4326 = new Projection("EPSG:4326");
+        Point[] vertices = null;
         switch (type.getCurrentValue()) {
             case CIRCLE:
                 LonLat center = geometry.getBounds().getCenterLonLat();
-                center.transform(map.getProjection(), "EPSG:4326");
-                updated.points(new GeoFence.LonLat(center.lon(), center.lat()));
+                vertices = new Point[] { new Point(center.lon(), center.lat()) };
                 break;
+            case POLYGON:
+                vertices = geometry.getVertices(false);
+                break;
+            case LINE:
+                Point[] endpoints = geometry.getVertices(true);
+                Point[] nodes = geometry.getVertices(false);
+                vertices = new Point[endpoints.length + nodes.length];
+                if (endpoints.length > 0) {
+                    vertices[0] = endpoints[0];
+                    vertices[vertices.length - 1] = endpoints[1];
+                }
+                for (int i = 0; i < nodes.length; i++) {
+                    vertices[i + 1] = nodes[i];
+                }
+                break;
+        }
+        if (vertices != null) {
+            GeoFence.LonLat[] points = new GeoFence.LonLat[vertices.length];
+            for (int i = 0; i < vertices.length; i++) {
+                vertices[i].transform(mapProjection, epsg4326);
+                points[i] = new GeoFence.LonLat(vertices[i].getX(), vertices[i].getY());
+            }
+            updated.points(points);
         }
         return updated;
     }
