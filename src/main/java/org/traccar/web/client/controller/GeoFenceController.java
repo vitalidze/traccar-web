@@ -78,6 +78,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
                             public void onSuccess(GeoFence geoFence) {
                                 mapController.removeGeoFence(geoFence);
                                 mapController.drawGeoFence(geoFence, true);
+                                geoFenceStore.update(geoFence);
                             }
 
                             @Override
