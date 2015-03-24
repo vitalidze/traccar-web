@@ -73,4 +73,6 @@ public interface DataService extends RemoteService {
     void saveRoles(List<User> users);
 
     List<GeoFence> getGeoFences();
+
+    GeoFence updateGeoFence(GeoFence geoFence) throws TraccarException;
 }

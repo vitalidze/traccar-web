@@ -19,6 +19,7 @@ import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import org.traccar.web.client.Application;
+import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.GeoFenceProperties;
@@ -42,20 +43,67 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
 
     @Override
     public void onAdd() {
-        new GeoFenceWindow(new GeoFence(), null, mapController.getMap(), mapController.getGeoFenceLayer(),
+        new GeoFenceWindow(null, null, mapController.getMap(), mapController.getGeoFenceLayer(),
         new GeoFenceWindow.GeoFenceHandler() {
             @Override
             public void onSave(GeoFence device) {
+            }
+
+            @Override
+            public void onClear() {
+            }
+
+            @Override
+            public void onCancel() {
+            }
+
+            @Override
+            public GeoFenceDrawing repaint(GeoFence geoFence) {
+                return null;
             }
         }).show();
     }
 
     @Override
-    public void onEdit(GeoFence geoFence) {
-        new GeoFenceWindow(geoFence, mapController.getGeoFenceDrawing(geoFence), mapController.getMap(), mapController.getGeoFenceLayer(),
+    public void onEdit(final GeoFence geoFence) {
+        GeoFenceDrawing drawing = mapController.getGeoFenceDrawing(geoFence);
+        mapController.getGeoFenceLayer().removeFeature(drawing.getTitle());
+        new GeoFenceWindow(geoFence, drawing, mapController.getMap(), mapController.getGeoFenceLayer(),
         new GeoFenceWindow.GeoFenceHandler() {
             @Override
-            public void onSave(GeoFence device) {
+            public void onSave(GeoFence updatedGeoFence) {
+                Application.getDataService().updateGeoFence(updatedGeoFence,
+                        new BaseAsyncCallback<GeoFence>(i18n) {
+                            @Override
+                            public void onSuccess(GeoFence geoFence) {
+                                mapController.removeGeoFence(geoFence);
+                                mapController.drawGeoFence(geoFence, true);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                onCancel();
+                                super.onFailure(caught);
+                            }
+                        });
+            }
+
+            @Override
+            public void onClear() {
+                mapController.removeGeoFence(geoFence);
+            }
+
+            @Override
+            public void onCancel() {
+                mapController.removeGeoFence(geoFence);
+                mapController.drawGeoFence(geoFence, true);
+            }
+
+            @Override
+            public GeoFenceDrawing repaint(GeoFence geoFence) {
+                mapController.removeGeoFence(geoFence);
+                mapController.drawGeoFence(geoFence, false);
+                return mapController.getGeoFenceDrawing(geoFence);
             }
         }).show();
     }

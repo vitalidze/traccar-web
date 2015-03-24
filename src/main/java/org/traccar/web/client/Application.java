@@ -142,7 +142,7 @@ public class Application {
         @Override
         public void onAdd(StoreAddEvent<GeoFence> event) {
             for (GeoFence geoFence : event.getItems()) {
-                mapController.drawGeoFence(geoFence);
+                mapController.drawGeoFence(geoFence, true);
             }
         }
 
@@ -178,7 +178,7 @@ public class Application {
                 }
             }
             LonLat center = mapController.getMap().getCenter();
-            center.transform(mapController.getMap().getProjection(), new Projection("EPSG:4326").getProjectionCode());
+            center.transform(mapController.getMap().getProjection(), "EPSG:4326");
             centerLongitude.setValue(center.lon());
             centerLatitude.setValue(center.lat());
             zoomLevel.setValue(mapController.getMap().getZoom());

@@ -30,8 +30,11 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ColorPalette;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.event.CloseEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.*;
+import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.StyleMap;
@@ -40,8 +43,10 @@ import org.gwtopenmaps.openlayers.client.control.DrawFeatureOptions;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
+import org.gwtopenmaps.openlayers.client.geometry.Geometry;
 import org.gwtopenmaps.openlayers.client.handler.*;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
+import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.GeoFenceProperties;
 import org.traccar.web.shared.model.*;
@@ -61,7 +66,10 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     }
 
     public interface GeoFenceHandler {
-        public void onSave(GeoFence device);
+        public void onSave(GeoFence geoFence);
+        public void onClear();
+        public void onCancel();
+        public GeoFenceDrawing repaint(GeoFence geoFence);
     }
 
     private final GeoFenceHandler geoFenceHandler;
@@ -97,12 +105,18 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     DrawFeature drawCircleFeatureControl;
 
     ModifyFeature modifyFeature;
-    VectorFeature geoFenceDrawing;
+    final GeoFence geoFence;
+    GeoFenceDrawing geoFenceDrawing;
 
-    public GeoFenceWindow(GeoFence geoFence, VectorFeature geoFenceDrawing, Map map, Vector geoFenceLayer, GeoFenceHandler geoFenceHandler) {
+    public GeoFenceWindow(GeoFence geoFence, GeoFenceDrawing geoFenceDrawing, Map map, Vector geoFenceLayer, GeoFenceHandler geoFenceHandler) {
         this.geoFenceHandler = geoFenceHandler;
         this.map = map;
         this.geoFenceLayer = geoFenceLayer;
+        this.geoFence = new GeoFence();
+
+        if (geoFence != null) {
+            this.geoFence.copyFrom(geoFence);
+        }
 
         ListStore<GeoFenceType> geoFenceTypeStore = new ListStore<GeoFenceType>(
                 new EnumKeyProvider<GeoFenceType>());
@@ -116,7 +130,7 @@ public class GeoFenceWindow implements Editor<GeoFence> {
         uiBinder.createAndBindUi(this);
 
         driver.initialize(this);
-        driver.edit(geoFence);
+        driver.edit(this.geoFence);
 
         this.geoFenceDrawing = geoFenceDrawing;
         if (geoFenceDrawing == null) {
@@ -189,17 +203,21 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     public void onSaveClicked(SelectEvent event) {
         window.hide();
         removeControls();
-        geoFenceHandler.onSave(driver.flush());
+        geoFenceHandler.onSave(flush());
     }
 
     @UiHandler("clearButton")
     public void onClearClicked(SelectEvent event) {
-        getActiveControl().cancel();
+        if (getActiveControl() != null) {
+            getActiveControl().cancel();
+        }
+        geoFenceHandler.onClear();
     }
 
     @UiHandler("cancelButton")
     public void onCancelClicked(SelectEvent event) {
         removeControls();
+        geoFenceHandler.onCancel();
         window.hide();
     }
 
@@ -212,7 +230,31 @@ public class GeoFenceWindow implements Editor<GeoFence> {
 
     @UiHandler("color")
     public void onColorChanged(ValueChangeEvent<String> event) {
-        setUpColor(event.getValue());
+        repaint();
+    }
+
+    @UiHandler("radius")
+    public void onRadiusChanged(ValueChangeEvent<Float> event) {
+        repaint();
+    }
+
+    private void repaint() {
+        modifyFeature.deactivate();
+        geoFenceDrawing = geoFenceHandler.repaint(flush());
+        edit();
+    }
+
+    private GeoFence flush() {
+        GeoFence updated = driver.flush();
+        Geometry geometry = geoFenceDrawing.getShape().getGeometry();
+        switch (type.getCurrentValue()) {
+            case CIRCLE:
+                LonLat center = geometry.getBounds().getCenterLonLat();
+                center.transform(map.getProjection(), "EPSG:4326");
+                updated.points(new GeoFence.LonLat(center.lon(), center.lat()));
+                break;
+        }
+        return updated;
     }
 
     private void setUpColor(String color) {
@@ -259,12 +301,14 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     }
 
     private void removeControls() {
-        getActiveControl().deactivate();
-        getActiveControl().cancel();
+        if (getActiveControl() != null) {
+            getActiveControl().deactivate();
+            getActiveControl().cancel();
 
-        map.removeControl(drawCircleFeatureControl);
-        map.removeControl(drawLineFeatureControl);
-        map.removeControl(drawPolygonFeatureControl);
+            map.removeControl(drawCircleFeatureControl);
+            map.removeControl(drawLineFeatureControl);
+            map.removeControl(drawPolygonFeatureControl);
+        }
 
         if (modifyFeature != null) {
             modifyFeature.deactivate();
@@ -295,6 +339,6 @@ public class GeoFenceWindow implements Editor<GeoFence> {
         } else if (type.getValue() == GeoFenceType.POLYGON) {
             modifyFeature.setMode(ModifyFeature.DRAG | ModifyFeature.RESHAPE);
         }
-        modifyFeature.selectFeature(geoFenceDrawing);
+        modifyFeature.selectFeature(geoFenceDrawing.getShape());
     }
 }

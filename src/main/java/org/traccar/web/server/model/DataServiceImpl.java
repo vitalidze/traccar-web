@@ -633,4 +633,18 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     public List<GeoFence> getGeoFences() {
         return getSessionEntityManager().createQuery("SELECT g FROM GeoFence g", GeoFence.class).getResultList();
     }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public GeoFence updateGeoFence(GeoFence updatedGeoFence) throws TraccarException {
+        if (updatedGeoFence.getName() == null || updatedGeoFence.getName().trim().isEmpty()) {
+            throw new ValidationException();
+        }
+
+        GeoFence geoFence = getSessionEntityManager().find(GeoFence.class, updatedGeoFence.getId());
+        geoFence.copyFrom(updatedGeoFence);
+
+        return geoFence;
+    }
 }

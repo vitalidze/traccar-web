@@ -70,4 +70,6 @@ public interface DataServiceAsync {
     void getLatestNonIdlePositions(AsyncCallback<List<Position>> async);
 
     void getGeoFences(AsyncCallback<List<GeoFence>> async);
+
+    void updateGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
 }

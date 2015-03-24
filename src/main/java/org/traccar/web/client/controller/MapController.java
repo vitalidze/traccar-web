@@ -24,6 +24,7 @@ import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.view.MapView;
@@ -167,15 +168,15 @@ public class MapController implements ContentController, MapView.MapHandler {
         });
     }
 
-    public void drawGeoFence(GeoFence geoFence) {
-        mapView.drawGeoFence(geoFence);
+    public void drawGeoFence(GeoFence geoFence, boolean drawTitle) {
+        mapView.drawGeoFence(geoFence, drawTitle);
     }
 
     public void removeGeoFence(GeoFence geoFence) {
         mapView.removeGeoFence(geoFence);
     }
 
-    public VectorFeature getGeoFenceDrawing(GeoFence geoFence) {
+    public GeoFenceDrawing getGeoFenceDrawing(GeoFence geoFence) {
         return mapView.getGeoFenceDrawing(geoFence);
     }
 

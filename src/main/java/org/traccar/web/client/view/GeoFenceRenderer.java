@@ -20,6 +20,7 @@ import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.*;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
+import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.shared.model.GeoFence;
 
 import java.util.HashMap;
@@ -28,7 +29,7 @@ import java.util.Map;
 
 public class GeoFenceRenderer {
     private final MapView mapView;
-    private final Map<Long, VectorFeature> drawings = new HashMap<Long, VectorFeature>();
+    private final Map<Long, GeoFenceDrawing> drawings = new HashMap<Long, GeoFenceDrawing>();
 
     public GeoFenceRenderer(MapView mapView) {
         this.mapView = mapView;
@@ -38,29 +39,27 @@ public class GeoFenceRenderer {
         return mapView.getGeofenceLayer();
     }
 
-    public void drawGeoFence(GeoFence geoFence) {
+    public void drawGeoFence(GeoFence geoFence, boolean drawTitle) {
         switch (geoFence.getType()) {
             case CIRCLE:
-                drawCircle(geoFence);
+                drawCircle(geoFence, drawTitle);
                 break;
             case POLYGON:
-                drawPolygon(geoFence);
+                drawPolygon(geoFence, drawTitle);
                 break;
             case LINE:
-                drawLine(geoFence);
+                drawLine(geoFence, drawTitle);
                 break;
         }
     }
 
     public void removeGeoFence(GeoFence geoFence) {
-        // TODO
+        getVectorLayer().removeFeature(getDrawing(geoFence).getShape());
+        getVectorLayer().removeFeature(getDrawing(geoFence).getTitle());
+        drawings.remove(geoFence.getId());
     }
 
-    public VectorFeature getGeoFenceDrawing(GeoFence geoFence) {
-        return drawings.get(geoFence.getId());
-    }
-
-    private void drawCircle(GeoFence circle) {
+    private void drawCircle(GeoFence circle, boolean drawTitle) {
         GeoFence.LonLat center = circle.points().get(0);
         Polygon circleShape = Polygon.createRegularPolygon(mapView.createPoint(center.lon, center.lat), circle.getRadius(), 40, 0f);
 
@@ -73,11 +72,14 @@ public class GeoFenceRenderer {
 
         VectorFeature drawing = new VectorFeature(circleShape, st);
         getVectorLayer().addFeature(drawing);
-        drawName(circle.getName(), mapView.createPoint(center.lon, center.lat));
-        drawings.put(circle.getId(), drawing);
+        VectorFeature title = drawName(circle.getName(), mapView.createPoint(center.lon, center.lat));
+        drawings.put(circle.getId(), new GeoFenceDrawing(drawing, title));
+        if (drawTitle) {
+            getVectorLayer().addFeature(title);
+        }
     }
 
-    private void drawPolygon(GeoFence polygon) {
+    private void drawPolygon(GeoFence polygon, boolean drawTitle) {
         List<GeoFence.LonLat> lonLats = polygon.points();
         Point[] points = new Point[lonLats.size()];
         int i = 0;
@@ -96,11 +98,14 @@ public class GeoFenceRenderer {
         VectorFeature drawing = new VectorFeature(polygonShape, st);
         getVectorLayer().addFeature(drawing);
         Point center = getCollectionCentroid(polygonShape);
-        drawName(polygon.getName(), center);
-        drawings.put(polygon.getId(), drawing);
+        VectorFeature title = drawName(polygon.getName(), center);
+        drawings.put(polygon.getId(), new GeoFenceDrawing(drawing, title));
+        if (drawTitle) {
+            getVectorLayer().addFeature(title);
+        }
     }
 
-    private void drawLine(GeoFence line) {
+    private void drawLine(GeoFence line, boolean drawTitle) {
         List<GeoFence.LonLat> lonLats = line.points();
         Point[] linePoints = new Point[lonLats.size()];
 
@@ -115,11 +120,14 @@ public class GeoFenceRenderer {
         lineFeature.getAttributes().setAttribute("lineColor", '#' + line.getColor());
 
         getVectorLayer().addFeature(lineFeature);
-        drawName(line.getName(), getCollectionCentroid(lineString));
-        drawings.put(line.getId(), lineFeature);
+        VectorFeature title = drawName(line.getName(), getCollectionCentroid(lineString));
+        drawings.put(line.getId(), new GeoFenceDrawing(lineFeature, title));
+        if (drawTitle) {
+            getVectorLayer().addFeature(title);
+        }
     }
 
-    private void drawName(String name, Point point) {
+    private VectorFeature drawName(String name, Point point) {
         org.gwtopenmaps.openlayers.client.Style st = new org.gwtopenmaps.openlayers.client.Style();
         st.setLabel(name);
         st.setLabelAlign("cb");
@@ -128,7 +136,7 @@ public class GeoFenceRenderer {
         st.setFill(false);
         st.setStroke(false);
 
-        getVectorLayer().addFeature(new VectorFeature(point, st));
+        return new VectorFeature(point, st);
     }
 
     private static Point getCollectionCentroid(Collection collection) {
@@ -140,7 +148,7 @@ public class GeoFenceRenderer {
         return collection.getCentroid(false);
     }-*/;
 
-    public VectorFeature getDrawing(GeoFence geoFence) {
+    public GeoFenceDrawing getDrawing(GeoFence geoFence) {
         return drawings.get(geoFence.getId());
     }
 }

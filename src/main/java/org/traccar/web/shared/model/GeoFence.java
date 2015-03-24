@@ -83,7 +83,7 @@ public class GeoFence implements Serializable {
     }
 
     // will hold list of lon/lat pairs of base points for this geo-fence separated by comma
-    // for example: [-1.342,1.23423],[33.442324,54.3454]
+    // for example: -1.342 1.23423,33.442324 54.3454
     private String points;
 
     public String getPoints() {
@@ -150,5 +150,31 @@ public class GeoFence implements Serializable {
             result.add(new LonLat(lon, lat));
         }
         return result;
+    }
+
+    public void points(LonLat... points) {
+        if (points == null) {
+            setPoints(null);
+            return;
+        }
+
+        String strPoints = "";
+        for (LonLat point : points) {
+            if (strPoints.length() > 0) {
+                strPoints += ',';
+            }
+            strPoints += point.lon + " " + point.lat;
+        }
+        setPoints(strPoints);
+    }
+
+    public void copyFrom(GeoFence geoFence) {
+        id = geoFence.id;
+        name = geoFence.name;
+        description = geoFence.description;
+        color = geoFence.color;
+        type = geoFence.type;
+        points = geoFence.points;
+        radius = geoFence.radius;
     }
 }

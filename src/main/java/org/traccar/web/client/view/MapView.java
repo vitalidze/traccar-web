@@ -36,6 +36,7 @@ import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
+import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Device;
@@ -95,7 +96,7 @@ public class MapView {
 
     public LonLat createLonLat(double longitude, double latitude) {
         LonLat lonLat = new LonLat(longitude, latitude);
-        lonLat.transform(new Projection("EPSG:4326").getProjectionCode(), map.getProjection());
+        lonLat.transform("EPSG:4326", map.getProjection());
         return lonLat;
     }
 
@@ -313,16 +314,16 @@ public class MapView {
         latestPositionRenderer.updateIcon(device);
     }
 
-    public void drawGeoFence(GeoFence geoFence) {
-        geoFenceRenderer.drawGeoFence(geoFence);
+    public void drawGeoFence(GeoFence geoFence, boolean drawTitle) {
+        geoFenceRenderer.drawGeoFence(geoFence, drawTitle);
     }
 
     public void removeGeoFence(GeoFence geoFence) {
         geoFenceRenderer.removeGeoFence(geoFence);
     }
 
-    public VectorFeature getGeoFenceDrawing(GeoFence geoFence) {
-        return geoFenceRenderer.getGeoFenceDrawing(geoFence);
+    public GeoFenceDrawing getGeoFenceDrawing(GeoFence geoFence) {
+        return geoFenceRenderer.getDrawing(geoFence);
     }
 
     /**
