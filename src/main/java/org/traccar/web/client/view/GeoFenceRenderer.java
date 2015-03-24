@@ -54,9 +54,12 @@ public class GeoFenceRenderer {
     }
 
     public void removeGeoFence(GeoFence geoFence) {
-        getVectorLayer().removeFeature(getDrawing(geoFence).getShape());
-        getVectorLayer().removeFeature(getDrawing(geoFence).getTitle());
-        drawings.remove(geoFence.getId());
+        GeoFenceDrawing drawing = getDrawing(geoFence);
+        if (drawing != null) {
+            getVectorLayer().removeFeature(drawing.getShape());
+            getVectorLayer().removeFeature(drawing.getTitle());
+            drawings.remove(geoFence.getId());
+        }
     }
 
     private void drawCircle(GeoFence circle, boolean drawTitle) {

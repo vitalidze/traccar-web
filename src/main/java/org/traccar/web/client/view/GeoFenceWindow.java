@@ -202,10 +202,11 @@ public class GeoFenceWindow implements Editor<GeoFence> {
 
     @UiHandler("clearButton")
     public void onClearClicked(SelectEvent event) {
-        if (getActiveControl() != null) {
-            getActiveControl().cancel();
-        }
+        removeControls();
+        geoFenceDrawing = null;
+        geoFence.setPoints(null);
         geoFenceHandler.onClear();
+        draw();
     }
 
     @UiHandler("cancelButton")
