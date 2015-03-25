@@ -171,7 +171,7 @@ public class MapView {
         vectorOptions = new VectorOptions();
         OpenLayersStyle defaultStyle = new OpenLayersStyle(new StyleRules(), new StyleOptions());
         defaultStyle.setJSObject(getGeoFenceLineStyle(map.getJSObject()));
-        vectorOptions.setStyleMap(new StyleMap(defaultStyle, null, null));
+        vectorOptions.setStyleMap(new StyleMap(defaultStyle, defaultStyle, null));
         geofenceLayer = new Vector(i18n.geoFences(), vectorOptions);
 
         initMapLayers(map);
