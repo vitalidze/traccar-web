@@ -265,6 +265,10 @@ public class GeoFenceWindow implements Editor<GeoFence> {
             }
         });
 
+        PathHandlerOptions phOpt = new PathHandlerOptions();
+        phOpt.setStyleMap(geoFenceLayer.getStyleMap());
+        drawFeatureOptions.setHandlerOptions(phOpt);
+
         drawFeature = new DrawFeature(geoFenceLayer, handler, drawFeatureOptions);
         map.addControl(drawFeature);
         drawFeature.activate();
