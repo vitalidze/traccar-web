@@ -662,4 +662,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         return geoFence;
     }
+
+    @Transactional
+    @RequireUser
+    @RequireWrite
+    @Override
+    public GeoFence removeGeoFence(GeoFence geoFence) {
+        geoFence = getSessionEntityManager().find(GeoFence.class, geoFence.getId());
+        getSessionEntityManager().remove(geoFence);
+        return geoFence;
+    }
 }

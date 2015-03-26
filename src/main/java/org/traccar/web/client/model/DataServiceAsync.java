@@ -74,4 +74,6 @@ public interface DataServiceAsync {
     void updateGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
 
     void addGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
+
+    void removeGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
 }

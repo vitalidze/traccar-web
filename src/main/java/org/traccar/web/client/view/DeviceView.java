@@ -86,6 +86,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     public interface GeoFenceHandler {
         public void onAdd();
         public void onEdit(GeoFence geoFence);
+        public void onRemove(GeoFence geoFence);
     }
 
     private final DeviceHandler deviceHandler;
@@ -323,7 +324,11 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @UiHandler("removeButton")
     public void onRemoveClicked(SelectEvent event) {
-        deviceHandler.onRemove(grid.getSelectionModel().getSelectedItem());
+        if (objectsTabs.getActiveWidget() == geoFenceList) {
+            geoFenceHandler.onRemove(geoFenceList.getSelectionModel().getSelectedItem());
+        } else {
+            deviceHandler.onRemove(grid.getSelectionModel().getSelectedItem());
+        }
     }
 
     @UiHandler("logoutButton")

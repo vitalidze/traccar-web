@@ -18,6 +18,9 @@ package org.traccar.web.client.controller;
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.i18n.Messages;
@@ -25,6 +28,7 @@ import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.GeoFenceProperties;
 import org.traccar.web.client.view.DeviceView;
 import org.traccar.web.client.view.GeoFenceWindow;
+import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
 
 import java.util.List;
@@ -122,6 +126,25 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
                 mapController.drawGeoFence(geoFence, true);
             }
         }).show();
+    }
+
+    @Override
+    public void onRemove(final GeoFence geoFence) {
+        final ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmGeoFenceRemoval());
+        dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+            @Override
+            public void onDialogHide(DialogHideEvent event) {
+                if (event.getHideButton() == Dialog.PredefinedButton.YES) {
+                    Application.getDataService().removeGeoFence(geoFence, new BaseAsyncCallback<GeoFence>(i18n) {
+                        @Override
+                        public void onSuccess(GeoFence geoFence) {
+                            geoFenceStore.remove(geoFence);
+                        }
+                    });
+                }
+            }
+        });
+        dialog.show();
     }
 
     @Override

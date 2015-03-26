@@ -77,4 +77,6 @@ public interface DataService extends RemoteService {
     GeoFence addGeoFence(GeoFence geoFence) throws TraccarException;
 
     GeoFence updateGeoFence(GeoFence geoFence) throws TraccarException;
+
+    GeoFence removeGeoFence(GeoFence geoFence);
 }
