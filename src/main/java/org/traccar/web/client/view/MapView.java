@@ -326,6 +326,10 @@ public class MapView {
         return geoFenceRenderer.getDrawing(geoFence);
     }
 
+    public void selectGeoFence(GeoFence geoFence) {
+        geoFenceRenderer.selectGeoFence(geoFence);
+    }
+
     /**
      * This style is used to dynamically calculate width of 'LINE' geo-fence
      *

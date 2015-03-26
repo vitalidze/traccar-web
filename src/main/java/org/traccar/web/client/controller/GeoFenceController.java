@@ -164,4 +164,9 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
     public ListStore<GeoFence> getGeoFenceStore() {
         return geoFenceStore;
     }
+
+    @Override
+    public void onSelected(GeoFence geoFence) {
+        mapController.selectGeoFence(geoFence);
+    }
 }

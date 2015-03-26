@@ -154,4 +154,11 @@ public class GeoFenceRenderer {
     public GeoFenceDrawing getDrawing(GeoFence geoFence) {
         return drawings.get(geoFence.getId());
     }
+
+    public void selectGeoFence(GeoFence geoFence) {
+        GeoFenceDrawing drawing = getDrawing(geoFence);
+        if (drawing != null) {
+            mapView.getMap().zoomToExtent(drawing.getShape().getGeometry().getBounds());
+        }
+    }
 }

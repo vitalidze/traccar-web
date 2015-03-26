@@ -180,6 +180,10 @@ public class MapController implements ContentController, MapView.MapHandler {
         return mapView.getGeoFenceDrawing(geoFence);
     }
 
+    public void selectGeoFence(GeoFence geoFence) {
+        mapView.selectGeoFence(geoFence);
+    }
+
     public void selectDevice(Device device) {
         mapView.selectDevice(device);
     }

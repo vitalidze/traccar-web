@@ -23,7 +23,9 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Event;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
 import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
@@ -87,6 +89,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         public void onAdd();
         public void onEdit(GeoFence geoFence);
         public void onRemove(GeoFence geoFence);
+        public void onSelected(GeoFence geoFence);
     }
 
     private final DeviceHandler deviceHandler;
@@ -161,7 +164,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     Messages i18n = GWT.create(Messages.class);
 
     public DeviceView(final DeviceHandler deviceHandler,
-                      GeoFenceHandler geoFenceHandler,
+                      final GeoFenceHandler geoFenceHandler,
                       SettingsHandler settingsHandler,
                       final ListStore<Device> deviceStore,
                       final ListStore<GeoFence> geoFenceStore) {
@@ -219,7 +222,16 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         // geo-fences
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
 
-        geoFenceList = new ListView<GeoFence, String>(geoFenceStore, geoFenceProperties.name());
+        geoFenceList = new ListView<GeoFence, String>(geoFenceStore, geoFenceProperties.name()) {
+            @Override
+            protected void onMouseDown(Event e) {
+                int index = indexOf(e.getEventTarget().<Element>cast());
+                if (index != -1) {
+                    geoFenceHandler.onSelected(geoFenceList.getStore().get(index));
+                }
+                super.onMouseDown(e);
+            }
+        };
         geoFenceList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         geoFenceList.getSelectionModel().addSelectionChangedHandler(geoFenceSelectionHandler);
 
@@ -271,12 +283,6 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
             editButton.setEnabled(!event.getSelection().isEmpty());
             shareButton.setEnabled(!event.getSelection().isEmpty());
             removeButton.setEnabled(!event.getSelection().isEmpty());
-
-            if (event.getSelection().isEmpty()) {
-                deviceHandler.onSelected(null);
-            } else {
-                deviceHandler.onSelected(event.getSelection().get(0));
-            }
         }
     };
 
@@ -286,6 +292,8 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
             editButton.setEnabled(!event.getSelection().isEmpty());
             shareButton.setEnabled(!event.getSelection().isEmpty());
             removeButton.setEnabled(!event.getSelection().isEmpty());
+
+            geoFenceHandler.onSelected(event.getSelection().isEmpty() ? null : event.getSelection().get(0));
         }
     };
 
