@@ -72,4 +72,6 @@ public interface DataServiceAsync {
     void getGeoFences(AsyncCallback<List<GeoFence>> async);
 
     void updateGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
+
+    void addGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
 }

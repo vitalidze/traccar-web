@@ -28,6 +28,7 @@ import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ColorPalette;
 import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.*;
 import org.gwtopenmaps.openlayers.client.*;
@@ -41,6 +42,7 @@ import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.handler.*;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.traccar.web.client.GeoFenceDrawing;
+import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.GeoFenceProperties;
 import org.traccar.web.shared.model.*;
@@ -69,6 +71,9 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     private final GeoFenceHandler geoFenceHandler;
     private final Map map;
     private final Vector geoFenceLayer;
+
+    @UiField
+    Messages i18n;
 
     @UiField
     Window window;
@@ -136,6 +141,11 @@ public class GeoFenceWindow implements Editor<GeoFence> {
 
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
+        if (geoFenceDrawing == null) {
+            new AlertMessageBox(i18n.error(), i18n.errGeoFenceIsEmpty()).show();
+            return;
+        }
+
         window.hide();
         removeControls();
         geoFenceHandler.onSave(flush());

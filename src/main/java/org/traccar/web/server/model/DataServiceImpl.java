@@ -636,6 +636,21 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser
+    @RequireWrite
+    @Override
+    public GeoFence addGeoFence(GeoFence geoFence) throws TraccarException {
+        if (geoFence.getName() == null || geoFence.getName().trim().isEmpty()) {
+            throw new ValidationException();
+        }
+
+        getSessionEntityManager().persist(geoFence);
+
+        return geoFence;
+    }
+
+    @Transactional
+    @RequireUser
+    @RequireWrite
     @Override
     public GeoFence updateGeoFence(GeoFence updatedGeoFence) throws TraccarException {
         if (updatedGeoFence.getName() == null || updatedGeoFence.getName().trim().isEmpty()) {

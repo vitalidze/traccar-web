@@ -67,7 +67,21 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         new GeoFenceWindow(geoFence, null, mapController.getMap(), mapController.getGeoFenceLayer(),
         new BaseGeoFenceHandler(geoFence) {
             @Override
-            public void onSave(GeoFence device) {
+            public void onSave(final GeoFence geoFence) {
+                Application.getDataService().addGeoFence(geoFence,
+                        new BaseAsyncCallback<GeoFence>(i18n) {
+                            @Override
+                            public void onSuccess(GeoFence addedGeoFence) {
+                                mapController.removeGeoFence(geoFence);
+                                geoFenceStore.add(addedGeoFence);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                onCancel();
+                                super.onFailure(caught);
+                            }
+                        });
             }
 
             @Override
