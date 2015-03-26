@@ -91,12 +91,7 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     @UiField
     ColorPalette color;
 
-    Style lineStyle;
-    DrawFeature drawLineFeatureControl;
-    Style polygonStyle;
-    DrawFeature drawPolygonFeatureControl;
-    RegularPolygonHandlerOptions circleOptions;
-    DrawFeature drawCircleFeatureControl;
+    DrawFeature drawFeature;
 
     ModifyFeature modifyFeature;
     final GeoFence geoFence;
@@ -107,10 +102,7 @@ public class GeoFenceWindow implements Editor<GeoFence> {
         this.map = map;
         this.geoFenceLayer = geoFenceLayer;
         this.geoFence = new GeoFence();
-
-        if (geoFence != null) {
-            this.geoFence.copyFrom(geoFence);
-        }
+        this.geoFence.copyFrom(geoFence);
 
         ListStore<GeoFenceType> geoFenceTypeStore = new ListStore<GeoFenceType>(
                 new EnumKeyProvider<GeoFenceType>());
@@ -132,57 +124,6 @@ public class GeoFenceWindow implements Editor<GeoFence> {
         } else {
             edit();
         }
-//        // Create a line
-//        lineStyle = new Style(); //create a Style to use
-//        lineStyle.setFillColor("white");
-//        lineStyle.setPointRadius(5d);
-//        lineStyle.setStrokeWidth(15d);
-////        drawStyle.setStrokeWidth(5d / map.getResolution());
-//        lineStyle.setStrokeOpacity(0.6);
-//
-//        //Create PathHanlderOptions using this StyleMap
-//        PathHandlerOptions phOpt = new PathHandlerOptions();
-//        phOpt.setStyleMap(new StyleMap(lineStyle));
-//
-//        //Create DrawFeatureOptions and set the PathHandlerOptions (that have the StyleMap, that have the Style we wish)
-//        DrawFeatureOptions drawFeatureOptions = new DrawFeatureOptions();
-//        drawFeatureOptions.setHandlerOptions(phOpt);
-//
-//        // Create the drawline control
-//        drawLineFeatureControl = new DrawFeature(geoFenceLayer, new PathHandler(), drawFeatureOptions);
-//        map.addControl(drawLineFeatureControl);
-//
-//        // Create circle
-//        circleOptions = new RegularPolygonHandlerOptions();
-//        circleOptions.setSides(40);
-//        drawFeatureOptions = new DrawFeatureOptions();
-//        drawFeatureOptions.setHandlerOptions(circleOptions);
-//        drawCircleFeatureControl = new DrawFeature(geoFenceLayer, new RegularPolygonHandler(), drawFeatureOptions);
-//        map.addControl(drawCircleFeatureControl);
-//
-//        // Create polygon
-//        polygonStyle = new Style(); //create a Style to use
-//        polygonStyle.setFillColor("white");
-//        polygonStyle.setPointRadius(5d);
-//        polygonStyle.setStrokeWidth(30d);
-//        polygonStyle.setStrokeOpacity(0.6);
-//        polygonStyle.setStrokeColor(geoFence.getColor());
-//
-//        //Create PathHanlderOptions using this StyleMap
-//        phOpt = new PathHandlerOptions();
-//        phOpt.setStyleMap(new StyleMap(polygonStyle));
-//
-//        //Create DrawFeatureOptions and set the PathHandlerOptions (that have the StyleMap, that have the Style we wish)
-//        drawFeatureOptions = new DrawFeatureOptions();
-//        drawFeatureOptions.setHandlerOptions(phOpt);
-//
-//        // Create the drawPolygon control
-//        drawPolygonFeatureControl = new DrawFeature(geoFenceLayer, new PolygonHandler(), drawFeatureOptions);
-//        map.addControl(drawPolygonFeatureControl);
-//
-//        // activate selected control
-//        getControl(geoFence.getType()).activate();
-//        setUpColor(geoFence.getColor());
     }
 
     public void show() {
@@ -202,6 +143,10 @@ public class GeoFenceWindow implements Editor<GeoFence> {
 
     @UiHandler("clearButton")
     public void onClearClicked(SelectEvent event) {
+        clear();
+    }
+
+    private void clear() {
         removeControls();
         geoFenceDrawing = null;
         geoFence.setPoints(null);
@@ -218,9 +163,7 @@ public class GeoFenceWindow implements Editor<GeoFence> {
 
     @UiHandler("type")
     public void onTypeChanged(SelectionEvent<GeoFenceType> event) {
-        getControl(type.getValue()).cancel();
-        getControl(type.getValue()).deactivate();
-        getControl(event.getSelectedItem()).activate();
+        clear();
     }
 
     @UiHandler("color")
@@ -234,13 +177,18 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     }
 
     private void repaint() {
-        modifyFeature.deactivate();
-        geoFenceDrawing = geoFenceHandler.repaint(flush());
-        edit();
+        if (geoFenceDrawing != null) {
+            modifyFeature.deactivate();
+            geoFenceDrawing = geoFenceHandler.repaint(flush());
+            edit();
+        }
     }
 
     private GeoFence flush() {
         GeoFence updated = driver.flush();
+        // sometimes it's not flushed correctly
+        updated.setType(type.getCurrentValue());
+        updated.setRadius(radius.getCurrentValue());
         Geometry geometry = geoFenceDrawing.getShape().getGeometry();
         Projection mapProjection = new Projection(map.getProjection());
         Projection epsg4326 = new Projection("EPSG:4326");
@@ -277,57 +225,11 @@ public class GeoFenceWindow implements Editor<GeoFence> {
         return updated;
     }
 
-    private void setUpColor(String color) {
-        switch (type.getCurrentValue()) {
-            case POLYGON:
-                polygonStyle.setFillColor("#" + color);
-                ((PathHandler) drawPolygonFeatureControl.getHandler()).setStyle(polygonStyle);
-                break;
-            case LINE:
-                lineStyle.setStrokeColor("#" + color);
-                ((PathHandler) drawLineFeatureControl.getHandler()).setStyle(lineStyle);
-                break;
-            case CIRCLE:
-                // TODO
-//                circleOptions.set
-                break;
-        }
-    }
-
-    private void startDrawing(DrawFeature control) {
-        DrawFeatureOptions drawFeatureOptions = new DrawFeatureOptions();
-        drawFeatureOptions.onFeatureAdded(new DrawFeature.FeatureAddedListener() {
-            @Override
-            public void onFeatureAdded(VectorFeature vectorFeature) {
-                // TODO
-            }
-        });
-    }
-
-    private DrawFeature getActiveControl() {
-       return getControl(type.getValue());
-    }
-
-    private DrawFeature getControl(GeoFenceType type) {
-        switch (type) {
-            case LINE:
-                return drawLineFeatureControl;
-            case CIRCLE:
-                return drawCircleFeatureControl;
-            case POLYGON:
-                return drawPolygonFeatureControl;
-        }
-        return null;
-    }
-
     private void removeControls() {
-        if (getActiveControl() != null) {
-            getActiveControl().deactivate();
-            getActiveControl().cancel();
-
-            map.removeControl(drawCircleFeatureControl);
-            map.removeControl(drawLineFeatureControl);
-            map.removeControl(drawPolygonFeatureControl);
+        if (drawFeature != null) {
+            drawFeature.deactivate();
+            drawFeature.cancel();
+            map.removeControl(drawFeature);
         }
 
         if (modifyFeature != null) {
@@ -337,7 +239,35 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     }
 
     private void draw() {
+        DrawFeatureOptions drawFeatureOptions = new DrawFeatureOptions();
+        Handler handler = null;
 
+        switch (type.getCurrentValue()) {
+            case LINE:
+                handler = new PathHandler();
+                break;
+            case POLYGON:
+                handler = new PolygonHandler();
+                break;
+            case CIRCLE:
+                handler = new PointHandler();
+                break;
+        }
+
+        drawFeatureOptions.onFeatureAdded(new DrawFeature.FeatureAddedListener() {
+            @Override
+            public void onFeatureAdded(VectorFeature vectorFeature) {
+                removeControls();
+                geoFenceDrawing = new GeoFenceDrawing(vectorFeature, null);
+                geoFenceDrawing = geoFenceHandler.repaint(flush());
+                geoFenceLayer.removeFeature(vectorFeature);
+                edit();
+            }
+        });
+
+        drawFeature = new DrawFeature(geoFenceLayer, handler, drawFeatureOptions);
+        map.addControl(drawFeature);
+        drawFeature.activate();
     }
 
     private void edit() {
@@ -352,11 +282,11 @@ public class GeoFenceWindow implements Editor<GeoFence> {
         }
 
         modifyFeature.activate();
-        if (type.getValue() == GeoFenceType.CIRCLE) {
+        if (type.getCurrentValue() == GeoFenceType.CIRCLE) {
             modifyFeature.setMode(ModifyFeature.DRAG);
-        } else if (type.getValue() == GeoFenceType.LINE) {
+        } else if (type.getCurrentValue() == GeoFenceType.LINE) {
             modifyFeature.setMode(ModifyFeature.RESHAPE);
-        } else if (type.getValue() == GeoFenceType.POLYGON) {
+        } else if (type.getCurrentValue() == GeoFenceType.POLYGON) {
             modifyFeature.setMode(ModifyFeature.DRAG | ModifyFeature.RESHAPE);
         }
         modifyFeature.selectFeature(geoFenceDrawing.getShape());

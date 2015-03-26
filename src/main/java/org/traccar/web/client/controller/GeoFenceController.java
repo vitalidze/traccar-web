@@ -41,25 +41,38 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         this.geoFenceStore = new ListStore<GeoFence>(geoFenceProperties.id());
     }
 
+    abstract class BaseGeoFenceHandler implements GeoFenceWindow.GeoFenceHandler {
+        final GeoFence geoFence;
+
+        protected BaseGeoFenceHandler(GeoFence geoFence) {
+            this.geoFence = geoFence;
+        }
+
+        @Override
+        public void onClear() {
+            mapController.removeGeoFence(geoFence);
+        }
+
+        @Override
+        public GeoFenceDrawing repaint(GeoFence geoFence) {
+            mapController.removeGeoFence(geoFence);
+            mapController.drawGeoFence(geoFence, false);
+            return mapController.getGeoFenceDrawing(geoFence);
+        }
+    }
+
     @Override
     public void onAdd() {
-        new GeoFenceWindow(null, null, mapController.getMap(), mapController.getGeoFenceLayer(),
-        new GeoFenceWindow.GeoFenceHandler() {
+        final GeoFence geoFence = new GeoFence();
+        new GeoFenceWindow(geoFence, null, mapController.getMap(), mapController.getGeoFenceLayer(),
+        new BaseGeoFenceHandler(geoFence) {
             @Override
             public void onSave(GeoFence device) {
             }
 
             @Override
-            public void onClear() {
-            }
-
-            @Override
             public void onCancel() {
-            }
-
-            @Override
-            public GeoFenceDrawing repaint(GeoFence geoFence) {
-                return null;
+                onClear();
             }
         }).show();
     }
@@ -69,7 +82,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         GeoFenceDrawing drawing = mapController.getGeoFenceDrawing(geoFence);
         mapController.getGeoFenceLayer().removeFeature(drawing.getTitle());
         new GeoFenceWindow(geoFence, drawing, mapController.getMap(), mapController.getGeoFenceLayer(),
-        new GeoFenceWindow.GeoFenceHandler() {
+        new BaseGeoFenceHandler(geoFence) {
             @Override
             public void onSave(GeoFence updatedGeoFence) {
                 Application.getDataService().updateGeoFence(updatedGeoFence,
@@ -90,21 +103,9 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
             }
 
             @Override
-            public void onClear() {
-                mapController.removeGeoFence(geoFence);
-            }
-
-            @Override
             public void onCancel() {
                 mapController.removeGeoFence(geoFence);
                 mapController.drawGeoFence(geoFence, true);
-            }
-
-            @Override
-            public GeoFenceDrawing repaint(GeoFence geoFence) {
-                mapController.removeGeoFence(geoFence);
-                mapController.drawGeoFence(geoFence, false);
-                return mapController.getGeoFenceDrawing(geoFence);
             }
         }).show();
     }

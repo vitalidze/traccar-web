@@ -30,6 +30,7 @@ public class GeoFence implements Serializable {
         type = GeoFenceType.LINE;
         color = "4169E1";
         radius = 30f;
+        name = "New Geo-fence";
     }
 
     @Id
