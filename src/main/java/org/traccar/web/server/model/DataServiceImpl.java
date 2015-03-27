@@ -634,7 +634,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public List<GeoFence> getGeoFences() {
-        return getSessionEntityManager().createQuery("SELECT g FROM GeoFence g", GeoFence.class).getResultList();
+        User user = getSessionUser();
+        if (user.getAdmin()) {
+            return getSessionEntityManager().createQuery("SELECT g FROM GeoFence g", GeoFence.class).getResultList();
+        }
+        return new ArrayList<GeoFence>(user.getAllAvailableGeoFences());
     }
 
     @Transactional

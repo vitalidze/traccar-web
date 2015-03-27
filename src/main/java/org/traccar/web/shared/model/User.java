@@ -53,6 +53,10 @@ public class User implements Serializable, Cloneable {
         manager = false;
     }
 
+    public User(String login) {
+        this.login = login;
+    }
+
     public User(User user) {
         id = user.id;
         admin = user.admin;
@@ -177,6 +181,23 @@ public class User implements Serializable, Cloneable {
 
     public List<GeoFence> getGeoFences() {
         return geoFences;
+    }
+
+    public Set<GeoFence> getAllAvailableGeoFences() {
+        Set<GeoFence> result = new HashSet<GeoFence>();
+        result.addAll(getGeoFences());
+        if (getManager()) {
+            for (User user : getManagedUsers()) {
+                result.addAll(user.getAllAvailableGeoFences());
+            }
+        }
+        User managedBy = getManagedBy();
+        while (managedBy != null) {
+            result.addAll(managedBy.getGeoFences());
+            managedBy = managedBy.getManagedBy();
+        }
+
+        return result;
     }
 
     @Expose

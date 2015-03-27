@@ -35,6 +35,11 @@ public class GeoFence implements Serializable {
         radius = 30f;
     }
 
+    public GeoFence(long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -195,5 +200,10 @@ public class GeoFence implements Serializable {
         type = geoFence.type;
         points = geoFence.points;
         radius = geoFence.radius;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
