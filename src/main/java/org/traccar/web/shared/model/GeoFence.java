@@ -15,11 +15,14 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gwt.user.client.rpc.GwtTransient;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "geofences",
@@ -103,6 +106,22 @@ public class GeoFence implements Serializable {
 
     public void setRadius(float radius) {
         this.radius = radius;
+    }
+
+    @GwtTransient
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "users_geofences",
+            foreignKey = @ForeignKey(name = "users_geofences_fkey_geofence_id"),
+            joinColumns = { @JoinColumn(name = "geofence_id", table = "geofences", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "user_id", table = "users", referencedColumnName = "id") })
+    private Set<User> users;
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 
     @Override

@@ -28,25 +28,20 @@ import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.Window;
-import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
-import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
-import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.UserProperties;
-import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.User;
 
 import java.util.*;
 
-public class DeviceShareDialog {
+public class UserShareDialog {
 
     private static UsersDialogUiBinder uiBinder = GWT.create(UsersDialogUiBinder.class);
 
-    interface UsersDialogUiBinder extends UiBinder<Widget, DeviceShareDialog> {
+    interface UsersDialogUiBinder extends UiBinder<Widget, UserShareDialog> {
     }
 
     public class UserShared {
@@ -83,11 +78,11 @@ public class DeviceShareDialog {
         ValueProvider<UserShared, Boolean> shared();
     }
 
-    public interface DeviceShareHandler {
-        public void onSaveShares(Device device, Map<User, Boolean> shares);
+    public interface UserShareHandler {
+        public void onSaveShares(Map<User, Boolean> shares);
     }
 
-    private DeviceShareHandler shareHandler;
+    private UserShareHandler shareHandler;
 
     @UiField
     Window window;
@@ -104,10 +99,7 @@ public class DeviceShareDialog {
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    Device device;
-
-    public DeviceShareDialog(Device device, Map<User, Boolean> shares, DeviceShareHandler shareHandler) {
-        this.device = device;
+    public UserShareDialog(Map<User, Boolean> shares, UserShareHandler shareHandler) {
         this.shareHandler = shareHandler;
 
         List<User> users = new ArrayList<User>(shares.keySet());
@@ -158,7 +150,7 @@ public class DeviceShareDialog {
             }
             updatedShare.put(updated.user, updated.shared);
         }
-        shareHandler.onSaveShares(device, updatedShare);
+        shareHandler.onSaveShares(updatedShare);
         shareStore.commitChanges();
     }
 

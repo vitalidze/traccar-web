@@ -27,7 +27,7 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.view.DeviceDialog;
-import org.traccar.web.client.view.DeviceShareDialog;
+import org.traccar.web.client.view.UserShareDialog;
 import org.traccar.web.client.view.DeviceView;
 import org.traccar.web.client.view.PositionInfoPopup;
 import org.traccar.web.shared.model.*;
@@ -192,9 +192,9 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         Application.getDataService().getDeviceShare(device, new BaseAsyncCallback<Map<User, Boolean>>(i18n) {
             @Override
             public void onSuccess(final Map<User, Boolean> share) {
-                new DeviceShareDialog(device, share, new DeviceShareDialog.DeviceShareHandler() {
+                new UserShareDialog(share, new UserShareDialog.UserShareHandler() {
                     @Override
-                    public void onSaveShares(Device device, Map<User, Boolean> shares) {
+                    public void onSaveShares(Map<User, Boolean> shares) {
                         Application.getDataService().saveDeviceShare(device, shares, new BaseAsyncCallback<Void>(i18n));
                     }
                 }).show();

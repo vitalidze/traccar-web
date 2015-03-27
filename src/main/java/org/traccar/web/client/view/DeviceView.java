@@ -90,6 +90,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         public void onEdit(GeoFence geoFence);
         public void onRemove(GeoFence geoFence);
         public void onSelected(GeoFence geoFence);
+        public void onShare(GeoFence geoFence);
     }
 
     private final DeviceHandler deviceHandler;
@@ -327,7 +328,11 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @UiHandler("shareButton")
     public void onShareClicked(SelectEvent event) {
-        deviceHandler.onShare(grid.getSelectionModel().getSelectedItem());
+        if (objectsTabs.getActiveWidget() == geoFenceList) {
+            geoFenceHandler.onShare(geoFenceList.getSelectionModel().getSelectedItem());
+        } else {
+            deviceHandler.onShare(grid.getSelectionModel().getSelectedItem());
+        }
     }
 
     @UiHandler("removeButton")

@@ -163,6 +163,22 @@ public class User implements Serializable, Cloneable {
         return devices;
     }
 
+    @GwtTransient
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "users_geofences",
+            foreignKey = @ForeignKey(name = "users_geofences_fkey_user_id"),
+            joinColumns = { @JoinColumn(name = "user_id", table = "users", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "geofence_id", table = "geofences", referencedColumnName = "id") })
+    private List<GeoFence> geoFences;
+
+    public void setGeoFences(List<GeoFence> geoFences) {
+        this.geoFences = geoFences;
+    }
+
+    public List<GeoFence> getGeoFences() {
+        return geoFences;
+    }
+
     @Expose
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))

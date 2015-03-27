@@ -281,6 +281,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         for (Device device : user.getDevices()) {
             device.getUsers().remove(user);
         }
+        for (GeoFence geoFence : user.getGeoFences()) {
+            geoFence.getUsers().remove(user);
+        }
         entityManager.remove(user);
         return fillUserSettings(user);
     }
@@ -643,6 +646,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             throw new ValidationException();
         }
 
+        geoFence.setUsers(new HashSet<User>());
+        geoFence.getUsers().add(getSessionUser());
         getSessionEntityManager().persist(geoFence);
 
         return geoFence;
@@ -668,8 +673,48 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireWrite
     @Override
     public GeoFence removeGeoFence(GeoFence geoFence) {
+        User user = getSessionUser();
         geoFence = getSessionEntityManager().find(GeoFence.class, geoFence.getId());
-        getSessionEntityManager().remove(geoFence);
+        if (user.getAdmin() || user.getManager()) {
+            geoFence.getUsers().removeAll(getUsers());
+        }
+        geoFence.getUsers().remove(user);
+        if (geoFence.getUsers().isEmpty()) {
+            getSessionEntityManager().remove(geoFence);
+        }
         return geoFence;
+    }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public Map<User, Boolean> getGeoFenceShare(GeoFence geoFence) {
+        geoFence = getSessionEntityManager().find(GeoFence.class, geoFence.getId());
+        List<User> users = getUsers();
+        Map<User, Boolean> result = new HashMap<User, Boolean>(users.size());
+        for (User user : users) {
+            result.put(fillUserSettings(user), geoFence.getUsers().contains(user));
+        }
+        return result;
+    }
+
+    @Transactional
+    @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
+    @Override
+    public void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share) {
+        EntityManager entityManager = getSessionEntityManager();
+        geoFence = entityManager.find(GeoFence.class, geoFence.getId());
+
+        for (User user : getUsers()) {
+            Boolean shared = share.get(user);
+            if (shared == null) continue;
+            if (shared) {
+                geoFence.getUsers().add(user);
+            } else {
+                geoFence.getUsers().remove(user);
+            }
+            entityManager.merge(user);
+        }
     }
 }
