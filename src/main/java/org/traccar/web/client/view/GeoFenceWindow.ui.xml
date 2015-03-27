@@ -18,28 +18,28 @@
   <gxt:Window ui:field="window" pixelSize="264, 284" position="6, 60" modal="false" closable="false" headingText="{i18n.geoFence}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.name}" labelWidth="64">
+        <form:FieldLabel text="{i18n.name}" labelWidth="74">
           <form:widget>
             <form:TextField ui:field="name" allowBlank="false" />
           </form:widget>
         </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.description}" labelWidth="64">
+        <form:FieldLabel text="{i18n.description}" labelWidth="74">
           <form:widget>
             <form:TextArea ui:field="description" allowBlank="true" />
           </form:widget>
         </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.type}">
+        <form:FieldLabel text="{i18n.type}" labelWidth="124">
             <form:widget>
                 <form:ComboBox ui:field="type" />
             </form:widget>
         </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.width}/{i18n.radius} ({i18n.meter})">
+        <form:FieldLabel text="{i18n.width}/{i18n.radius} ({i18n.meter})" labelWidth="124">
             <form:widget>
                 <form:NumberField editor="{floatPropertyEditor}"
                                   ui:field="radius"
