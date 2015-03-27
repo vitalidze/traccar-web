@@ -47,3 +47,16 @@ Deleting geo-fence
 ------------------
 
 To delete a geo-fence select in a list on 'Geo-fences' tab, click 'Remove' on toolbar and confirm it's removal.
+
+Sharing geo-fence
+-----------------
+
+First of all access to geo-fences is a bit different from access to devices:
+
+* user has access to his geo-fences, and all geo-fences of users in his upper hierarchy (his manager, manager of his manager, etc.). Difference with devices access is that user sees only his devices.
+* manager in addition to geo-fences as an ordinary user has access to geo-fences of all users managed by him.
+* administrator has access to all geo-fences of all users.
+
+To manage access to geo-fence administrator or manager should select it in a list on 'Geo-fences' tab and click 'Share' button as he uses for access management to devices.
+
+![Sharing geo-fence](http://i62.tinypic.com/1zme8o3.png)
