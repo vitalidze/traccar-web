@@ -17,6 +17,8 @@ package org.traccar.web.client.controller;
 
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.SortDir;
+import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
@@ -43,6 +45,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         this.mapController = mapController;
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
         this.geoFenceStore = new ListStore<GeoFence>(geoFenceProperties.id());
+        this.geoFenceStore.addSortInfo(new Store.StoreSortInfo<GeoFence>(geoFenceProperties.name(), SortDir.ASC));
     }
 
     abstract class BaseGeoFenceHandler implements GeoFenceWindow.GeoFenceHandler {
@@ -78,6 +81,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
                             public void onSuccess(GeoFence addedGeoFence) {
                                 mapController.removeGeoFence(geoFence);
                                 geoFenceStore.add(addedGeoFence);
+                                geoFenceStore.applySort(false);
                             }
 
                             @Override
@@ -110,6 +114,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
                                 mapController.removeGeoFence(geoFence);
                                 mapController.drawGeoFence(geoFence, true);
                                 geoFenceStore.update(geoFence);
+                                geoFenceStore.applySort(false);
                             }
 
                             @Override
@@ -157,6 +162,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
             @Override
             public void onSuccess(List<GeoFence> result) {
                 geoFenceStore.addAll(result);
+                geoFenceStore.applySort(false);
             }
         });
     }
