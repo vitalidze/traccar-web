@@ -71,6 +71,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
     @Override
     public void onAdd() {
         final GeoFence geoFence = new GeoFence();
+        geoFence.setName(i18n.newGeoFence());
         new GeoFenceWindow(geoFence, null, mapController.getMap(), mapController.getGeoFenceLayer(),
         new BaseGeoFenceHandler(geoFence) {
             @Override

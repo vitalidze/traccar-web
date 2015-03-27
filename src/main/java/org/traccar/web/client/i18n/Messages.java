@@ -273,4 +273,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String errGeoFenceIsEmpty();
 
     String confirmGeoFenceRemoval();
+
+    String newGeoFence();
 }
