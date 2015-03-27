@@ -15,10 +15,12 @@
  */
 package org.traccar.web.client.model;
 
+import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
+import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.GeoFenceType;
 
@@ -36,9 +38,11 @@ public interface GeoFenceProperties extends PropertyAccess<GeoFence> {
     ValueProvider<GeoFence, GeoFenceType> type();
 
     public static class GeoFenceTypeLabelProvider implements LabelProvider<GeoFenceType> {
+        final Messages i18n = GWT.create(Messages.class);
+
         @Override
         public String getLabel(GeoFenceType item) {
-            return item.name();
+            return i18n.geoFenceType(item);
         }
     }
 }
