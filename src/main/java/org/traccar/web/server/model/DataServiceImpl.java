@@ -15,8 +15,11 @@
  */
 package org.traccar.web.server.model;
 
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -425,24 +428,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         List<Position> queryResult = query.getResultList();
 
-        final double radKoef = Math.PI / 180;
-        final double earthRadius = 6371.01; // Radius of the earth in km
-
         for (int i = 0; i < queryResult.size(); i++) {
             boolean add = true;
             if (i > 0) {
                 Position positionA = queryResult.get(i - 1);
                 Position positionB = queryResult.get(i);
 
-                double dLat = (positionA.getLatitude() - positionB.getLatitude()) * radKoef;
-                double dLon = (positionA.getLongitude() - positionB.getLongitude()) * radKoef;
-                double a =
-                        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                                Math.cos(positionA.getLatitude() * radKoef) * Math.cos(positionB.getLatitude() * radKoef) *
-                                Math.sin(dLon / 2) * Math.sin(dLon / 2)
-                        ;
-                double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                positionB.setDistance(earthRadius * c); // Distance in km
+                positionB.setDistance(getDistance(positionA.getLongitude(), positionA.getLatitude(), positionB.getLongitude(), positionB.getLatitude()));
 
                 if (filter && filters.isHideDuplicates()) {
                     add = !positionA.getTime().equals(positionB.getTime());
@@ -456,16 +448,68 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         return positions;
     }
 
+    private static final double radKoef = Math.PI / 180;
+    private static final double earthRadius = 6371.01; // Radius of the earth in km
+
+    private double getDistance(double lonX, double latX, double lonY, double latY) {
+        double dLat = (latX - latY) * radKoef;
+        double dLon = (lonX - lonY) * radKoef;
+        double a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.cos(latX * radKoef) * Math.cos(latY * radKoef) *
+                                Math.sin(dLon / 2) * Math.sin(dLon / 2)
+                ;
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return earthRadius * c; // Distance in km
+    }
+
     @RequireUser
     @Transactional
     @Override
     public List<Position> getLatestPositions() {
         List<Position> positions = new LinkedList<Position>();
         List<Device> devices = getDevices();
+        List<GeoFence> geoFences = getGeoFences();
         if (devices != null && !devices.isEmpty()) {
             for (Device device : devices) {
                 if (device.getLatestPosition() != null) {
-                    positions.add(device.getLatestPosition());
+                    Position position = device.getLatestPosition();
+                    // calculate geo-fences
+                    for (GeoFence geoFence : geoFences) {
+                        boolean add = false;
+                        switch (geoFence.getType()) {
+                            case POLYGON:
+                                Path2D shape = new Path2D.Double();
+                                List<GeoFence.LonLat> points = geoFence.points();
+                                for (int i = 0; i < points.size(); i++) {
+                                    GeoFence.LonLat point = points.get(i);
+                                    if (i == 0) {
+                                        shape.moveTo(point.lon, point.lat);
+                                    } else {
+                                        shape.lineTo(point.lon, point.lat);
+                                    }
+                                }
+                                shape.closePath();
+                                add = shape.contains(position.getLongitude(), position.getLatitude());
+                                break;
+                            case CIRCLE:
+                                GeoFence.LonLat center = geoFence.points().get(0);
+                                add = getDistance(position.getLongitude(), position.getLatitude(), center.lon, center.lat) <= geoFence.getRadius() / 1000;
+                                break;
+                            case LINE:
+                                // TODO
+                                break;
+                        }
+
+                        if (add) {
+                            if (position.getGeoFences() == null) {
+                                position.setGeoFences(new LinkedList<GeoFence>());
+                            }
+                            position.getGeoFences().add(geoFence);
+                        }
+                    }
+
+                    positions.add(position);
                 }
             }
         }

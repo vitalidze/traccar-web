@@ -17,6 +17,7 @@ package org.traccar.web.shared.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -244,7 +245,18 @@ public class Position implements Serializable, Cloneable {
     public void setDistance(double distance) {
         this.distance = distance;
     }
-    
+
+    @Transient
+    private List<GeoFence> geoFences;
+
+    public List<GeoFence> getGeoFences() {
+        return geoFences;
+    }
+
+    public void setGeoFences(List<GeoFence> geoFences) {
+        this.geoFences = geoFences;
+    }
+
     @Override
     public int hashCode() {
         return (int) (id ^ (id >>> 32));
