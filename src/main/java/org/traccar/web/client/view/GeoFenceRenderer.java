@@ -122,7 +122,7 @@ public class GeoFenceRenderer {
 
         LineString lineString = new LineString(linePoints);
         VectorFeature lineFeature = new VectorFeature(lineString);
-        lineFeature.getAttributes().setAttribute("widthInMeters", line.getRadius());
+        lineFeature.getAttributes().setAttribute("widthInMeters", line.getRadius() * 1.78143299863f);
         lineFeature.getAttributes().setAttribute("lineColor", '#' + line.getColor());
 
         getVectorLayer().addFeature(lineFeature);
