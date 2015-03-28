@@ -66,8 +66,7 @@ public class GeoFenceRenderer {
 
     private void drawCircle(GeoFence circle, boolean drawTitle) {
         GeoFence.LonLat center = circle.points().get(0);
-        float radius = circle.getRadius() * 1.78143299863f;
-        Polygon circleShape = Polygon.createRegularPolygon(mapView.createPoint(center.lon, center.lat), radius, 100, 0f);
+        Polygon circleShape = Polygon.createRegularPolygon(mapView.createPoint(center.lon, center.lat), applyMercatorScale(center.lat, circle.getRadius()), 100, 0f);
 
         Style st = new Style();
         st.setFillOpacity(0.3);
@@ -122,7 +121,7 @@ public class GeoFenceRenderer {
 
         LineString lineString = new LineString(linePoints);
         VectorFeature lineFeature = new VectorFeature(lineString);
-        lineFeature.getAttributes().setAttribute("widthInMeters", line.getRadius() * 1.78143299863f);
+        lineFeature.getAttributes().setAttribute("widthInMeters", applyMercatorScale(lonLats.get(0).lat, line.getRadius()));
         lineFeature.getAttributes().setAttribute("lineColor", '#' + line.getColor());
 
         getVectorLayer().addFeature(lineFeature);
@@ -131,6 +130,16 @@ public class GeoFenceRenderer {
         if (drawTitle) {
             getVectorLayer().addFeature(title);
         }
+    }
+
+    /**
+     * Applies scale to specified radius in meters so it is precisely drawn on map
+     *
+     * @see <a href="http://osdir.com/ml/openlayers-users-gis/2012-09/msg00034.html">http://osdir.com/ml/openlayers-users-gis/2012-09/msg00034.html</a>
+     * @see <a href="http://osdir.com/ml/openlayers-users-gis/2012-09/msg00036.html">http://osdir.com/ml/openlayers-users-gis/2012-09/msg00036.html</a>
+     */
+    private float applyMercatorScale(double latitude, float radius) {
+        return (float) (radius / Math.cos(latitude * Math.PI / 180));
     }
 
     private VectorFeature drawName(String name, Point point) {
