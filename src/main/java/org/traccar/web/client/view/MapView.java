@@ -176,9 +176,9 @@ public class MapView {
 
         initMapLayers(map);
 
+        map.addLayer(geofenceLayer);
         map.addLayer(vectorLayer);
         map.addLayer(markerLayer);
-        map.addLayer(geofenceLayer);
 
         map.addControl(new LayerSwitcher());
         map.addControl(new ScaleLine());
