@@ -15,6 +15,8 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.core.client.GWT;
+import org.gwtopenmaps.openlayers.client.OpenLayers;
 import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.*;
@@ -64,7 +66,8 @@ public class GeoFenceRenderer {
 
     private void drawCircle(GeoFence circle, boolean drawTitle) {
         GeoFence.LonLat center = circle.points().get(0);
-        Polygon circleShape = Polygon.createRegularPolygon(mapView.createPoint(center.lon, center.lat), circle.getRadius(), 40, 0f);
+        float radius = circle.getRadius() * 1.78143299863f;
+        Polygon circleShape = Polygon.createRegularPolygon(mapView.createPoint(center.lon, center.lat), radius, 100, 0f);
 
         Style st = new Style();
         st.setFillOpacity(0.3);
