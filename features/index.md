@@ -56,3 +56,4 @@ This project has following features, which don't exist in original `traccar-web`
 * do not create user with name 'admin' when any other user with 'administrator' role present
 * [possibility to fit line of archived track the current map view](zoom-to-track.html)
 * [language selector at login screen](language-selector-on-login-screen.html)
+* [Geo-fences](geofences.html)
