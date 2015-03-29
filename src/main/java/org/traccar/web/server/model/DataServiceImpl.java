@@ -480,10 +480,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                         switch (geoFence.getType()) {
                             case POLYGON:
                                 Path2D shape = new Path2D.Double();
-                                List<GeoFence.LonLat> points = geoFence.points();
-                                for (int i = 0; i < points.size(); i++) {
-                                    GeoFence.LonLat point = points.get(i);
-                                    if (i == 0) {
+                                for (GeoFence.LonLat point : geoFence.points()) {
+                                    if (shape.getCurrentPoint() == null) {
                                         shape.moveTo(point.lon, point.lat);
                                     } else {
                                         shape.lineTo(point.lon, point.lat);
@@ -497,7 +495,34 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                                 add = getDistance(position.getLongitude(), position.getLatitude(), center.lon, center.lat) <= geoFence.getRadius() / 1000;
                                 break;
                             case LINE:
-                                // TODO
+                                GeoFence.LonLat prevPoint = null;
+                                for (GeoFence.LonLat point : geoFence.points()) {
+                                    if (prevPoint != null) {
+                                        // from http://stackoverflow.com/questions/1459368/snap-point-to-a-line
+                                        double apx = position.getLongitude() - prevPoint.lon;
+                                        double apy = position.getLatitude() - prevPoint.lat;
+                                        double abx = point.lon - prevPoint.lon;
+                                        double aby = point.lat - prevPoint.lat;
+
+                                        double ab2 = abx * abx + aby * aby;
+                                        double ap_ab = apx * abx + apy * aby;
+                                        double t = ap_ab / ab2;
+                                        if (t < 0) {
+                                            t = 0;
+                                        } else if (t > 1) {
+                                            t = 1;
+                                        }
+
+                                        double destLon = prevPoint.lon + abx * t;
+                                        double destLat = prevPoint.lat + aby * t;
+
+                                        if (getDistance(destLon, destLat, position.getLongitude(), position.getLatitude()) <= geoFence.getRadius() / 2000) {
+                                            add = true;
+                                            break;
+                                        }
+                                    }
+                                    prevPoint = point;
+                                }
                                 break;
                         }
 
