@@ -60,3 +60,15 @@ First of all access to geo-fences is a bit different from access to devices:
 To manage access to geo-fence administrator or manager should select it in a list on 'Geo-fences' tab and click 'Share' button as he uses for access management to devices.
 
 ![Sharing geo-fence](http://i62.tinypic.com/1zme8o3.png)
+
+Viewing geo-fence
+-----------------
+
+As for now geo-fence is displayed only in popup of device if it's currently in that geo-fence.
+
+![Geo-fence in popup](http://i58.tinypic.com/6jpvh4.png)
+
+Notifications
+-------------
+
+This is not yet implemented, but will be done in nearest future.
