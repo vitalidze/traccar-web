@@ -18,17 +18,30 @@ package org.traccar.web.client.view;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import org.gwtopenmaps.openlayers.client.*;
+import org.gwtopenmaps.openlayers.client.Bounds;
+import org.gwtopenmaps.openlayers.client.LonLat;
+import org.gwtopenmaps.openlayers.client.Map;
+import org.gwtopenmaps.openlayers.client.MapOptions;
+import org.gwtopenmaps.openlayers.client.MapWidget;
+import org.gwtopenmaps.openlayers.client.OpenLayersStyle;
+import org.gwtopenmaps.openlayers.client.Projection;
+import org.gwtopenmaps.openlayers.client.Style;
+import org.gwtopenmaps.openlayers.client.StyleMap;
+import org.gwtopenmaps.openlayers.client.StyleOptions;
+import org.gwtopenmaps.openlayers.client.StyleRules;
 import org.gwtopenmaps.openlayers.client.control.LayerSwitcher;
 import org.gwtopenmaps.openlayers.client.control.ScaleLine;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
+import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
+import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.Position;
 
 import com.google.gwt.core.client.Scheduler;
@@ -57,6 +70,7 @@ public class MapView {
     private Map map;
     private Vector vectorLayer;
     private Markers markerLayer;
+    private Vector geofenceLayer;
     private Vector archiveLayer;
 
     private Messages i18n = GWT.create(Messages.class);
@@ -69,6 +83,10 @@ public class MapView {
         return vectorLayer;
     }
 
+    public Vector getGeofenceLayer() {
+        return geofenceLayer;
+    }
+
     public Markers getMarkerLayer() {
         return markerLayer;
     }
@@ -79,12 +97,12 @@ public class MapView {
 
     public LonLat createLonLat(double longitude, double latitude) {
         LonLat lonLat = new LonLat(longitude, latitude);
-        lonLat.transform(new Projection("EPSG:4326").getProjectionCode(), map.getProjection());
+        lonLat.transform("EPSG:4326", map.getProjection());
         return lonLat;
     }
 
-    public Point createPoint(double x, double y) {
-        Point point = new Point(x, y);
+    public Point createPoint(double longitude, double latitude) {
+        Point point = new Point(longitude, latitude);
         point.transform(new Projection("EPSG:4326"), new Projection(map.getProjection()));
         return point;
     }
@@ -156,8 +174,15 @@ public class MapView {
         MarkersOptions markersOptions = new MarkersOptions();
         markerLayer = new Markers(i18n.markers(), markersOptions);
 
+        vectorOptions = new VectorOptions();
+        OpenLayersStyle defaultStyle = new OpenLayersStyle(new StyleRules(), new StyleOptions());
+        defaultStyle.setJSObject(getGeoFenceLineStyle(map.getJSObject()));
+        vectorOptions.setStyleMap(new StyleMap(defaultStyle, defaultStyle, null));
+        geofenceLayer = new Vector(i18n.geoFences(), vectorOptions);
+
         initMapLayers(map);
 
+        map.addLayer(geofenceLayer);
         map.addLayer(vectorLayer);
         map.addLayer(markerLayer);
 
@@ -204,13 +229,13 @@ public class MapView {
         latestPositionRenderer = new MapPositionRenderer(this, latestPositionSelectHandler, positionMouseHandler);
         archivePositionRenderer = new MapPositionRenderer(this, archivePositionSelectHandler, positionMouseHandler);
         latestPositionTrackRenderer = new MapPositionRenderer(this, null, null);
+        geoFenceRenderer = new GeoFenceRenderer(this);
     }
 
     private final MapPositionRenderer latestPositionRenderer;
-
     private final MapPositionRenderer archivePositionRenderer;
-
     private final MapPositionRenderer latestPositionTrackRenderer;
+    private final GeoFenceRenderer geoFenceRenderer;
 
     public void showLatestPositions(List<Position> positions) {
         latestPositionRenderer.showPositions(positions);
@@ -302,4 +327,66 @@ public class MapView {
     public void updateIcon(Device device) {
         latestPositionRenderer.updateIcon(device);
     }
+
+    public void drawGeoFence(GeoFence geoFence, boolean drawTitle) {
+        geoFenceRenderer.drawGeoFence(geoFence, drawTitle);
+    }
+
+    public void removeGeoFence(GeoFence geoFence) {
+        geoFenceRenderer.removeGeoFence(geoFence);
+    }
+
+    public GeoFenceDrawing getGeoFenceDrawing(GeoFence geoFence) {
+        return geoFenceRenderer.getDrawing(geoFence);
+    }
+
+    public void selectGeoFence(GeoFence geoFence) {
+        geoFenceRenderer.selectGeoFence(geoFence);
+    }
+
+    /**
+     * This style is used to dynamically calculate width of 'LINE' geo-fence
+     *
+     * <p>See:
+     * <ul>
+     * <li>http://gis.stackexchange.com/questions/56754/features-on-a-vector-layer-to-have-a-scalable-stroke</li>
+     * <li>http://stackoverflow.com/questions/6037969/get-radius-size-in-meters-of-a-drawn-point</li>
+     * <li>http://stackoverflow.com/questions/21672508/gwt-openlayers-set-sum-of-values-of-underlying-vectorfeatures-on-cluster-point</li>
+     * </ul>
+     * </p>
+     */
+    public static native JSObject getGeoFenceLineStyle(JSObject map) /*-{
+        var context =
+        {
+            getWidth: function (feature) {
+                if (feature.attributes.widthInMeters === undefined) {
+                    return 2;
+                } else {
+                    return feature.attributes.widthInMeters / map.getResolution();
+                }
+            },
+            getLineColor: function (feature)
+            {
+                if (feature.attributes.lineColor === undefined) {
+                    return '#000000';
+                } else {
+                    return feature.attributes.lineColor;
+                }
+            }
+        };
+
+        return new $wnd.OpenLayers.Style(
+        {
+            strokeWidth: "${getWidth}",
+            strokeColor: "${getLineColor}",
+            strokeOpacity: 0.3,
+            // for editing
+            pointRadius: 5,
+            fillColor: '#00ffff',
+            fillOpacity: '0.5'
+        },
+        {
+            context: context
+        });
+    }-*/;
 }

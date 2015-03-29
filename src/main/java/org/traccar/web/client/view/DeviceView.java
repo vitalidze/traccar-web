@@ -23,9 +23,14 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Event;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
-import com.sencha.gxt.state.client.GridStateHandler;
+import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
+import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
+import com.sencha.gxt.widget.core.client.ListView;
+import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
@@ -38,6 +43,8 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.DeviceProperties;
+import org.traccar.web.client.model.GeoFenceProperties;
+import org.traccar.web.client.state.GridStateHandler;
 import org.traccar.web.shared.model.Device;
 
 import com.google.gwt.core.client.GWT;
@@ -58,8 +65,9 @@ import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import org.traccar.web.shared.model.GeoFence;
 
-public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler<Device>, RowMouseDownEvent.RowMouseDownHandler, CellDoubleClickEvent.CellDoubleClickHandler {
+public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDoubleClickEvent.CellDoubleClickHandler {
 
     private static DeviceViewUiBinder uiBinder = GWT.create(DeviceViewUiBinder.class);
 
@@ -77,7 +85,17 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         public void doubleClicked(Device device);
     }
 
-    private DeviceHandler deviceHandler;
+    public interface GeoFenceHandler {
+        public void onAdd();
+        public void onEdit(GeoFence geoFence);
+        public void onRemove(GeoFence geoFence);
+        public void onSelected(GeoFence geoFence);
+        public void onShare(GeoFence geoFence);
+    }
+
+    private final DeviceHandler deviceHandler;
+
+    private final GeoFenceHandler geoFenceHandler;
 
     @UiField
     ContentPanel contentPanel;
@@ -105,6 +123,9 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     SeparatorToolItem separatorItem;
 
     @UiField(provided = true)
+    TabPanel objectsTabs;
+
+    @UiField(provided = true)
     ColumnModel<Device> columnModel;
 
     @UiField(provided = true)
@@ -112,6 +133,12 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
 
     @UiField
     Grid<Device> grid;
+
+    @UiField(provided = true)
+    ListStore<GeoFence> geoFenceStore;
+
+    @UiField(provided = true)
+    ListView<GeoFence, String> geoFenceList;
 
     @UiField
     TextButton settingsButton;
@@ -137,10 +164,16 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public DeviceView(final DeviceHandler deviceHandler, SettingsHandler settingsHandler, final ListStore<Device> deviceStore) {
+    public DeviceView(final DeviceHandler deviceHandler,
+                      final GeoFenceHandler geoFenceHandler,
+                      SettingsHandler settingsHandler,
+                      final ListStore<Device> deviceStore,
+                      final ListStore<GeoFence> geoFenceStore) {
         this.deviceHandler = deviceHandler;
+        this.geoFenceHandler = geoFenceHandler;
         this.settingsHandler = settingsHandler;
         this.deviceStore = deviceStore;
+        this.geoFenceStore = geoFenceStore;
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
 
@@ -187,9 +220,28 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
 
         columnModel = new ColumnModel<Device>(columnConfigList);
 
+        // geo-fences
+        GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
+
+        geoFenceList = new ListView<GeoFence, String>(geoFenceStore, geoFenceProperties.name()) {
+            @Override
+            protected void onMouseDown(Event e) {
+                int index = indexOf(e.getEventTarget().<Element>cast());
+                if (index != -1) {
+                    geoFenceHandler.onSelected(geoFenceList.getStore().get(index));
+                }
+                super.onMouseDown(e);
+            }
+        };
+        geoFenceList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        geoFenceList.getSelectionModel().addSelectionChangedHandler(geoFenceSelectionHandler);
+
+        // tab panel
+        objectsTabs = new TabPanel(GWT.<TabPanelAppearance>create(BlueTabPanelBottomAppearance.class));
+
         uiBinder.createAndBindUi(this);
 
-        grid.getSelectionModel().addSelectionChangedHandler(this);
+        grid.getSelectionModel().addSelectionChangedHandler(deviceSelectionHandler);
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         grid.addRowMouseDownHandler(this);
         grid.addCellDoubleClickHandler(this);
@@ -226,18 +278,25 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
         separatorItem.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
     }
 
-    @Override
-    public void onSelectionChanged(SelectionChangedEvent<Device> event) {
-        editButton.setEnabled(!event.getSelection().isEmpty());
-        shareButton.setEnabled(!event.getSelection().isEmpty());
-        removeButton.setEnabled(!event.getSelection().isEmpty());
-
-        if (event.getSelection().isEmpty()) {
-            deviceHandler.onSelected(null);
-        } else {
-            deviceHandler.onSelected(event.getSelection().get(0));
+    final SelectionChangedEvent.SelectionChangedHandler<Device> deviceSelectionHandler = new SelectionChangedEvent.SelectionChangedHandler<Device>() {
+        @Override
+        public void onSelectionChanged(SelectionChangedEvent<Device> event) {
+            editButton.setEnabled(!event.getSelection().isEmpty());
+            shareButton.setEnabled(!event.getSelection().isEmpty());
+            removeButton.setEnabled(!event.getSelection().isEmpty());
         }
-    }
+    };
+
+    final SelectionChangedEvent.SelectionChangedHandler<GeoFence> geoFenceSelectionHandler = new SelectionChangedEvent.SelectionChangedHandler<GeoFence>() {
+        @Override
+        public void onSelectionChanged(SelectionChangedEvent<GeoFence> event) {
+            editButton.setEnabled(!event.getSelection().isEmpty());
+            shareButton.setEnabled(!event.getSelection().isEmpty());
+            removeButton.setEnabled(!event.getSelection().isEmpty());
+
+            geoFenceHandler.onSelected(event.getSelection().isEmpty() ? null : event.getSelection().get(0));
+        }
+    };
 
     @Override
     public void onRowMouseDown(RowMouseDownEvent event) {
@@ -251,22 +310,38 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
 
     @UiHandler("addButton")
     public void onAddClicked(SelectEvent event) {
-        deviceHandler.onAdd();
+        if (objectsTabs.getActiveWidget() == geoFenceList) {
+            geoFenceHandler.onAdd();
+        } else {
+            deviceHandler.onAdd();
+        }
     }
 
     @UiHandler("editButton")
     public void onEditClicked(SelectEvent event) {
-        deviceHandler.onEdit(grid.getSelectionModel().getSelectedItem());
+        if (objectsTabs.getActiveWidget() == geoFenceList) {
+            geoFenceHandler.onEdit(geoFenceList.getSelectionModel().getSelectedItem());
+        } else {
+            deviceHandler.onEdit(grid.getSelectionModel().getSelectedItem());
+        }
     }
 
     @UiHandler("shareButton")
     public void onShareClicked(SelectEvent event) {
-        deviceHandler.onShare(grid.getSelectionModel().getSelectedItem());
+        if (objectsTabs.getActiveWidget() == geoFenceList) {
+            geoFenceHandler.onShare(geoFenceList.getSelectionModel().getSelectedItem());
+        } else {
+            deviceHandler.onShare(grid.getSelectionModel().getSelectedItem());
+        }
     }
 
     @UiHandler("removeButton")
     public void onRemoveClicked(SelectEvent event) {
-        deviceHandler.onRemove(grid.getSelectionModel().getSelectedItem());
+        if (objectsTabs.getActiveWidget() == geoFenceList) {
+            geoFenceHandler.onRemove(geoFenceList.getSelectionModel().getSelectedItem());
+        } else {
+            deviceHandler.onRemove(grid.getSelectionModel().getSelectedItem());
+        }
     }
 
     @UiHandler("logoutButton")
@@ -321,5 +396,14 @@ public class DeviceView implements SelectionChangedEvent.SelectionChangedHandler
     @UiHandler("showTrackerServerLog")
     public void onShowTrackerServerLog(SelectionEvent<Item> event) {
         new TrackerServerLogViewDialog().show();
+    }
+
+    @UiHandler("objectsTabs")
+    public void onTabSelected(SelectionEvent<Widget> event) {
+        if (event.getSelectedItem() == geoFenceList) {
+            grid.getSelectionModel().deselectAll();
+        } else {
+            geoFenceList.getSelectionModel().deselectAll();
+        }
     }
 }

@@ -53,6 +53,10 @@ public class User implements Serializable, Cloneable {
         manager = false;
     }
 
+    public User(String login) {
+        this.login = login;
+    }
+
     public User(User user) {
         id = user.id;
         admin = user.admin;
@@ -161,6 +165,39 @@ public class User implements Serializable, Cloneable {
             }
         }
         return devices;
+    }
+
+    @GwtTransient
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "users_geofences",
+            foreignKey = @ForeignKey(name = "users_geofences_fkey_user_id"),
+            joinColumns = { @JoinColumn(name = "user_id", table = "users", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "geofence_id", table = "geofences", referencedColumnName = "id") })
+    private List<GeoFence> geoFences;
+
+    public void setGeoFences(List<GeoFence> geoFences) {
+        this.geoFences = geoFences;
+    }
+
+    public List<GeoFence> getGeoFences() {
+        return geoFences;
+    }
+
+    public Set<GeoFence> getAllAvailableGeoFences() {
+        Set<GeoFence> result = new HashSet<GeoFence>();
+        result.addAll(getGeoFences());
+        if (getManager()) {
+            for (User user : getManagedUsers()) {
+                result.addAll(user.getAllAvailableGeoFences());
+            }
+        }
+        User managedBy = getManagedBy();
+        while (managedBy != null) {
+            result.addAll(managedBy.getGeoFences());
+            managedBy = managedBy.getManagedBy();
+        }
+
+        return result;
     }
 
     @Expose

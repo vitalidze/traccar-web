@@ -24,6 +24,7 @@ import com.sencha.gxt.widget.core.client.tips.ToolTipConfig;
 import org.gwtopenmaps.openlayers.client.Pixel;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.PositionIconType;
 
@@ -60,6 +61,21 @@ public class PositionInfoPopup {
                 }
             } catch (Exception error) {
             }
+        }
+
+        if (position.getGeoFences() != null && !position.getGeoFences().isEmpty()) {
+            body += "<tr><td style=\"border-width: 1px 0px 0px 0px; border-style: solid; border-color: #000000; padding: 3px 10px 3px 0px;\" colspan=\"2\">";
+            for (GeoFence geoFence : position.getGeoFences()) {
+                body += "<p><div style=\"" +
+                        "    width: 10px;\n" +
+                        "    height: 10px;\n" +
+                        "    display: inline-block;\n" +
+                        "    background-color: #" + geoFence.getColor() + ";\n" +
+                        "    border: 1px solid;\n" +
+                        "    left: 5px;\n" +
+                        "    top: 5px;\"></div> " + geoFence.getName() + "</p>";
+            }
+            body += "</td></tr>";
         }
 
         body += "</table>";

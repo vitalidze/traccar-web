@@ -15,8 +15,11 @@
  */
 package org.traccar.web.server.model;
 
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -281,6 +284,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         for (Device device : user.getDevices()) {
             device.getUsers().remove(user);
         }
+        for (GeoFence geoFence : user.getGeoFences()) {
+            geoFence.getUsers().remove(user);
+        }
         entityManager.remove(user);
         return fillUserSettings(user);
     }
@@ -422,24 +428,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         List<Position> queryResult = query.getResultList();
 
-        final double radKoef = Math.PI / 180;
-        final double earthRadius = 6371.01; // Radius of the earth in km
-
         for (int i = 0; i < queryResult.size(); i++) {
             boolean add = true;
             if (i > 0) {
                 Position positionA = queryResult.get(i - 1);
                 Position positionB = queryResult.get(i);
 
-                double dLat = (positionA.getLatitude() - positionB.getLatitude()) * radKoef;
-                double dLon = (positionA.getLongitude() - positionB.getLongitude()) * radKoef;
-                double a =
-                        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                                Math.cos(positionA.getLatitude() * radKoef) * Math.cos(positionB.getLatitude() * radKoef) *
-                                Math.sin(dLon / 2) * Math.sin(dLon / 2)
-                        ;
-                double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                positionB.setDistance(earthRadius * c); // Distance in km
+                positionB.setDistance(getDistance(positionA.getLongitude(), positionA.getLatitude(), positionB.getLongitude(), positionB.getLatitude()));
 
                 if (filter && filters.isHideDuplicates()) {
                     add = !positionA.getTime().equals(positionB.getTime());
@@ -453,16 +448,93 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         return positions;
     }
 
+    private static final double radKoef = Math.PI / 180;
+    private static final double earthRadius = 6371.01; // Radius of the earth in km
+
+    private double getDistance(double lonX, double latX, double lonY, double latY) {
+        double dLat = (latX - latY) * radKoef;
+        double dLon = (lonX - lonY) * radKoef;
+        double a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.cos(latX * radKoef) * Math.cos(latY * radKoef) *
+                                Math.sin(dLon / 2) * Math.sin(dLon / 2)
+                ;
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return earthRadius * c; // Distance in km
+    }
+
     @RequireUser
     @Transactional
     @Override
     public List<Position> getLatestPositions() {
         List<Position> positions = new LinkedList<Position>();
         List<Device> devices = getDevices();
+        List<GeoFence> geoFences = getGeoFences();
         if (devices != null && !devices.isEmpty()) {
             for (Device device : devices) {
                 if (device.getLatestPosition() != null) {
-                    positions.add(device.getLatestPosition());
+                    Position position = device.getLatestPosition();
+                    // calculate geo-fences
+                    for (GeoFence geoFence : geoFences) {
+                        boolean add = false;
+                        switch (geoFence.getType()) {
+                            case POLYGON:
+                                Path2D shape = new Path2D.Double();
+                                for (GeoFence.LonLat point : geoFence.points()) {
+                                    if (shape.getCurrentPoint() == null) {
+                                        shape.moveTo(point.lon, point.lat);
+                                    } else {
+                                        shape.lineTo(point.lon, point.lat);
+                                    }
+                                }
+                                shape.closePath();
+                                add = shape.contains(position.getLongitude(), position.getLatitude());
+                                break;
+                            case CIRCLE:
+                                GeoFence.LonLat center = geoFence.points().get(0);
+                                add = getDistance(position.getLongitude(), position.getLatitude(), center.lon, center.lat) <= geoFence.getRadius() / 1000;
+                                break;
+                            case LINE:
+                                GeoFence.LonLat prevPoint = null;
+                                for (GeoFence.LonLat point : geoFence.points()) {
+                                    if (prevPoint != null) {
+                                        // from http://stackoverflow.com/questions/1459368/snap-point-to-a-line
+                                        double apx = position.getLongitude() - prevPoint.lon;
+                                        double apy = position.getLatitude() - prevPoint.lat;
+                                        double abx = point.lon - prevPoint.lon;
+                                        double aby = point.lat - prevPoint.lat;
+
+                                        double ab2 = abx * abx + aby * aby;
+                                        double ap_ab = apx * abx + apy * aby;
+                                        double t = ap_ab / ab2;
+                                        if (t < 0) {
+                                            t = 0;
+                                        } else if (t > 1) {
+                                            t = 1;
+                                        }
+
+                                        double destLon = prevPoint.lon + abx * t;
+                                        double destLat = prevPoint.lat + aby * t;
+
+                                        if (getDistance(destLon, destLat, position.getLongitude(), position.getLatitude()) <= geoFence.getRadius() / 2000) {
+                                            add = true;
+                                            break;
+                                        }
+                                    }
+                                    prevPoint = point;
+                                }
+                                break;
+                        }
+
+                        if (add) {
+                            if (position.getGeoFences() == null) {
+                                position.setGeoFences(new LinkedList<GeoFence>());
+                            }
+                            position.getGeoFences().add(geoFence);
+                        }
+                    }
+
+                    positions.add(position);
                 }
             }
         }
@@ -625,5 +697,97 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             user.setUserSettings(settings);
         }
         return user;
+    }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public List<GeoFence> getGeoFences() {
+        User user = getSessionUser();
+        if (user.getAdmin()) {
+            return getSessionEntityManager().createQuery("SELECT g FROM GeoFence g", GeoFence.class).getResultList();
+        }
+        return new ArrayList<GeoFence>(user.getAllAvailableGeoFences());
+    }
+
+    @Transactional
+    @RequireUser
+    @RequireWrite
+    @Override
+    public GeoFence addGeoFence(GeoFence geoFence) throws TraccarException {
+        if (geoFence.getName() == null || geoFence.getName().trim().isEmpty()) {
+            throw new ValidationException();
+        }
+
+        geoFence.setUsers(new HashSet<User>());
+        geoFence.getUsers().add(getSessionUser());
+        getSessionEntityManager().persist(geoFence);
+
+        return geoFence;
+    }
+
+    @Transactional
+    @RequireUser
+    @RequireWrite
+    @Override
+    public GeoFence updateGeoFence(GeoFence updatedGeoFence) throws TraccarException {
+        if (updatedGeoFence.getName() == null || updatedGeoFence.getName().trim().isEmpty()) {
+            throw new ValidationException();
+        }
+
+        GeoFence geoFence = getSessionEntityManager().find(GeoFence.class, updatedGeoFence.getId());
+        geoFence.copyFrom(updatedGeoFence);
+
+        return geoFence;
+    }
+
+    @Transactional
+    @RequireUser
+    @RequireWrite
+    @Override
+    public GeoFence removeGeoFence(GeoFence geoFence) {
+        User user = getSessionUser();
+        geoFence = getSessionEntityManager().find(GeoFence.class, geoFence.getId());
+        if (user.getAdmin() || user.getManager()) {
+            geoFence.getUsers().removeAll(getUsers());
+        }
+        geoFence.getUsers().remove(user);
+        if (geoFence.getUsers().isEmpty()) {
+            getSessionEntityManager().remove(geoFence);
+        }
+        return geoFence;
+    }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public Map<User, Boolean> getGeoFenceShare(GeoFence geoFence) {
+        geoFence = getSessionEntityManager().find(GeoFence.class, geoFence.getId());
+        List<User> users = getUsers();
+        Map<User, Boolean> result = new HashMap<User, Boolean>(users.size());
+        for (User user : users) {
+            result.put(fillUserSettings(user), geoFence.getUsers().contains(user));
+        }
+        return result;
+    }
+
+    @Transactional
+    @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
+    @Override
+    public void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share) {
+        EntityManager entityManager = getSessionEntityManager();
+        geoFence = entityManager.find(GeoFence.class, geoFence.getId());
+
+        for (User user : getUsers()) {
+            Boolean shared = share.get(user);
+            if (shared == null) continue;
+            if (shared) {
+                geoFence.getUsers().add(user);
+            } else {
+                geoFence.getUsers().remove(user);
+            }
+            entityManager.merge(user);
+        }
     }
 }

@@ -71,4 +71,15 @@ public interface DataService extends RemoteService {
     String getTrackerServerLog(short sizeKb);
 
     void saveRoles(List<User> users);
+
+    List<GeoFence> getGeoFences();
+
+    GeoFence addGeoFence(GeoFence geoFence) throws TraccarException;
+
+    GeoFence updateGeoFence(GeoFence geoFence) throws TraccarException;
+
+    GeoFence removeGeoFence(GeoFence geoFence);
+
+    Map<User, Boolean> getGeoFenceShare(GeoFence geoFence);
+    void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share);
 }

@@ -17,7 +17,6 @@ package org.traccar.web.client.view;
 
 import java.util.*;
 
-import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -25,7 +24,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
-import com.sencha.gxt.state.client.GridStateHandler;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.form.*;
@@ -37,6 +35,7 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.PositionProperties;
+import org.traccar.web.client.state.GridStateHandler;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
