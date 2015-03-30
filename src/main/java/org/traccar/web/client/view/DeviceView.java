@@ -260,6 +260,25 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         editing.addEditor(colFollow, new CheckBox());
         editing.addEditor(colRecordTrace, new CheckBox());
 
+        boolean readOnly = ApplicationContext.getInstance().getUser().getReadOnly();
+        boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
+        boolean manager = ApplicationContext.getInstance().getUser().getManager();
+
+        settingsButton.setVisible(admin || !readOnly);
+        settingsAccount.setVisible(!readOnly);
+        settingsPreferences.setVisible(!readOnly);
+
+        settingsGlobal.setVisible(!readOnly && admin);
+        showTrackerServerLog.setVisible(admin);
+        settingsUsers.setVisible(!readOnly && (admin || manager));
+        settingsNotifications.setVisible(!readOnly && (admin || manager));
+        shareButton.setVisible(!readOnly && (admin || manager));
+
+        addButton.setVisible(!readOnly);
+        editButton.setVisible(!readOnly);
+        removeButton.setVisible(!readOnly);
+        fillItem.setVisible(!readOnly);
+        separatorItem.setVisible(!readOnly);
         toggleManagementButtons();
     }
 
@@ -398,27 +417,12 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     }
 
     private void toggleManagementButtons() {
-        boolean readOnly = ApplicationContext.getInstance().getUser().getReadOnly();
         boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
         boolean manager = ApplicationContext.getInstance().getUser().getManager();
-        boolean allowDeviceManagement = editingGeoFences() || !ApplicationContext.getInstance().getApplicationSettings().isDisallowDeviceManagementByUsers();
+        boolean allowDeviceManagement = !ApplicationContext.getInstance().getApplicationSettings().isDisallowDeviceManagementByUsers();
 
-        settingsButton.setVisible(admin || !readOnly);
-        settingsAccount.setVisible(!readOnly);
-        settingsPreferences.setVisible(!readOnly);
-
-        settingsGlobal.setVisible(!readOnly && admin);
-        showTrackerServerLog.setVisible(admin);
-        settingsUsers.setVisible(!readOnly && (admin || manager));
-        settingsNotifications.setVisible(!readOnly && (admin || manager));
-        shareButton.setVisible(!readOnly && (admin || manager));
-
-        addButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
-        editButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
-        removeButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
-        fillItem.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
-        separatorItem.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
-
-        toolbar.forceLayout();
+        addButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
+        editButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
+        removeButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
     }
 }
