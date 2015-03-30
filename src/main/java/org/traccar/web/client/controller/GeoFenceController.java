@@ -21,6 +21,7 @@ import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import org.traccar.web.client.Application;
@@ -41,6 +42,7 @@ import java.util.Map;
 public class GeoFenceController implements ContentController, DeviceView.GeoFenceHandler {
     private final MapController mapController;
     private final ListStore<GeoFence> geoFenceStore;
+    private boolean geoFenceManagementInProgress;
 
     private Messages i18n = GWT.create(Messages.class);
 
@@ -73,6 +75,10 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
 
     @Override
     public void onAdd() {
+        if (geoFenceManagementInProgress()) {
+            return;
+        }
+        geoFenceManagementStarted();
         final GeoFence geoFence = new GeoFence();
         geoFence.setName(i18n.newGeoFence());
         new GeoFenceWindow(geoFence, null, mapController.getMap(), mapController.getGeoFenceLayer(),
@@ -86,6 +92,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
                                 mapController.removeGeoFence(geoFence);
                                 geoFenceStore.add(addedGeoFence);
                                 geoFenceStore.applySort(false);
+                                geoFenceManagementStopped();
                             }
 
                             @Override
@@ -99,12 +106,17 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
             @Override
             public void onCancel() {
                 onClear();
+                geoFenceManagementStopped();
             }
         }).show();
     }
 
     @Override
     public void onEdit(final GeoFence geoFence) {
+        if (geoFenceManagementInProgress()) {
+            return;
+        }
+        geoFenceManagementStarted();
         GeoFenceDrawing drawing = mapController.getGeoFenceDrawing(geoFence);
         mapController.getGeoFenceLayer().removeFeature(drawing.getTitle());
         new GeoFenceWindow(geoFence, drawing, mapController.getMap(), mapController.getGeoFenceLayer(),
@@ -119,6 +131,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
                                 mapController.drawGeoFence(geoFence, true);
                                 geoFenceStore.update(geoFence);
                                 geoFenceStore.applySort(false);
+                                geoFenceManagementStopped();
                             }
 
                             @Override
@@ -133,12 +146,16 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
             public void onCancel() {
                 mapController.removeGeoFence(geoFence);
                 mapController.drawGeoFence(geoFence, true);
+                geoFenceManagementStopped();
             }
         }).show();
     }
 
     @Override
     public void onRemove(final GeoFence geoFence) {
+        if (geoFenceManagementInProgress()) {
+            return;
+        }
         final ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmGeoFenceRemoval());
         dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
             @Override
@@ -182,6 +199,9 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
 
     @Override
     public void onShare(final GeoFence geoFence) {
+        if (geoFenceManagementInProgress()) {
+            return;
+        }
         Application.getDataService().getGeoFenceShare(geoFence, new BaseAsyncCallback<Map<User, Boolean>>(i18n) {
             @Override
             public void onSuccess(final Map<User, Boolean> share) {
@@ -193,5 +213,20 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
                 }).show();
             }
         });
+    }
+
+    private boolean geoFenceManagementInProgress() {
+        if (geoFenceManagementInProgress) {
+            new AlertMessageBox(i18n.error(), i18n.errSaveChanges()).show();
+        }
+        return geoFenceManagementInProgress;
+    }
+
+    private void geoFenceManagementStarted() {
+        geoFenceManagementInProgress = true;
+    }
+
+    private void geoFenceManagementStopped() {
+        geoFenceManagementInProgress = false;
     }
 }
