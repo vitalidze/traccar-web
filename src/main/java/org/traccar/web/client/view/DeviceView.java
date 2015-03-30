@@ -38,6 +38,7 @@ import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.toolbar.FillToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.SeparatorToolItem;
+import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
@@ -103,6 +104,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     public ContentPanel getView() {
         return contentPanel;
     }
+
+    @UiField
+    ToolBar toolbar;
 
     @UiField
     TextButton addButton;
@@ -256,26 +260,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         editing.addEditor(colFollow, new CheckBox());
         editing.addEditor(colRecordTrace, new CheckBox());
 
-        boolean readOnly = ApplicationContext.getInstance().getUser().getReadOnly();
-        boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
-        boolean manager = ApplicationContext.getInstance().getUser().getManager();
-        boolean allowDeviceManagement = !ApplicationContext.getInstance().getApplicationSettings().isDisallowDeviceManagementByUsers();
-
-        settingsButton.setVisible(admin || !readOnly);
-        settingsAccount.setVisible(!readOnly);
-        settingsPreferences.setVisible(!readOnly);
-
-        settingsGlobal.setVisible(!readOnly && admin);
-        showTrackerServerLog.setVisible(admin);
-        settingsUsers.setVisible(!readOnly && (admin || manager));
-        settingsNotifications.setVisible(!readOnly && (admin || manager));
-        shareButton.setVisible(!readOnly && (admin || manager));
-
-        addButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
-        editButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
-        removeButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
-        fillItem.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
-        separatorItem.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
+        toggleManagementButtons();
     }
 
     final SelectionChangedEvent.SelectionChangedHandler<Device> deviceSelectionHandler = new SelectionChangedEvent.SelectionChangedHandler<Device>() {
@@ -310,7 +295,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @UiHandler("addButton")
     public void onAddClicked(SelectEvent event) {
-        if (objectsTabs.getActiveWidget() == geoFenceList) {
+        if (editingGeoFences()) {
             geoFenceHandler.onAdd();
         } else {
             deviceHandler.onAdd();
@@ -319,7 +304,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @UiHandler("editButton")
     public void onEditClicked(SelectEvent event) {
-        if (objectsTabs.getActiveWidget() == geoFenceList) {
+        if (editingGeoFences()) {
             geoFenceHandler.onEdit(geoFenceList.getSelectionModel().getSelectedItem());
         } else {
             deviceHandler.onEdit(grid.getSelectionModel().getSelectedItem());
@@ -328,7 +313,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @UiHandler("shareButton")
     public void onShareClicked(SelectEvent event) {
-        if (objectsTabs.getActiveWidget() == geoFenceList) {
+        if (editingGeoFences()) {
             geoFenceHandler.onShare(geoFenceList.getSelectionModel().getSelectedItem());
         } else {
             deviceHandler.onShare(grid.getSelectionModel().getSelectedItem());
@@ -337,7 +322,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @UiHandler("removeButton")
     public void onRemoveClicked(SelectEvent event) {
-        if (objectsTabs.getActiveWidget() == geoFenceList) {
+        if (editingGeoFences()) {
             geoFenceHandler.onRemove(geoFenceList.getSelectionModel().getSelectedItem());
         } else {
             deviceHandler.onRemove(grid.getSelectionModel().getSelectedItem());
@@ -405,5 +390,35 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         } else {
             geoFenceList.getSelectionModel().deselectAll();
         }
+        toggleManagementButtons();
+    }
+
+    private boolean editingGeoFences() {
+        return objectsTabs.getActiveWidget() == geoFenceList;
+    }
+
+    private void toggleManagementButtons() {
+        boolean readOnly = ApplicationContext.getInstance().getUser().getReadOnly();
+        boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
+        boolean manager = ApplicationContext.getInstance().getUser().getManager();
+        boolean allowDeviceManagement = editingGeoFences() || !ApplicationContext.getInstance().getApplicationSettings().isDisallowDeviceManagementByUsers();
+
+        settingsButton.setVisible(admin || !readOnly);
+        settingsAccount.setVisible(!readOnly);
+        settingsPreferences.setVisible(!readOnly);
+
+        settingsGlobal.setVisible(!readOnly && admin);
+        showTrackerServerLog.setVisible(admin);
+        settingsUsers.setVisible(!readOnly && (admin || manager));
+        settingsNotifications.setVisible(!readOnly && (admin || manager));
+        shareButton.setVisible(!readOnly && (admin || manager));
+
+        addButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
+        editButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
+        removeButton.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
+        fillItem.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
+        separatorItem.setVisible(!readOnly && (allowDeviceManagement || admin || manager));
+
+        toolbar.forceLayout();
     }
 }

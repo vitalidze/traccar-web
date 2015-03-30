@@ -38,7 +38,7 @@
     <container:VerticalLayoutContainer>
 
       <container:child layoutData="{toolBarRowData}">
-        <toolbar:ToolBar>
+        <toolbar:ToolBar ui:field="toolbar">
           <button:TextButton ui:field="addButton" text="{i18n.add}" />
           <button:TextButton ui:field="editButton" text="{i18n.edit}" enabled="false" />
           <button:TextButton ui:field="shareButton" text="{i18n.share}" enabled="false" visible="false" />
