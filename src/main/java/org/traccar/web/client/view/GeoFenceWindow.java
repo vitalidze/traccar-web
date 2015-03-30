@@ -174,6 +174,8 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     @UiHandler("type")
     public void onTypeChanged(SelectionEvent<GeoFenceType> event) {
         clear();
+        GeoFenceType type = event.getSelectedItem();
+        radius.setEnabled(type == GeoFenceType.CIRCLE || type == GeoFenceType.LINE);
     }
 
     @UiHandler("color")
