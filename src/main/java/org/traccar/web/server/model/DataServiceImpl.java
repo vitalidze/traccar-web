@@ -689,6 +689,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
         geoFence.getUsers().remove(user);
         if (geoFence.getUsers().isEmpty()) {
+            Query query = entityManager.get().createQuery("DELETE FROM DeviceEvent x WHERE x.geoFence = :geoFence");
+            query.setParameter("geoFence", geoFence);
+            query.executeUpdate();
+
             getSessionEntityManager().remove(geoFence);
         }
         return geoFence;
