@@ -55,8 +55,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         public void doWork() throws Exception {
             Map<User, Set<DeviceEvent>> events = new HashMap<User, Set<DeviceEvent>>();
             List<User> admins = null;
+            Map<User, List<User>> managers = new HashMap<User, List<User>>();
 
-            for (DeviceEvent event : entityManager.get().createQuery("SELECT e FROM DeviceEvent e WHERE e.notificationSent = :false", DeviceEvent.class)
+            for (DeviceEvent event : entityManager.get().createQuery("SELECT e FROM DeviceEvent e INNER JOIN FETCH e.position WHERE e.notificationSent = :false", DeviceEvent.class)
                                     .setParameter("false", false)
                                     .getResultList()) {
                 Device device = event.getDevice();
@@ -64,6 +65,24 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 for (User user : device.getUsers()) {
                     if (user.isNotifications()) {
                         addEvent(events, user, event);
+                    }
+                    List<User> userManagers = managers.get(user);
+                    if (userManagers == null) {
+                        userManagers = new LinkedList<User>();
+                        User manager = user.getManagedBy();
+                        while (manager != null) {
+                            if (manager.isNotifications()) {
+                                userManagers.add(manager);
+                            }
+                            manager = manager.getManagedBy();
+                        }
+                        if (userManagers.isEmpty()) {
+                            userManagers = Collections.emptyList();
+                        }
+                        managers.put(user, userManagers);
+                    }
+                    for (User manager : userManagers) {
+                        addEvent(events, manager, event);
                     }
                 }
 
