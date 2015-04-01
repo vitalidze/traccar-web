@@ -281,4 +281,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String geoFenceType(@Select GeoFenceType type);
 
     String errSaveChanges();
+
+    String applyToAllDevices();
 }

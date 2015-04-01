@@ -454,7 +454,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     public List<Position> getLatestPositions() {
         List<Position> positions = new LinkedList<Position>();
         List<Device> devices = getDevices();
-        List<GeoFence> geoFences = getGeoFences();
+        List<GeoFence> geoFences = getGeoFences(false);
         GeoFenceCalculator geoFenceCalculator = new GeoFenceCalculator(getGeoFences());
         if (devices != null && !devices.isEmpty()) {
             for (Device device : devices) {
@@ -639,11 +639,25 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public List<GeoFence> getGeoFences() {
+        return getGeoFences(true);
+    }
+
+    private List<GeoFence> getGeoFences(boolean includeTransferDevices) {
         User user = getSessionUser();
+        List<GeoFence> geoFences;
         if (user.getAdmin()) {
-            return getSessionEntityManager().createQuery("SELECT g FROM GeoFence g", GeoFence.class).getResultList();
+            geoFences = getSessionEntityManager().createQuery("SELECT g FROM GeoFence g", GeoFence.class).getResultList();
+        } else {
+            geoFences = new ArrayList<GeoFence>(user.getAllAvailableGeoFences());
         }
-        return new ArrayList<GeoFence>(user.getAllAvailableGeoFences());
+
+        if (includeTransferDevices) {
+            for (GeoFence geoFence : geoFences) {
+                geoFence.setTransferDevices(new HashSet<Device>(geoFence.getDevices()));
+            }
+        }
+
+        return geoFences;
     }
 
     @Transactional
@@ -730,4 +744,6 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             entityManager.merge(user);
         }
     }
+
+
 }

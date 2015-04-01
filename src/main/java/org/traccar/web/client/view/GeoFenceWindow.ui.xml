@@ -15,7 +15,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="264, 284" position="6, 60" modal="false" closable="false" headingText="{i18n.geoFence}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="264, 312" position="6, 60" modal="false" closable="false" headingText="{i18n.geoFence}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.name}" labelWidth="74">
@@ -50,9 +50,16 @@
         </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.color}" labelWidth="64">
+        <form:FieldLabel text="{i18n.color}" labelWidth="80">
             <form:widget>
                 <gxt:ColorPalette ui:field="color" />
+            </form:widget>
+        </form:FieldLabel>
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:FieldLabel text="{i18n.applyToAllDevices}" labelWidth="110">
+            <form:widget>
+                <form:CheckBox ui:field="allDevices" />
             </form:widget>
         </form:FieldLabel>
       </container:child>

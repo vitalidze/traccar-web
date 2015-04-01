@@ -19,10 +19,7 @@ import com.google.gwt.user.client.rpc.GwtTransient;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "geofences",
@@ -33,6 +30,7 @@ public class GeoFence implements Serializable {
         type = GeoFenceType.LINE;
         color = "4169E1";
         radius = 30f;
+        allDevices = true;
     }
 
     public GeoFence(long id, String name) {
@@ -128,6 +126,47 @@ public class GeoFence implements Serializable {
 
     public void setUsers(Set<User> users) {
         this.users = users;
+    }
+
+    // indicates that this geo-fence is applied to all available devices
+    // it is possible to configure geo-fence per device
+    @Column(nullable = true)
+    private boolean allDevices;
+
+    public boolean isAllDevices() {
+        return allDevices;
+    }
+
+    public void setAllDevices(boolean allDevices) {
+        this.allDevices = allDevices;
+    }
+
+    @GwtTransient
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "devices_geofences",
+            foreignKey = @ForeignKey(name = "devices_geofences_fkey_geofence_id"),
+            joinColumns = { @JoinColumn(name = "geofence_id", table = "geofences", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "device_id", table = "devices", referencedColumnName = "id") })
+    private Set<Device> devices;
+
+    public Set<Device> getDevices() {
+        return devices;
+    }
+
+    public void setDevices(Set<Device> devices) {
+        this.devices = devices;
+    }
+
+    // collection used to transfer devices through GWT RPC and JSON
+    @Transient
+    private Set<Device> transferDevices;
+
+    public Set<Device> getTransferDevices() {
+        return transferDevices;
+    }
+
+    public void setTransferDevices(Set<Device> transferDevices) {
+        this.transferDevices = transferDevices;
     }
 
     @Override

@@ -96,6 +96,9 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     @UiField
     ColorPalette color;
 
+    @UiField
+    CheckBox allDevices;
+
     DrawFeature drawFeature;
 
     ModifyFeature modifyFeature;
