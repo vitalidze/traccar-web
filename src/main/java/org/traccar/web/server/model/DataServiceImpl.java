@@ -644,11 +644,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     private List<GeoFence> getGeoFences(boolean includeTransferDevices) {
         User user = getSessionUser();
-        List<GeoFence> geoFences;
+        Set<GeoFence> geoFences;
         if (user.getAdmin()) {
-            geoFences = getSessionEntityManager().createQuery("SELECT g FROM GeoFence g LEFT JOIN FETCH g.devices", GeoFence.class).getResultList();
+            geoFences = new HashSet<GeoFence>(getSessionEntityManager().createQuery("SELECT g FROM GeoFence g LEFT JOIN FETCH g.devices", GeoFence.class).getResultList());
         } else {
-            geoFences = new ArrayList<GeoFence>(user.getAllAvailableGeoFences());
+            geoFences = user.getAllAvailableGeoFences();
         }
 
         if (includeTransferDevices) {
@@ -657,7 +657,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
         }
 
-        return geoFences;
+        return new ArrayList<GeoFence>(geoFences);
     }
 
     @Transactional
@@ -671,6 +671,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         geoFence.setUsers(new HashSet<User>());
         geoFence.getUsers().add(getSessionUser());
+        geoFence.setDevices(geoFence.getTransferDevices());
         getSessionEntityManager().persist(geoFence);
 
         return geoFence;
@@ -687,6 +688,19 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         GeoFence geoFence = getSessionEntityManager().find(GeoFence.class, updatedGeoFence.getId());
         geoFence.copyFrom(updatedGeoFence);
+
+        // used to check access to the device
+        List<Device> devices = getDevices();
+
+        // process devices
+        for (Iterator<Device> it = geoFence.getDevices().iterator(); it.hasNext(); ) {
+            Device next = it.next();
+            if (!updatedGeoFence.getTransferDevices().contains(next) && devices.contains(next)) {
+                it.remove();
+            }
+        }
+        updatedGeoFence.getTransferDevices().retainAll(devices);
+        geoFence.getDevices().addAll(updatedGeoFence.getTransferDevices());
 
         return geoFence;
     }
@@ -744,6 +758,4 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             entityManager.merge(user);
         }
     }
-
-
 }

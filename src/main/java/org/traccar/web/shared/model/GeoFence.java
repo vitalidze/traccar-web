@@ -240,6 +240,7 @@ public class GeoFence implements Serializable {
         type = geoFence.type;
         points = geoFence.points;
         radius = geoFence.radius;
+        transferDevices = new HashSet<Device>(geoFence.getTransferDevices());
     }
 
     @Override

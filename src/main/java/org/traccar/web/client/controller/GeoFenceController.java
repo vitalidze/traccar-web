@@ -36,17 +36,20 @@ import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.User;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 public class GeoFenceController implements ContentController, DeviceView.GeoFenceHandler {
     private final MapController mapController;
     private final ListStore<GeoFence> geoFenceStore;
+    private final ListStore<Device> deviceStore;
     private boolean geoFenceManagementInProgress;
 
     private Messages i18n = GWT.create(Messages.class);
 
-    public GeoFenceController(MapController mapController) {
+    public GeoFenceController(ListStore<Device> deviceStore, MapController mapController) {
+        this.deviceStore = deviceStore;
         this.mapController = mapController;
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
         this.geoFenceStore = new ListStore<GeoFence>(geoFenceProperties.id());
@@ -81,7 +84,8 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         geoFenceManagementStarted();
         final GeoFence geoFence = new GeoFence();
         geoFence.setName(i18n.newGeoFence());
-        new GeoFenceWindow(geoFence, null, mapController.getMap(), mapController.getGeoFenceLayer(),
+        geoFence.setTransferDevices(new HashSet<Device>());
+        new GeoFenceWindow(geoFence, null, deviceStore, mapController.getMap(), mapController.getGeoFenceLayer(),
         new BaseGeoFenceHandler(geoFence) {
             @Override
             public void onSave(final GeoFence geoFence) {
@@ -119,7 +123,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         geoFenceManagementStarted();
         GeoFenceDrawing drawing = mapController.getGeoFenceDrawing(geoFence);
         mapController.getGeoFenceLayer().removeFeature(drawing.getTitle());
-        new GeoFenceWindow(geoFence, drawing, mapController.getMap(), mapController.getGeoFenceLayer(),
+        new GeoFenceWindow(geoFence, drawing, deviceStore, mapController.getMap(), mapController.getGeoFenceLayer(),
         new BaseGeoFenceHandler(geoFence) {
             @Override
             public void onSave(GeoFence updatedGeoFence) {

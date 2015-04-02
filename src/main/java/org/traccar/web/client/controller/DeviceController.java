@@ -58,15 +58,16 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     public DeviceController(MapController mapController,
                             DeviceView.GeoFenceHandler geoFenceHandler,
                             DeviceView.SettingsHandler settingsHandler,
+                            ListStore<Device> deviceStore,
                             ListStore<GeoFence> geoFenceStore,
                             StoreHandlers<Device> deviceStoreHandler,
                             Application application) {
         this.application = application;
         this.mapController = mapController;
         this.deviceStoreHandler = deviceStoreHandler;
-        DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
-        deviceStore = new ListStore<Device>(deviceProperties.id());
-        deviceStore.addStoreRecordChangeHandler(new StoreRecordChangeEvent.StoreRecordChangeHandler<Device>() {
+        this.deviceStore = deviceStore;
+
+        this.deviceStore.addStoreRecordChangeHandler(new StoreRecordChangeEvent.StoreRecordChangeHandler<Device>() {
             @Override
             public void onRecordChange(StoreRecordChangeEvent<Device> event) {
                 if (event.getProperty().getPath().equals("follow")) {
