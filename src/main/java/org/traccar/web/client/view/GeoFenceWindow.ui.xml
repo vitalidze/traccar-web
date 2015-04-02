@@ -28,12 +28,6 @@
       .tabBody {
           padding: 5px;
       }
-      .hidden-tab-bar .x-tab-panel .x-tab-panel-header {
-          display: none;
-      }
-      .hidden-tab-bar .x-tab-panel .x-tab-panel-body {
-          border-top: 1px solid #D0D0D0; /* restore the top border using the same color as the panel */
-      }
   </ui:style>
 
   <ui:with type="com.sencha.gxt.data.shared.ListStore" field="deviceSelectionStore" />
@@ -44,7 +38,7 @@
   </ui:with>
 
   <gxt:Window ui:field="window" pixelSize="274, 344" position="6, 60" modal="false" closable="false" headingText="{i18n.geoFence}" focusWidget="{saveButton}">
-      <gxt:PlainTabPanel ui:field="tabs" addStyleNames="{style.hidden-tab-bar}">
+      <gxt:PlainTabPanel ui:field="tabs">
           <gxt:child config="{settingsTabConfig}">
             <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
               <container:child layoutData="{verticalLayoutData}">
