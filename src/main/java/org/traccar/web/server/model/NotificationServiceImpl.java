@@ -18,10 +18,7 @@ package org.traccar.web.server.model;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.NotificationService;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.DeviceEvent;
-import org.traccar.web.shared.model.NotificationSettings;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.shared.model.*;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -46,6 +43,71 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @Inject
     private Provider<EntityManager> entityManager;
 
+    static class DeviceEvents implements Comparator<DeviceEvent> {
+        Set<DeviceEvent> offlineEvents;
+        Set<DeviceEvent> geoFenceEvents;
+
+        void addEvent(DeviceEvent deviceEvent) {
+            switch (deviceEvent.getType()) {
+                case OFFLINE:
+                    if (offlineEvents == null) {
+                        offlineEvents = new HashSet<DeviceEvent>();
+                    }
+                    offlineEvents.add(deviceEvent);
+                    break;
+                case GEO_FENCE_ENTER:
+                case GEO_FENCE_EXIT:
+                    if (geoFenceEvents == null) {
+                        geoFenceEvents = new HashSet<DeviceEvent>();
+                    }
+                    geoFenceEvents.add(deviceEvent);
+                    break;
+            }
+        }
+
+        @Override
+        public int compare(DeviceEvent o1, DeviceEvent o2) {
+            int r = o1.getDevice().getName().compareTo(o2.getDevice().getName());
+            if (r == 0) {
+                if (o1.getType() == DeviceEventType.GEO_FENCE_ENTER || o1.getType() == DeviceEventType.GEO_FENCE_EXIT) {
+                    return o1.getPosition().getTime().compareTo(o2.getPosition().getTime());
+                }
+                return o1.getTime().compareTo(o2.getTime());
+            }
+            return r;
+        }
+
+        List<DeviceEvent> offlineEvents() {
+            return sorted(offlineEvents);
+        }
+
+        List<DeviceEvent> geoFenceEvents() {
+            return sorted(geoFenceEvents);
+        }
+
+        List<DeviceEvent> sorted(Set<DeviceEvent> unsorted) {
+            if (unsorted == null) {
+                return Collections.emptyList();
+            }
+            List<DeviceEvent> result = new ArrayList<DeviceEvent>(unsorted);
+            Collections.sort(result, this);
+            return result;
+        }
+
+        void markAsSent() {
+            markAsSent(offlineEvents);
+            markAsSent(geoFenceEvents);
+        }
+
+        void markAsSent(Set<DeviceEvent> events) {
+            if (events != null) {
+                for (DeviceEvent event : events) {
+                    event.setNotificationSent(true);
+                }
+            }
+        }
+    }
+
     public static class NotificationSender extends ScheduledTask {
         @Inject
         Provider<EntityManager> entityManager;
@@ -53,10 +115,11 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         @Transactional
         @Override
         public void doWork() throws Exception {
-            Map<User, Set<DeviceEvent>> events = new HashMap<User, Set<DeviceEvent>>();
+            Map<User, DeviceEvents> events = new HashMap<User, DeviceEvents>();
             List<User> admins = null;
+            Map<User, List<User>> managers = new HashMap<User, List<User>>();
 
-            for (DeviceEvent event : entityManager.get().createQuery("SELECT e FROM DeviceEvent e WHERE e.notificationSent = :false", DeviceEvent.class)
+            for (DeviceEvent event : entityManager.get().createQuery("SELECT e FROM DeviceEvent e INNER JOIN FETCH e.position WHERE e.notificationSent = :false", DeviceEvent.class)
                                     .setParameter("false", false)
                                     .getResultList()) {
                 Device device = event.getDevice();
@@ -64,6 +127,24 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 for (User user : device.getUsers()) {
                     if (user.isNotifications()) {
                         addEvent(events, user, event);
+                    }
+                    List<User> userManagers = managers.get(user);
+                    if (userManagers == null) {
+                        userManagers = new LinkedList<User>();
+                        User manager = user.getManagedBy();
+                        while (manager != null) {
+                            if (manager.isNotifications()) {
+                                userManagers.add(manager);
+                            }
+                            manager = manager.getManagedBy();
+                        }
+                        if (userManagers.isEmpty()) {
+                            userManagers = Collections.emptyList();
+                        }
+                        managers.put(user, userManagers);
+                    }
+                    for (User manager : userManagers) {
+                        addEvent(events, manager, event);
                     }
                 }
 
@@ -78,7 +159,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 }
             }
 
-            for (Map.Entry<User, Set<DeviceEvent>> entry : events.entrySet()) {
+            for (Map.Entry<User, DeviceEvents> entry : events.entrySet()) {
                 User user = entry.getKey();
                 if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
                     logger.warning("User '" + user.getLogin() + "' has empty email field");
@@ -91,17 +172,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                     continue;
                 }
 
-                List<DeviceEvent> deviceEvents = new ArrayList<DeviceEvent>(entry.getValue());
-                Collections.sort(deviceEvents, new Comparator<DeviceEvent>() {
-                    @Override
-                    public int compare(DeviceEvent o1, DeviceEvent o2) {
-                        int r = o1.getDevice().getName().compareTo(o2.getDevice().getName());
-                        if (r == 0) {
-                            return o1.getTime().compareTo(o2.getTime());
-                        }
-                        return r;
-                    }
-                });
+                DeviceEvents deviceEvents = entry.getValue();
 
                 logger.info("Sending notification to '" + user.getEmail() + "'...");
 
@@ -112,16 +183,14 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                     msg.setFrom(new InternetAddress(settings.getFromAddress()));
                     msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getLogin() + " <" + user.getEmail() + ">", false));
                     msg.setSubject("[traccar-web] Notification");
-                    if (deviceEvents.size() == 1) {
-                        DeviceEvent event = deviceEvents.get(0);
-                        msg.setText("Device '" + event.getDevice().getName() + "' went offline at " + event.getTime());
-                    } else {
-                        StringBuilder body = new StringBuilder("Following devices went offline:\n");
-                        for (DeviceEvent event : deviceEvents) {
-                            body.append("\n  '").append(event.getDevice().getName()).append("' (").append(event.getDevice().getUniqueId()).append(") at ").append(event.getTime());
-                        }
-                        msg.setText(body.toString());
+
+                    StringBuilder message = new StringBuilder();
+                    if (appendOfflineEventsText(message, deviceEvents.offlineEvents())) {
+                        message.append("\n\n");
                     }
+                    appendGeoFenceText(message, deviceEvents.geoFenceEvents());
+
+                    msg.setText(message.toString());
                     msg.setHeader("X-Mailer", "traccar-web.sendmail");
                     msg.setSentDate(new Date());
 
@@ -129,9 +198,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                     transport.connect();
                     transport.sendMessage(msg, msg.getAllRecipients());
 
-                    for (DeviceEvent event : deviceEvents) {
-                        event.setNotificationSent(true);
-                    }
+                    deviceEvents.markAsSent();
                 } catch (MessagingException me) {
                     logger.log(Level.SEVERE, "Unable to send Email message", me);
                 } finally {
@@ -142,13 +209,20 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             }
         }
 
-        private void addEvent(Map<User, Set<DeviceEvent>> events, User user, DeviceEvent event) {
-            Set<DeviceEvent> userEvents = events.get(user);
+        private void addEvent(Map<User, DeviceEvents> events, User user, DeviceEvent event) {
+            if (event.getType() == DeviceEventType.GEO_FENCE_ENTER || event.getType() == DeviceEventType.GEO_FENCE_EXIT) {
+                // check whether user has access to the geo-fence
+                if (!user.getAdmin() && !user.hasAccessTo(event.getGeoFence())) {
+                    return;
+                }
+            }
+
+            DeviceEvents userEvents = events.get(user);
             if (userEvents == null) {
-                userEvents = new HashSet<DeviceEvent>();
+                userEvents = new DeviceEvents();
                 events.put(user, userEvents);
             }
-            userEvents.add(event);
+            userEvents.addEvent(event);
         }
 
         private NotificationSettings findNotificationSettings(User user) {
@@ -182,6 +256,28 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                     .getResultList();
             return settings.isEmpty() ? null : settings.get(0);
         }
+
+        private boolean appendOfflineEventsText(StringBuilder msg, List<DeviceEvent> events) {
+            if (events.size() == 1) {
+                DeviceEvent event = events.get(0);
+                msg.append("Device '").append(event.getDevice().getName()).append("' went offline at ").append(event.getTime());
+            } else if (events.size() > 1) {
+                msg.append("Following devices went offline:\n");
+                for (DeviceEvent event : events) {
+                    msg.append("\n  '").append(event.getDevice().getName()).append("' (").append(event.getDevice().getUniqueId()).append(") at ").append(event.getTime());
+                }
+            }
+            return !events.isEmpty();
+        }
+
+        private boolean appendGeoFenceText(StringBuilder msg, List<DeviceEvent> events) {
+            for (DeviceEvent event : events) {
+                msg.append("Device '").append(event.getDevice().getName()).append("' ")
+                        .append(event.getType() == DeviceEventType.GEO_FENCE_ENTER ? "entered" : "exited")
+                        .append(" geo-fence '").append(event.getGeoFence().getName()).append("' at ").append(event.getPosition().getTime()).append('\n');
+            }
+            return !events.isEmpty();
+        }
     }
 
     @Inject
@@ -198,6 +294,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
     @Override
     public void checkSettings(NotificationSettings settings) {
         // Validate smtp settings
@@ -268,6 +365,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
     @Override
     public void saveSettings(NotificationSettings settings) {
         NotificationSettings currentSettings = getSettings();

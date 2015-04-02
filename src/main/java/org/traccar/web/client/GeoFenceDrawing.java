@@ -13,10 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.shared.model;
+package org.traccar.web.client;
 
-public enum DeviceEventType {
-    OFFLINE,
-    GEO_FENCE_ENTER,
-    GEO_FENCE_EXIT;
+import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
+
+public class GeoFenceDrawing {
+    final VectorFeature shape;
+    final VectorFeature title;
+
+    public GeoFenceDrawing(VectorFeature shape, VectorFeature title) {
+        this.shape = shape;
+        this.title = title;
+    }
+
+    public VectorFeature getShape() {
+        return shape;
+    }
+
+    public VectorFeature getTitle() {
+        return title;
+    }
 }

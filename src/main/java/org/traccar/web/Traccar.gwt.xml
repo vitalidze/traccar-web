@@ -29,4 +29,5 @@
     <extend-property name="locale" values="pt_PT" />
     <extend-property name="locale" values="lt" />
     <extend-property name="locale" values="nl" />
+    <extend-property name="locale" values="sv_SE" />
 </module>

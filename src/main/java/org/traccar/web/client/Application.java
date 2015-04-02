@@ -21,10 +21,7 @@ import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Projection;
-import org.traccar.web.client.controller.ArchiveController;
-import org.traccar.web.client.controller.DeviceController;
-import org.traccar.web.client.controller.MapController;
-import org.traccar.web.client.controller.SettingsController;
+import org.traccar.web.client.controller.*;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.BaseStoreHandlers;
@@ -33,16 +30,13 @@ import org.traccar.web.client.model.DataServiceAsync;
 import org.traccar.web.client.view.ApplicationView;
 import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.client.view.UserSettingsDialog;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.data.shared.event.StoreAddEvent;
 import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.data.shared.event.StoreRemoveEvent;
-import org.traccar.web.shared.model.User;
-import org.traccar.web.shared.model.UserSettings;
 
 public class Application {
 
@@ -61,6 +55,7 @@ public class Application {
 
     private final SettingsController settingsController;
     private final DeviceController deviceController;
+    private final GeoFenceController geoFenceController;
     private final MapController mapController;
     private final ArchiveController archiveController;
 
@@ -69,7 +64,9 @@ public class Application {
     public Application() {
         settingsController = new SettingsController(userSettingsHandler);
         mapController = new MapController(mapHandler);
-        deviceController = new DeviceController(mapController, settingsController, deviceStoreHandler, this);
+        geoFenceController = new GeoFenceController(mapController);
+        geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
+        deviceController = new DeviceController(mapController, geoFenceController, settingsController, geoFenceController.getGeoFenceStore(), deviceStoreHandler, this);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
         archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
 
@@ -83,6 +80,7 @@ public class Application {
         deviceController.run();
         mapController.run();
         archiveController.run();
+        geoFenceController.run();
     }
 
     private MapController.MapHandler mapHandler = new MapController.MapHandler() {
@@ -140,6 +138,20 @@ public class Application {
 
     };
 
+    private StoreHandlers<GeoFence> geoFenceStoreHandler = new BaseStoreHandlers<GeoFence>() {
+        @Override
+        public void onAdd(StoreAddEvent<GeoFence> event) {
+            for (GeoFence geoFence : event.getItems()) {
+                mapController.drawGeoFence(geoFence, true);
+            }
+        }
+
+        @Override
+        public void onRemove(StoreRemoveEvent<GeoFence> event) {
+            mapController.removeGeoFence(event.getItem());
+        }
+    };
+
     private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler, FilterDialog.FilterSettingsHandler {
         @Override
         public void onSave(UserSettings userSettings) {
@@ -166,7 +178,7 @@ public class Application {
                 }
             }
             LonLat center = mapController.getMap().getCenter();
-            center.transform(mapController.getMap().getProjection(), new Projection("EPSG:4326").getProjectionCode());
+            center.transform(mapController.getMap().getProjection(), "EPSG:4326");
             centerLongitude.setValue(center.lon());
             centerLatitude.setValue(center.lat());
             zoomLevel.setValue(mapController.getMap().getZoom());

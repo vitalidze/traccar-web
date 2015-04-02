@@ -15,8 +15,11 @@
  */
 package org.traccar.web.server.model;
 
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -281,6 +284,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         for (Device device : user.getDevices()) {
             device.getUsers().remove(user);
         }
+        for (GeoFence geoFence : user.getGeoFences()) {
+            geoFence.getUsers().remove(user);
+        }
         entityManager.remove(user);
         return fillUserSettings(user);
     }
@@ -291,7 +297,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     public List<Device> getDevices() {
         User user = getSessionUser();
         if (user.getAdmin()) {
-            return getSessionEntityManager().createQuery("SELECT x FROM Device x").getResultList();
+            return getSessionEntityManager().createQuery("SELECT x FROM Device x JOIN FETCH x.latestPosition").getResultList();
         }
         return user.getAllAvailableDevices();
     }
@@ -422,24 +428,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         List<Position> queryResult = query.getResultList();
 
-        final double radKoef = Math.PI / 180;
-        final double earthRadius = 6371.01; // Radius of the earth in km
-
         for (int i = 0; i < queryResult.size(); i++) {
             boolean add = true;
             if (i > 0) {
                 Position positionA = queryResult.get(i - 1);
                 Position positionB = queryResult.get(i);
 
-                double dLat = (positionA.getLatitude() - positionB.getLatitude()) * radKoef;
-                double dLon = (positionA.getLongitude() - positionB.getLongitude()) * radKoef;
-                double a =
-                        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                                Math.cos(positionA.getLatitude() * radKoef) * Math.cos(positionB.getLatitude() * radKoef) *
-                                Math.sin(dLon / 2) * Math.sin(dLon / 2)
-                        ;
-                double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                positionB.setDistance(earthRadius * c); // Distance in km
+                positionB.setDistance(GeoFenceCalculator.getDistance(positionA.getLongitude(), positionA.getLatitude(), positionB.getLongitude(), positionB.getLatitude()));
 
                 if (filter && filters.isHideDuplicates()) {
                     add = !positionA.getTime().equals(positionB.getTime());
@@ -459,10 +454,23 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     public List<Position> getLatestPositions() {
         List<Position> positions = new LinkedList<Position>();
         List<Device> devices = getDevices();
+        List<GeoFence> geoFences = getGeoFences(false);
+        GeoFenceCalculator geoFenceCalculator = new GeoFenceCalculator(getGeoFences());
         if (devices != null && !devices.isEmpty()) {
             for (Device device : devices) {
                 if (device.getLatestPosition() != null) {
-                    positions.add(device.getLatestPosition());
+                    Position position = device.getLatestPosition();
+                    // calculate geo-fences
+                    for (GeoFence geoFence : geoFences) {
+                        if (geoFenceCalculator.contains(geoFence, position)) {
+                            if (position.getGeoFences() == null) {
+                                position.setGeoFences(new LinkedList<GeoFence>());
+                            }
+                            position.getGeoFences().add(geoFence);
+                        }
+                    }
+
+                    positions.add(position);
                 }
             }
         }
@@ -626,4 +634,116 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
         return user;
     }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public List<GeoFence> getGeoFences() {
+        return getGeoFences(true);
+    }
+
+    private List<GeoFence> getGeoFences(boolean includeTransferDevices) {
+        User user = getSessionUser();
+        List<GeoFence> geoFences;
+        if (user.getAdmin()) {
+            geoFences = getSessionEntityManager().createQuery("SELECT g FROM GeoFence g JOIN FETCH g.devices", GeoFence.class).getResultList();
+        } else {
+            geoFences = new ArrayList<GeoFence>(user.getAllAvailableGeoFences());
+        }
+
+        if (includeTransferDevices) {
+            for (GeoFence geoFence : geoFences) {
+                geoFence.setTransferDevices(new HashSet<Device>(geoFence.getDevices()));
+            }
+        }
+
+        return geoFences;
+    }
+
+    @Transactional
+    @RequireUser
+    @RequireWrite
+    @Override
+    public GeoFence addGeoFence(GeoFence geoFence) throws TraccarException {
+        if (geoFence.getName() == null || geoFence.getName().trim().isEmpty()) {
+            throw new ValidationException();
+        }
+
+        geoFence.setUsers(new HashSet<User>());
+        geoFence.getUsers().add(getSessionUser());
+        getSessionEntityManager().persist(geoFence);
+
+        return geoFence;
+    }
+
+    @Transactional
+    @RequireUser
+    @RequireWrite
+    @Override
+    public GeoFence updateGeoFence(GeoFence updatedGeoFence) throws TraccarException {
+        if (updatedGeoFence.getName() == null || updatedGeoFence.getName().trim().isEmpty()) {
+            throw new ValidationException();
+        }
+
+        GeoFence geoFence = getSessionEntityManager().find(GeoFence.class, updatedGeoFence.getId());
+        geoFence.copyFrom(updatedGeoFence);
+
+        return geoFence;
+    }
+
+    @Transactional
+    @RequireUser
+    @RequireWrite
+    @Override
+    public GeoFence removeGeoFence(GeoFence geoFence) {
+        User user = getSessionUser();
+        geoFence = getSessionEntityManager().find(GeoFence.class, geoFence.getId());
+        if (user.getAdmin() || user.getManager()) {
+            geoFence.getUsers().removeAll(getUsers());
+        }
+        geoFence.getUsers().remove(user);
+        if (geoFence.getUsers().isEmpty()) {
+            Query query = entityManager.get().createQuery("DELETE FROM DeviceEvent x WHERE x.geoFence = :geoFence");
+            query.setParameter("geoFence", geoFence);
+            query.executeUpdate();
+
+            getSessionEntityManager().remove(geoFence);
+        }
+        return geoFence;
+    }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public Map<User, Boolean> getGeoFenceShare(GeoFence geoFence) {
+        geoFence = getSessionEntityManager().find(GeoFence.class, geoFence.getId());
+        List<User> users = getUsers();
+        Map<User, Boolean> result = new HashMap<User, Boolean>(users.size());
+        for (User user : users) {
+            result.put(fillUserSettings(user), geoFence.getUsers().contains(user));
+        }
+        return result;
+    }
+
+    @Transactional
+    @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
+    @Override
+    public void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share) {
+        EntityManager entityManager = getSessionEntityManager();
+        geoFence = entityManager.find(GeoFence.class, geoFence.getId());
+
+        for (User user : getUsers()) {
+            Boolean shared = share.get(user);
+            if (shared == null) continue;
+            if (shared) {
+                geoFence.getUsers().add(user);
+            } else {
+                geoFence.getUsers().remove(user);
+            }
+            entityManager.merge(user);
+        }
+    }
+
+
 }

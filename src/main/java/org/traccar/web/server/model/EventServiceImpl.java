@@ -18,10 +18,7 @@ package org.traccar.web.server.model;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.EventService;
-import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.DeviceEvent;
-import org.traccar.web.shared.model.DeviceEventType;
+import org.traccar.web.shared.model.*;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -29,7 +26,9 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -37,6 +36,9 @@ import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class EventServiceImpl extends RemoteServiceServlet implements EventService {
+    static class DeviceState {
+        Long latestPositionId;
+    }
 
     public static class OfflineDetector extends ScheduledTask {
         @Inject
@@ -72,9 +74,98 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         }
     }
 
+    public static class GeoFenceDetector extends ScheduledTask {
+        @Inject
+        Provider<EntityManager> entityManager;
+
+        Map<Long, DeviceState> deviceState = new HashMap<Long, DeviceState>();
+
+        /**
+         * Scanning is based on assumption that position identifiers are incremented sequentially
+         */
+        Long lastScannedPositionId;
+
+        @Override
+        @Transactional
+        public void doWork() throws Exception {
+            Date currentDate = new Date();
+            List<GeoFence> geoFences = entityManager.get().createQuery("SELECT g FROM GeoFence g", GeoFence.class).getResultList();
+            if (geoFences.isEmpty()) {
+                return;
+            }
+
+            if (lastScannedPositionId == null) {
+                List<Long> latestPositionId = entityManager.get().createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class).getResultList();
+                if (latestPositionId.isEmpty()) {
+                    return;
+                } else {
+                    lastScannedPositionId = latestPositionId.get(0);
+                }
+            }
+
+            GeoFenceCalculator geoFenceCalculator = new GeoFenceCalculator(geoFences);
+
+            List<Position> positions = entityManager.get().createQuery("SELECT p FROM Position p WHERE p.id >= :from ORDER BY device.id, time ASC", Position.class)
+                    .setParameter("from", lastScannedPositionId)
+                    .getResultList();
+
+            Position prevPosition = null;
+            Device device = null;
+            DeviceState state = null;
+            for (Position position : positions) {
+                // find current device and it's state
+                if (device == null || device.getId() != position.getDevice().getId()) {
+                    device = position.getDevice();
+                    state = deviceState.get(device.getId());
+                    if (state == null) {
+                        state = new DeviceState();
+                        deviceState.put(device.getId(), state);
+                        prevPosition = null;
+                    } else {
+                        prevPosition = entityManager.get().find(Position.class, state.latestPositionId);
+                    }
+                }
+
+                // calculate
+                for (GeoFence geoFence : geoFences) {
+                    if (prevPosition != null) {
+                        boolean containsCurrent = geoFenceCalculator.contains(geoFence, position);
+                        boolean containsPrevious = geoFenceCalculator.contains(geoFence, prevPosition);
+
+                        DeviceEventType eventType = null;
+                        if (containsCurrent && !containsPrevious) {
+                            eventType = DeviceEventType.GEO_FENCE_ENTER;
+                        } else if (!containsCurrent && containsPrevious) {
+                            eventType = DeviceEventType.GEO_FENCE_EXIT;
+                        }
+
+                        if (eventType != null) {
+                            DeviceEvent event = new DeviceEvent();
+                            event.setTime(currentDate);
+                            event.setDevice(device);
+                            event.setType(eventType);
+                            event.setPosition(position);
+                            event.setGeoFence(geoFence);
+                            entityManager.get().persist(event);
+                        }
+                    }
+                }
+
+                // update prev position and state
+                state.latestPositionId = position.getId();
+                prevPosition = position;
+                // update latest position id
+                lastScannedPositionId = Math.max(lastScannedPositionId, position.getId());
+            }
+        }
+    }
+
     @Inject
     private OfflineDetector offlineDetector;
-    private ScheduledFuture<?> detectorFuture;
+    private ScheduledFuture<?> offlineDetectorFuture;
+    @Inject
+    private GeoFenceDetector geoFenceDetector;
+    private ScheduledFuture<?> geoFenceDetectorFuture;
     @Inject
     private Provider<ApplicationSettings> applicationSettings;
 
@@ -86,19 +177,33 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
 
         if (applicationSettings.get().isEventRecordingEnabled()) {
             startOfflineDetector();
+            startGeoFenceDetector();
         }
     }
 
     private synchronized void startOfflineDetector() {
-        if (detectorFuture == null) {
-            detectorFuture = scheduler.scheduleAtFixedRate(offlineDetector, 0, 1, TimeUnit.MINUTES);
+        if (offlineDetectorFuture == null) {
+            offlineDetectorFuture = scheduler.scheduleAtFixedRate(offlineDetector, 0, 1, TimeUnit.MINUTES);
         }
     }
 
     private synchronized void stopOfflineDetector() {
-        if (detectorFuture != null) {
-            detectorFuture.cancel(true);
-            detectorFuture = null;
+        if (offlineDetectorFuture != null) {
+            offlineDetectorFuture.cancel(true);
+            offlineDetectorFuture = null;
+        }
+    }
+
+    private synchronized void startGeoFenceDetector() {
+        if (geoFenceDetectorFuture == null) {
+            geoFenceDetectorFuture = scheduler.scheduleAtFixedRate(geoFenceDetector, 0, 1, TimeUnit.MINUTES);
+        }
+    }
+
+    private synchronized void stopGeoFenceDetector() {
+        if (geoFenceDetectorFuture != null) {
+            geoFenceDetectorFuture.cancel(true);
+            geoFenceDetectorFuture = null;
         }
     }
 
@@ -108,8 +213,10 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
     public void applicationSettingsChanged() {
         if (applicationSettings.get().isEventRecordingEnabled()) {
             startOfflineDetector();
+            startGeoFenceDetector();
         } else {
             stopOfflineDetector();
+            stopGeoFenceDetector();
         }
     }
 }

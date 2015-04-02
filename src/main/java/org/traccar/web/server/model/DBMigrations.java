@@ -40,7 +40,8 @@ public class DBMigrations {
                 new SetDefaultDeviceIconType(),
                 new SetDefaultHashImplementation(),
                 new SetDefaultUserSettings(),
-                new SetArchiveDefaultColumns()
+                new SetArchiveDefaultColumns(),
+                new SetAllDevicesFlag()
         }) {
             em.getTransaction().begin();
             try {
@@ -243,6 +244,15 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + User.class.getSimpleName() + " U SET U.readOnly = :ro WHERE U.readOnly IS NULL")
                     .setParameter("ro", Boolean.FALSE)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetAllDevicesFlag implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + GeoFence.class.getName() + " G SET G.allDevices = :b WHERE G.allDevices IS NULL")
+                    .setParameter("b", Boolean.TRUE)
                     .executeUpdate();
         }
     }

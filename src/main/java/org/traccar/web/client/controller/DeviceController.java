@@ -27,10 +27,10 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.view.DeviceDialog;
-import org.traccar.web.client.view.DeviceShareDialog;
+import org.traccar.web.client.view.UserShareDialog;
 import org.traccar.web.client.view.DeviceView;
 import org.traccar.web.client.view.PositionInfoPopup;
-import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
@@ -39,9 +39,6 @@ import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.User;
-import org.traccar.web.shared.model.ValidationException;
 
 public class DeviceController implements ContentController, DeviceView.DeviceHandler {
     private final MapController mapController;
@@ -59,7 +56,9 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     private final StoreHandlers<Device> deviceStoreHandler;
 
     public DeviceController(MapController mapController,
+                            DeviceView.GeoFenceHandler geoFenceHandler,
                             DeviceView.SettingsHandler settingsHandler,
+                            ListStore<GeoFence> geoFenceStore,
                             StoreHandlers<Device> deviceStoreHandler,
                             Application application) {
         this.application = application;
@@ -89,7 +88,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                 }
             }
         });
-        deviceView = new DeviceView(this, settingsHandler, deviceStore);
+        deviceView = new DeviceView(this, geoFenceHandler, settingsHandler, deviceStore, geoFenceStore);
     }
 
     public ListStore<Device> getDeviceStore() {
@@ -193,9 +192,9 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         Application.getDataService().getDeviceShare(device, new BaseAsyncCallback<Map<User, Boolean>>(i18n) {
             @Override
             public void onSuccess(final Map<User, Boolean> share) {
-                new DeviceShareDialog(device, share, new DeviceShareDialog.DeviceShareHandler() {
+                new UserShareDialog(share, new UserShareDialog.UserShareHandler() {
                     @Override
-                    public void onSaveShares(Device device, Map<User, Boolean> shares) {
+                    public void onSaveShares(Map<User, Boolean> shares) {
                         Application.getDataService().saveDeviceShare(device, shares, new BaseAsyncCallback<Void>(i18n));
                     }
                 }).show();

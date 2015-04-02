@@ -15,6 +15,8 @@
  */
 package org.traccar.web.client.i18n;
 
+import org.traccar.web.shared.model.GeoFenceType;
+
 public interface Messages extends com.google.gwt.i18n.client.Messages {
     String authentication();
 
@@ -253,4 +255,32 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String readOnly();
 
     String protocol();
+
+    String geoFences();
+
+    String objects();
+
+    String description();
+
+    String geoFence();
+
+    String type();
+
+    String width();
+
+    String radius();
+
+    String color();
+
+    String errGeoFenceIsEmpty();
+
+    String confirmGeoFenceRemoval();
+
+    String newGeoFence();
+
+    String geoFenceType(@Select GeoFenceType type);
+
+    String errSaveChanges();
+
+    String applyToAllDevices();
 }
