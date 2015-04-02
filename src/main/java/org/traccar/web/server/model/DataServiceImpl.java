@@ -297,7 +297,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     public List<Device> getDevices() {
         User user = getSessionUser();
         if (user.getAdmin()) {
-            return getSessionEntityManager().createQuery("SELECT x FROM Device x").getResultList();
+            return getSessionEntityManager().createQuery("SELECT x FROM Device x JOIN FETCH x.latestPosition").getResultList();
         }
         return user.getAllAvailableDevices();
     }
@@ -646,7 +646,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         User user = getSessionUser();
         List<GeoFence> geoFences;
         if (user.getAdmin()) {
-            geoFences = getSessionEntityManager().createQuery("SELECT g FROM GeoFence g", GeoFence.class).getResultList();
+            geoFences = getSessionEntityManager().createQuery("SELECT g FROM GeoFence g JOIN FETCH g.devices", GeoFence.class).getResultList();
         } else {
             geoFences = new ArrayList<GeoFence>(user.getAllAvailableGeoFences());
         }
