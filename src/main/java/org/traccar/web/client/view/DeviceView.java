@@ -84,6 +84,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         public void onMouseOver(int mouseX, int mouseY, Device device);
         public void onMouseOut(int mouseX, int mouseY, Device device);
         public void doubleClicked(Device device);
+        public void onClearSelection();
     }
 
     public interface GeoFenceHandler {
@@ -409,6 +410,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     public void onTabSelected(SelectionEvent<Widget> event) {
         if (event.getSelectedItem() == geoFenceList) {
             grid.getSelectionModel().deselectAll();
+            deviceHandler.onClearSelection();
         } else {
             geoFenceList.getSelectionModel().deselectAll();
         }

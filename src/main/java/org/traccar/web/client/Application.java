@@ -21,7 +21,6 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import org.gwtopenmaps.openlayers.client.LonLat;
-import org.gwtopenmaps.openlayers.client.Projection;
 import org.traccar.web.client.controller.*;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.*;
@@ -67,7 +66,13 @@ public class Application {
         mapController = new MapController(mapHandler);
         geoFenceController = new GeoFenceController(deviceStore, mapController);
         geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
-        deviceController = new DeviceController(mapController, geoFenceController, settingsController, deviceStore, geoFenceController.getGeoFenceStore(), deviceStoreHandler, this);
+        deviceController = new DeviceController(mapController,
+                geoFenceController,
+                settingsController, deviceStore,
+                deviceStoreHandler,
+                geoFenceController.getGeoFenceStore(),
+                geoFenceController.getDeviceGeoFences(),
+                this);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
         archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
 
@@ -121,6 +126,7 @@ public class Application {
         @Override
         public void onRemove(StoreRemoveEvent<Device> event) {
             mapController.update();
+            geoFenceController.deviceRemoved(event.getItem());
         }
 
     };
@@ -143,15 +149,13 @@ public class Application {
         @Override
         public void onAdd(StoreAddEvent<GeoFence> event) {
             for (GeoFence geoFence : event.getItems()) {
-                if (geoFence.isAllDevices()) {
-                    mapController.drawGeoFence(geoFence, true);
-                }
+                geoFenceController.geoFenceAdded(geoFence);
             }
         }
 
         @Override
         public void onRemove(StoreRemoveEvent<GeoFence> event) {
-            mapController.removeGeoFence(event.getItem());
+            geoFenceController.geoFenceRemoved(event.getItem());
         }
     };
 

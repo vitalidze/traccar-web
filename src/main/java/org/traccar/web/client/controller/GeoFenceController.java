@@ -37,14 +37,13 @@ import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.User;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GeoFenceController implements ContentController, DeviceView.GeoFenceHandler {
     private final MapController mapController;
     private final ListStore<GeoFence> geoFenceStore;
     private final ListStore<Device> deviceStore;
+    private final Map<Long, Set<GeoFence>> deviceGeoFences;
     private ListView<GeoFence, String> geoFenceListView;
     private boolean geoFenceManagementInProgress;
     private GeoFence selectedGeoFence;
@@ -57,6 +56,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
         this.geoFenceStore = new ListStore<GeoFence>(geoFenceProperties.id());
         this.geoFenceStore.addSortInfo(new Store.StoreSortInfo<GeoFence>(geoFenceProperties.name(), SortDir.ASC));
+        this.deviceGeoFences = new HashMap<Long, Set<GeoFence>>();
     }
 
     abstract class BaseGeoFenceHandler implements GeoFenceWindow.GeoFenceHandler {
@@ -255,5 +255,35 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
     @Override
     public void setGeoFenceListView(ListView<GeoFence, String> geoFenceListView) {
         this.geoFenceListView = geoFenceListView;
+    }
+
+    public Map<Long, Set<GeoFence>> getDeviceGeoFences() {
+        return deviceGeoFences;
+    }
+
+    public void geoFenceAdded(GeoFence geoFence) {
+        if (geoFence.isAllDevices()) {
+            mapController.drawGeoFence(geoFence, true);
+        } else {
+            for (Device device : geoFence.getTransferDevices()) {
+                Set<GeoFence> geoFences = deviceGeoFences.get(device.getId());
+                if (geoFences == null) {
+                    geoFences = new HashSet<GeoFence>();
+                    deviceGeoFences.put(device.getId(), geoFences);
+                }
+                geoFences.add(geoFence);
+            }
+        }
+    }
+
+    public void geoFenceRemoved(GeoFence geoFence) {
+        mapController.removeGeoFence(geoFence);
+        for (Map.Entry<Long, Set<GeoFence>> entry : deviceGeoFences.entrySet()) {
+            entry.getValue().remove(geoFence);
+        }
+    }
+
+    public void deviceRemoved(Device device) {
+        deviceGeoFences.remove(device.getId());
     }
 }
