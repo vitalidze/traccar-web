@@ -143,7 +143,9 @@ public class Application {
         @Override
         public void onAdd(StoreAddEvent<GeoFence> event) {
             for (GeoFence geoFence : event.getItems()) {
-                mapController.drawGeoFence(geoFence, true);
+                if (geoFence.isAllDevices()) {
+                    mapController.drawGeoFence(geoFence, true);
+                }
             }
         }
 
