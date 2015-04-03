@@ -14,7 +14,7 @@ Adding new geo-fence
 
 To start adding new geo-fence click on 'Add' button when 'Geo-fences' tab is selected. New window pops up with geo-fence settings.
 
-![Add geo-fence](http://i62.tinypic.com/34iqsdk.png)
+![Add geo-fence](http://i62.tinypic.com/5fhn9y.png)
 
 Select it's type (line, polygon or circle) and start drawing. Depending on type of geo-fence drawing is done as follows:
 
@@ -31,6 +31,14 @@ Select it's type (line, polygon or circle) and start drawing. Depending on type 
 ![Drawing circle](http://i62.tinypic.com/24dpkyt.png)
 
 Formatting (color, line width) is not applied while drawing from scratch. Once drawing is finished it goes to 'edit' mode, which has formatting applied. There are two ways to get back to 'drawing' mode from here: 'clear' drawing or change geo-fence type (which also clears drawing).
+
+**IMPORTANT NOTE**: Check box 'Apply to all devices' changes class of geo-fence. For now there are two classes:
+
+* global - when 'Apply to all devices' is checked. Geo-fence will be applied to all accessible devices despite any settings on 'Devices' tab. This works for notifications as well - user will receive notification when any accessible device enters/exits this geo-fence. On map these geo-fences are always visible. This class is selected by default.
+
+* device-specific - when 'Apply to all devices' is unchecked. Geo-fence will be applied to devices selected on 'devices' tab. On map these geo-fences are visible only when either it is selected in geo-fences list or when specific device is selected (in such case all geo-fences for the device will be shown). This also works for notifications - geo-fence enter/exit events are posted only for configured devices.
+
+![Configuring devices for geo-fence](http://i62.tinypic.com/245blo8.png)
 
 Once finished click 'Save' to save changes to the database.
 
@@ -64,11 +72,22 @@ To manage access to geo-fence administrator or manager should select it in a lis
 Viewing geo-fence
 -----------------
 
-As for now geo-fence is displayed only in popup of device if it's currently in that geo-fence.
+As for now geo-fence is displayed in popup of device if it's currently in that geo-fence.
 
 ![Geo-fence in popup](http://i58.tinypic.com/6jpvh4.png)
+
+Then it is displayed in side bar of mobile UI:
+
+![Geo-fence in mobile UI sidebar](http://i62.tinypic.com/kak08y.png)
 
 Notifications
 -------------
 
-This is not yet implemented, but will be done in nearest future.
+For now there are two types of notifications:
+
+* device entered geo-fence
+* device exited geo-fence
+
+Couple of words on what is under cover. Events are recorded by scanning latest positions assuming their identifiers are growing. When server starts all geo-fence events are recorded since latest positions. Positions processing starts every minute.
+
+[Notifications](notifications.html) are configured in separate screen. User will receive notification only if he has access to both device and geo-fence. Administrators receive all notifications.
