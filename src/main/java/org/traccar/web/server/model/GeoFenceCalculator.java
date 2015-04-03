@@ -20,6 +20,7 @@ import org.traccar.web.shared.model.Position;
 
 import java.awt.*;
 import java.awt.geom.Path2D;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class GeoFenceCalculator {
 
     private final Map<GeoFence, GeoFenceData> geoFences;
 
-    public GeoFenceCalculator(List<GeoFence> geoFences) {
+    public GeoFenceCalculator(Collection<GeoFence> geoFences) {
         this.geoFences = new HashMap<GeoFence, GeoFenceData>(geoFences.size());
         for (GeoFence geoFence : geoFences) {
             List<GeoFence.LonLat> points = geoFence.points();
@@ -76,6 +77,12 @@ public class GeoFenceCalculator {
     }
 
     public boolean contains(GeoFence geoFence, Position position) {
+        // if geo-fence is device specific then check whether position's device matches
+        if (!geoFence.isAllDevices() &&
+            (position.getDevice() == null || !geoFence.getDevices().contains(position.getDevice()))) {
+            return false;
+        }
+
         GeoFenceData data = geoFences.get(geoFence);
         switch (geoFence.getType()) {
             case POLYGON:
