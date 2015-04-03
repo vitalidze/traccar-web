@@ -144,6 +144,10 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
                                 }
                                 geoFenceStore.update(geoFence);
                                 geoFenceStore.applySort(false);
+                                for (Collection<GeoFence> geoFences : deviceGeoFences.values()) {
+                                    geoFences.remove(geoFence);
+                                }
+                                geoFenceAdded(geoFence);
                                 geoFenceManagementStopped();
                             }
 
@@ -212,10 +216,12 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         if (selectedGeoFence != null && !selectedGeoFence.isAllDevices()) {
             mapController.removeGeoFence(selectedGeoFence);
         }
-        if (!geoFence.isAllDevices()) {
-            mapController.drawGeoFence(geoFence, true);
+        if (geoFence != null) {
+            if (!geoFence.isAllDevices()) {
+                mapController.drawGeoFence(geoFence, true);
+            }
+            mapController.selectGeoFence(geoFence);
         }
-        mapController.selectGeoFence(geoFence);
         selectedGeoFence = geoFence;
     }
 
