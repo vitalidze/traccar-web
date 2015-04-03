@@ -200,6 +200,34 @@ public class User implements Serializable, Cloneable {
         return result;
     }
 
+    public boolean hasAccessTo(GeoFence geoFence) {
+        if (hasAccessOnLowerLevelTo(geoFence)) {
+            return true;
+        }
+        User managedBy = getManagedBy();
+        while (managedBy != null) {
+            if (managedBy.getGeoFences().contains(geoFence)) {
+                return true;
+            }
+            managedBy = managedBy.getManagedBy();
+        }
+        return false;
+    }
+
+    private boolean hasAccessOnLowerLevelTo(GeoFence geoFence) {
+        if (getGeoFences().contains(geoFence)) {
+            return true;
+        }
+        if (getManager()) {
+            for (User user : getManagedUsers()) {
+                if (user.hasAccessOnLowerLevelTo(geoFence)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Expose
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))

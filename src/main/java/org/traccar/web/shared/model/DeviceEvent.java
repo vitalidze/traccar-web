@@ -41,6 +41,10 @@ public class DeviceEvent {
     @JoinColumn(foreignKey = @ForeignKey(name = "events_fkey_position_id"))
     private Position position;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(foreignKey = @ForeignKey(name = "events_fkey_geofence_id"))
+    private GeoFence geoFence;
+
     private boolean notificationSent;
 
     public DeviceEvent() {
@@ -70,6 +74,14 @@ public class DeviceEvent {
         this.device = device;
     }
 
+    public GeoFence getGeoFence() {
+        return geoFence;
+    }
+
+    public void setGeoFence(GeoFence geoFence) {
+        this.geoFence = geoFence;
+    }
+
     public DeviceEventType getType() {
         return type;
     }
@@ -94,6 +106,7 @@ public class DeviceEvent {
         this.notificationSent = notificationSent;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -101,10 +114,11 @@ public class DeviceEvent {
 
         DeviceEvent that = (DeviceEvent) o;
 
-        if (!device.equals(that.device)) return false;
-        if (type != that.type) return false;
+        if (device != null ? !device.equals(that.device) : that.device != null) return false;
+        if (geoFence != null ? !geoFence.equals(that.geoFence) : that.geoFence != null) return false;
         if (position != null ? !position.equals(that.position) : that.position != null) return false;
         if (!time.equals(that.time)) return false;
+        if (type != that.type) return false;
 
         return true;
     }
@@ -112,9 +126,10 @@ public class DeviceEvent {
     @Override
     public int hashCode() {
         int result = time.hashCode();
-        result = 31 * result + device.hashCode();
+        result = 31 * result + (device != null ? device.hashCode() : 0);
         result = 31 * result + type.hashCode();
         result = 31 * result + (position != null ? position.hashCode() : 0);
+        result = 31 * result + (geoFence != null ? geoFence.hashCode() : 0);
         return result;
     }
 }

@@ -295,5 +295,32 @@ var i18n = {
         speed: 'Speed',
         course: 'Course',
         address: 'Address'
+    },
+    sv_SE: {
+        _name_: 'Svenska',
+        // login screen
+        language: 'Språk',
+        username: 'Användarnamn',
+        password: 'Lösenord',
+        your_username: 'Ditt användarnamn',
+        your_password: 'Ditt lösenord',
+        sign_in: 'Logga in',
+        user_name_and_password_must_not_be_empty: 'Ditt lösenord får inte vara tomt',
+        user_name_or_password_is_invalid: 'Ditt användarnamn eller lösenord är ogiltligt',
+        unexpected_error: 'Oväntat fel',
+        open_desktop_version: 'Öppna Desktop version',
+        // sidebar
+        devices: 'Enheter',
+        logout: 'Logga ut',
+        // device details
+        select_on_map: 'Välj på karta',
+        no_data_available: 'Ingen data tillgänglig',
+        time: 'Tid',
+        latitude: 'Latitud',
+        longitude: 'Longitud',
+        altitude: 'Altitud',
+        speed: 'Hastighet',
+        course: 'Kurs',
+        address: 'Adress'
     }
 };

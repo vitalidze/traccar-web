@@ -16,6 +16,8 @@
 package org.traccar.web.shared.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -79,11 +81,58 @@ public class UserTest {
 
         // test
         assertEquals(set(g1, g2, g3, g4, g5, g6, g7), m1.getAllAvailableGeoFences());
+        assertTrue(m1.hasAccessTo(g1));
+        assertTrue(m1.hasAccessTo(g2));
+        assertTrue(m1.hasAccessTo(g3));
+        assertTrue(m1.hasAccessTo(g4));
+        assertTrue(m1.hasAccessTo(g5));
+        assertTrue(m1.hasAccessTo(g6));
+        assertTrue(m1.hasAccessTo(g7));
+
         assertEquals(set(g1, g2, g3, g4, g7), m2.getAllAvailableGeoFences());
+        assertTrue(m2.hasAccessTo(g1));
+        assertTrue(m2.hasAccessTo(g2));
+        assertTrue(m2.hasAccessTo(g3));
+        assertTrue(m2.hasAccessTo(g4));
+        assertFalse(m2.hasAccessTo(g5));
+        assertFalse(m2.hasAccessTo(g6));
+        assertTrue(m2.hasAccessTo(g7));
+
         assertEquals(set(g1, g5, g6, g7), m3.getAllAvailableGeoFences());
+        assertTrue(m3.hasAccessTo(g1));
+        assertFalse(m3.hasAccessTo(g2));
+        assertFalse(m3.hasAccessTo(g3));
+        assertFalse(m3.hasAccessTo(g4));
+        assertTrue(m3.hasAccessTo(g5));
+        assertTrue(m3.hasAccessTo(g6));
+        assertTrue(m3.hasAccessTo(g7));
+
         assertEquals(set(g1, g2, g3, g7), u1.getAllAvailableGeoFences());
+        assertTrue(u1.hasAccessTo(g1));
+        assertTrue(u1.hasAccessTo(g2));
+        assertTrue(u1.hasAccessTo(g3));
+        assertFalse(u1.hasAccessTo(g4));
+        assertFalse(u1.hasAccessTo(g5));
+        assertFalse(u1.hasAccessTo(g6));
+        assertTrue(u1.hasAccessTo(g7));
+
         assertEquals(set(g1, g2, g4, g7), u2.getAllAvailableGeoFences());
+        assertTrue(u2.hasAccessTo(g1));
+        assertTrue(u2.hasAccessTo(g2));
+        assertFalse(u2.hasAccessTo(g3));
+        assertTrue(u2.hasAccessTo(g4));
+        assertFalse(u2.hasAccessTo(g5));
+        assertFalse(u2.hasAccessTo(g6));
+        assertTrue(u2.hasAccessTo(g7));
+
         assertEquals(set(g1, g5, g6, g7), u3.getAllAvailableGeoFences());
+        assertTrue(u3.hasAccessTo(g1));
+        assertFalse(u3.hasAccessTo(g2));
+        assertFalse(u3.hasAccessTo(g3));
+        assertFalse(u3.hasAccessTo(g4));
+        assertTrue(u3.hasAccessTo(g5));
+        assertTrue(u3.hasAccessTo(g6));
+        assertTrue(u3.hasAccessTo(g7));
     }
 
     private <T> Set<T> set(T... elements) {

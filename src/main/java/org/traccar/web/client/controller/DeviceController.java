@@ -17,6 +17,7 @@ package org.traccar.web.client.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
@@ -25,7 +26,6 @@ import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
-import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.view.DeviceDialog;
 import org.traccar.web.client.view.UserShareDialog;
 import org.traccar.web.client.view.DeviceView;
@@ -55,18 +55,25 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     private final StoreHandlers<Device> deviceStoreHandler;
 
+    // geo-fences per device
+    private final Map<Long, Set<GeoFence>> deviceGeoFences;
+    private Device selectedDevice;
+
     public DeviceController(MapController mapController,
                             DeviceView.GeoFenceHandler geoFenceHandler,
                             DeviceView.SettingsHandler settingsHandler,
-                            ListStore<GeoFence> geoFenceStore,
+                            ListStore<Device> deviceStore,
                             StoreHandlers<Device> deviceStoreHandler,
+                            ListStore<GeoFence> geoFenceStore,
+                            Map<Long, Set<GeoFence>> deviceGeoFences,
                             Application application) {
         this.application = application;
         this.mapController = mapController;
         this.deviceStoreHandler = deviceStoreHandler;
-        DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
-        deviceStore = new ListStore<Device>(deviceProperties.id());
-        deviceStore.addStoreRecordChangeHandler(new StoreRecordChangeEvent.StoreRecordChangeHandler<Device>() {
+        this.deviceStore = deviceStore;
+        this.deviceGeoFences = deviceGeoFences;
+
+        this.deviceStore.addStoreRecordChangeHandler(new StoreRecordChangeEvent.StoreRecordChangeHandler<Device>() {
             @Override
             public void onRecordChange(StoreRecordChangeEvent<Device> event) {
                 if (event.getProperty().getPath().equals("follow")) {
@@ -114,6 +121,8 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     @Override
     public void onSelected(Device device) {
         mapController.selectDevice(device);
+        updateGeoFences(device);
+        selectedDevice = device;
     }
 
     @Override
@@ -233,9 +242,35 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     public void selectDevice(Device device) {
         deviceView.selectDevice(device);
+        updateGeoFences(device);
+        selectedDevice = device;
     }
 
     public void doubleClicked(Device device) {
         application.getArchiveController().selectDevice(device);
+    }
+
+    private void updateGeoFences(Device device) {
+        onClearSelection();
+        Set<GeoFence> geoFences = device == null ? null : deviceGeoFences.get(device.getId());
+        if (geoFences != null) {
+            for (GeoFence geoFence : geoFences) {
+                mapController.drawGeoFence(geoFence, true);
+            }
+        }
+    }
+
+    @Override
+    public void onClearSelection() {
+        // remove old geo-fences
+        if (selectedDevice != null) {
+            Set<GeoFence> geoFences = deviceGeoFences.get(selectedDevice.getId());
+            if (geoFences != null) {
+                for (GeoFence geoFence : geoFences) {
+                    mapController.removeGeoFence(geoFence);
+                }
+            }
+        }
+        selectedDevice = null;
     }
 }

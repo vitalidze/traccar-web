@@ -246,6 +246,7 @@ public class Position implements Serializable, Cloneable {
         this.distance = distance;
     }
 
+    @Expose
     @Transient
     private List<GeoFence> geoFences;
 

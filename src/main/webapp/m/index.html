@@ -121,6 +121,13 @@
         </div>
             {{/each}}
         {{/if}}
+        {{#each geoFences}}
+        <div class="row">
+            <div class="col-100">
+                <div class="geofence-color-box" style="background-color: #{{color}};"></div> {{name}}
+            </div>
+        </div>
+        {{/each}}
     </div>
 </script>
 <!-- Path to your app js-->

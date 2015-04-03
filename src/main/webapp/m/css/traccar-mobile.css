@@ -73,3 +73,12 @@
 #devicesList li {
     -webkit-transform-style: preserve-3d;
 }
+
+.geofence-color-box {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border: 1px solid;
+    left: 5px;
+    top: 5px;
+}

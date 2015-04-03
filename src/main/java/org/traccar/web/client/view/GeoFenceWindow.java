@@ -24,14 +24,25 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
+import com.sencha.gxt.core.client.*;
+import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.data.shared.PropertyAccess;
+import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.ColorPalette;
+import com.sencha.gxt.widget.core.client.PlainTabPanel;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.*;
+import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
+import com.sencha.gxt.widget.core.client.grid.ColumnModel;
+import com.sencha.gxt.widget.core.client.grid.Grid;
 import org.gwtopenmaps.openlayers.client.*;
+import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.control.DrawFeature;
 import org.gwtopenmaps.openlayers.client.control.DrawFeatureOptions;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
@@ -47,7 +58,7 @@ import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.GeoFenceProperties;
 import org.traccar.web.shared.model.*;
 
-import java.util.Arrays;
+import java.util.*;
 
 public class GeoFenceWindow implements Editor<GeoFence> {
 
@@ -72,11 +83,14 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     private final Map map;
     private final Vector geoFenceLayer;
 
-    @UiField
-    Messages i18n;
+    @UiField(provided = true)
+    Messages i18n = GWT.create(Messages.class);
 
     @UiField
     Window window;
+
+    @UiField
+    PlainTabPanel tabs;
 
     @UiField
     TextField name;
@@ -96,13 +110,65 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     @UiField
     ColorPalette color;
 
+    @UiField
+    CheckBox allDevices;
+
     DrawFeature drawFeature;
 
     ModifyFeature modifyFeature;
     final GeoFence geoFence;
     GeoFenceDrawing geoFenceDrawing;
 
-    public GeoFenceWindow(GeoFence geoFence, GeoFenceDrawing geoFenceDrawing, Map map, Vector geoFenceLayer, GeoFenceHandler geoFenceHandler) {
+    // device selection
+    public class DeviceSelected {
+        public final Device device;
+        public boolean selected;
+
+        public DeviceSelected(Device device, boolean selected) {
+            this.device = device;
+            this.selected = selected;
+        }
+
+        public long getId() {
+            return device.getId();
+        }
+
+        public String getName() {
+            return device.getName();
+        }
+
+        public boolean isSelected() {
+            return selected;
+        }
+
+        public void setSelected(boolean selected) {
+            this.selected = selected;
+        }
+    }
+
+    public interface DeviceSelectedProperties extends PropertyAccess<DeviceSelected> {
+        ModelKeyProvider<DeviceSelected> id();
+
+        ValueProvider<DeviceSelected, String> name();
+
+        ValueProvider<DeviceSelected, Boolean> selected();
+    }
+
+    @UiField(provided = true)
+    ColumnModel<DeviceSelected> columnModel;
+
+    @UiField(provided = true)
+    ListStore<DeviceSelected> deviceSelectionStore;
+
+    @UiField
+    Grid<DeviceSelected> grid;
+
+    public GeoFenceWindow(GeoFence geoFence,
+                          GeoFenceDrawing geoFenceDrawing,
+                          ListStore<Device> devices,
+                          Map map,
+                          Vector geoFenceLayer,
+                          GeoFenceHandler geoFenceHandler) {
         this.geoFenceHandler = geoFenceHandler;
         this.map = map;
         this.geoFenceLayer = geoFenceLayer;
@@ -117,6 +183,25 @@ public class GeoFenceWindow implements Editor<GeoFence> {
 
         type.setForceSelection(true);
         type.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+
+        // device selection
+        DeviceSelectedProperties deviceSelectedProperties = GWT.create(DeviceSelectedProperties.class);
+
+        deviceSelectionStore = new ListStore<DeviceSelected>(deviceSelectedProperties.id());
+
+        for (Device device : devices.getAll()) {
+            deviceSelectionStore.add(new DeviceSelected(device, geoFence.getTransferDevices().contains(device)));
+        }
+
+        List<ColumnConfig<DeviceSelected, ?>> columnConfigList = new LinkedList<ColumnConfig<DeviceSelected, ?>>();
+
+        ColumnConfig<DeviceSelected, Boolean> colSelected = new ColumnConfig<DeviceSelected, Boolean>(deviceSelectedProperties.selected(), 5, "");
+        colSelected.setCell(new CheckBoxCell());
+        columnConfigList.add(colSelected);
+
+        columnConfigList.add(new ColumnConfig<DeviceSelected, String>(deviceSelectedProperties.name(), 25, i18n.name()));
+
+        columnModel = new ColumnModel<DeviceSelected>(columnConfigList);
 
         uiBinder.createAndBindUi(this);
 
@@ -174,6 +259,8 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     @UiHandler("type")
     public void onTypeChanged(SelectionEvent<GeoFenceType> event) {
         clear();
+        GeoFenceType type = event.getSelectedItem();
+        radius.setEnabled(type == GeoFenceType.CIRCLE || type == GeoFenceType.LINE);
     }
 
     @UiHandler("color")
@@ -231,6 +318,18 @@ public class GeoFenceWindow implements Editor<GeoFence> {
                 points[i] = new GeoFence.LonLat(vertices[i].getX(), vertices[i].getY());
             }
             updated.points(points);
+        }
+        // set up devices
+        for (Store<DeviceSelected>.Record record : deviceSelectionStore.getModifiedRecords()) {
+            DeviceSelected next = new DeviceSelected(record.getModel().device, record.getModel().selected);
+            for (Store.Change<DeviceSelected, ?> change : record.getChanges()) {
+                change.modify(next);
+            }
+            if (next.selected) {
+                updated.getTransferDevices().add(next.device);
+            } else {
+                updated.getTransferDevices().remove(next.device);
+            }
         }
         return updated;
     }

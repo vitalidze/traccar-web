@@ -17,16 +17,13 @@ package org.traccar.web.client;
 
 import java.util.logging.Logger;
 
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import org.gwtopenmaps.openlayers.client.LonLat;
-import org.gwtopenmaps.openlayers.client.Projection;
 import org.traccar.web.client.controller.*;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseAsyncCallback;
-import org.traccar.web.client.model.BaseStoreHandlers;
-import org.traccar.web.client.model.DataService;
-import org.traccar.web.client.model.DataServiceAsync;
+import org.traccar.web.client.model.*;
 import org.traccar.web.client.view.ApplicationView;
 import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.client.view.UserSettingsDialog;
@@ -62,11 +59,20 @@ public class Application {
     private ApplicationView view;
 
     public Application() {
+        DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
+        ListStore<Device> deviceStore = new ListStore<Device>(deviceProperties.id());
+
         settingsController = new SettingsController(userSettingsHandler);
         mapController = new MapController(mapHandler);
-        geoFenceController = new GeoFenceController(mapController);
+        geoFenceController = new GeoFenceController(deviceStore, mapController);
         geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
-        deviceController = new DeviceController(mapController, geoFenceController, settingsController, geoFenceController.getGeoFenceStore(), deviceStoreHandler, this);
+        deviceController = new DeviceController(mapController,
+                geoFenceController,
+                settingsController, deviceStore,
+                deviceStoreHandler,
+                geoFenceController.getGeoFenceStore(),
+                geoFenceController.getDeviceGeoFences(),
+                this);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
         archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
 
@@ -120,6 +126,7 @@ public class Application {
         @Override
         public void onRemove(StoreRemoveEvent<Device> event) {
             mapController.update();
+            geoFenceController.deviceRemoved(event.getItem());
         }
 
     };
@@ -142,13 +149,13 @@ public class Application {
         @Override
         public void onAdd(StoreAddEvent<GeoFence> event) {
             for (GeoFence geoFence : event.getItems()) {
-                mapController.drawGeoFence(geoFence, true);
+                geoFenceController.geoFenceAdded(geoFence);
             }
         }
 
         @Override
         public void onRemove(StoreRemoveEvent<GeoFence> event) {
-            mapController.removeGeoFence(event.getItem());
+            geoFenceController.geoFenceRemoved(event.getItem());
         }
     };
 
