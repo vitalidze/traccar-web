@@ -39,3 +39,8 @@ Disable event recording
 By default all devices events are always recorded. However, this can be disabled from in Global settings menu (Settings >> Global).
 
 ![Disabling event recording](http://i58.tinypic.com/wulzti.png)
+
+Troubleshooting
+---------------
+
+If you are using GMail then by default security settings don't allow access from third party applications (see [#133](https://github.com/vitalidze/traccar-web/issues/133)). This security check can be disabled [here](https://www.google.com/settings/security/lesssecureapps) - select 'turn off' here. You must be logged in to google account before accessing that page.
