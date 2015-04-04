@@ -16,14 +16,12 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
@@ -34,6 +32,7 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.grid.RowNumberer;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
@@ -41,7 +40,6 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.MaintenanceProperties;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Maintenance;
-import org.traccar.web.shared.model.User;
 
 import java.util.*;
 
@@ -60,6 +58,8 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
 
     @UiField(provided = true)
     final ListStore<Maintenance> maintenanceStore;
+
+    int nextIndex;
 
     @UiField
     Grid<Maintenance> grid;
@@ -86,25 +86,29 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
 
         MaintenanceProperties maintenanceProperties = GWT.create(MaintenanceProperties.class);
 
-        this.maintenanceStore = new ListStore<Maintenance>(new ModelKeyProvider<Maintenance>() {
-            @Override
-            public String getKey(Maintenance item) {
-                return Integer.toString(item.getIndexNo());
-            }
-        });
+        this.maintenanceStore = new ListStore<Maintenance>(maintenanceProperties.indexNo());
+
+        nextIndex = device.getMaintenances().size();
 
         for (Maintenance maintenance : device.getMaintenances()) {
             maintenanceStore.add(maintenance);
         }
 
         List<ColumnConfig<Maintenance, ?>> columnConfigList = new LinkedList<ColumnConfig<Maintenance, ?>>();
-        columnConfigList.add(new ColumnConfig<Maintenance, Integer>(maintenanceProperties.indexNo(), 1, "#"));
+        RowNumberer<Maintenance> rowNumberer = new RowNumberer<Maintenance>();
+        rowNumberer.setHeader("#");
+
+        columnConfigList.add(rowNumberer);
+        rowNumberer.setSortable(false);
         ColumnConfig<Maintenance, String> nameColumn = new ColumnConfig<Maintenance, String>(maintenanceProperties.name(), 25, i18n.serviceName());
         columnConfigList.add(nameColumn);
+        nameColumn.setSortable(false);
         ColumnConfig<Maintenance, Double> serviceIntervalColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.serviceInterval(), 10, i18n.mileageInterval());
         columnConfigList.add(serviceIntervalColumn);
+        serviceIntervalColumn.setSortable(false);
         ColumnConfig<Maintenance, Double> lastServiceColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 10, i18n.lastServiceMileage());
         columnConfigList.add(lastServiceColumn);
+        lastServiceColumn.setSortable(false);
 
         columnModel = new ColumnModel<Maintenance>(columnConfigList);
 
@@ -130,6 +134,8 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
         lastServiceEditor.setAllowBlank(false);
         lastServiceEditor.setAllowNegative(false);
         editing.addEditor(lastServiceColumn, lastServiceEditor);
+
+        rowNumberer.initPlugin(grid);
     }
 
     public void show() {
@@ -144,6 +150,9 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
     public void onSaveClicked(SelectEvent event) {
         maintenanceStore.commitChanges();
         device.setMaintenances(maintenanceStore.getAll());
+        for (int i = 0; i < device.getMaintenances().size(); i++) {
+            device.getMaintenances().get(i).setIndexNo(i);
+        }
         device.setOdometer(odometer.getCurrentValue());
         device.setAutoUpdateOdometer(autoUpdateOdometer.getValue());
         hide();
@@ -157,13 +166,13 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
     @UiHandler("addButton")
     public void onAddClicked(SelectEvent event) {
         Maintenance maintenance = new Maintenance();
-        maintenance.setIndexNo(maintenanceStore.size() + 1);
+        maintenance.setIndexNo(nextIndex++);
         maintenanceStore.add(maintenance);
     }
 
     @UiHandler("removeButton")
     public void onRemoveClicked(SelectEvent event) {
-        maintenanceStore.remove(grid.getSelectionModel().getSelectedItem());
+        maintenanceStore.remove(maintenanceStore.indexOf(grid.getSelectionModel().getSelectedItem()));
     }
 
     @Override

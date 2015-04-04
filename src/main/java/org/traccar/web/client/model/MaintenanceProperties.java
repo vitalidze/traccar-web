@@ -16,13 +16,14 @@
 package org.traccar.web.client.model;
 
 import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import org.traccar.web.shared.model.Maintenance;
 
 public interface MaintenanceProperties  extends PropertyAccess<Maintenance> {
-    ValueProvider<Maintenance, String> name();
+    ModelKeyProvider<Maintenance> indexNo();
 
-    ValueProvider<Maintenance, Integer> indexNo();
+    ValueProvider<Maintenance, String> name();
 
     ValueProvider<Maintenance, Double> serviceInterval();
 
