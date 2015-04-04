@@ -45,6 +45,8 @@ public class Device implements Serializable {
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
         iconType = device.iconType;
+        odometer = device.odometer;
+        autoUpdateOdometer = device.autoUpdateOdometer;
         maintenances = new ArrayList<Maintenance>(device.maintenances.size());
         for (Maintenance maintenance : device.maintenances) {
             maintenances.add(new Maintenance(maintenance));

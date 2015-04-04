@@ -371,6 +371,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setTimeout(device.getTimeout());
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
             tmp_device.setIconType(device.getIconType());
+            tmp_device.setOdometer(device.getOdometer());
+            tmp_device.setAutoUpdateOdometer(device.isAutoUpdateOdometer());
             tmp_device.setMaintenances(new ArrayList<Maintenance>(device.getMaintenances()));
 
             List<Maintenance> currentMaintenances = getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device = :device", Maintenance.class)
