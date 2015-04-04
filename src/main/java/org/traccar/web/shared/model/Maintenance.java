@@ -19,19 +19,14 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "maintenance",
-       indexes = { @Index(name = "maintenance_pkey", columnList = "id") })
+@Table(name = "maintenances",
+       indexes = { @Index(name = "maintenances_pkey", columnList = "id") })
 public class Maintenance implements Serializable {
 
     public Maintenance() {}
 
     public Maintenance(Maintenance maintenance) {
-        id = maintenance.id;
-        name = maintenance.name;
-        indexNo = maintenance.indexNo;
-        device = maintenance.device;
-        serviceInterval = maintenance.serviceInterval;
-        lastService = maintenance.lastService;
+        copyFrom(maintenance);
     }
 
     @Id
@@ -44,7 +39,7 @@ public class Maintenance implements Serializable {
     }
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(foreignKey = @ForeignKey(name = "maintenance_fkey_device_id"))
+    @JoinColumn(foreignKey = @ForeignKey(name = "maintenances_fkey_device_id"))
     private Device device;
 
     public Device getDevice() {
@@ -120,5 +115,14 @@ public class Maintenance implements Serializable {
         result = 31 * result + indexNo;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
+    }
+
+    public void copyFrom(Maintenance maintenance) {
+        id = maintenance.id;
+        name = maintenance.name;
+        indexNo = maintenance.indexNo;
+        device = maintenance.device;
+        serviceInterval = maintenance.serviceInterval;
+        lastService = maintenance.lastService;
     }
 }

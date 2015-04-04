@@ -337,6 +337,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             device.setUsers(new HashSet<User>(1));
             device.getUsers().add(user);
             entityManager.persist(device);
+            for (Maintenance maintenance : device.getMaintenances()) {
+                maintenance.setDevice(device);
+                entityManager.persist(maintenance);
+            }
             return device;
         } else {
             throw new DeviceExistsException();
@@ -367,6 +371,33 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setTimeout(device.getTimeout());
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
             tmp_device.setIconType(device.getIconType());
+            tmp_device.setMaintenances(new ArrayList<Maintenance>(device.getMaintenances()));
+
+            List<Maintenance> currentMaintenances = getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device = :device", Maintenance.class)
+                    .setParameter("device", device)
+                    .getResultList();
+            // update and delete existing
+            for (Maintenance existingMaintenance : currentMaintenances) {
+                boolean contains = false;
+                for (int index = 0; index < device.getMaintenances().size(); index++) {
+                    Maintenance updatedMaintenance = device.getMaintenances().get(index);
+                    if (updatedMaintenance.getId() == existingMaintenance.getId()) {
+                        existingMaintenance.copyFrom(updatedMaintenance);
+                        updatedMaintenance.setDevice(tmp_device);
+                        device.getMaintenances().remove(index);
+                        contains = true;
+                        break;
+                    }
+                }
+                if (!contains) {
+                    getSessionEntityManager().remove(existingMaintenance);
+                }
+            }
+            // add new
+            for (Maintenance maintenance : device.getMaintenances()) {
+                maintenance.setDevice(tmp_device);
+                getSessionEntityManager().persist(maintenance);
+            }
             return tmp_device;
         } else {
             throw new DeviceExistsException();
@@ -398,6 +429,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             query.executeUpdate();
 
             query = entityManager.createQuery("DELETE FROM Position x WHERE x.device = :device");
+            query.setParameter("device", device);
+            query.executeUpdate();
+
+            query = entityManager.createQuery("DELETE FROM Maintenance x WHERE x.device = :device");
             query.setParameter("device", device);
             query.executeUpdate();
 

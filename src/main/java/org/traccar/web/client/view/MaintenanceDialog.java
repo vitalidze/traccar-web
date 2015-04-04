@@ -149,7 +149,7 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
         maintenanceStore.commitChanges();
-        device.setMaintenances(maintenanceStore.getAll());
+        device.setMaintenances(new ArrayList<Maintenance>(maintenanceStore.getAll()));
         for (int i = 0; i < device.getMaintenances().size(); i++) {
             device.getMaintenances().get(i).setIndexNo(i);
         }
