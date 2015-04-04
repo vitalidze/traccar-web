@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -157,7 +158,9 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
             }
         }
 
-        new DeviceDialog(new Device(), new AddHandler()).show();
+        Device newDevice = new Device();
+        newDevice.setMaintenances(new ArrayList<Maintenance>());
+        new DeviceDialog(newDevice, new AddHandler()).show();
     }
 
     @Override

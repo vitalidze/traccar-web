@@ -289,4 +289,12 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String km();
 
     String auto();
+
+    String maintenance();
+
+    String serviceName();
+
+    String mileageInterval();
+
+    String lastServiceMileage();
 }

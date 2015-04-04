@@ -22,6 +22,18 @@ import java.io.Serializable;
 @Table(name = "maintenance",
        indexes = { @Index(name = "maintenance_pkey", columnList = "id") })
 public class Maintenance implements Serializable {
+
+    public Maintenance() {}
+
+    public Maintenance(Maintenance maintenance) {
+        id = maintenance.id;
+        name = maintenance.name;
+        indexNo = maintenance.indexNo;
+        device = maintenance.device;
+        serviceInterval = maintenance.serviceInterval;
+        lastService = maintenance.lastService;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)

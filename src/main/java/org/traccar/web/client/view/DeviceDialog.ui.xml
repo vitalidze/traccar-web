@@ -15,24 +15,12 @@
     <ui:attributes width="1" height="27" />
   </ui:with>
 
-  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutData">
-    <ui:attributes width="-1" height="1" />
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="leftButtonMargins">
+    <ui:attributes top="0" right="0" bottom="0" left="140" />
   </ui:with>
 
-  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="middleLabelMargins">
-    <ui:attributes top="4" right="4" bottom="0" left="4" />
-  </ui:with>
-
-  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="middleHorizontalLayoutData">
-    <ui:attributes width="-1" height="1" margins="{middleLabelMargins}" />
-  </ui:with>
-
-  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="leftLabelMargins">
-    <ui:attributes top="4" right="0" bottom="0" left="4" />
-  </ui:with>
-
-  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="leftHorizontalLayoutData">
-    <ui:attributes width="-1" height="1" margins="{leftLabelMargins}" />
+  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="buttonHorizontalLayoutData">
+    <ui:attributes width="-1" height="1" margins="{leftButtonMargins}" />
   </ui:with>
 
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="integerPropertyEditor" />
@@ -78,31 +66,15 @@
                                   allowDecimals="true"
                                   allowBlank="false"
                                   width="5" />
-
             </form:widget>
         </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutDataLine}">
-        <container:HorizontalLayoutContainer>
-            <container:child layoutData="{horizontalLayoutData}">
-                <form:FieldLabel text="{i18n.odometer}" labelWidth="140">
-                    <form:widget>
-                        <form:NumberField editor="{doublePropertyEditor}"
-                                          ui:field="odometer"
-                                          allowNegative="false"
-                                          allowDecimals="true"
-                                          allowBlank="false"
-                                          width="100" />
-                    </form:widget>
-                </form:FieldLabel>
-            </container:child>
-            <container:child layoutData="{middleHorizontalLayoutData}">
-                <g:Label text="{i18n.km}"/>
-            </container:child>
-            <container:child layoutData="{leftHorizontalLayoutData}">
-                <form:CheckBox ui:field="autoUpdateOdometer" boxLabel="{i18n.auto}" />
-            </container:child>
-        </container:HorizontalLayoutContainer>
+          <container:HorizontalLayoutContainer>
+              <container:child layoutData="{buttonHorizontalLayoutData}">
+                <button:TextButton ui:field="maintenanceButton" text="{i18n.maintenance}"/>
+              </container:child>
+          </container:HorizontalLayoutContainer>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
           <container:VerticalLayoutContainer ui:field="devicePictures" />

@@ -19,6 +19,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +45,10 @@ public class Device implements Serializable {
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
         iconType = device.iconType;
+        maintenances = new ArrayList<Maintenance>(device.maintenances.size());
+        for (Maintenance maintenance : device.maintenances) {
+            maintenances.add(new Maintenance(maintenance));
+        }
     }
 
     @Expose

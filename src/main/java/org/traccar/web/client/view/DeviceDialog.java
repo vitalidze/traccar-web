@@ -80,15 +80,12 @@ public class DeviceDialog implements Editor<Device> {
     @UiField
     NumberField<Double> idleSpeedThreshold;
 
-    @UiField
-    NumberField<Double> odometer;
-
-    @UiField
-    CheckBox autoUpdateOdometer;
-
     ToggleGroup iconRadioGroup = new ToggleGroup();
 
+    final Device device;
+
     public DeviceDialog(Device device, DeviceHandler deviceHandler) {
+        this.device = device;
         this.deviceHandler = deviceHandler;
         uiBinder.createAndBindUi(this);
 
@@ -143,4 +140,8 @@ public class DeviceDialog implements Editor<Device> {
         window.hide();
     }
 
+    @UiHandler("maintenanceButton")
+    public void onMaintenanceClicked(SelectEvent event) {
+        new MaintenanceDialog(device).show();
+    }
 }
