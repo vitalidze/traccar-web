@@ -271,7 +271,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Override
     public User removeUser(User user) {
         EntityManager entityManager = getSessionEntityManager();
-        user = entityManager.merge(user);
+        user = entityManager.find(User.class, user.getId());
         // Don't allow user to delete himself
         if (user.equals(getSessionUser())) {
             throw new IllegalArgumentException();
