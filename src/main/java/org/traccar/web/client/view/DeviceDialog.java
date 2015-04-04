@@ -20,9 +20,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.ToggleGroup;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
-import com.sencha.gxt.widget.core.client.form.NumberField;
-import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
-import com.sencha.gxt.widget.core.client.form.Radio;
+import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.ApplicationContext;
@@ -37,7 +35,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.form.TextField;
 import org.traccar.web.shared.model.DeviceIconType;
 import org.traccar.web.shared.model.Position;
 
@@ -82,6 +79,12 @@ public class DeviceDialog implements Editor<Device> {
 
     @UiField
     NumberField<Double> idleSpeedThreshold;
+
+    @UiField
+    NumberField<Double> odometer;
+
+    @UiField
+    CheckBox autoUpdateOdometer;
 
     ToggleGroup iconRadioGroup = new ToggleGroup();
 

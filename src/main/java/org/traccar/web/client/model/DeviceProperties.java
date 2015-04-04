@@ -41,4 +41,8 @@ public interface DeviceProperties extends PropertyAccess<Device> {
     ValueProvider<Device, Boolean> follow();
 
     ValueProvider<Device, Boolean> recordTrace();
+
+    ValueProvider<Device, Double> odometer();
+
+    ValueProvider<Device, Boolean> autoUpdateOdometer();
 }

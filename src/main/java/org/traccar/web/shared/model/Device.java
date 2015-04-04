@@ -170,6 +170,28 @@ public class Device implements Serializable {
         this.iconType = iconType;
     }
 
+    // contains current odometer value in kilometers
+    private double odometer;
+
+    public double getOdometer() {
+        return odometer;
+    }
+
+    public void setOdometer(double odometer) {
+        this.odometer = odometer;
+    }
+
+    // indicates that odometer must be updated automatically by positions history
+    private boolean autoUpdateOdometer;
+
+    public boolean isAutoUpdateOdometer() {
+        return autoUpdateOdometer;
+    }
+
+    public void setAutoUpdateOdometer(boolean autoUpdateOdometer) {
+        this.autoUpdateOdometer = autoUpdateOdometer;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
