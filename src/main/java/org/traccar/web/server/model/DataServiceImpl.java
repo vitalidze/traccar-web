@@ -15,8 +15,6 @@
  */
 package org.traccar.web.server.model;
 
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -295,11 +293,26 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public List<Device> getDevices() {
+        return getDevices(true);
+    }
+
+    private List<Device> getDevices(boolean loadMaintenances) {
         User user = getSessionUser();
+        List<Device> devices;
         if (user.getAdmin()) {
-            return getSessionEntityManager().createQuery("SELECT x FROM Device x LEFT JOIN FETCH x.latestPosition").getResultList();
+            devices = getSessionEntityManager().createQuery("SELECT x FROM Device x LEFT JOIN FETCH x.latestPosition", Device.class).getResultList();
+        } else {
+            devices = user.getAllAvailableDevices();
         }
-        return user.getAllAvailableDevices();
+        if (loadMaintenances) {
+            for (Device device : devices) {
+                device.setMaintenances(
+                        getSessionEntityManager().createQuery("SELECT s FROM Maintenance s WHERE s.device=:device ORDER BY s.indexNo ASC", Maintenance.class)
+                                .setParameter("device", device)
+                                .getResultList());
+            }
+        }
+        return devices;
     }
 
     @Transactional
@@ -453,7 +466,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Override
     public List<Position> getLatestPositions() {
         List<Position> positions = new LinkedList<Position>();
-        List<Device> devices = getDevices();
+        List<Device> devices = getDevices(false);
         List<GeoFence> geoFences = getGeoFences(false);
         GeoFenceCalculator geoFenceCalculator = new GeoFenceCalculator(getGeoFences());
         if (devices != null && !devices.isEmpty()) {
@@ -482,7 +495,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Override
     public List<Position> getLatestNonIdlePositions() {
         List<Position> positions = new LinkedList<Position>();
-        List<Device> devices = getDevices();
+        List<Device> devices = getDevices(false);
         if (devices != null && !devices.isEmpty()) {
             EntityManager entityManager = getSessionEntityManager();
 
@@ -690,7 +703,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         geoFence.copyFrom(updatedGeoFence);
 
         // used to check access to the device
-        List<Device> devices = getDevices();
+        List<Device> devices = getDevices(false);
 
         // process devices
         for (Iterator<Device> it = geoFence.getDevices().iterator(); it.hasNext(); ) {

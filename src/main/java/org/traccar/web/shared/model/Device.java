@@ -19,6 +19,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -190,6 +191,17 @@ public class Device implements Serializable {
 
     public void setAutoUpdateOdometer(boolean autoUpdateOdometer) {
         this.autoUpdateOdometer = autoUpdateOdometer;
+    }
+
+    @Transient
+    private List<Maintenance> maintenances;
+
+    public List<Maintenance> getMaintenances() {
+        return maintenances;
+    }
+
+    public void setMaintenances(List<Maintenance> maintenances) {
+        this.maintenances = maintenances;
     }
 
     @Override
