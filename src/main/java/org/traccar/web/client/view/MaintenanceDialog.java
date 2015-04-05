@@ -16,7 +16,6 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
@@ -34,6 +33,8 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.button.ToggleButton;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
@@ -46,6 +47,7 @@ import com.sencha.gxt.widget.core.client.grid.RowNumberer;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.MaintenanceProperties;
 import org.traccar.web.shared.model.Device;
@@ -86,6 +88,20 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
     @UiField
     TextButton removeButton;
 
+    @UiField
+    ToggleButton editButton;
+
+    GridEditing<Maintenance> editing;
+    ColumnConfig<Maintenance, String> nameColumn;
+    ColumnConfig<Maintenance, Double> serviceIntervalColumn;
+    ColumnConfig<Maintenance, Double> lastServiceColumn;
+
+    @UiField
+    ToolBar addRemoveToolbar;
+
+    @UiField
+    VerticalLayoutContainer mainContainer;
+
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
@@ -107,16 +123,18 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
         columnConfigList.add(rowNumberer);
         rowNumberer.setFixed(true);
         rowNumberer.setResizable(false);
-        ColumnConfig<Maintenance, String> nameColumn = new ColumnConfig<Maintenance, String>(maintenanceProperties.name(), 25, i18n.serviceName());
+        nameColumn = new ColumnConfig<Maintenance, String>(maintenanceProperties.name(), 25, i18n.serviceName());
         columnConfigList.add(nameColumn);
-        ColumnConfig<Maintenance, Double> serviceIntervalColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.serviceInterval(), 140, i18n.mileageInterval() + " (" + i18n.km() + ")");
+        serviceIntervalColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.serviceInterval(), 140, i18n.mileageInterval() + " (" + i18n.km() + ")");
         columnConfigList.add(serviceIntervalColumn);
         serviceIntervalColumn.setFixed(true);
         serviceIntervalColumn.setResizable(false);
-        ColumnConfig<Maintenance, Double> lastServiceColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 110, i18n.lastServiceMileage() + " (" + i18n.km() + ")");
+        serviceIntervalColumn.setHidden(true);
+        lastServiceColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 110, i18n.lastServiceMileage() + " (" + i18n.km() + ")");
         columnConfigList.add(lastServiceColumn);
         lastServiceColumn.setFixed(true);
         lastServiceColumn.setResizable(false);
+        lastServiceColumn.setHidden(true);
 
         ColumnConfig<Maintenance, Double> stateColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 128, i18n.state());
         stateColumn.setFixed(true);
@@ -196,18 +214,7 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         grid.getSelectionModel().addSelectionChangedHandler(this);
 
-        GridEditing<Maintenance> editing = new GridInlineEditing<Maintenance>(grid);
-        editing.addEditor(nameColumn, new TextField());
-        NumberField<Double> serviceIntervalEditor = new NumberField<Double>(doublePropertyEditor);
-        serviceIntervalEditor.setAllowDecimals(false);
-        serviceIntervalEditor.setAllowBlank(false);
-        serviceIntervalEditor.setAllowNegative(false);
-        editing.addEditor(serviceIntervalColumn, serviceIntervalEditor);
-        NumberField<Double> lastServiceEditor = new NumberField<Double>(doublePropertyEditor);
-        lastServiceEditor.setAllowDecimals(false);
-        lastServiceEditor.setAllowBlank(false);
-        lastServiceEditor.setAllowNegative(false);
-        editing.addEditor(lastServiceColumn, lastServiceEditor);
+        editing = new GridInlineEditing<Maintenance>(grid);
 
         rowNumberer.initPlugin(grid);
     }
@@ -257,5 +264,47 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
     @UiHandler("odometer")
     public void onOdometerChanged(ValueChangeEvent<Double> event) {
         grid.getView().refresh(false);
+    }
+
+    @UiHandler("editButton")
+    public void onEditClicked(SelectEvent event) {
+        if (editButton.getValue()) {
+            startEditing();
+        } else {
+            stopEditing();
+        }
+    }
+
+    private void startEditing() {
+        editing.addEditor(nameColumn, new TextField());
+        NumberField<Double> serviceIntervalEditor = new NumberField<Double>(doublePropertyEditor);
+        serviceIntervalEditor.setAllowDecimals(false);
+        serviceIntervalEditor.setAllowBlank(false);
+        serviceIntervalEditor.setAllowNegative(false);
+        editing.addEditor(serviceIntervalColumn, serviceIntervalEditor);
+        NumberField<Double> lastServiceEditor = new NumberField<Double>(doublePropertyEditor);
+        lastServiceEditor.setAllowDecimals(false);
+        lastServiceEditor.setAllowBlank(false);
+        lastServiceEditor.setAllowNegative(false);
+        editing.addEditor(lastServiceColumn, lastServiceEditor);
+
+        serviceIntervalColumn.setHidden(false);
+        lastServiceColumn.setHidden(false);
+
+        addRemoveToolbar.setVisible(true);
+        grid.getView().refresh(true);
+        mainContainer.forceLayout();
+    }
+
+    private void stopEditing() {
+        editing.removeEditor(nameColumn);
+        editing.removeEditor(serviceIntervalColumn);
+        editing.removeEditor(lastServiceColumn);
+
+        serviceIntervalColumn.setHidden(true);
+        lastServiceColumn.setHidden(true);
+
+        addRemoveToolbar.setVisible(false);
+        grid.getView().refresh(true);
     }
 }

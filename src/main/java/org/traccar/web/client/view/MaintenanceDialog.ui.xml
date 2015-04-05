@@ -34,7 +34,7 @@
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
   <gxt:Window ui:field="window" pixelSize="640, 480" modal="true" headingText="{i18n.maintenance}">
-    <container:VerticalLayoutContainer>
+    <container:VerticalLayoutContainer ui:field="mainContainer">
       <container:child layoutData="{verticalLayoutData}">
         <gxt:ContentPanel ui:field="contentPanel" headerVisible="false">
           <container:VerticalLayoutContainer>
@@ -53,10 +53,12 @@
                     <toolbar:LabelToolItem label="{i18n.km}" />
                     <toolbar:LabelToolItem width="16" />
                     <form:CheckBox ui:field="autoUpdateOdometer" boxLabel="{i18n.auto}" />
+                    <toolbar:FillToolItem />
+                    <button:ToggleButton ui:field="editButton" text="{i18n.edit}" />
                 </toolbar:ToolBar>
             </container:child>
             <container:child layoutData="{toolBarRowData}">
-                <toolbar:ToolBar>
+                <toolbar:ToolBar ui:field="addRemoveToolbar" visible="false">
                     <button:TextButton ui:field="addButton" text="{i18n.add}" />
                     <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
                 </toolbar:ToolBar>
