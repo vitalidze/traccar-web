@@ -16,6 +16,7 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
@@ -90,20 +91,6 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
 
     final Device device;
 
-    abstract class CalculatableCell extends AbstractCell<Double> {
-        @Override
-        public void render(Context context, Double value, SafeHtmlBuilder sb) {
-            sb.append(calculate(maintenanceStore.get(context.getIndex())));
-        }
-
-        abstract double calculate(Maintenance m);
-
-        double getValue(Maintenance m, ValueProvider<Maintenance, Double> property) {
-            Store.Record record = maintenanceStore.getRecord(m);
-            return (Double) record.getValue(property);
-        }
-    }
-
     public MaintenanceDialog(Device device) {
         this.device = device;
 
@@ -131,33 +118,28 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
         lastServiceColumn.setFixed(true);
         lastServiceColumn.setResizable(false);
 
-        ColumnConfig<Maintenance, Double> remainingColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 82, i18n.remaining() + " (" + i18n.km() + ")");
-        remainingColumn.setFixed(true);
-        remainingColumn.setResizable(false);
-        remainingColumn.setCell(new CalculatableCell() {
+        ColumnConfig<Maintenance, Double> stateColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 128, i18n.state());
+        stateColumn.setFixed(true);
+        stateColumn.setResizable(false);
+        stateColumn.setCell(new AbstractCell<Double>() {
             @Override
-            double calculate(Maintenance m) {
-                double serviceInterval = getValue(m, maintenanceProperties.serviceInterval());
-                double lastService = getValue(m, maintenanceProperties.lastService());
-                double value = lastService + serviceInterval - odometer.getCurrentValue();
-                return Math.max(0, value);
-            }
-        });
-        columnConfigList.add(remainingColumn);
+            public void render(Context context, Double value, SafeHtmlBuilder sb) {
+                Maintenance m = maintenanceStore.get(context.getIndex());
+                Store.Record record = maintenanceStore.getRecord(m);
 
-        ColumnConfig<Maintenance, Double> overdueColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 96, i18n.overdue() + " (" + i18n.km() + ")");
-        overdueColumn.setFixed(true);
-        overdueColumn.setResizable(false);
-        overdueColumn.setCell(new CalculatableCell() {
-            @Override
-            double calculate(Maintenance m) {
-                double serviceInterval = getValue(m, maintenanceProperties.serviceInterval());
-                double lastService = getValue(m, maintenanceProperties.lastService());
-                double value = lastService + serviceInterval - odometer.getCurrentValue();
-                return -Math.min(0, value);
+                double serviceInterval = (Double) record.getValue(maintenanceProperties.serviceInterval());
+                double lastService = (Double) record.getValue(maintenanceProperties.lastService());
+
+                double remaining = lastService + serviceInterval - odometer.getCurrentValue();
+
+                if (remaining >= 0) {
+                    sb.appendHtmlConstant("<font color=\"green\">" + i18n.remaining() + " " + remaining + " " + i18n.km() + "</font>");
+                } else {
+                    sb.appendHtmlConstant("<font color=\"red\">" + i18n.overdue() + " " + -remaining + " " + i18n.km() + "</font>");
+                }
             }
         });
-        columnConfigList.add(overdueColumn);
+        columnConfigList.add(stateColumn);
 
         ColumnConfig<Maintenance, String> resetColumn = new ColumnConfig<Maintenance, String>(new ValueProvider<Maintenance, String>() {
             @Override
