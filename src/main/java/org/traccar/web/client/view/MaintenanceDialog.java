@@ -146,11 +146,16 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
                 Store.Record record = maintenanceStore.getRecord(m);
 
                 double serviceInterval = (Double) record.getValue(maintenanceProperties.serviceInterval());
-                double lastService = (Double) record.getValue(maintenanceProperties.lastService());
+                // do not draw anything if service interval is not set
+                if (serviceInterval == 0d) {
+                    sb.appendEscaped("");
+                    return;
+                }
 
+                double lastService = (Double) record.getValue(maintenanceProperties.lastService());
                 double remaining = lastService + serviceInterval - odometer.getCurrentValue();
 
-                if (remaining >= 0) {
+                if (remaining > 0) {
                     sb.appendHtmlConstant("<font color=\"green\">" + i18n.remaining() + " " + remaining + " " + i18n.km() + "</font>");
                 } else {
                     sb.appendHtmlConstant("<font color=\"red\">" + i18n.overdue() + " " + -remaining + " " + i18n.km() + "</font>");
