@@ -297,4 +297,10 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String mileageInterval();
 
     String lastServiceMileage();
+
+    String remaining();
+
+    String overdue();
+
+    String reset();
 }

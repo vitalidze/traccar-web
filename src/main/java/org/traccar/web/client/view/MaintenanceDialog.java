@@ -15,13 +15,22 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.safecss.shared.SafeStylesUtils;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.TextButtonCell;
 import com.sencha.gxt.core.client.Style.SelectionMode;
+import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.core.client.resources.CommonStyles;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
@@ -81,34 +90,105 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
 
     final Device device;
 
+    abstract class CalculatableCell extends AbstractCell<Double> {
+        @Override
+        public void render(Context context, Double value, SafeHtmlBuilder sb) {
+            sb.append(calculate(maintenanceStore.get(context.getIndex())));
+        }
+
+        abstract double calculate(Maintenance m);
+
+        double getValue(Maintenance m, ValueProvider<Maintenance, Double> property) {
+            Store.Change<Maintenance, Double> change = maintenanceStore.getRecord(m).getChange(property);
+            return change == null || change.getValue() == null ? property.getValue(m) : change.getValue();
+        }
+    }
+
     public MaintenanceDialog(Device device) {
         this.device = device;
 
-        MaintenanceProperties maintenanceProperties = GWT.create(MaintenanceProperties.class);
+        final MaintenanceProperties maintenanceProperties = GWT.create(MaintenanceProperties.class);
 
         this.maintenanceStore = new ListStore<Maintenance>(maintenanceProperties.indexNo());
 
         nextIndex = device.getMaintenances().size();
-
-        for (Maintenance maintenance : device.getMaintenances()) {
-            maintenanceStore.add(maintenance);
-        }
 
         List<ColumnConfig<Maintenance, ?>> columnConfigList = new LinkedList<ColumnConfig<Maintenance, ?>>();
         RowNumberer<Maintenance> rowNumberer = new RowNumberer<Maintenance>();
         rowNumberer.setHeader("#");
 
         columnConfigList.add(rowNumberer);
-        rowNumberer.setSortable(false);
+        rowNumberer.setFixed(true);
+        rowNumberer.setResizable(false);
         ColumnConfig<Maintenance, String> nameColumn = new ColumnConfig<Maintenance, String>(maintenanceProperties.name(), 25, i18n.serviceName());
         columnConfigList.add(nameColumn);
-        nameColumn.setSortable(false);
-        ColumnConfig<Maintenance, Double> serviceIntervalColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.serviceInterval(), 10, i18n.mileageInterval());
+        ColumnConfig<Maintenance, Double> serviceIntervalColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.serviceInterval(), 140, i18n.mileageInterval() + " (" + i18n.km() + ")");
         columnConfigList.add(serviceIntervalColumn);
-        serviceIntervalColumn.setSortable(false);
-        ColumnConfig<Maintenance, Double> lastServiceColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 10, i18n.lastServiceMileage());
+        serviceIntervalColumn.setFixed(true);
+        serviceIntervalColumn.setResizable(false);
+        ColumnConfig<Maintenance, Double> lastServiceColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 110, i18n.lastServiceMileage() + " (" + i18n.km() + ")");
         columnConfigList.add(lastServiceColumn);
-        lastServiceColumn.setSortable(false);
+        lastServiceColumn.setFixed(true);
+        lastServiceColumn.setResizable(false);
+
+        ColumnConfig<Maintenance, Double> remainingColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 82, i18n.remaining() + " (" + i18n.km() + ")");
+        remainingColumn.setFixed(true);
+        remainingColumn.setResizable(false);
+        remainingColumn.setCell(new CalculatableCell() {
+            @Override
+            double calculate(Maintenance m) {
+                double serviceInterval = getValue(m, maintenanceProperties.serviceInterval());
+                double lastService = getValue(m, maintenanceProperties.lastService());
+                double value = lastService + serviceInterval - odometer.getCurrentValue();
+                return Math.max(0, value);
+            }
+        });
+        columnConfigList.add(remainingColumn);
+
+        ColumnConfig<Maintenance, Double> overdueColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 96, i18n.overdue() + " (" + i18n.km() + ")");
+        overdueColumn.setFixed(true);
+        overdueColumn.setResizable(false);
+        overdueColumn.setCell(new CalculatableCell() {
+            @Override
+            double calculate(Maintenance m) {
+                double serviceInterval = getValue(m, maintenanceProperties.serviceInterval());
+                double lastService = getValue(m, maintenanceProperties.lastService());
+                double value = lastService + serviceInterval - odometer.getCurrentValue();
+                return -Math.min(0, value);
+            }
+        });
+        columnConfigList.add(overdueColumn);
+
+        ColumnConfig<Maintenance, String> resetColumn = new ColumnConfig<Maintenance, String>(new ValueProvider<Maintenance, String>() {
+            @Override
+            public String getValue(Maintenance object) {
+                return i18n.reset();
+            }
+
+            @Override
+            public void setValue(Maintenance object, String value) {
+            }
+
+            @Override
+            public String getPath() {
+                return "reset";
+            }
+        }, 46);
+        resetColumn.setFixed(true);
+        resetColumn.setResizable(false);
+        // IMPORTANT we want the text element (cell parent) to only be as wide as
+        // the cell and not fill the cell
+        resetColumn.setColumnTextClassName(CommonStyles.get().inlineBlock());
+        resetColumn.setColumnTextStyle(SafeStylesUtils.fromTrustedString("padding: 1px 3px 0;"));
+        TextButtonCell resetButton = new TextButtonCell();
+        resetColumn.setCell(resetButton);
+        columnConfigList.add(resetColumn);
+
+        for (ColumnConfig<Maintenance, ?> columnConfig : columnConfigList) {
+            columnConfig.setSortable(false);
+            columnConfig.setHideable(false);
+            columnConfig.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        }
 
         columnModel = new ColumnModel<Maintenance>(columnConfigList);
 
@@ -119,6 +199,10 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
         autoUpdateOdometer.setValue(device.isAutoUpdateOdometer());
 
         // set up grid
+        for (Maintenance maintenance : device.getMaintenances()) {
+            maintenanceStore.add(maintenance);
+        }
+
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         grid.getSelectionModel().addSelectionChangedHandler(this);
 
@@ -178,5 +262,10 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
     @Override
     public void onSelectionChanged(SelectionChangedEvent<Maintenance> event) {
         removeButton.setEnabled(!event.getSelection().isEmpty());
+    }
+
+    @UiHandler("odometer")
+    public void onOdometerChanged(ValueChangeEvent<Double> event) {
+        grid.getView().refresh(false);
     }
 }

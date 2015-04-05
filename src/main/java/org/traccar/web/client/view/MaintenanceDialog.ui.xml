@@ -40,7 +40,7 @@
           <container:VerticalLayoutContainer>
             <container:child layoutData="{toolBarRowData}">
                 <toolbar:ToolBar>
-                    <form:FieldLabel text="{i18n.odometer}" labelWidth="70">
+                    <form:FieldLabel text="{i18n.odometer}" labelWidth="100">
                         <form:widget>
                             <form:NumberField editor="{doublePropertyEditor}"
                                               ui:field="odometer"
