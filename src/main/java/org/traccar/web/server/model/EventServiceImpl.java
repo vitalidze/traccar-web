@@ -25,6 +25,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -162,12 +163,87 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         }
     }
 
+    public static class OdometerUpdater extends ScheduledTask {
+        @Inject
+        Provider<EntityManager> entityManager;
+
+        Map<Long, DeviceState> deviceState = new HashMap<Long, DeviceState>();
+
+        /**
+         * Scanning is based on assumption that position identifiers are incremented sequentially
+         */
+        Long lastScannedPositionId;
+
+        @Override
+        @Transactional
+        public void doWork() throws Exception {
+            List<Device> devices = entityManager.get().createQuery("SELECT d FROM Device d WHERE d.autoUpdateOdometer=:b", Device.class)
+                    .setParameter("b", Boolean.TRUE).getResultList();
+            if (devices.isEmpty()) {
+                return;
+            }
+
+            if (lastScannedPositionId == null) {
+                List<Long> latestPositionId = entityManager.get().createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class).getResultList();
+                if (latestPositionId.isEmpty()) {
+                    return;
+                } else {
+                    lastScannedPositionId = latestPositionId.get(0);
+                }
+            }
+
+            List<Position> positions = entityManager.get().createQuery(
+                    "SELECT p FROM Position p INNER JOIN p.device d WHERE p.id >= :from AND d.autoUpdateOdometer=:b ORDER BY d.id, p.time ASC", Position.class)
+                    .setParameter("b", Boolean.TRUE)
+                    .setParameter("from", lastScannedPositionId)
+                    .getResultList();
+
+            Position prevPosition = null;
+            Device device = null;
+            DeviceState state = null;
+            for (Position position : positions) {
+                // find current device and it's state
+                if (device == null || device.getId() != position.getDevice().getId()) {
+                    device = position.getDevice();
+                    state = deviceState.get(device.getId());
+                    if (state == null) {
+                        state = new DeviceState();
+                        deviceState.put(device.getId(), state);
+                        prevPosition = null;
+                    } else {
+                        prevPosition = entityManager.get().find(Position.class, state.latestPositionId);
+                    }
+                }
+
+                // calculate
+                if (prevPosition != null) {
+                    double distance = GeoFenceCalculator.getDistance(
+                            prevPosition.getLongitude(), prevPosition.getLatitude(),
+                            position.getLongitude(), position.getLatitude());
+
+                    if (distance > 0.003) {
+                        device.setOdometer(device.getOdometer());
+                    }
+                }
+
+                // update prev position and state
+                state.latestPositionId = position.getId();
+                prevPosition = position;
+                // update latest position id
+                lastScannedPositionId = Math.max(lastScannedPositionId, position.getId());
+            }
+        }
+    }
+
     @Inject
     private OfflineDetector offlineDetector;
-    private ScheduledFuture<?> offlineDetectorFuture;
     @Inject
     private GeoFenceDetector geoFenceDetector;
-    private ScheduledFuture<?> geoFenceDetectorFuture;
+    @Inject
+    private OdometerUpdater odometerUpdater;
+    private Set<ScheduledTask> runningTasks = new HashSet<ScheduledTask>();
+    private List<ScheduledFuture<?>> futures = new ArrayList<ScheduledFuture<?>>();
+
     @Inject
     private Provider<ApplicationSettings> applicationSettings;
 
@@ -178,35 +254,23 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         super.init();
 
         if (applicationSettings.get().isEventRecordingEnabled()) {
-            startOfflineDetector();
-            startGeoFenceDetector();
+            startTasks();
         }
     }
 
-    private synchronized void startOfflineDetector() {
-        if (offlineDetectorFuture == null) {
-            offlineDetectorFuture = scheduler.scheduleAtFixedRate(offlineDetector, 0, 1, TimeUnit.MINUTES);
+    private synchronized void startTasks() {
+        for (ScheduledTask task : new ScheduledTask[] { offlineDetector, geoFenceDetector, odometerUpdater }) {
+            futures.add(scheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.MINUTES));
+            runningTasks.add(task);
         }
     }
 
-    private synchronized void stopOfflineDetector() {
-        if (offlineDetectorFuture != null) {
-            offlineDetectorFuture.cancel(true);
-            offlineDetectorFuture = null;
+    private synchronized void stopTasks() {
+        for (ScheduledFuture<?> future : futures) {
+            future.cancel(true);
         }
-    }
-
-    private synchronized void startGeoFenceDetector() {
-        if (geoFenceDetectorFuture == null) {
-            geoFenceDetectorFuture = scheduler.scheduleAtFixedRate(geoFenceDetector, 0, 1, TimeUnit.MINUTES);
-        }
-    }
-
-    private synchronized void stopGeoFenceDetector() {
-        if (geoFenceDetectorFuture != null) {
-            geoFenceDetectorFuture.cancel(true);
-            geoFenceDetectorFuture = null;
-        }
+        futures.clear();
+        runningTasks.clear();
     }
 
     @Transactional
@@ -214,11 +278,9 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
     @Override
     public void applicationSettingsChanged() {
         if (applicationSettings.get().isEventRecordingEnabled()) {
-            startOfflineDetector();
-            startGeoFenceDetector();
+            startTasks();
         } else {
-            stopOfflineDetector();
-            stopGeoFenceDetector();
+            stopTasks();
         }
     }
 }
