@@ -99,8 +99,8 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
         abstract double calculate(Maintenance m);
 
         double getValue(Maintenance m, ValueProvider<Maintenance, Double> property) {
-            Store.Change<Maintenance, Double> change = maintenanceStore.getRecord(m).getChange(property);
-            return change == null || change.getValue() == null ? property.getValue(m) : change.getValue();
+            Store.Record record = maintenanceStore.getRecord(m);
+            return (Double) record.getValue(property);
         }
     }
 
@@ -181,6 +181,14 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
         resetColumn.setColumnTextClassName(CommonStyles.get().inlineBlock());
         resetColumn.setColumnTextStyle(SafeStylesUtils.fromTrustedString("padding: 1px 3px 0;"));
         TextButtonCell resetButton = new TextButtonCell();
+        resetButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                int row = event.getContext().getIndex();
+                Maintenance m = maintenanceStore.get(row);
+                maintenanceStore.getRecord(m).addChange(maintenanceProperties.lastService(), odometer.getCurrentValue());
+            }
+        });
         resetColumn.setCell(resetButton);
         columnConfigList.add(resetColumn);
 
