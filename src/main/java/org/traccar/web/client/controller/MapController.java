@@ -18,6 +18,7 @@ package org.traccar.web.client.controller;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
@@ -46,12 +47,15 @@ public class MapController implements ContentController, MapView.MapHandler {
         public void onArchivePositionSelected(Position position);
     }
 
-    private MapHandler mapHandler;
+    private final MapHandler mapHandler;
 
-    private MapView mapView;
+    private final MapView mapView;
 
-    public MapController(MapHandler mapHandler) {
+    private final ListStore<Device> deviceStore;
+
+    public MapController(MapHandler mapHandler, ListStore<Device> deviceStore) {
         this.mapHandler = mapHandler;
+        this.deviceStore = deviceStore;
         mapView = new MapView(this);
         loadMapSettings();
     }
@@ -126,6 +130,8 @@ public class MapController implements ContentController, MapView.MapHandler {
                             }
                         }
                     }
+                    device = deviceStore.findModelWithKey(Long.toString(device.getId()));
+                    device.setOdometer(position.getDistance());
                 }
                 /**
                  * Draw positions

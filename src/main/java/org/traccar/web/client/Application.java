@@ -63,7 +63,7 @@ public class Application {
         ListStore<Device> deviceStore = new ListStore<Device>(deviceProperties.id());
 
         settingsController = new SettingsController(userSettingsHandler);
-        mapController = new MapController(mapHandler);
+        mapController = new MapController(mapHandler, deviceStore);
         geoFenceController = new GeoFenceController(deviceStore, mapController);
         geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
         deviceController = new DeviceController(mapController,

@@ -520,10 +520,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                         }
                     }
 
+                    position.setDistance(device.getOdometer());
                     positions.add(position);
                 }
             }
         }
+        // TODO: check for overdue servicing records
         return positions;
     }
 

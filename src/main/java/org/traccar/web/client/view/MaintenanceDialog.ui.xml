@@ -31,6 +31,8 @@
 
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="doublePropertyEditor" />
 
+  <ui:with type="com.google.gwt.i18n.client.NumberFormat" field="odometerFormat" />
+
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
   <gxt:Window ui:field="window" pixelSize="640, 480" modal="true" headingText="{i18n.maintenance}">
@@ -47,7 +49,8 @@
                                               allowNegative="false"
                                               allowDecimals="true"
                                               allowBlank="false"
-                                              width="100" />
+                                              width="100"
+                                              format="{odometerFormat}" />
                         </form:widget>
                     </form:FieldLabel>
                     <toolbar:LabelToolItem label="{i18n.km}" />

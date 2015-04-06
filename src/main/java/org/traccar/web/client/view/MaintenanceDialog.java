@@ -18,6 +18,7 @@ package org.traccar.web.client.view;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -25,6 +26,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.NumberCell;
 import com.sencha.gxt.cell.core.client.TextButtonCell;
 import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.ValueProvider;
@@ -103,6 +105,9 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
     VerticalLayoutContainer mainContainer;
 
     @UiField(provided = true)
+    NumberFormat odometerFormat = NumberFormat.getFormat("0.#");
+
+    @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
     final Device device;
@@ -130,11 +135,13 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
         serviceIntervalColumn.setFixed(true);
         serviceIntervalColumn.setResizable(false);
         serviceIntervalColumn.setHidden(true);
+        serviceIntervalColumn.setCell(new NumberCell<Double>(odometerFormat));
         lastServiceColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 110, i18n.lastServiceMileage() + " (" + i18n.km() + ")");
         columnConfigList.add(lastServiceColumn);
         lastServiceColumn.setFixed(true);
         lastServiceColumn.setResizable(false);
         lastServiceColumn.setHidden(true);
+        lastServiceColumn.setCell(new NumberCell<Double>(odometerFormat));
 
         ColumnConfig<Maintenance, Double> stateColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 128, i18n.state());
         stateColumn.setFixed(true);
@@ -156,9 +163,9 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
                 double remaining = lastService + serviceInterval - odometer.getCurrentValue();
 
                 if (remaining > 0) {
-                    sb.appendHtmlConstant("<font color=\"green\">" + i18n.remaining() + " " + remaining + " " + i18n.km() + "</font>");
+                    sb.appendHtmlConstant("<font color=\"green\">" + i18n.remaining() + " " + odometerFormat.format(remaining) + " " + i18n.km() + "</font>");
                 } else {
-                    sb.appendHtmlConstant("<font color=\"red\">" + i18n.overdue() + " " + -remaining + " " + i18n.km() + "</font>");
+                    sb.appendHtmlConstant("<font color=\"red\">" + i18n.overdue() + " " + odometerFormat.format(-remaining) + " " + i18n.km() + "</font>");
                 }
             }
         });
