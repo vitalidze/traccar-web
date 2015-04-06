@@ -21,22 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
@@ -278,6 +263,9 @@ public class User implements Serializable, Cloneable {
     }
 
     private String email;
+    /**
+     * @deprecated now user can select types of events for notifications
+     */
     @Column(nullable = true)
     private boolean notifications;
 
@@ -289,12 +277,29 @@ public class User implements Serializable, Cloneable {
         this.email = email;
     }
 
+    @Deprecated
     public boolean isNotifications() {
         return notifications;
     }
 
+    @Deprecated
     public void setNotifications(boolean notifications) {
         this.notifications = notifications;
+    }
+
+    @ElementCollection(targetClass = DeviceEventType.class)
+    @JoinTable(name = "users_notifications", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @GwtTransient
+    private Set<DeviceEventType> notificationEvents;
+
+    public Set<DeviceEventType> getNotificationEvents() {
+        return notificationEvents;
+    }
+
+    public void setNotificationEvents(Set<DeviceEventType> notificationEvents) {
+        this.notificationEvents = notificationEvents;
     }
 
     @Expose

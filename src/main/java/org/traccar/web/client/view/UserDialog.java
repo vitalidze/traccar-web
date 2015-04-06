@@ -15,9 +15,18 @@
  */
 package org.traccar.web.client.view;
 
+import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.ToStringValueProvider;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
+import com.sencha.gxt.widget.core.client.grid.CheckBoxSelectionModel;
+import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
+import com.sencha.gxt.widget.core.client.grid.ColumnModel;
+import com.sencha.gxt.widget.core.client.grid.Grid;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.model.EnumKeyProvider;
+import org.traccar.web.shared.model.DeviceEventType;
 import org.traccar.web.shared.model.User;
 
 import com.google.gwt.core.client.GWT;
@@ -32,6 +41,10 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.PasswordField;
 import com.sencha.gxt.widget.core.client.form.TextField;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class UserDialog implements Editor<User> {
 
@@ -69,14 +82,36 @@ public class UserDialog implements Editor<User> {
     @UiField
     TextField email;
 
-    @UiField
-    CheckBox notifications;
+    @UiField(provided = true)
+    Grid<DeviceEventType> grid;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
     public UserDialog(User user, UserHandler userHandler) {
         this.userHandler = userHandler;
+
+        // notification types grid
+        IdentityValueProvider<DeviceEventType> identity = new IdentityValueProvider<DeviceEventType>();
+        final CheckBoxSelectionModel<DeviceEventType> selectionModel = new CheckBoxSelectionModel<DeviceEventType>(identity);
+
+        ColumnConfig<DeviceEventType, String> nameCol = new ColumnConfig<DeviceEventType, String>(new ToStringValueProvider<DeviceEventType>(), 200, "Event");
+        List<ColumnConfig<DeviceEventType, ?>> columns = new ArrayList<ColumnConfig<DeviceEventType, ?>>();
+        columns.add(selectionModel.getColumn());
+        columns.add(nameCol);
+
+        ColumnModel<DeviceEventType> cm = new ColumnModel<DeviceEventType>(columns);
+
+        ListStore<DeviceEventType> store = new ListStore<DeviceEventType>(new EnumKeyProvider<DeviceEventType>());
+        store.addAll(Arrays.asList(DeviceEventType.values()));
+
+        grid = new Grid<DeviceEventType>(store, cm);
+        grid.setSelectionModel(selectionModel);
+        grid.getView().setAutoExpandColumn(nameCol);
+        grid.setBorders(false);
+        grid.getView().setStripeRows(true);
+        grid.getView().setColumnLines(true);
+
         uiBinder.createAndBindUi(this);
 
         if (ApplicationContext.getInstance().getUser().getAdmin()) {
