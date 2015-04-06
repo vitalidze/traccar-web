@@ -222,7 +222,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                             position.getLongitude(), position.getLatitude());
 
                     if (distance > 0.003) {
-                        device.setOdometer(device.getOdometer());
+                        device.setOdometer(device.getOdometer() + distance);
                     }
                 }
 
