@@ -15,6 +15,7 @@
  */
 package org.traccar.web.server.model;
 
+import com.google.gson.stream.JsonWriter;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.NotificationService;
@@ -33,6 +34,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -168,7 +171,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 }
 
                 if (admins == null) {
-                    admins = entityManager.get().createQuery("SELECT u FROM User u WHERE u.admin=:true AND u.notifications=:true", User.class)
+                    admins = entityManager.get().createQuery("SELECT u FROM User u WHERE u.admin=:true", User.class)
                             .setParameter("true", true)
                             .getResultList();
                 }
@@ -193,37 +196,16 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
                 DeviceEvents deviceEvents = entry.getValue();
 
-                logger.info("Sending notification to '" + user.getEmail() + "'...");
+                StringBuilder message = new StringBuilder();
+                if (appendOfflineEventsText(message, deviceEvents.offlineEvents())) {
+                    message.append("\n\n");
+                }
+                appendGeoFenceText(message, deviceEvents.geoFenceEvents());
 
-                Session session = getSession(settings);
-                Message msg = new MimeMessage(session);
-                Transport transport = null;
-                try {
-                    msg.setFrom(new InternetAddress(settings.getFromAddress()));
-                    msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getLogin() + " <" + user.getEmail() + ">", false));
-                    msg.setSubject("[traccar-web] Notification");
-
-                    StringBuilder message = new StringBuilder();
-                    if (appendOfflineEventsText(message, deviceEvents.offlineEvents())) {
-                        message.append("\n\n");
-                    }
-                    appendGeoFenceText(message, deviceEvents.geoFenceEvents());
-
-                    msg.setText(message.toString());
-                    msg.setHeader("X-Mailer", "traccar-web.sendmail");
-                    msg.setSentDate(new Date());
-
-                    transport = session.getTransport("smtp");
-                    transport.connect();
-                    transport.sendMessage(msg, msg.getAllRecipients());
-
+                boolean sentEmail = sendEmail(settings, user, "[traccar-web] Notification", message.toString());
+                boolean sentPushbullet = sendPushbullet(settings, user, "[traccar-web] Notification", message.toString());
+                if (sentPushbullet || sentEmail) {
                     deviceEvents.markAsSent();
-                } catch (MessagingException me) {
-                    logger.log(Level.SEVERE, "Unable to send Email message", me);
-                } finally {
-                    if (transport != null) {
-                        transport.close();
-                    }
                 }
             }
         }
@@ -300,6 +282,88 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                         .append(" geo-fence '").append(event.getGeoFence().getName()).append("' at ").append(event.getPosition().getTime()).append('\n');
             }
             return !events.isEmpty();
+        }
+
+        private boolean sendEmail(NotificationSettings settings, User user, String subject, String body) {
+            // perform some validation of e-mail settings
+            if (settings.getServer() == null || settings.getServer().trim().isEmpty() ||
+                settings.getFromAddress() == null || settings.getFromAddress().trim().isEmpty()) {
+                return false;
+            }
+
+            logger.info("Sending Email notification to '" + user.getEmail() + "'...");
+
+            Session session = getSession(settings);
+            Message msg = new MimeMessage(session);
+            Transport transport = null;
+            try {
+                msg.setFrom(new InternetAddress(settings.getFromAddress()));
+                msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getLogin() + " <" + user.getEmail() + ">", false));
+                msg.setSubject(subject);
+
+                msg.setText(body);
+                msg.setHeader("X-Mailer", "traccar-web.sendmail");
+                msg.setSentDate(new Date());
+
+                transport = session.getTransport("smtp");
+                transport.connect();
+                transport.sendMessage(msg, msg.getAllRecipients());
+
+                return true;
+            } catch (MessagingException me) {
+                logger.log(Level.SEVERE, "Unable to send Email message", me);
+                return false;
+            } finally {
+                if (transport != null) try { transport.close(); } catch (MessagingException ignored) {}
+            }
+        }
+
+        private boolean sendPushbullet(NotificationSettings settings, User user, String subject, String body) {
+            // perform some validation of Pushbullet settings
+            if (settings.getPushbulletApiKey() == null || settings.getPushbulletApiKey().trim().isEmpty()) {
+                return false;
+            }
+            logger.info("Sending Pushbullet notification to '" + user.getEmail() + "'...");
+
+            InputStream is = null;
+            OutputStream os = null;
+            try {
+                URL url = new URL("https://api.pushbullet.com/v2/pushes");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Authorization", "Bearer " + settings.getPushbulletApiKey());
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+                os = conn.getOutputStream();
+                JsonWriter writer = new JsonWriter(new OutputStreamWriter(os));
+                writer.beginObject();
+                writer
+                    .name("email").value(user.getEmail())
+                    .name("type").value("note")
+                    .name("title").value(subject)
+                        .name("body").value(body);
+                writer.endObject();
+                writer.flush();
+                writer.close();
+                is = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                try {
+                    String line;
+                    logger.info("Pushbullet response: ");
+                    while ((line = reader.readLine()) != null) logger.info(line);
+                    return true;
+                } finally {
+                    reader.close();
+                }
+            } catch (MalformedURLException mue) {
+                logger.log(Level.SEVERE, "Incorrect URL", mue);
+                return false;
+            } catch (IOException ioex) {
+                logger.log(Level.SEVERE, "I/O Error", ioex);
+                return false;
+            } finally {
+                if (is != null ) try { is.close(); } catch (IOException ignored) {}
+            }
         }
     }
 
