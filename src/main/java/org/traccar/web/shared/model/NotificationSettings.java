@@ -153,14 +153,14 @@ public class NotificationSettings implements Serializable {
         this.secureConnectionType = secureConnectionType;
     }
 
-    private String pushbulletApiKey;
+    private String pushbulletAccessToken;
 
-    public String getPushbulletApiKey() {
-        return pushbulletApiKey;
+    public String getPushbulletAccessToken() {
+        return pushbulletAccessToken;
     }
 
-    public void setPushbulletApiKey(String pushbulletApiKey) {
-        this.pushbulletApiKey = pushbulletApiKey;
+    public void setPushbulletAccessToken(String pushbulletApiKey) {
+        this.pushbulletAccessToken = pushbulletApiKey;
     }
 
     public void copyFrom(NotificationSettings s) {
@@ -171,6 +171,6 @@ public class NotificationSettings implements Serializable {
         setUsername(s.getUsername());
         setPassword(s.getPassword());
         setSecureConnectionType(s.getSecureConnectionType());
-        setPushbulletApiKey(s.getPushbulletApiKey());
+        setPushbulletAccessToken(s.getPushbulletAccessToken());
     }
 }

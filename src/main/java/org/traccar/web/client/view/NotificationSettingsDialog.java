@@ -85,7 +85,7 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     PasswordField password;
 
     @UiField
-    TextField pushbulletApiKey;
+    TextField pushbulletAccessToken;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);

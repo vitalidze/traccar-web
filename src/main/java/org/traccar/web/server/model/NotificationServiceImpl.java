@@ -320,7 +320,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
         private boolean sendPushbullet(NotificationSettings settings, User user, String subject, String body) {
             // perform some validation of Pushbullet settings
-            if (settings.getPushbulletApiKey() == null || settings.getPushbulletApiKey().trim().isEmpty()) {
+            if (settings.getPushbulletAccessToken() == null || settings.getPushbulletAccessToken().trim().isEmpty()) {
                 return false;
             }
             logger.info("Sending Pushbullet notification to '" + user.getEmail() + "'...");
@@ -331,7 +331,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 URL url = new URL("https://api.pushbullet.com/v2/pushes");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
-                conn.setRequestProperty("Authorization", "Bearer " + settings.getPushbulletApiKey());
+                conn.setRequestProperty("Authorization", "Bearer " + settings.getPushbulletAccessToken());
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
                 os = conn.getOutputStream();
@@ -450,7 +450,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             URL url = new URL("https://api.pushbullet.com/v2/users/me");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
-            conn.setRequestProperty("Authorization", "Bearer " + settings.getPushbulletApiKey());
+            conn.setRequestProperty("Authorization", "Bearer " + settings.getPushbulletAccessToken());
             is = conn.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             try {
