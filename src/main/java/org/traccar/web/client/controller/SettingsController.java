@@ -202,8 +202,25 @@ public class SettingsController implements DeviceView.SettingsHandler {
                     }
 
                     @Override
-                    public void onTest(NotificationSettings notificationSettings) {
-                        service.checkSettings(notificationSettings, new AsyncCallback<Void>() {
+                    public void onTestEmail(NotificationSettings notificationSettings) {
+                        service.checkEmailSettings(notificationSettings, new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable throwable) {
+                                new AlertMessageBox(i18n.notificationSettings(), i18n.testFailed()).show();
+                            }
+
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                MessageBox messageBox = new MessageBox(i18n.notificationSettings(), i18n.testSucceeded());
+                                messageBox.setIcon(MessageBox.ICONS.info());
+                                messageBox.show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onTestPushbullet(NotificationSettings notificationSettings) {
+                        service.checkPushbulletSettings(notificationSettings, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable throwable) {
                                 new AlertMessageBox(i18n.notificationSettings(), i18n.testFailed()).show();

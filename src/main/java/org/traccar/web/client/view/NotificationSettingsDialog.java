@@ -51,7 +51,8 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
 
     public interface NotificationSettingsHandler {
         public void onSave(NotificationSettings notificationSettings);
-        public void onTest(NotificationSettings notificationSettings);
+        public void onTestEmail(NotificationSettings notificationSettings);
+        public void onTestPushbullet(NotificationSettings notificationSettings);
     }
 
     private NotificationSettingsHandler notificationSettingsHandler;
@@ -124,7 +125,12 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
 
     @UiHandler("testEmailButton")
     public void onTestEmailClicked(SelectEvent event) {
-        notificationSettingsHandler.onTest(driver.flush());
+        notificationSettingsHandler.onTestEmail(driver.flush());
+    }
+
+    @UiHandler("testPushbulletButton")
+    public void onTestPushbulletClicked(SelectEvent event) {
+        notificationSettingsHandler.onTestPushbullet(driver.flush());
     }
 
     @UiHandler("cancelButton")

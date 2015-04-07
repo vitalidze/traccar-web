@@ -29,11 +29,19 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Singleton
 public class NotificationServiceImpl extends RemoteServiceServlet implements NotificationService {
@@ -42,6 +50,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
     @Inject
     private Provider<EntityManager> entityManager;
+
+    @Inject
+    protected Logger logger;
 
     static class DeviceEvents implements Comparator<DeviceEvent> {
         Set<DeviceEvent> offlineEvents;
@@ -308,7 +319,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public void checkSettings(NotificationSettings settings) {
+    public void checkEmailSettings(NotificationSettings settings) {
         // Validate smtp settings
         try {
             Session s = getSession(settings);
@@ -363,6 +374,35 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         s.setDebug(DEBUG);
 
         return s;
+    }
+
+    @Transactional
+    @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
+    @Override
+    public void checkPushbulletSettings(NotificationSettings settings) {
+        InputStream is = null;
+        try {
+            URL url = new URL("https://api.pushbullet.com/v2/users/me");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", "Bearer " + settings.getPushbulletApiKey());
+            is = conn.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            try {
+                String line;
+                logger.info("Pushbullet response: ");
+                while ((line = reader.readLine()) != null) logger.info(line);
+            } finally {
+                reader.close();
+            }
+        } catch (MalformedURLException mue) {
+            throw new IllegalArgumentException(mue);
+        } catch (IOException ioex) {
+            throw new IllegalStateException(ioex);
+        } finally {
+            if (is != null ) try { is.close(); } catch (IOException ignored) {}
+        }
     }
 
     @Transactional
