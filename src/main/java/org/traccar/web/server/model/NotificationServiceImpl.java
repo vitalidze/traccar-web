@@ -115,25 +115,33 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         @Transactional
         @Override
         public void doWork() throws Exception {
+            Set<DeviceEventType> eventTypes = new HashSet<DeviceEventType>();
+            for (User user : entityManager.get().createQuery("SELECT u FROM User u INNER JOIN FETCH u.notificationEvents", User.class).getResultList()) {
+                eventTypes.addAll(user.getNotificationEvents());
+            }
+
+            if (eventTypes.isEmpty()) {
+                return;
+            }
+
             Map<User, DeviceEvents> events = new HashMap<User, DeviceEvents>();
             List<User> admins = null;
             Map<User, List<User>> managers = new HashMap<User, List<User>>();
 
-            for (DeviceEvent event : entityManager.get().createQuery("SELECT e FROM DeviceEvent e INNER JOIN FETCH e.position WHERE e.notificationSent = :false", DeviceEvent.class)
+            for (DeviceEvent event : entityManager.get().createQuery("SELECT e FROM DeviceEvent e INNER JOIN FETCH e.position WHERE e.notificationSent = :false AND e.type IN (:types)", DeviceEvent.class)
                                     .setParameter("false", false)
+                                    .setParameter("types", eventTypes)
                                     .getResultList()) {
                 Device device = event.getDevice();
 
                 for (User user : device.getUsers()) {
-                    if (user.isNotifications()) {
-                        addEvent(events, user, event);
-                    }
+                    addEvent(events, user, event);
                     List<User> userManagers = managers.get(user);
                     if (userManagers == null) {
                         userManagers = new LinkedList<User>();
                         User manager = user.getManagedBy();
                         while (manager != null) {
-                            if (manager.isNotifications()) {
+                            if (!manager.getNotificationEvents().isEmpty()) {
                                 userManagers.add(manager);
                             }
                             manager = manager.getManagedBy();
@@ -210,6 +218,10 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         }
 
         private void addEvent(Map<User, DeviceEvents> events, User user, DeviceEvent event) {
+            // check whether user wants to receive such notification events
+            if (!user.getNotificationEvents().contains(event.getType())) {
+                return;
+            }
             if (event.getType() == DeviceEventType.GEO_FENCE_ENTER || event.getType() == DeviceEventType.GEO_FENCE_EXIT) {
                 // check whether user has access to the geo-fence
                 if (!user.getAdmin() && !user.hasAccessTo(event.getGeoFence())) {
