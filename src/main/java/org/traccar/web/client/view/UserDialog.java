@@ -44,6 +44,7 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class UserDialog implements Editor<User> {
@@ -82,8 +83,14 @@ public class UserDialog implements Editor<User> {
     @UiField
     TextField email;
 
-    @UiField(provided = true)
+    @UiField
     Grid<DeviceEventType> grid;
+
+    @UiField(provided = true)
+    ColumnModel<DeviceEventType> columnModel;
+
+    @UiField(provided = true)
+    ListStore<DeviceEventType> notificationEventStore;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
@@ -95,24 +102,28 @@ public class UserDialog implements Editor<User> {
         IdentityValueProvider<DeviceEventType> identity = new IdentityValueProvider<DeviceEventType>();
         final CheckBoxSelectionModel<DeviceEventType> selectionModel = new CheckBoxSelectionModel<DeviceEventType>(identity);
 
-        ColumnConfig<DeviceEventType, String> nameCol = new ColumnConfig<DeviceEventType, String>(new ToStringValueProvider<DeviceEventType>(), 200, "Event");
+        ColumnConfig<DeviceEventType, String> nameCol = new ColumnConfig<DeviceEventType, String>(new ToStringValueProvider<DeviceEventType>() {
+            @Override
+            public String getValue(DeviceEventType object) {
+                return i18n.deviceEventType(object);
+            }
+        }, 200, i18n.event());
         List<ColumnConfig<DeviceEventType, ?>> columns = new ArrayList<ColumnConfig<DeviceEventType, ?>>();
         columns.add(selectionModel.getColumn());
         columns.add(nameCol);
 
-        ColumnModel<DeviceEventType> cm = new ColumnModel<DeviceEventType>(columns);
+        columnModel = new ColumnModel<DeviceEventType>(columns);
 
-        ListStore<DeviceEventType> store = new ListStore<DeviceEventType>(new EnumKeyProvider<DeviceEventType>());
-        store.addAll(Arrays.asList(DeviceEventType.values()));
-
-        grid = new Grid<DeviceEventType>(store, cm);
-        grid.setSelectionModel(selectionModel);
-        grid.getView().setAutoExpandColumn(nameCol);
-        grid.setBorders(false);
-        grid.getView().setStripeRows(true);
-        grid.getView().setColumnLines(true);
+        notificationEventStore = new ListStore<DeviceEventType>(new EnumKeyProvider<DeviceEventType>());
+        notificationEventStore.addAll(Arrays.asList(DeviceEventType.values()));
 
         uiBinder.createAndBindUi(this);
+
+        grid.setSelectionModel(selectionModel);
+        grid.getView().setAutoExpandColumn(nameCol);
+        for (DeviceEventType deviceEventType : user.getTransferNotificationEvents()) {
+            grid.getSelectionModel().select(deviceEventType, true);
+        }
 
         if (ApplicationContext.getInstance().getUser().getAdmin()) {
             admin.setEnabled(true);
@@ -138,13 +149,15 @@ public class UserDialog implements Editor<User> {
     }
 
     @UiHandler("saveButton")
-    public void onLoginClicked(SelectEvent event) {
+    public void onSaveClicked(SelectEvent event) {
         window.hide();
-        userHandler.onSave(driver.flush());
+        User user = driver.flush();
+        user.setTransferNotificationEvents(new HashSet<DeviceEventType>(grid.getSelectionModel().getSelectedItems()));
+        userHandler.onSave(user);
     }
 
     @UiHandler("cancelButton")
-    public void onRegisterClicked(SelectEvent event) {
+    public void onCancelClicked(SelectEvent event) {
         window.hide();
     }
 

@@ -11,9 +11,16 @@
     <ui:attributes width="1" height="-1" />
   </ui:with>
 
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view">
+    <ui:attributes stripeRows="true" autoFill="true" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="notificationEventStore" />
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
+
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
  
-  <gxt:Window ui:field="window" pixelSize="300, 210" modal="true" headingText="{i18n.account}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="300, 280" modal="true" headingText="{i18n.account}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.user}" labelWidth="120">
@@ -25,7 +32,7 @@
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.password}" labelWidth="120">
           <form:widget>
-            <form:PasswordField ui:field="password" />
+            <form:PasswordField ui:field="password" allowBlank="false" />
           </form:widget>
         </form:FieldLabel>
       </container:child>
@@ -53,7 +60,7 @@
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.notifications}" labelWidth="120">
           <form:widget>
-            <grid:Grid ui:field="grid" />
+            <grid:Grid ui:field="grid" store="{notificationEventStore}" cm="{columnModel}" view="{view}" />
           </form:widget>
         </form:FieldLabel>
       </container:child>
