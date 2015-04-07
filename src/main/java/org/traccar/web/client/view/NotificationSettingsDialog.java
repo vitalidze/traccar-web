@@ -83,6 +83,9 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     @UiField
     PasswordField password;
 
+    @UiField
+    TextField pushbulletApiKey;
+
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
@@ -119,8 +122,8 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
         notificationSettingsHandler.onSave(driver.flush());
     }
 
-    @UiHandler("testButton")
-    public void onTestClicked(SelectEvent event) {
+    @UiHandler("testEmailButton")
+    public void onTestEmailClicked(SelectEvent event) {
         notificationSettingsHandler.onTest(driver.flush());
     }
 
