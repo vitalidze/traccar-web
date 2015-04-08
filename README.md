@@ -8,6 +8,8 @@ Demo - http://traccar.litvak.su/demo.html
 
 Authors: Anton Tananaev (anton.tananaev@gmail.com), Vitaly Litvak (vitavaque@gmail.com)
 
+Support project - [donate](http://traccar.litvak.su/donate.html)
+
 ## Summary
 
 Web interface for traccar server.
