@@ -40,7 +40,7 @@ Wait until eclipse downloads and installs necessary packages and confirm restart
 
 ![Google plugin for eclipse selection](http://i58.tinypic.com/359gylx.png)
 
-#### Instructions
+### Instructions
 
 0) Go to File >> Import project... Select 'Git >> Projects from git' and click 'Next'.
 
@@ -88,7 +88,7 @@ Wait until GWT project initialization completes.
 
 Select `src/main/webapp` folder when prompted for `WAR` file.
 
-#### Troubleshooting
+### Troubleshooting
 
 * During 'Google plugin for eclipse' installation getting error about 'Egit' dependency - try to add 'Egit' repository as said [here](https://www.eclipse.org/forums/index.php?t=msg&th=1026052&goto=1678778&#msg_1678778).
 
