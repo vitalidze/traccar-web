@@ -21,6 +21,7 @@ import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
@@ -36,21 +37,26 @@ import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.User;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GeoFenceController implements ContentController, DeviceView.GeoFenceHandler {
     private final MapController mapController;
     private final ListStore<GeoFence> geoFenceStore;
+    private final ListStore<Device> deviceStore;
+    private final Map<Long, Set<GeoFence>> deviceGeoFences;
+    private ListView<GeoFence, String> geoFenceListView;
     private boolean geoFenceManagementInProgress;
+    private GeoFence selectedGeoFence;
 
     private Messages i18n = GWT.create(Messages.class);
 
-    public GeoFenceController(MapController mapController) {
+    public GeoFenceController(ListStore<Device> deviceStore, MapController mapController) {
+        this.deviceStore = deviceStore;
         this.mapController = mapController;
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
         this.geoFenceStore = new ListStore<GeoFence>(geoFenceProperties.id());
         this.geoFenceStore.addSortInfo(new Store.StoreSortInfo<GeoFence>(geoFenceProperties.name(), SortDir.ASC));
+        this.deviceGeoFences = new HashMap<Long, Set<GeoFence>>();
     }
 
     abstract class BaseGeoFenceHandler implements GeoFenceWindow.GeoFenceHandler {
@@ -81,7 +87,8 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         geoFenceManagementStarted();
         final GeoFence geoFence = new GeoFence();
         geoFence.setName(i18n.newGeoFence());
-        new GeoFenceWindow(geoFence, null, mapController.getMap(), mapController.getGeoFenceLayer(),
+        geoFence.setTransferDevices(new HashSet<Device>());
+        new GeoFenceWindow(geoFence, null, deviceStore, mapController.getMap(), mapController.getGeoFenceLayer(),
         new BaseGeoFenceHandler(geoFence) {
             @Override
             public void onSave(final GeoFence geoFence) {
@@ -92,6 +99,9 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
                                 mapController.removeGeoFence(geoFence);
                                 geoFenceStore.add(addedGeoFence);
                                 geoFenceStore.applySort(false);
+                                if (!addedGeoFence.isAllDevices()) {
+                                    geoFenceListView.getSelectionModel().select(addedGeoFence, false);
+                                }
                                 geoFenceManagementStopped();
                             }
 
@@ -119,7 +129,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         geoFenceManagementStarted();
         GeoFenceDrawing drawing = mapController.getGeoFenceDrawing(geoFence);
         mapController.getGeoFenceLayer().removeFeature(drawing.getTitle());
-        new GeoFenceWindow(geoFence, drawing, mapController.getMap(), mapController.getGeoFenceLayer(),
+        new GeoFenceWindow(geoFence, drawing, deviceStore, mapController.getMap(), mapController.getGeoFenceLayer(),
         new BaseGeoFenceHandler(geoFence) {
             @Override
             public void onSave(GeoFence updatedGeoFence) {
@@ -128,9 +138,16 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
                             @Override
                             public void onSuccess(GeoFence geoFence) {
                                 mapController.removeGeoFence(geoFence);
-                                mapController.drawGeoFence(geoFence, true);
+                                if (geoFence.isAllDevices() || geoFence.equals(selectedGeoFence)) {
+                                    mapController.drawGeoFence(geoFence, true);
+                                    selectedGeoFence = geoFence;
+                                }
                                 geoFenceStore.update(geoFence);
                                 geoFenceStore.applySort(false);
+                                for (Collection<GeoFence> geoFences : deviceGeoFences.values()) {
+                                    geoFences.remove(geoFence);
+                                }
+                                geoFenceAdded(geoFence);
                                 geoFenceManagementStopped();
                             }
 
@@ -145,7 +162,9 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
             @Override
             public void onCancel() {
                 mapController.removeGeoFence(geoFence);
-                mapController.drawGeoFence(geoFence, true);
+                if (geoFence.isAllDevices() || geoFence.equals(selectedGeoFence)) {
+                    mapController.drawGeoFence(geoFence, true);
+                }
                 geoFenceManagementStopped();
             }
         }).show();
@@ -194,7 +213,16 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
 
     @Override
     public void onSelected(GeoFence geoFence) {
-        mapController.selectGeoFence(geoFence);
+        if (selectedGeoFence != null && !selectedGeoFence.isAllDevices()) {
+            mapController.removeGeoFence(selectedGeoFence);
+        }
+        if (geoFence != null) {
+            if (!geoFence.isAllDevices()) {
+                mapController.drawGeoFence(geoFence, true);
+            }
+            mapController.selectGeoFence(geoFence);
+        }
+        selectedGeoFence = geoFence;
     }
 
     @Override
@@ -228,5 +256,40 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
 
     private void geoFenceManagementStopped() {
         geoFenceManagementInProgress = false;
+    }
+
+    @Override
+    public void setGeoFenceListView(ListView<GeoFence, String> geoFenceListView) {
+        this.geoFenceListView = geoFenceListView;
+    }
+
+    public Map<Long, Set<GeoFence>> getDeviceGeoFences() {
+        return deviceGeoFences;
+    }
+
+    public void geoFenceAdded(GeoFence geoFence) {
+        if (geoFence.isAllDevices()) {
+            mapController.drawGeoFence(geoFence, true);
+        } else {
+            for (Device device : geoFence.getTransferDevices()) {
+                Set<GeoFence> geoFences = deviceGeoFences.get(device.getId());
+                if (geoFences == null) {
+                    geoFences = new HashSet<GeoFence>();
+                    deviceGeoFences.put(device.getId(), geoFences);
+                }
+                geoFences.add(geoFence);
+            }
+        }
+    }
+
+    public void geoFenceRemoved(GeoFence geoFence) {
+        mapController.removeGeoFence(geoFence);
+        for (Map.Entry<Long, Set<GeoFence>> entry : deviceGeoFences.entrySet()) {
+            entry.getValue().remove(geoFence);
+        }
+    }
+
+    public void deviceRemoved(Device device) {
+        deviceGeoFences.remove(device.getId());
     }
 }

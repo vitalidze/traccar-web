@@ -84,6 +84,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         public void onMouseOver(int mouseX, int mouseY, Device device);
         public void onMouseOut(int mouseX, int mouseY, Device device);
         public void doubleClicked(Device device);
+        public void onClearSelection();
     }
 
     public interface GeoFenceHandler {
@@ -92,6 +93,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         public void onRemove(GeoFence geoFence);
         public void onSelected(GeoFence geoFence);
         public void onShare(GeoFence geoFence);
+        public void setGeoFenceListView(ListView<GeoFence, String> geoFenceListView);
     }
 
     private final DeviceHandler deviceHandler;
@@ -239,6 +241,8 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         };
         geoFenceList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         geoFenceList.getSelectionModel().addSelectionChangedHandler(geoFenceSelectionHandler);
+
+        geoFenceHandler.setGeoFenceListView(geoFenceList);
 
         // tab panel
         objectsTabs = new TabPanel(GWT.<TabPanelAppearance>create(BlueTabPanelBottomAppearance.class));
@@ -406,6 +410,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     public void onTabSelected(SelectionEvent<Widget> event) {
         if (event.getSelectedItem() == geoFenceList) {
             grid.getSelectionModel().deselectAll();
+            deviceHandler.onClearSelection();
         } else {
             geoFenceList.getSelectionModel().deselectAll();
         }
@@ -424,5 +429,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         addButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
         editButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
         removeButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
+    }
+
+    public ListView<GeoFence, String> getGeoFenceList() {
+        return geoFenceList;
     }
 }

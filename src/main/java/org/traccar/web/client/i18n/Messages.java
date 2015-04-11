@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.i18n;
 
+import org.traccar.web.shared.model.DeviceEventType;
 import org.traccar.web.shared.model.GeoFenceType;
 
 public interface Messages extends com.google.gwt.i18n.client.Messages {
@@ -283,4 +284,10 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String errSaveChanges();
 
     String applyToAllDevices();
+
+    String deviceEventType(@Select DeviceEventType type);
+
+    String event();
+
+    String accessToken();
 }

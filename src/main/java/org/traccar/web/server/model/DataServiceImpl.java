@@ -93,7 +93,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public User authenticated() throws IllegalStateException {
-        return fillUserSettings(getSessionUser());
+        return fillUserSettings(new User(getSessionUser()));
     }
 
     @Transactional
@@ -124,7 +124,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
 
         setSessionUser(user);
-        return fillUserSettings(user);
+        return fillUserSettings(new User(user));
     }
 
     @Transactional
@@ -158,7 +158,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     getSessionEntityManager().persist(user);
                     getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
                     setSessionUser(user);
-                    return fillUserSettings(user);
+                    return fillUserSettings(new User(user));
             }
             else
             {
@@ -192,7 +192,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Override
     public User addUser(User user) {
         User currentUser = getSessionUser();
-        if (user.getLogin().isEmpty() || user.getPassword().isEmpty()) {
+        if (user.getLogin() == null || user.getLogin().isEmpty() ||
+            user.getPassword() == null || user.getPassword().isEmpty()) {
             throw new IllegalArgumentException();
         }
         String login = user.getLogin();
@@ -210,6 +211,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             if (user.getUserSettings() == null) {
                 user.setUserSettings(new UserSettings());
             }
+            user.setNotificationEvents(user.getTransferNotificationEvents());
             getSessionEntityManager().persist(user);
             getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
             return fillUserSettings(user);
@@ -241,7 +243,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 currentUser.setAdmin(user.getAdmin());
                 currentUser.setManager(user.getManager());
                 currentUser.setEmail(user.getEmail());
-                currentUser.setNotifications(user.isNotifications());
+                currentUser.setNotificationEvents(user.getTransferNotificationEvents());
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
@@ -259,7 +261,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 }
             }
 
-            return fillUserSettings(user);
+            return fillUserSettings(new User(user));
         } else {
             throw new SecurityException();
         }
@@ -271,7 +273,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Override
     public User removeUser(User user) {
         EntityManager entityManager = getSessionEntityManager();
-        user = entityManager.merge(user);
+        user = entityManager.find(User.class, user.getId());
         // Don't allow user to delete himself
         if (user.equals(getSessionUser())) {
             throw new IllegalArgumentException();
@@ -297,7 +299,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     public List<Device> getDevices() {
         User user = getSessionUser();
         if (user.getAdmin()) {
-            return getSessionEntityManager().createQuery("SELECT x FROM Device x JOIN FETCH x.latestPosition").getResultList();
+            return getSessionEntityManager().createQuery("SELECT x FROM Device x LEFT JOIN FETCH x.latestPosition").getResultList();
         }
         return user.getAllAvailableDevices();
     }
@@ -644,11 +646,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     private List<GeoFence> getGeoFences(boolean includeTransferDevices) {
         User user = getSessionUser();
-        List<GeoFence> geoFences;
+        Set<GeoFence> geoFences;
         if (user.getAdmin()) {
-            geoFences = getSessionEntityManager().createQuery("SELECT g FROM GeoFence g JOIN FETCH g.devices", GeoFence.class).getResultList();
+            geoFences = new HashSet<GeoFence>(getSessionEntityManager().createQuery("SELECT g FROM GeoFence g LEFT JOIN FETCH g.devices", GeoFence.class).getResultList());
         } else {
-            geoFences = new ArrayList<GeoFence>(user.getAllAvailableGeoFences());
+            geoFences = user.getAllAvailableGeoFences();
         }
 
         if (includeTransferDevices) {
@@ -657,7 +659,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
         }
 
-        return geoFences;
+        return new ArrayList<GeoFence>(geoFences);
     }
 
     @Transactional
@@ -671,6 +673,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         geoFence.setUsers(new HashSet<User>());
         geoFence.getUsers().add(getSessionUser());
+        geoFence.setDevices(geoFence.getTransferDevices());
         getSessionEntityManager().persist(geoFence);
 
         return geoFence;
@@ -687,6 +690,19 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         GeoFence geoFence = getSessionEntityManager().find(GeoFence.class, updatedGeoFence.getId());
         geoFence.copyFrom(updatedGeoFence);
+
+        // used to check access to the device
+        List<Device> devices = getDevices();
+
+        // process devices
+        for (Iterator<Device> it = geoFence.getDevices().iterator(); it.hasNext(); ) {
+            Device next = it.next();
+            if (!updatedGeoFence.getTransferDevices().contains(next) && devices.contains(next)) {
+                it.remove();
+            }
+        }
+        updatedGeoFence.getTransferDevices().retainAll(devices);
+        geoFence.getDevices().addAll(updatedGeoFence.getTransferDevices());
 
         return geoFence;
     }
@@ -744,6 +760,4 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             entityManager.merge(user);
         }
     }
-
-
 }

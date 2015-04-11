@@ -27,8 +27,10 @@ import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -89,7 +91,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         @Transactional
         public void doWork() throws Exception {
             Date currentDate = new Date();
-            List<GeoFence> geoFences = entityManager.get().createQuery("SELECT g FROM GeoFence g", GeoFence.class).getResultList();
+            Set<GeoFence> geoFences = new HashSet<GeoFence>(entityManager.get().createQuery("SELECT g FROM GeoFence g LEFT JOIN FETCH g.devices", GeoFence.class).getResultList());
             if (geoFences.isEmpty()) {
                 return;
             }

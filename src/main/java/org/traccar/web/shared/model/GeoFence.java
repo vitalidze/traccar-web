@@ -15,6 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 
 import javax.persistence.*;
@@ -38,6 +39,7 @@ public class GeoFence implements Serializable {
         this.name = name;
     }
 
+    @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -47,6 +49,7 @@ public class GeoFence implements Serializable {
         return id;
     }
 
+    @Expose
     private String name;
 
     public void setName(String name) {
@@ -67,6 +70,7 @@ public class GeoFence implements Serializable {
         this.description = description;
     }
 
+    @Expose
     private String color;
 
     public String getColor() {
@@ -240,6 +244,8 @@ public class GeoFence implements Serializable {
         type = geoFence.type;
         points = geoFence.points;
         radius = geoFence.radius;
+        allDevices = geoFence.allDevices;
+        transferDevices = new HashSet<Device>(geoFence.getTransferDevices());
     }
 
     @Override
