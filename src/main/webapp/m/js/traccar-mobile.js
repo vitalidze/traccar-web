@@ -286,7 +286,7 @@ function loadPositions() {
 
             currentTime = new Date().getTime();
 
-            for (i = 0; i < positions.length; i++) {
+            for (var i = 0; i < positions.length; i++) {
                 var position = positions[i];
 
                 // save 'selected' state from previous position
@@ -393,7 +393,7 @@ function drawDeviceDetails(deviceId, position) {
             } else {
                 position.other = {};
                 var nodes = xmlDoc.documentElement.childNodes;
-                for (i = 0; i < nodes.length; i++) {
+                for (var i = 0; i < nodes.length; i++) {
                     if (nodes[i].textContent == null) {
                         position.other[nodes[i].nodeName] = nodes[i].nodeValue;
                     } else {
