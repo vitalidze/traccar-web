@@ -91,7 +91,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public User authenticated() throws IllegalStateException {
-        return fillUserSettings(getSessionUser());
+        return fillUserSettings(new User(getSessionUser()));
     }
 
     @Transactional
@@ -122,7 +122,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
 
         setSessionUser(user);
-        return fillUserSettings(user);
+        return fillUserSettings(new User(user));
     }
 
     @Transactional
@@ -156,7 +156,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     getSessionEntityManager().persist(user);
                     getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
                     setSessionUser(user);
-                    return fillUserSettings(user);
+                    return fillUserSettings(new User(user));
             }
             else
             {
@@ -190,7 +190,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Override
     public User addUser(User user) {
         User currentUser = getSessionUser();
-        if (user.getLogin().isEmpty() || user.getPassword().isEmpty()) {
+        if (user.getLogin() == null || user.getLogin().isEmpty() ||
+            user.getPassword() == null || user.getPassword().isEmpty()) {
             throw new IllegalArgumentException();
         }
         String login = user.getLogin();
@@ -208,6 +209,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             if (user.getUserSettings() == null) {
                 user.setUserSettings(new UserSettings());
             }
+            user.setNotificationEvents(user.getTransferNotificationEvents());
             getSessionEntityManager().persist(user);
             getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
             return fillUserSettings(user);
@@ -239,7 +241,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 currentUser.setAdmin(user.getAdmin());
                 currentUser.setManager(user.getManager());
                 currentUser.setEmail(user.getEmail());
-                currentUser.setNotifications(user.isNotifications());
+                currentUser.setNotificationEvents(user.getTransferNotificationEvents());
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
@@ -257,7 +259,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 }
             }
 
-            return fillUserSettings(user);
+            return fillUserSettings(new User(user));
         } else {
             throw new SecurityException();
         }

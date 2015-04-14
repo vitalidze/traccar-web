@@ -30,6 +30,7 @@ public class DBMigrations {
                 new SetDefaultMapViewSettings(),
                 new SetManagerFlag(),
                 new SetNotificationsFlag(),
+                new AddDefaultNotifications(),
                 new SetReadOnlyFlag(),
                 new SetDefaultDeviceTimeout(),
                 new SetDefaultIdleSpeedThreshold(),
@@ -227,6 +228,19 @@ public class DBMigrations {
             em.createQuery("UPDATE " + User.class.getSimpleName() + " U SET U.notifications = :n WHERE U.notifications IS NULL")
                     .setParameter("n", Boolean.FALSE)
                     .executeUpdate();
+        }
+    }
+
+    static class AddDefaultNotifications implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            for (User user : em.createQuery("SELECT u FROM User u WHERE u.notifications=:b", User.class).setParameter("b", Boolean.TRUE).getResultList()) {
+                user.getNotificationEvents().add(DeviceEventType.OFFLINE);
+                user.getNotificationEvents().add(DeviceEventType.GEO_FENCE_ENTER);
+                user.getNotificationEvents().add(DeviceEventType.GEO_FENCE_EXIT);
+                // reset flag to prevent further migrations
+                user.setNotifications(false);
+            }
         }
     }
 
