@@ -20,7 +20,8 @@ import java.util.Date;
 
 @Entity
 @Table(name = "events",
-       indexes = { @Index(name="events_position_event_type", columnList="position_id,type") })
+       indexes = { @Index(name="events_position_event_type", columnList="position_id,type"),
+                   @Index(name="events_sent_event_type", columnList="notificationSent,type") })
 public class DeviceEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

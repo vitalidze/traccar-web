@@ -364,6 +364,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     public void selectDevice(Device device) {
         grid.getSelectionModel().select(deviceStore.findModel(device), false);
+        deviceHandler.onSelected(grid.getSelectionModel().getSelectedItem());
     }
 
     public interface SettingsHandler {

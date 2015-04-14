@@ -21,7 +21,8 @@ import org.traccar.web.shared.model.NotificationSettings;
 
 @RemoteServiceRelativePath("notificationService")
 public interface NotificationService extends RemoteService {
-    void checkSettings(NotificationSettings settings);
+    void checkEmailSettings(NotificationSettings settings);
+    void checkPushbulletSettings(NotificationSettings settings);
     NotificationSettings getSettings();
     void saveSettings(NotificationSettings settings);
 }
