@@ -3,4 +3,4 @@ layout: feature
 title: Portuguese translation
 ---
 
-![Portuguese UI screen shot](http://i59.tinypic.com/2yosb5x.png)
+![Portuguese UI screen shot](http://i60.tinypic.com/280v678.png)
