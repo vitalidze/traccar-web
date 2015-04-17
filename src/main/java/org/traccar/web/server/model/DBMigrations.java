@@ -36,6 +36,7 @@ public class DBMigrations {
                 new SetDefaultIdleSpeedThreshold(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
                 new SetDefaultEventRecordingEnabled(),
+                new SetDefaultLanguage(),
                 new SetDefaultMapType(),
                 new CreateAdmin(),
                 new SetDefaultDeviceIconType(),
@@ -267,6 +268,15 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + GeoFence.class.getName() + " G SET G.allDevices = :b WHERE G.allDevices IS NULL")
                     .setParameter("b", Boolean.TRUE)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultLanguage implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.language = :b WHERE S.language IS NULL")
+                    .setParameter("b", "default")
                     .executeUpdate();
         }
     }

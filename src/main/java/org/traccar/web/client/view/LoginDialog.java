@@ -36,6 +36,7 @@ import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.PasswordField;
 import com.sencha.gxt.widget.core.client.form.TextField;
+import org.traccar.web.client.widget.LanguageComboBox;
 
 import java.util.Arrays;
 import java.util.List;
@@ -73,21 +74,7 @@ public class LoginDialog {
     public LoginDialog(LoginHandler loginHandler) {
         this.loginHandler = loginHandler;
         // language selector
-        ListStore<String> languages = new ListStore<String>(new ModelKeyProvider<String>() {
-            @Override
-            public String getKey(String item) {
-                return item;
-            }
-        });
-        language = new ComboBox<String>(languages, new LabelProvider<String>() {
-            @Override
-            public String getLabel(String item) {
-                return (item.equals("default") ? "english" : LocaleInfo.getLocaleNativeDisplayName(item));
-            }
-        });
-        language.getStore().addAll(Arrays.asList(LocaleInfo.getAvailableLocaleNames()));
-        language.setForceSelection(true);
-        language.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+        language = new LanguageComboBox();
         language.setValue(LocaleInfo.getCurrentLocale().getLocaleName());
 
         uiBinder.createAndBindUi(this);

@@ -32,6 +32,7 @@ public class ApplicationSettings implements Serializable {
         updateInterval = DEFAULT_UPDATE_INTERVAL;
         defaultPasswordHash = PasswordHashMethod.PLAIN;
         eventRecordingEnabled = true;
+        language = "default";
     }
 
     @Expose
@@ -89,6 +90,16 @@ public class ApplicationSettings implements Serializable {
 
     public void setEventRecordingEnabled(boolean eventRecordingEnabled) {
         this.eventRecordingEnabled = eventRecordingEnabled;
+    }
+
+    private String language;
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     @Override
