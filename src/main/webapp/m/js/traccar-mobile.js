@@ -5,8 +5,26 @@ function getParameterByName(name) {
     results = regex.exec(location.search);
     return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
+//
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+//
 var locale = getParameterByName("locale");
-i18n = i18n[locale === null ? 'en' : locale];
+if (locale === null) {
+    locale = readCookie('GWT_LOCALE');
+}
+if (locale === null) {
+    locale = 'en';
+}
+i18n = i18n[locale];
 
 // Initialize app
 var myApp = new Framework7({
@@ -97,7 +115,7 @@ myApp.onPageInit('login-screen', function (page) {
     language.on('change', function() {
         var sel = pageContainer.find('#language')[0];
         var newLocale = sel.options[sel.selectedIndex].value;
-        window.location = newLocale == 'en' ? '?' : ('?locale=' + newLocale);
+        window.location = newLocale == locale ? '?' : ('?locale=' + newLocale);
     });
 
     // set up open desktop version action
