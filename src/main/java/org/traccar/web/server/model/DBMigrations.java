@@ -30,8 +30,8 @@ public class DBMigrations {
                 new SetDefaultMapViewSettings(),
                 new SetManagerFlag(),
                 new SetNotificationsFlag(),
-                new AddDefaultNotifications(),
                 new SetReadOnlyFlag(),
+                new AddDefaultNotifications(),
                 new SetDefaultDeviceTimeout(),
                 new SetDefaultIdleSpeedThreshold(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
@@ -43,7 +43,7 @@ public class DBMigrations {
                 new SetDefaultHashImplementation(),
                 new SetDefaultUserSettings(),
                 new SetArchiveDefaultColumns(),
-                new SetAllDevicesFlag()
+                new SetGeoFenceAllDevicesFlag()
         }) {
             em.getTransaction().begin();
             try {
@@ -263,7 +263,7 @@ public class DBMigrations {
         }
     }
 
-    static class SetAllDevicesFlag implements Migration {
+    static class SetGeoFenceAllDevicesFlag implements Migration {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + GeoFence.class.getName() + " G SET G.allDevices = :b WHERE G.allDevices IS NULL")
