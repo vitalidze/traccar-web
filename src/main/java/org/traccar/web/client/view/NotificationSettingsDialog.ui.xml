@@ -19,11 +19,30 @@
 
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="integerPropertyEditor" />
 
+  <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="emailTabConfig">
+    <ui:attributes text="{i18n.email}" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="pushbulletTabConfig">
+    <ui:attributes text="Pushbullet" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="templateTabConfig">
+    <ui:attributes text="{i18n.messageTemplates}" />
+  </ui:with>
+
+  <ui:style>
+    .tabBody {
+        padding: 5px;
+    }
+  </ui:style>
+
   <gxt:Window ui:field="window" pixelSize="350, 405" modal="true" headingText="{i18n.notificationSettings}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
         <container:child layoutData="{verticalLayoutData}">
-          <gxt:FramedPanel headingText="{i18n.email}">
-            <container:VerticalLayoutContainer>
+          <gxt:PlainTabPanel>
+            <gxt:child config="{emailTabConfig}">
+            <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
               <container:child layoutData="{verticalLayoutData}">
                 <form:FieldLabel text="{i18n.fromAddress}" labelWidth="130">
                   <form:widget>
@@ -77,27 +96,49 @@
                   </form:widget>
                 </form:FieldLabel>
               </container:child>
+              <container:child layoutData="{horizontalLayoutData}">
+                  <button:TextButton ui:field="testEmailButton" text="{i18n.test}" width="96" />
+              </container:child>
             </container:VerticalLayoutContainer>
-            <gxt:button>
-              <button:TextButton ui:field="testEmailButton" text="{i18n.test}" />
-            </gxt:button>
-          </gxt:FramedPanel>
-        </container:child>
-        <container:child layoutData="{verticalLayoutData}">
-            <gxt:FramedPanel headingText="Pushbullet">
-              <container:VerticalLayoutContainer>
-                  <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.accessToken}" labelWidth="86">
-                          <form:widget>
-                              <form:TextField ui:field="pushbulletAccessToken" />
-                          </form:widget>
-                      </form:FieldLabel>
-                  </container:child>
-              </container:VerticalLayoutContainer>
-              <gxt:button>
-                <button:TextButton ui:field="testPushbulletButton" text="{i18n.test}" />
-              </gxt:button>
-            </gxt:FramedPanel>
+
+          </gxt:child>
+            <gxt:child config="{pushbulletTabConfig}">
+                <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
+                    <container:child layoutData="{verticalLayoutData}">
+                        <form:FieldLabel text="{i18n.accessToken}" labelWidth="86">
+                            <form:widget>
+                                <form:TextField ui:field="pushbulletAccessToken" />
+                            </form:widget>
+                        </form:FieldLabel>
+                    </container:child>
+                    <container:child layoutData="{horizontalLayoutData}">
+                        <button:TextButton ui:field="testPushbulletButton" text="{i18n.test}" width="96" />
+                    </container:child>
+                </container:VerticalLayoutContainer>
+            </gxt:child>
+            <gxt:child config="{templateTabConfig}">
+                <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
+                    <container:child layoutData="{verticalLayoutData}">
+                        <!-- template type -->
+                    </container:child>
+                    <container:child layoutData="{verticalLayoutData}">
+                        <!-- subject -->
+                    </container:child>
+                    <container:child layoutData="{verticalLayoutData}">
+                        <!-- body -->
+                    </container:child>
+                    <container:child layoutData="{verticalLayoutData}">
+                        <!-- content type -->
+                    </container:child>
+                    <container:child layoutData="{verticalLayoutData}">
+                        <!-- hints -->
+                    </container:child>
+                    <container:child layoutData="{horizontalLayoutData}">
+                        <button:TextButton ui:field="testTemplateButton" text="{i18n.test}" width="96" />
+                    </container:child>
+                </container:VerticalLayoutContainer>
+            </gxt:child>
+          </gxt:PlainTabPanel>
         </container:child>
     </container:VerticalLayoutContainer>
 
