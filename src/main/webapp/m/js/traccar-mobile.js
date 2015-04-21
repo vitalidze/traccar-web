@@ -21,7 +21,7 @@ var locale = getParameterByName("locale");
 if (locale === null) {
     locale = readCookie('GWT_LOCALE');
 }
-if (locale === null) {
+if (locale === null || locale == 'default') {
     locale = 'en';
 }
 i18n = i18n[locale];
