@@ -1,11 +1,11 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder
     xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
   	xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
   	xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
-  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
+  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+    xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid">
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
     <ui:attributes width="1" height="-1" />
@@ -119,19 +119,31 @@
             <gxt:child config="{templateTabConfig}">
                 <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
                     <container:child layoutData="{verticalLayoutData}">
-                        <!-- template type -->
+                        <form:FieldLabel text="{i18n.event}" labelWidth="86">
+                            <form:widget>
+                                <form:ComboBox ui:field="eventType" />
+                            </form:widget>
+                        </form:FieldLabel>
                     </container:child>
                     <container:child layoutData="{verticalLayoutData}">
-                        <!-- subject -->
+                        <form:FieldLabel text="{i18n.subject}" labelWidth="86">
+                            <form:widget>
+                                <form:TextField ui:field="messageSubject" />
+                            </form:widget>
+                        </form:FieldLabel>
                     </container:child>
                     <container:child layoutData="{verticalLayoutData}">
-                        <!-- body -->
+                        <form:TextArea ui:field="messageBody" height="96" />
                     </container:child>
                     <container:child layoutData="{verticalLayoutData}">
-                        <!-- content type -->
+                        <form:FieldLabel text="{i18n.contentType}" labelWidth="86">
+                            <form:widget>
+                                <form:TextField ui:field="messageContentType" />
+                            </form:widget>
+                        </form:FieldLabel>
                     </container:child>
                     <container:child layoutData="{verticalLayoutData}">
-                        <!-- hints -->
+                        <grid:Grid ui:field="placeholderGrid" />
                     </container:child>
                     <container:child layoutData="{horizontalLayoutData}">
                         <button:TextButton ui:field="testTemplateButton" text="{i18n.test}" width="96" />
