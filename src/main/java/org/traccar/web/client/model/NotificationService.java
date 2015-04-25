@@ -23,6 +23,7 @@ import org.traccar.web.shared.model.NotificationSettings;
 public interface NotificationService extends RemoteService {
     void checkEmailSettings(NotificationSettings settings);
     void checkPushbulletSettings(NotificationSettings settings);
+    String checkTemplate(String subject, String body);
     NotificationSettings getSettings();
     void saveSettings(NotificationSettings settings);
 }

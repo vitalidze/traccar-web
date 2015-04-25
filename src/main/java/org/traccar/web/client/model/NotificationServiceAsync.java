@@ -12,4 +12,6 @@ public interface NotificationServiceAsync {
     void saveSettings(NotificationSettings settings, AsyncCallback<Void> async);
 
     void checkPushbulletSettings(NotificationSettings settings, AsyncCallback<Void> async);
+
+    void checkTemplate(String subject, String body, AsyncCallback<String> async);
 }

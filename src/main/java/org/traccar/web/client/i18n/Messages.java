@@ -299,4 +299,10 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String contentType();
 
     String placeholderDescription(@Select MessagePlaceholder placeholder);
+
+    String defaultNotificationTemplate(@Select DeviceEventType type,
+                                       @Optional String deviceName,
+                                       @Optional String geoFenceName,
+                                       @Optional String eventTime,
+                                       @Optional String positionTime);
 }

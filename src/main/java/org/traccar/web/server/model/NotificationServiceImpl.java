@@ -15,9 +15,13 @@
  */
 package org.traccar.web.server.model;
 
+import com.floreysoft.jmte.Engine;
+import com.floreysoft.jmte.NamedRenderer;
+import com.floreysoft.jmte.RenderFormatInfo;
 import com.google.gson.stream.JsonWriter;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
+import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.NotificationService;
 import org.traccar.web.shared.model.*;
 
@@ -39,6 +43,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -56,6 +61,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
     @Inject
     protected Logger logger;
+
+    @Inject
+    private DataService dataService;
 
     static class DeviceEvents implements Comparator<DeviceEvent> {
         Set<DeviceEvent> offlineEvents;
@@ -467,6 +475,70 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         } finally {
             if (is != null ) try { is.close(); } catch (IOException ignored) {}
         }
+    }
+
+    @Transactional
+    @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @Override
+    public String checkTemplate(String subject, String body) {
+        List<Device> devices = dataService.getDevices();
+        Device testDevice;
+        if (devices.isEmpty()) {
+            testDevice = new Device();
+            testDevice.setName("Test-Device");
+            testDevice.setUniqueId("123");
+        } else {
+            testDevice = devices.get(0);
+        }
+        List<GeoFence> geoFences = dataService.getGeoFences();
+        GeoFence testGeoFence;
+        if (geoFences.isEmpty()) {
+            testGeoFence = new GeoFence(0l, "Some-GeoFence");
+        } else {
+            testGeoFence = geoFences.get(0);
+        }
+
+        Map<String, Object> model = new HashMap<String, Object>();
+        model.put(MessagePlaceholder.deviceName.name(), testDevice.getName());
+        model.put(MessagePlaceholder.geoFenceName.name(), testGeoFence.getName());
+        model.put(MessagePlaceholder.eventTime.name(), new Date());
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.HOUR, c.get(Calendar.HOUR) - 1);
+        c.set(Calendar.MINUTE, c.get(Calendar.MINUTE) - 15);
+        model.put(MessagePlaceholder.positionTime.name(), c.getTime());
+
+        Engine engine = new Engine();
+        engine.registerNamedRenderer(new NamedRenderer() {
+            @Override
+            public String render(Object o, String format, Locale locale) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat(format, locale);
+                return dateFormat.format((Date) o);
+            }
+
+            @Override
+            public String getName() {
+                return "date";
+            }
+
+            @Override
+            public RenderFormatInfo getFormatInfo() {
+                return null;
+            }
+
+            @Override
+            public Class<?>[] getSupportedClasses() {
+                return new Class<?>[] { Date.class };
+            }
+        });
+        String transformedSubject = engine.transform(subject, model);
+        String transformedBody = engine.transform(body, model);
+
+        return "<div style=\"background-color: #ffffff;\">" +
+                    "<table style=\"border-collapse: collapse;\">" +
+                        "<tr><td style=\"border: 1px solid black; padding: 2px;\">" + transformedSubject + "</td></tr>" +
+                        "<tr><td style=\"border: 1px solid black; padding: 4px;\">" + transformedBody + "</td></tr>" +
+                    "</table>" +
+                "</div>";
     }
 
     @Transactional

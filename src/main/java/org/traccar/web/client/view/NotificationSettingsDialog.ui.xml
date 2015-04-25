@@ -128,7 +128,7 @@
                     <container:child layoutData="{verticalLayoutData}">
                         <form:FieldLabel text="{i18n.subject}" labelWidth="86">
                             <form:widget>
-                                <form:TextField ui:field="messageSubject" />
+                                <form:TextField ui:field="messageSubject" text="[traccar-web] Notification" />
                             </form:widget>
                         </form:FieldLabel>
                     </container:child>
@@ -138,7 +138,7 @@
                     <container:child layoutData="{verticalLayoutData}">
                         <form:FieldLabel text="{i18n.contentType}" labelWidth="86">
                             <form:widget>
-                                <form:TextField ui:field="messageContentType" />
+                                <form:TextField ui:field="messageContentType" text="text/plain; charset=utf-8" />
                             </form:widget>
                         </form:FieldLabel>
                     </container:child>

@@ -18,6 +18,7 @@ package org.traccar.web.client.view;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
+import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -64,6 +65,7 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
         void onSave(NotificationSettings notificationSettings);
         void onTestEmail(NotificationSettings notificationSettings);
         void onTestPushbullet(NotificationSettings notificationSettings);
+        void onTestMessageTemplate(String subject, String body);
     }
 
     private NotificationSettingsHandler notificationSettingsHandler;
@@ -101,6 +103,18 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     @Ignore
     @UiField(provided = true)
     ComboBox<DeviceEventType> eventType;
+
+    @Ignore
+    @UiField
+    TextField messageSubject;
+
+    @Ignore
+    @UiField
+    TextArea messageBody;
+
+    @Ignore
+    @UiField
+    TextField messageContentType;
 
     @UiField(provided = true)
     Grid<MessagePlaceholder> placeholderGrid;
@@ -189,5 +203,15 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     @UiHandler("cancelButton")
     public void onCancelClicked(SelectEvent event) {
         window.hide();
+    }
+
+    @UiHandler("eventType")
+    public void onEventTypeChanged(SelectionEvent<DeviceEventType> event) {
+        messageBody.setText(i18n.defaultNotificationTemplate(event.getSelectedItem(), "${deviceName}", "${geoFenceName}", "${eventTime}", "${positionTime}"));
+    }
+
+    @UiHandler("testTemplateButton")
+    public void onTestTemplateClicked(SelectEvent event) {
+        notificationSettingsHandler.onTestMessageTemplate(messageSubject.getText(), messageBody.getText());
     }
 }
