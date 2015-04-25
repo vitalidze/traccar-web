@@ -40,10 +40,7 @@ import com.sencha.gxt.widget.core.client.grid.GridView;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.NotificationSettingsProperties;
-import org.traccar.web.shared.model.DeviceEventType;
-import org.traccar.web.shared.model.MessagePlaceholder;
-import org.traccar.web.shared.model.NotificationSettings;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -65,10 +62,11 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
         void onSave(NotificationSettings notificationSettings);
         void onTestEmail(NotificationSettings notificationSettings);
         void onTestPushbullet(NotificationSettings notificationSettings);
-        void onTestMessageTemplate(String subject, String body);
+        void onTestMessageTemplate(NotificationTemplate template);
     }
 
-    private NotificationSettingsHandler notificationSettingsHandler;
+    private final NotificationSettings settings;
+    private final NotificationSettingsHandler notificationSettingsHandler;
 
     @UiField
     Window window;
@@ -100,6 +98,8 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     @UiField
     TextField pushbulletAccessToken;
 
+    NotificationTemplate messageTemplate;
+
     @Ignore
     @UiField(provided = true)
     ComboBox<DeviceEventType> eventType;
@@ -123,6 +123,7 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     Messages i18n = GWT.create(Messages.class);
 
     public NotificationSettingsDialog(NotificationSettings notificationSettings, NotificationSettingsHandler notificationSettingsHandler) {
+        this.settings = notificationSettings;
         this.notificationSettingsHandler = notificationSettingsHandler;
 
         ListStore<NotificationSettings.SecureConnectionType> secureConnectionTypeStore = new ListStore<NotificationSettings.SecureConnectionType>(new EnumKeyProvider<NotificationSettings.SecureConnectionType>());
@@ -187,6 +188,7 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
         window.hide();
+        flushTemplate();
         notificationSettingsHandler.onSave(driver.flush());
     }
 
@@ -207,11 +209,33 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
 
     @UiHandler("eventType")
     public void onEventTypeChanged(SelectionEvent<DeviceEventType> event) {
-        messageBody.setText(i18n.defaultNotificationTemplate(event.getSelectedItem(), "${deviceName}", "${geoFenceName}", "${eventTime}", "${positionTime}"));
+        // save previously edited template
+        flushTemplate();
+        messageTemplate = settings.getTransferTemplates().get(event.getSelectedItem());
+        if (messageTemplate == null) {
+            messageTemplate = new NotificationTemplate();
+            messageTemplate.setType(event.getSelectedItem());
+            messageTemplate.setBody(i18n.defaultNotificationTemplate(event.getSelectedItem(), "${deviceName}", "${geoFenceName}", "${eventTime}", "${positionTime}"));
+            settings.getTransferTemplates().put(event.getSelectedItem(), messageTemplate);
+        }
+        messageSubject.setText(messageTemplate.getSubject());
+        messageBody.setText(messageTemplate.getBody());
+        messageContentType.setText(messageTemplate.getContentType());
     }
 
     @UiHandler("testTemplateButton")
     public void onTestTemplateClicked(SelectEvent event) {
-        notificationSettingsHandler.onTestMessageTemplate(messageSubject.getText(), messageBody.getText());
+        flushTemplate();
+        if (messageTemplate != null) {
+            notificationSettingsHandler.onTestMessageTemplate(messageTemplate);
+        }
+    }
+
+    private void flushTemplate() {
+        if (messageTemplate != null) {
+            messageTemplate.setSubject(messageSubject.getText());
+            messageTemplate.setBody(messageBody.getText());
+            messageTemplate.setContentType(messageContentType.getText());
+        }
     }
 }

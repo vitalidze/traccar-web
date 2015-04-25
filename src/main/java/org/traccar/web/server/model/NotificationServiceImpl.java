@@ -480,7 +480,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
-    public String checkTemplate(String subject, String body) {
+    public String checkTemplate(NotificationTemplate template) {
         List<Device> devices = dataService.getDevices();
         Device testDevice;
         if (devices.isEmpty()) {
@@ -530,8 +530,8 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 return new Class<?>[] { Date.class };
             }
         });
-        String transformedSubject = engine.transform(subject, model);
-        String transformedBody = engine.transform(body, model);
+        String transformedSubject = engine.transform(template.getSubject(), model);
+        String transformedBody = engine.transform(template.getBody(), model);
 
         return "<div style=\"background-color: #ffffff;\">" +
                     "<table style=\"border-collapse: collapse;\">" +
@@ -548,7 +548,16 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         List<NotificationSettings> settings = entityManager.get().createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
                 .setParameter("user", sessionUser.get())
                 .getResultList();
-        return settings.isEmpty() ? null : settings.get(0);
+        if (settings.isEmpty()) {
+            return null;
+        } else {
+            NotificationSettings s = settings.get(0);
+            s.setTransferTemplates(new HashMap<DeviceEventType, NotificationTemplate>(s.getTemplates().size()));
+            for (NotificationTemplate t : s.getTemplates()) {
+                s.getTransferTemplates().put(t.getType(), t);
+            }
+            return s;
+        }
     }
 
     @Transactional
@@ -560,9 +569,25 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         if (currentSettings == null) {
             currentSettings = settings;
             settings.setUser(sessionUser.get());
+            entityManager.get().persist(currentSettings);
+            for (NotificationTemplate newTemplate : currentSettings.getTransferTemplates().values()) {
+                newTemplate.setSettings(currentSettings);
+                entityManager.get().persist(newTemplate);
+            }
         } else {
             currentSettings.copyFrom(settings);
+            for (NotificationTemplate existingTemplate : currentSettings.getTemplates()) {
+                NotificationTemplate updatedTemplate = settings.getTransferTemplates().remove(existingTemplate.getType());
+                if (updatedTemplate == null) {
+                    entityManager.get().remove(existingTemplate);
+                } else {
+                    existingTemplate.copyFrom(updatedTemplate);
+                }
+            }
+            for (NotificationTemplate newTemplate : settings.getTransferTemplates().values()) {
+                newTemplate.setSettings(currentSettings);
+                entityManager.get().persist(newTemplate);
+            }
         }
-        entityManager.get().persist(currentSettings);
     }
 }

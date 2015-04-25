@@ -33,6 +33,7 @@ import org.traccar.web.client.model.UserProperties;
 import org.traccar.web.client.view.*;
 import org.traccar.web.shared.model.ApplicationSettings;
 import org.traccar.web.shared.model.NotificationSettings;
+import org.traccar.web.shared.model.NotificationTemplate;
 import org.traccar.web.shared.model.User;
 
 import com.google.gwt.core.client.GWT;
@@ -236,8 +237,8 @@ public class SettingsController implements DeviceView.SettingsHandler {
                     }
 
                     @Override
-                    public void onTestMessageTemplate(String subject, String body) {
-                        service.checkTemplate(subject, body, new AsyncCallback<String>() {
+                    public void onTestMessageTemplate(NotificationTemplate template) {
+                        service.checkTemplate(template, new AsyncCallback<String>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 new AlertMessageBox(i18n.notificationSettings(), i18n.testFailed() + "<br><br>" + caught.getLocalizedMessage()).show();

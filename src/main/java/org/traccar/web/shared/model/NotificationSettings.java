@@ -19,6 +19,10 @@ import com.google.gwt.user.client.rpc.GwtTransient;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Table(name = "notification_settings")
@@ -44,6 +48,8 @@ public class NotificationSettings implements Serializable {
         port = 465;
         useAuthorization = true;
         secureConnectionType = SecureConnectionType.SSL_TLS;
+        templates = new HashSet<NotificationTemplate>();
+        transferTemplates = new HashMap<DeviceEventType, NotificationTemplate>();
     }
 
     @Id
@@ -96,6 +102,13 @@ public class NotificationSettings implements Serializable {
     private String password;
     @Enumerated(EnumType.STRING)
     private SecureConnectionType secureConnectionType;
+
+    @GwtTransient
+    @OneToMany(mappedBy = "settings", fetch = FetchType.LAZY)
+    private Set<NotificationTemplate> templates;
+
+    @Transient
+    private Map<DeviceEventType, NotificationTemplate> transferTemplates;
 
     public String getFromAddress() {
         return fromAddress;
@@ -161,6 +174,22 @@ public class NotificationSettings implements Serializable {
 
     public void setPushbulletAccessToken(String pushbulletApiKey) {
         this.pushbulletAccessToken = pushbulletApiKey;
+    }
+
+    public Set<NotificationTemplate> getTemplates() {
+        return templates;
+    }
+
+    public void setTemplates(Set<NotificationTemplate> templates) {
+        this.templates = templates;
+    }
+
+    public Map<DeviceEventType, NotificationTemplate> getTransferTemplates() {
+        return transferTemplates;
+    }
+
+    public void setTransferTemplates(Map<DeviceEventType, NotificationTemplate> transferTemplates) {
+        this.transferTemplates = transferTemplates;
     }
 
     public void copyFrom(NotificationSettings s) {
