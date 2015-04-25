@@ -51,6 +51,13 @@ public class DeviceEvent {
     public DeviceEvent() {
     }
 
+    public DeviceEvent(Date time, Device device, Position position, GeoFence geoFence) {
+        this.time = time;
+        this.device = device;
+        this.position = position;
+        this.geoFence = geoFence;
+    }
+
     public long getId() {
         return id;
     }

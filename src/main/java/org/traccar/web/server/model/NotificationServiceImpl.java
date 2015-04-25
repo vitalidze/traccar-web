@@ -65,74 +65,12 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @Inject
     private DataService dataService;
 
-    static class DeviceEvents implements Comparator<DeviceEvent> {
-        Set<DeviceEvent> offlineEvents;
-        Set<DeviceEvent> geoFenceEvents;
-
-        void addEvent(DeviceEvent deviceEvent) {
-            switch (deviceEvent.getType()) {
-                case OFFLINE:
-                    if (offlineEvents == null) {
-                        offlineEvents = new HashSet<DeviceEvent>();
-                    }
-                    offlineEvents.add(deviceEvent);
-                    break;
-                case GEO_FENCE_ENTER:
-                case GEO_FENCE_EXIT:
-                    if (geoFenceEvents == null) {
-                        geoFenceEvents = new HashSet<DeviceEvent>();
-                    }
-                    geoFenceEvents.add(deviceEvent);
-                    break;
-            }
-        }
-
-        @Override
-        public int compare(DeviceEvent o1, DeviceEvent o2) {
-            int r = o1.getDevice().getName().compareTo(o2.getDevice().getName());
-            if (r == 0) {
-                if (o1.getType() == DeviceEventType.GEO_FENCE_ENTER || o1.getType() == DeviceEventType.GEO_FENCE_EXIT) {
-                    return o1.getPosition().getTime().compareTo(o2.getPosition().getTime());
-                }
-                return o1.getTime().compareTo(o2.getTime());
-            }
-            return r;
-        }
-
-        List<DeviceEvent> offlineEvents() {
-            return sorted(offlineEvents);
-        }
-
-        List<DeviceEvent> geoFenceEvents() {
-            return sorted(geoFenceEvents);
-        }
-
-        List<DeviceEvent> sorted(Set<DeviceEvent> unsorted) {
-            if (unsorted == null) {
-                return Collections.emptyList();
-            }
-            List<DeviceEvent> result = new ArrayList<DeviceEvent>(unsorted);
-            Collections.sort(result, this);
-            return result;
-        }
-
-        void markAsSent() {
-            markAsSent(offlineEvents);
-            markAsSent(geoFenceEvents);
-        }
-
-        void markAsSent(Set<DeviceEvent> events) {
-            if (events != null) {
-                for (DeviceEvent event : events) {
-                    event.setNotificationSent(true);
-                }
-            }
-        }
-    }
-
     public static class NotificationSender extends ScheduledTask {
         @Inject
         Provider<EntityManager> entityManager;
+
+        @Inject
+        Provider<ApplicationSettings> applicationSettings;
 
         @Transactional
         @Override
@@ -146,7 +84,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 return;
             }
 
-            Map<User, DeviceEvents> events = new HashMap<User, DeviceEvents>();
+            Map<User, Set<DeviceEvent>> events = new HashMap<User, Set<DeviceEvent>>();
             List<User> admins = null;
             Map<User, List<User>> managers = new HashMap<User, List<User>>();
 
@@ -189,7 +127,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 }
             }
 
-            for (Map.Entry<User, DeviceEvents> entry : events.entrySet()) {
+            for (Map.Entry<User, Set<DeviceEvent>> entry : events.entrySet()) {
                 User user = entry.getKey();
                 if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
                     logger.warning("User '" + user.getLogin() + "' has empty email field");
@@ -202,23 +140,28 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                     continue;
                 }
 
-                DeviceEvents deviceEvents = entry.getValue();
+                for (DeviceEvent deviceEvent : entry.getValue()) {
+                    NotificationTemplate template = settings.findTemplate(deviceEvent.getType());
+                    if (template == null) {
+                        template = new NotificationTemplate();
+                        template.setBody(defaultBody(deviceEvent.getType(), applicationSettings.get().getLanguage()));
+                    }
 
-                StringBuilder message = new StringBuilder();
-                if (appendOfflineEventsText(message, deviceEvents.offlineEvents())) {
-                    message.append("\n\n");
-                }
-                appendGeoFenceText(message, deviceEvents.geoFenceEvents());
+                    Engine engine = getTemplateEngine();
+                    Map<String, Object> model = getTemplateModel(deviceEvent);
+                    String subject = engine.transform(template.getSubject(), model);
+                    String body = engine.transform(template.getBody(), model);
 
-                boolean sentEmail = sendEmail(settings, user, "[traccar-web] Notification", message.toString());
-                boolean sentPushbullet = sendPushbullet(settings, user, "[traccar-web] Notification", message.toString());
-                if (sentPushbullet || sentEmail) {
-                    deviceEvents.markAsSent();
+                    boolean sentEmail = sendEmail(settings, user, subject, body, template.getContentType());
+                    boolean sentPushbullet = sendPushbullet(settings, user, subject, body);
+                    if (sentPushbullet || sentEmail) {
+                        deviceEvent.setNotificationSent(true);
+                    }
                 }
             }
         }
 
-        private void addEvent(Map<User, DeviceEvents> events, User user, DeviceEvent event) {
+        private void addEvent(Map<User, Set<DeviceEvent>> events, User user, DeviceEvent event) {
             // check whether user wants to receive such notification events
             if (!user.getNotificationEvents().contains(event.getType())) {
                 return;
@@ -230,12 +173,12 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 }
             }
 
-            DeviceEvents userEvents = events.get(user);
+            Set<DeviceEvent> userEvents = events.get(user);
             if (userEvents == null) {
-                userEvents = new DeviceEvents();
+                userEvents = new HashSet<DeviceEvent>();
                 events.put(user, userEvents);
             }
-            userEvents.addEvent(event);
+            userEvents.add(event);
         }
 
         private NotificationSettings findNotificationSettings(User user) {
@@ -283,16 +226,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             return !events.isEmpty();
         }
 
-        private boolean appendGeoFenceText(StringBuilder msg, List<DeviceEvent> events) {
-            for (DeviceEvent event : events) {
-                msg.append("Device '").append(event.getDevice().getName()).append("' ")
-                        .append(event.getType() == DeviceEventType.GEO_FENCE_ENTER ? "entered" : "exited")
-                        .append(" geo-fence '").append(event.getGeoFence().getName()).append("' at ").append(event.getPosition().getTime()).append('\n');
-            }
-            return !events.isEmpty();
-        }
-
-        private boolean sendEmail(NotificationSettings settings, User user, String subject, String body) {
+        private boolean sendEmail(NotificationSettings settings, User user, String subject, String body, String contentType) {
             // perform some validation of e-mail settings
             if (settings.getServer() == null || settings.getServer().trim().isEmpty() ||
                 settings.getFromAddress() == null || settings.getFromAddress().trim().isEmpty()) {
@@ -302,14 +236,14 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             logger.info("Sending Email notification to '" + user.getEmail() + "'...");
 
             Session session = getSession(settings);
-            Message msg = new MimeMessage(session);
+            MimeMessage msg = new MimeMessage(session);
             Transport transport = null;
             try {
                 msg.setFrom(new InternetAddress(settings.getFromAddress()));
                 msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getLogin() + " <" + user.getEmail() + ">", false));
                 msg.setSubject(subject);
 
-                msg.setText(body);
+                msg.setContent(body, contentType);
                 msg.setHeader("X-Mailer", "traccar-web.sendmail");
                 msg.setSentDate(new Date());
 
@@ -498,15 +432,36 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             testGeoFence = geoFences.get(0);
         }
 
-        Map<String, Object> model = new HashMap<String, Object>();
-        model.put(MessagePlaceholder.deviceName.name(), testDevice.getName());
-        model.put(MessagePlaceholder.geoFenceName.name(), testGeoFence.getName());
-        model.put(MessagePlaceholder.eventTime.name(), new Date());
+        Position testPosition = new Position();
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR, c.get(Calendar.HOUR) - 1);
         c.set(Calendar.MINUTE, c.get(Calendar.MINUTE) - 15);
-        model.put(MessagePlaceholder.positionTime.name(), c.getTime());
+        testPosition.setTime(c.getTime());
 
+        Engine engine = getTemplateEngine();
+        Map<String, Object> model = getTemplateModel(new DeviceEvent(new Date(), testDevice, testPosition, testGeoFence));
+
+        String transformedSubject = engine.transform(template.getSubject(), model);
+        String transformedBody = engine.transform(template.getBody(), model);
+
+        return "<div style=\"background-color: #ffffff;\">" +
+                    "<table style=\"border-collapse: collapse;\">" +
+                        "<tr><td style=\"border: 1px solid black; padding: 2px;\">" + transformedSubject + "</td></tr>" +
+                        "<tr><td style=\"border: 1px solid black; padding: 4px;\">" + transformedBody + "</td></tr>" +
+                    "</table>" +
+                "</div>";
+    }
+
+    private static Map<String, Object> getTemplateModel(DeviceEvent event) {
+        Map<String, Object> model = new HashMap<String, Object>();
+        model.put(MessagePlaceholder.deviceName.name(), event.getDevice() == null ? "N/A" : event.getDevice().getName());
+        model.put(MessagePlaceholder.geoFenceName.name(), event.getGeoFence() == null ? "N/A" : event.getGeoFence().getName());
+        model.put(MessagePlaceholder.eventTime.name(), event.getTime());
+        model.put(MessagePlaceholder.positionTime.name(), event.getPosition() == null ? null : event.getPosition().getTime());
+        return model;
+    }
+
+    private static Engine getTemplateEngine() {
         Engine engine = new Engine();
         engine.registerNamedRenderer(new NamedRenderer() {
             @Override
@@ -530,15 +485,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 return new Class<?>[] { Date.class };
             }
         });
-        String transformedSubject = engine.transform(template.getSubject(), model);
-        String transformedBody = engine.transform(template.getBody(), model);
-
-        return "<div style=\"background-color: #ffffff;\">" +
-                    "<table style=\"border-collapse: collapse;\">" +
-                        "<tr><td style=\"border: 1px solid black; padding: 2px;\">" + transformedSubject + "</td></tr>" +
-                        "<tr><td style=\"border: 1px solid black; padding: 4px;\">" + transformedBody + "</td></tr>" +
-                    "</table>" +
-                "</div>";
+        return engine;
     }
 
     @Transactional
@@ -589,5 +536,26 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 entityManager.get().persist(newTemplate);
             }
         }
+    }
+
+    static String defaultBody(DeviceEventType type, String locale) throws IOException {
+        Properties defaultMessages = new Properties();
+        defaultMessages.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/client/i18n/Messages.properties"));
+
+        Properties localeMessages = new Properties();
+        InputStream messagesIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/client/i18n/Messages_" + locale + ".properties");
+        if (messagesIS == null) {
+            localeMessages = defaultMessages;
+        } else {
+            localeMessages.load(new InputStreamReader(messagesIS, "UTF-8"));
+        }
+
+        String key = "defaultNotificationTemplate[" + type.name() + "]";
+        String body = localeMessages.getProperty(key, defaultMessages.getProperty(key));
+        return body.replace("''", "'")
+                .replace("{1}", "${deviceName}")
+                .replace("{2}", "${geoFenceName}")
+                .replace("{3}", "${eventTime}")
+                .replace("{4}", "${positionTime}");
     }
 }

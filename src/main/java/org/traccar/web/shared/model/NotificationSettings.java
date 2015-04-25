@@ -202,4 +202,16 @@ public class NotificationSettings implements Serializable {
         setSecureConnectionType(s.getSecureConnectionType());
         setPushbulletAccessToken(s.getPushbulletAccessToken());
     }
+
+    public NotificationTemplate findTemplate(DeviceEventType type) {
+        if (getTransferTemplates() == null) {
+            setTransferTemplates(new HashMap<DeviceEventType, NotificationTemplate>());
+        }
+        if (getTransferTemplates().size() < getTemplates().size()) {
+            for (NotificationTemplate template : getTemplates()) {
+                getTransferTemplates().put(template.getType(), template);
+            }
+        }
+        return getTransferTemplates().get(type);
+    }
 }
