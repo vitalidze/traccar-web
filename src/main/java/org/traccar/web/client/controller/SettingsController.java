@@ -33,6 +33,7 @@ import org.traccar.web.client.model.UserProperties;
 import org.traccar.web.client.view.*;
 import org.traccar.web.shared.model.ApplicationSettings;
 import org.traccar.web.shared.model.NotificationSettings;
+import org.traccar.web.shared.model.NotificationTemplate;
 import org.traccar.web.shared.model.User;
 
 import com.google.gwt.core.client.GWT;
@@ -205,8 +206,8 @@ public class SettingsController implements DeviceView.SettingsHandler {
                     public void onTestEmail(NotificationSettings notificationSettings) {
                         service.checkEmailSettings(notificationSettings, new AsyncCallback<Void>() {
                             @Override
-                            public void onFailure(Throwable throwable) {
-                                new AlertMessageBox(i18n.notificationSettings(), i18n.testFailed()).show();
+                            public void onFailure(Throwable caught) {
+                                new AlertMessageBox(i18n.notificationSettings(), i18n.testFailed() + "<br><br>" + caught.getLocalizedMessage()).show();
                             }
 
                             @Override
@@ -222,8 +223,8 @@ public class SettingsController implements DeviceView.SettingsHandler {
                     public void onTestPushbullet(NotificationSettings notificationSettings) {
                         service.checkPushbulletSettings(notificationSettings, new AsyncCallback<Void>() {
                             @Override
-                            public void onFailure(Throwable throwable) {
-                                new AlertMessageBox(i18n.notificationSettings(), i18n.testFailed()).show();
+                            public void onFailure(Throwable caught) {
+                                new AlertMessageBox(i18n.notificationSettings(), i18n.testFailed() + "<br><br>" + caught.getLocalizedMessage()).show();
                             }
 
                             @Override
@@ -231,6 +232,21 @@ public class SettingsController implements DeviceView.SettingsHandler {
                                 MessageBox messageBox = new MessageBox(i18n.notificationSettings(), i18n.testSucceeded());
                                 messageBox.setIcon(MessageBox.ICONS.info());
                                 messageBox.show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onTestMessageTemplate(NotificationTemplate template) {
+                        service.checkTemplate(template, new AsyncCallback<String>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                new AlertMessageBox(i18n.notificationSettings(), i18n.testFailed() + "<br><br>" + caught.getLocalizedMessage()).show();
+                            }
+
+                            @Override
+                            public void onSuccess(String result) {
+                                new MessageBox(i18n.notificationSettings(), result).show();
                             }
                         });
                     }
