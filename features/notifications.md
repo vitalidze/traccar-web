@@ -14,13 +14,36 @@ First of all, all users that want to receive notifications must have email field
 
 ![Account settings dialog](http://i58.tinypic.com/339ilv5.png)
 
-Then user with either 'administrator' or 'manager' role should set up either SMTP server settings or [Pushbullet](https://www.pushbullet.com/) Access Token in Settings >> Notifications menu.
-
+Then user with either 'administrator' or 'manager' role in Settings >> Notifications menu should set up one of the following:
+ 
 ![Notification settings menu](http://i62.tinypic.com/w6tklu.png)
 
-![Notification settings dialog](http://i61.tinypic.com/vq7cat.png)
+* SMTP server settings Access Token
+
+![Notification settings dialog - Email](http://i58.tinypic.com/16kas5d.png)
+
+* [Pushbullet](https://www.pushbullet.com/)
+
+![Notification settings dialog - Pushbullet](http://i61.tinypic.com/2di15pd.png)
 
 Use 'Test' button to check settings validity. It will just test the connection. No test email or push is sent.
+
+Templates
+---------
+
+In Settings >> Notifications menu it is also possible to customize notification message with template. Message template is defined per event type.
+
+![Notification settings dialog - Message templates](http://i57.tinypic.com/o88fhe.png)
+
+There are placeholders, which are replaced during message generation with actual values. Full list of placeholders. Placeholders may be used both in subject and body of message. Full list of available placeholders is shown at bottom of this dialog window. There is an option to apply custom formatting to the date and time fields using rules from [SimpleDateFormat](https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) and following notation:
+
+    ${dateField;date(FORMAT)}
+    
+For example:
+
+    ${eventTime;date(yyyy.MM.dd HH:mm:ss)}
+    
+Each template can be tested with sample values using 'Test' button.
 
 Usage
 -----
