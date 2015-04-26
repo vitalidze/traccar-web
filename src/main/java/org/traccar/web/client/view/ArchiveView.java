@@ -31,6 +31,7 @@ import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.grid.*;
 import com.sencha.gxt.widget.core.client.menu.*;
+import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.ArchiveStyle;
 import org.traccar.web.client.i18n.Messages;
@@ -130,6 +131,12 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiField(provided = true)
     Menu routeMarkersType;
 
+    @UiField
+    LabelToolItem totalDistance;
+
+    @UiField
+    LabelToolItem averageSpeed;
+
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
@@ -146,7 +153,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         }
     }
 
-    public ArchiveView(ArchiveHandler archiveHandler, ListStore<Position> globalPositionStore, ListStore<Device> deviceStore) {
+    public ArchiveView(ArchiveHandler archiveHandler, final ListStore<Position> globalPositionStore, ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;
         this.positionStore = new ListStore<Position>(GWT.<PositionProperties>create(PositionProperties.class).id());
         this.globalPositionStore = globalPositionStore;
@@ -250,6 +257,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
             @Override
             public void onAnything() {
                 loader.load(0, view.getCacheSize());
+                updateTotals(globalPositionStore);
             }
         });
 
@@ -380,5 +388,18 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         deviceCombo.setValue(device, false);
         globalPositionStore.clear();
         positionStore.clear();
+    }
+
+    void updateTotals(ListStore<Position> positions) {
+        double totalDistance = 0;
+        double averageSpeed = 0;
+        for (int i = 0; i < positions.size(); i++) {
+            Position position = positions.get(i);
+            totalDistance += position.getDistance();
+            averageSpeed += position.getSpeed();
+        }
+        averageSpeed = averageSpeed / positions.size();
+        this.totalDistance.setLabel(ApplicationContext.getInstance().getFormatterUtil().getDistanceFormat().format(totalDistance));
+        this.averageSpeed.setLabel(ApplicationContext.getInstance().getFormatterUtil().getSpeedFormat().format(averageSpeed));
     }
 }
