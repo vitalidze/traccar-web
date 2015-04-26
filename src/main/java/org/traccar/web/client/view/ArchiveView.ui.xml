@@ -20,7 +20,7 @@
     <ui:with type="com.sencha.gxt.data.shared.ListStore" field="positionStore" />
     <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
 
-    <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view">
+    <ui:with type="com.sencha.gxt.widget.core.client.grid.LiveGridView" field="view">
         <ui:attributes stripeRows="true" autoFill="true" />
     </ui:with>
 

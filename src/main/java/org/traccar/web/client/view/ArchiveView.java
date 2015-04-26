@@ -17,6 +17,7 @@ package org.traccar.web.client.view;
 
 import java.util.*;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -24,6 +25,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
+import com.sencha.gxt.data.shared.loader.*;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.form.*;
@@ -102,6 +104,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiField(provided = true)
     ListStore<Position> positionStore;
 
+    final ListStore<Position> globalPositionStore;
+
+    @UiField(provided = true)
+    LiveGridView<Position> view;
+
     @UiField
     Grid<Position> grid;
 
@@ -126,9 +133,23 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public ArchiveView(ArchiveHandler archiveHandler, ListStore<Position> positionStore, ListStore<Device> deviceStore) {
+    class PagingMemoryProxy extends MemoryProxy<PagingLoadConfig, PagingLoadResult<Position>> {
+        private final ListStore<Position> totalList;
+        public PagingMemoryProxy(ListStore<Position> totalList) {
+            super(null); //data is useless in this case, memoryProxy only designed to hold, not to search
+            this.totalList = totalList;
+        }
+        @Override
+        public void load(PagingLoadConfig config, Callback<PagingLoadResult<Position>, Throwable> callback) {
+            List<Position> results = totalList.subList(config.getOffset(), config.getOffset() + config.getLimit()); // Get results list based on the data the proxy was created with
+            callback.onSuccess(new PagingLoadResultBean<Position>(results, totalList.size(), config.getOffset()));  // again, data from the config
+        }
+    }
+
+    public ArchiveView(ArchiveHandler archiveHandler, ListStore<Position> globalPositionStore, ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;
-        this.positionStore = positionStore;
+        this.positionStore = new ListStore<Position>(GWT.<PositionProperties>create(PositionProperties.class).id());
+        this.globalPositionStore = globalPositionStore;
         deviceStore.addStoreHandlers(deviceStoreHandlers);
         this.deviceStore = deviceStore;
 
@@ -166,12 +187,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         columnModel = new ColumnModel<Position>(columnConfigList);
 
-        // set up 'Totals' row
-        AggregationRowConfig<Position> totals = new AggregationRowConfig<Position>();
-        totals.setRenderer(columnConfigSpeed, new AggregationNumberSummaryRenderer<Position, Double>(ApplicationContext.getInstance().getFormatterUtil().getSpeedFormat(), new SummaryType.AvgSummaryType<Double>()));
-        totals.setRenderer(columnConfigDistance, new AggregationNumberSummaryRenderer<Position, Double>(ApplicationContext.getInstance().getFormatterUtil().getDistanceFormat(), new SummaryType.SumSummaryType<Double>()));
-
-        columnModel.addAggregationRow(totals);
+        view = new LiveGridView<Position>();
+        view.setForceFit(true);
+        view.setStripeRows(true);
 
         // Element that displays the current track color
         styleButtonTrackColor = new TextButton();
@@ -223,6 +241,17 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         routeMarkersType.add(item2);
 
         uiBinder.createAndBindUi(this);
+
+        final PagingLoader<PagingLoadConfig, PagingLoadResult<Position>> loader = new PagingLoader<PagingLoadConfig, PagingLoadResult<Position>>(new PagingMemoryProxy(globalPositionStore));
+        loader.setRemoteSort(true);
+        grid.setLoader(loader);
+
+        globalPositionStore.addStoreHandlers(new BaseStoreHandlers<Position>() {
+            @Override
+            public void onAnything() {
+                loader.load(0, view.getCacheSize());
+            }
+        });
 
         new GridStateHandler<Position>(grid).loadState();
 
@@ -311,7 +340,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
                             "&filter=" + !disableFilter.getValue(),
-                     "_blank", null);
+                    "_blank", null);
         }
     }
 
@@ -348,7 +377,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     }
 
     public void selectDevice(Device device) {
-        deviceCombo.setValue(device,false);
+        deviceCombo.setValue(device, false);
+        globalPositionStore.clear();
         positionStore.clear();
     }
 }
