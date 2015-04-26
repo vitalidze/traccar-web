@@ -18,11 +18,13 @@ package org.traccar.web.client.model;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.traccar.web.shared.model.NotificationSettings;
+import org.traccar.web.shared.model.NotificationTemplate;
 
 @RemoteServiceRelativePath("notificationService")
 public interface NotificationService extends RemoteService {
     void checkEmailSettings(NotificationSettings settings);
     void checkPushbulletSettings(NotificationSettings settings);
+    String checkTemplate(NotificationTemplate template);
     NotificationSettings getSettings();
     void saveSettings(NotificationSettings settings);
 }

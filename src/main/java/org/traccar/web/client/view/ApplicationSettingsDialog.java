@@ -25,6 +25,7 @@ import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.model.ApplicationSettingsProperties;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.UserSettingsProperties;
+import org.traccar.web.client.widget.LanguageComboBox;
 import org.traccar.web.shared.model.ApplicationSettings;
 
 import com.google.gwt.core.client.GWT;
@@ -81,6 +82,9 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     @UiField(provided = true)
     ComboBox<PasswordHashMethod> defaultHashImplementation;
 
+    @UiField(provided = true)
+    ComboBox<String> language;
+
     public ApplicationSettingsDialog(ApplicationSettings applicationSettings, ApplicationSettingsHandler applicationSettingsHandler) {
         this.applicationSettingsHandler = applicationSettingsHandler;
 
@@ -92,6 +96,8 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
 
         defaultHashImplementation.setForceSelection(true);
         defaultHashImplementation.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+
+        language = new LanguageComboBox();
 
         uiBinder.createAndBindUi(this);
 
