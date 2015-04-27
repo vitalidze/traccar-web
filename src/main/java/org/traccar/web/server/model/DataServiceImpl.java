@@ -301,7 +301,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         if (user.getAdmin()) {
             return getSessionEntityManager().createQuery("SELECT x FROM Device x LEFT JOIN FETCH x.latestPosition").getResultList();
         }
-        return user.getAllAvailableDevices();
+        return new LinkedList<Device>(user.getAllAvailableDevices());
     }
 
     @Transactional

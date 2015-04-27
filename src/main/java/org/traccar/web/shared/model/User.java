@@ -146,8 +146,8 @@ public class User implements IsSerializable, Cloneable {
         return devices;
     }
 
-    public List<Device> getAllAvailableDevices() {
-        List<Device> devices = new LinkedList<Device>();
+    public Set<Device> getAllAvailableDevices() {
+        Set<Device> devices = new HashSet<Device>();
         devices.addAll(getDevices());
         if (getManager()) {
             for (User managedUser : getManagedUsers()) {
