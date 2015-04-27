@@ -173,17 +173,17 @@ public class Device implements IsSerializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof Device)) return false;
 
         Device device = (Device) o;
 
-        if (uniqueId != null ? !uniqueId.equals(device.uniqueId) : device.uniqueId != null) return false;
+        if (getUniqueId() != null ? !getUniqueId().equals(device.getUniqueId()) : device.getUniqueId() != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return uniqueId != null ? uniqueId.hashCode() : 0;
+        return getUniqueId() != null ? getUniqueId().hashCode() : 0;
     }
 }

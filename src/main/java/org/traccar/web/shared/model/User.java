@@ -16,8 +16,6 @@
 package org.traccar.web.shared.model;
 
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -136,13 +134,13 @@ public class User implements IsSerializable, Cloneable {
                foreignKey = @ForeignKey(name = "users_devices_fkey_users_id"),
                joinColumns = { @JoinColumn(name = "users_id", table = "users", referencedColumnName = "id") },
                inverseJoinColumns = { @JoinColumn(name = "devices_id", table = "devices", referencedColumnName = "id") })
-    private List<Device> devices = new LinkedList<Device>();
+    private Set<Device> devices = new HashSet<Device>();
 
-    public void setDevices(List<Device> devices) {
+    public void setDevices(Set<Device> devices) {
         this.devices = devices;
     }
 
-    public List<Device> getDevices() {
+    public Set<Device> getDevices() {
         return devices;
     }
 
@@ -163,13 +161,13 @@ public class User implements IsSerializable, Cloneable {
             foreignKey = @ForeignKey(name = "users_geofences_fkey_user_id"),
             joinColumns = { @JoinColumn(name = "user_id", table = "users", referencedColumnName = "id") },
             inverseJoinColumns = { @JoinColumn(name = "geofence_id", table = "geofences", referencedColumnName = "id") })
-    private List<GeoFence> geoFences;
+    private Set<GeoFence> geoFences;
 
-    public void setGeoFences(List<GeoFence> geoFences) {
+    public void setGeoFences(Set<GeoFence> geoFences) {
         this.geoFences = geoFences;
     }
 
-    public List<GeoFence> getGeoFences() {
+    public Set<GeoFence> getGeoFences() {
         return geoFences;
     }
 
@@ -333,17 +331,17 @@ public class User implements IsSerializable, Cloneable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof User)) return false;
 
         User user = (User) o;
 
-        if (login != null ? !login.equals(user.login) : user.login != null) return false;
+        if (getLogin() != null ? !getLogin().equals(user.getLogin()) : user.getLogin() != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return login != null ? login.hashCode() : 0;
+        return getLogin() != null ? getLogin().hashCode() : 0;
     }
 }
