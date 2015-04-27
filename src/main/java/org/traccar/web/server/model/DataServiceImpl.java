@@ -390,6 +390,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             query.setParameter("device", device);
             query.executeUpdate();
 
+            query = entityManager.createQuery("SELECT g FROM GeoFence g WHERE :device MEMBER OF g.devices");
+            query.setParameter("device", device);
+            for (GeoFence geoFence : (List<GeoFence>) query.getResultList()) {
+                geoFence.getDevices().remove(device);
+            }
+
             entityManager.remove(device);
         }
         return device;
