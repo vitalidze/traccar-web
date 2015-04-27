@@ -15,7 +15,6 @@
  */
 package org.traccar.web.shared.model;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,11 +24,12 @@ import javax.persistence.*;
 
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 @Entity
 @Table(name="users",
        uniqueConstraints = { @UniqueConstraint(name = "users_ukey_login", columnNames = "login") })
-public class User implements Serializable, Cloneable {
+public class User implements IsSerializable, Cloneable {
 
     private static final long serialVersionUID = 1;
 

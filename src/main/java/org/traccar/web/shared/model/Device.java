@@ -17,8 +17,8 @@ package org.traccar.web.shared.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -27,7 +27,7 @@ import javax.persistence.*;
 @Table(name = "devices",
        indexes = { @Index(name = "devices_pkey", columnList = "id") },
        uniqueConstraints = { @UniqueConstraint(name = "devices_ukey_uniqueid", columnNames = "uniqueid") })
-public class Device implements Serializable {
+public class Device implements IsSerializable {
 
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_TIMEOUT = 5 * 60;
