@@ -213,19 +213,6 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             return settings.isEmpty() ? null : settings.get(0);
         }
 
-        private boolean appendOfflineEventsText(StringBuilder msg, List<DeviceEvent> events) {
-            if (events.size() == 1) {
-                DeviceEvent event = events.get(0);
-                msg.append("Device '").append(event.getDevice().getName()).append("' went offline at ").append(event.getTime());
-            } else if (events.size() > 1) {
-                msg.append("Following devices went offline:\n");
-                for (DeviceEvent event : events) {
-                    msg.append("\n  '").append(event.getDevice().getName()).append("' (").append(event.getDevice().getUniqueId()).append(") at ").append(event.getTime());
-                }
-            }
-            return !events.isEmpty();
-        }
-
         private boolean sendEmail(NotificationSettings settings, User user, String subject, String body, String contentType) {
             // perform some validation of e-mail settings
             if (settings.getServer() == null || settings.getServer().trim().isEmpty() ||

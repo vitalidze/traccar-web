@@ -137,6 +137,7 @@ public class ExportServlet extends HttpServlet {
 
         xsw.writeStartDocument("UTF-8", "1.0");
         xsw.writeStartElement("gpx");
+        xsw.writeAttribute("version", "1.1");
         xsw.writeAttribute("xmlns", "http://www.topografix.com/GPX/1/1");
         xsw.writeAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
         xsw.writeAttribute("xmlns:traccar", "http://www.traccar.org");

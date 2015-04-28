@@ -120,7 +120,8 @@ public class UserDialog implements Editor<User> {
         uiBinder.createAndBindUi(this);
 
         grid.setSelectionModel(selectionModel);
-        grid.getView().setAutoExpandColumn(nameCol);
+        grid.getView().setForceFit(true);
+        grid.getView().setAutoFill(true);
         for (DeviceEventType deviceEventType : user.getTransferNotificationEvents()) {
             grid.getSelectionModel().select(deviceEventType, true);
         }
