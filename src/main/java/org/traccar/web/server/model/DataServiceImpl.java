@@ -304,7 +304,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         if (user.getAdmin()) {
             devices = getSessionEntityManager().createQuery("SELECT x FROM Device x LEFT JOIN FETCH x.latestPosition", Device.class).getResultList();
         } else {
-            devices = user.getAllAvailableDevices();
+            devices = new LinkedList<Device>(user.getAllAvailableDevices());
         }
         if (loadMaintenances) {
             for (Device device : devices) {
@@ -435,6 +435,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             query = entityManager.createQuery("DELETE FROM Position x WHERE x.device = :device");
             query.setParameter("device", device);
             query.executeUpdate();
+
+            query = entityManager.createQuery("SELECT g FROM GeoFence g WHERE :device MEMBER OF g.devices");
+            query.setParameter("device", device);
+            for (GeoFence geoFence : (List<GeoFence>) query.getResultList()) {
+                geoFence.getDevices().remove(device);
+            }
 
             query = entityManager.createQuery("DELETE FROM Maintenance x WHERE x.device = :device");
             query.setParameter("device", device);

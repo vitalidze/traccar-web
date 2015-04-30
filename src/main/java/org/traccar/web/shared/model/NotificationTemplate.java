@@ -16,13 +16,13 @@
 package org.traccar.web.shared.model;
 
 import com.google.gwt.user.client.rpc.GwtTransient;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
 @Table(name = "notification_templates")
-public class NotificationTemplate implements Serializable {
+public class NotificationTemplate implements IsSerializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -68,12 +68,12 @@ public class NotificationTemplate implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof NotificationTemplate)) return false;
 
         NotificationTemplate that = (NotificationTemplate) o;
 
-        if (!settings.equals(that.settings)) return false;
-        return type == that.type;
+        if (!getSettings().equals(that.getSettings())) return false;
+        return getType() == that.getType();
 
     }
 

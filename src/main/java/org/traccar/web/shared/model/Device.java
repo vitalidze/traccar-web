@@ -17,8 +17,8 @@ package org.traccar.web.shared.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +29,7 @@ import javax.persistence.*;
 @Table(name = "devices",
        indexes = { @Index(name = "devices_pkey", columnList = "id") },
        uniqueConstraints = { @UniqueConstraint(name = "devices_ukey_uniqueid", columnNames = "uniqueid") })
-public class Device implements Serializable {
+public class Device implements IsSerializable {
 
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_TIMEOUT = 5 * 60;
@@ -214,17 +214,17 @@ public class Device implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof Device)) return false;
 
         Device device = (Device) o;
 
-        if (uniqueId != null ? !uniqueId.equals(device.uniqueId) : device.uniqueId != null) return false;
+        if (getUniqueId() != null ? !getUniqueId().equals(device.getUniqueId()) : device.getUniqueId() != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return uniqueId != null ? uniqueId.hashCode() : 0;
+        return getUniqueId() != null ? getUniqueId().hashCode() : 0;
     }
 }

@@ -1,8 +1,7 @@
 package org.traccar.web.shared.model;
 
 import com.google.gson.annotations.Expose;
-
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,7 +14,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "user_settings")
-public class UserSettings implements Serializable {
+public class UserSettings implements IsSerializable {
 
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_TIME_PRINT_INTERVAL = 10;
