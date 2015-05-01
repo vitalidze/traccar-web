@@ -18,5 +18,6 @@ package org.traccar.web.shared.model;
 public enum DeviceEventType {
     OFFLINE,
     GEO_FENCE_ENTER,
-    GEO_FENCE_EXIT;
+    GEO_FENCE_EXIT,
+    MAINTENANCE_OVERDUE;
 }

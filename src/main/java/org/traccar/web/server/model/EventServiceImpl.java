@@ -25,13 +25,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -183,6 +177,19 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                 return;
             }
 
+            // load maintenances
+            Map<Device, List<Maintenance>> maintenances = new HashMap<Device, List<Maintenance>>();
+            for (Maintenance maintenance : entityManager.get().createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices", Maintenance.class)
+                    .setParameter("devices", devices).getResultList()) {
+                List<Maintenance> deviceMaintenances = maintenances.get(maintenance.getDevice());
+                if (deviceMaintenances == null) {
+                    deviceMaintenances = new LinkedList<Maintenance>();
+                    maintenances.put(maintenance.getDevice(), deviceMaintenances);
+                }
+                deviceMaintenances.add(maintenance);
+            }
+
+            // find latest position id for the first scan
             if (lastScannedPositionId == null) {
                 List<Long> latestPositionId = entityManager.get().createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class).getResultList();
                 if (latestPositionId.isEmpty()) {
@@ -192,6 +199,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                 }
             }
 
+            // load all positions since latest
             List<Position> positions = entityManager.get().createQuery(
                     "SELECT p FROM Position p INNER JOIN p.device d WHERE p.id >= :from AND d.autoUpdateOdometer=:b ORDER BY d.id, p.time ASC", Position.class)
                     .setParameter("b", Boolean.TRUE)
@@ -222,7 +230,24 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                             position.getLongitude(), position.getLatitude());
 
                     if (distance > 0.003) {
-                        device.setOdometer(device.getOdometer() + distance);
+                        double prevOdometer = device.getOdometer();
+                        device.setOdometer(prevOdometer + distance);
+                        // post maintenance overdue events
+                        List<Maintenance> deviceMaintenances = maintenances.get(device);
+                        if (deviceMaintenances != null) {
+                            for (Maintenance maintenance : deviceMaintenances) {
+                                double serviceThreshold = maintenance.getLastService() + maintenance.getServiceInterval();
+                                if (prevOdometer < serviceThreshold && device.getOdometer() >= serviceThreshold) {
+                                    DeviceEvent event = new DeviceEvent();
+                                    event.setTime(new Date());
+                                    event.setDevice(device);
+                                    event.setType(DeviceEventType.MAINTENANCE_OVERDUE);
+                                    event.setPosition(position);
+                                    event.setMaintenance(maintenance);
+                                    entityManager.get().persist(event);
+                                }
+                            }
+                        }
                     }
                 }
 

@@ -46,16 +46,21 @@ public class DeviceEvent {
     @JoinColumn(foreignKey = @ForeignKey(name = "events_fkey_geofence_id"))
     private GeoFence geoFence;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(foreignKey = @ForeignKey(name = "events_fkey_maintenance_id"))
+    private Maintenance maintenance;
+
     private boolean notificationSent;
 
     public DeviceEvent() {
     }
 
-    public DeviceEvent(Date time, Device device, Position position, GeoFence geoFence) {
+    public DeviceEvent(Date time, Device device, Position position, GeoFence geoFence, Maintenance maintenance) {
         this.time = time;
         this.device = device;
         this.position = position;
         this.geoFence = geoFence;
+        this.maintenance = maintenance;
     }
 
     public long getId() {
@@ -106,6 +111,14 @@ public class DeviceEvent {
         this.position = position;
     }
 
+    public Maintenance getMaintenance() {
+        return maintenance;
+    }
+
+    public void setMaintenance(Maintenance maintenance) {
+        this.maintenance = maintenance;
+    }
+
     public boolean isNotificationSent() {
         return notificationSent;
     }
@@ -113,7 +126,6 @@ public class DeviceEvent {
     public void setNotificationSent(boolean notificationSent) {
         this.notificationSent = notificationSent;
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -125,6 +137,7 @@ public class DeviceEvent {
         if (getDevice() != null ? !getDevice().equals(that.getDevice()) : that.getDevice() != null) return false;
         if (getGeoFence() != null ? !getGeoFence().equals(that.getGeoFence()) : that.getGeoFence() != null) return false;
         if (getPosition() != null ? !getPosition().equals(that.getPosition()) : that.getPosition() != null) return false;
+        if (getMaintenance() != null ? !getMaintenance().equals(that.getMaintenance()) : that.getMaintenance() != null) return false;
         if (!getTime().equals(that.getTime())) return false;
         if (getType() != that.getType()) return false;
 
@@ -138,6 +151,7 @@ public class DeviceEvent {
         result = 31 * result + getType().hashCode();
         result = 31 * result + (getPosition() != null ? getPosition().hashCode() : 0);
         result = 31 * result + (getGeoFence() != null ? getGeoFence().hashCode() : 0);
+        result = 31 * result + (getMaintenance() != null ? getMaintenance().hashCode() : 0);
         return result;
     }
 }

@@ -373,15 +373,17 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setTimeout(device.getTimeout());
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
             tmp_device.setIconType(device.getIconType());
+            double prevOdometer = tmp_device.getOdometer();
             tmp_device.setOdometer(device.getOdometer());
             tmp_device.setAutoUpdateOdometer(device.isAutoUpdateOdometer());
             tmp_device.setMaintenances(new ArrayList<Maintenance>(device.getMaintenances()));
 
-            List<Maintenance> currentMaintenances = getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device = :device", Maintenance.class)
+            List<Maintenance> currentMaintenances = new LinkedList<Maintenance>(getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device = :device", Maintenance.class)
                     .setParameter("device", device)
-                    .getResultList();
+                    .getResultList());
             // update and delete existing
-            for (Maintenance existingMaintenance : currentMaintenances) {
+            for (Iterator<Maintenance> it = currentMaintenances.iterator(); it.hasNext(); ) {
+                Maintenance existingMaintenance = it.next();
                 boolean contains = false;
                 for (int index = 0; index < device.getMaintenances().size(); index++) {
                     Maintenance updatedMaintenance = device.getMaintenances().get(index);
@@ -395,12 +397,29 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 }
                 if (!contains) {
                     getSessionEntityManager().remove(existingMaintenance);
+                    it.remove();
                 }
             }
             // add new
             for (Maintenance maintenance : device.getMaintenances()) {
                 maintenance.setDevice(tmp_device);
                 getSessionEntityManager().persist(maintenance);
+                currentMaintenances.add(maintenance);
+            }
+            // post events if odometer changed
+            if (Math.abs(prevOdometer - device.getOdometer()) >= 0.000001) {
+                for (Maintenance maintenance : currentMaintenances) {
+                    double serviceThreshold = maintenance.getLastService() + maintenance.getServiceInterval();
+                    if (prevOdometer < serviceThreshold && device.getOdometer() >= serviceThreshold) {
+                        DeviceEvent event = new DeviceEvent();
+                        event.setTime(new Date());
+                        event.setDevice(device);
+                        event.setType(DeviceEventType.MAINTENANCE_OVERDUE);
+                        event.setPosition(tmp_device.getLatestPosition());
+                        event.setMaintenance(maintenance);
+                        getSessionEntityManager().persist(event);
+                    }
+                }
             }
             return tmp_device;
         } else {
@@ -535,6 +554,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
         // TODO: check for overdue servicing records
         // TODO: draw odometer in popup
+        // TODO: check on H2 database
         return positions;
     }
 

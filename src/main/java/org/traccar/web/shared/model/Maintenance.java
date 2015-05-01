@@ -29,6 +29,10 @@ public class Maintenance implements Serializable {
         copyFrom(maintenance);
     }
 
+    public Maintenance(String name) {
+        this.name = name;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)

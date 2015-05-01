@@ -408,6 +408,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             testDevice = new Device();
             testDevice.setName("Test-Device");
             testDevice.setUniqueId("123");
+            testDevice.setMaintenances(new ArrayList<Maintenance>());
         } else {
             testDevice = devices.get(0);
         }
@@ -418,6 +419,12 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         } else {
             testGeoFence = geoFences.get(0);
         }
+        Maintenance testMaintenance;
+        if (testDevice.getMaintenances().isEmpty()) {
+            testMaintenance = new Maintenance("Oil change");
+        } else {
+            testMaintenance = testDevice.getMaintenances().get(0);
+        }
 
         Position testPosition = new Position();
         Calendar c = Calendar.getInstance();
@@ -426,7 +433,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         testPosition.setTime(c.getTime());
 
         Engine engine = getTemplateEngine();
-        Map<String, Object> model = getTemplateModel(new DeviceEvent(new Date(), testDevice, testPosition, testGeoFence));
+        Map<String, Object> model = getTemplateModel(new DeviceEvent(new Date(), testDevice, testPosition, testGeoFence, testMaintenance));
 
         String transformedSubject = engine.transform(template.getSubject(), model);
         String transformedBody = engine.transform(template.getBody(), model);
@@ -445,6 +452,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         model.put(MessagePlaceholder.geoFenceName.name(), event.getGeoFence() == null ? "N/A" : event.getGeoFence().getName());
         model.put(MessagePlaceholder.eventTime.name(), event.getTime());
         model.put(MessagePlaceholder.positionTime.name(), event.getPosition() == null ? null : event.getPosition().getTime());
+        model.put(MessagePlaceholder.maintenanceName.name(), event.getMaintenance() == null ? "N/A" : event.getMaintenance().getName());
         return model;
     }
 
