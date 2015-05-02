@@ -19,5 +19,5 @@ public enum DeviceEventType {
     OFFLINE,
     GEO_FENCE_ENTER,
     GEO_FENCE_EXIT,
-    MAINTENANCE_OVERDUE;
+    MAINTENANCE_REQUIRED;
 }

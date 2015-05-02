@@ -551,6 +551,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 .replace("{1}", "${deviceName}")
                 .replace("{2}", "${geoFenceName}")
                 .replace("{3}", "${eventTime}")
-                .replace("{4}", "${positionTime}");
+                .replace("{4}", "${positionTime}")
+                .replace("{5}", "${maintenanceName}");
     }
 }

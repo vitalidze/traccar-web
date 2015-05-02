@@ -304,7 +304,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
                                        @Optional String deviceName,
                                        @Optional String geoFenceName,
                                        @Optional String eventTime,
-                                       @Optional String positionTime);
+                                       @Optional String positionTime,
+                                       @Optional String maintenanceName);
 
     String odometer();
 

@@ -241,7 +241,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                                     DeviceEvent event = new DeviceEvent();
                                     event.setTime(new Date());
                                     event.setDevice(device);
-                                    event.setType(DeviceEventType.MAINTENANCE_OVERDUE);
+                                    event.setType(DeviceEventType.MAINTENANCE_REQUIRED);
                                     event.setPosition(position);
                                     event.setMaintenance(maintenance);
                                     entityManager.get().persist(event);

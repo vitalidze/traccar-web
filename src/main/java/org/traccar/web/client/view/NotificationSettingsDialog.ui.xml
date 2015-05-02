@@ -37,7 +37,7 @@
     }
   </ui:style>
 
-  <gxt:Window ui:field="window" pixelSize="350, 405" modal="true" headingText="{i18n.notificationSettings}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="368, 426" modal="true" headingText="{i18n.notificationSettings}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
         <container:child layoutData="{verticalLayoutData}">
           <gxt:PlainTabPanel>

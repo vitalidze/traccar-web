@@ -414,7 +414,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                         DeviceEvent event = new DeviceEvent();
                         event.setTime(new Date());
                         event.setDevice(device);
-                        event.setType(DeviceEventType.MAINTENANCE_OVERDUE);
+                        event.setType(DeviceEventType.MAINTENANCE_REQUIRED);
                         event.setPosition(tmp_device.getLatestPosition());
                         event.setMaintenance(maintenance);
                         getSessionEntityManager().persist(event);
