@@ -231,8 +231,8 @@ public class MapView {
         latestPositionRenderer.showDeviceName(positions);
     }
 
-    public void showAlert(List<Position> positions) {
-        latestPositionRenderer.showAlert(positions);
+    public void showAlerts(List<Position> positions) {
+        latestPositionRenderer.showAlerts(positions);
     }
 
     public void showLatestTrackPositions(List<Position> positions) {
@@ -316,6 +316,10 @@ public class MapView {
 
     public void updateIcon(Device device) {
         latestPositionRenderer.updateIcon(device);
+    }
+
+    public void updateAlert(Device device, boolean show) {
+        latestPositionRenderer.updateAlert(device, show);
     }
 
     public void drawGeoFence(GeoFence geoFence, boolean drawTitle) {

@@ -130,13 +130,11 @@ public class MapController implements ContentController, MapView.MapHandler {
                     device = deviceStore.findModelWithKey(Long.toString(device.getId()));
                     device.setOdometer(position.getDistance());
                     // check maintenances
-                    if (device.getMaintenances() != null) {
-                        for (Maintenance maintenance : device.getMaintenances()) {
-                            if (maintenance.getLastService() + maintenance.getServiceInterval() >= device.getOdometer()) {
-                                if (alerts == null) alerts = new LinkedList<Position>();
-                                alerts.add(position);
-                                break;
-                            }
+                    for (Maintenance maintenance : device.getMaintenances()) {
+                        if (device.getOdometer() >= maintenance.getLastService() + maintenance.getServiceInterval()) {
+                            if (alerts == null) alerts = new LinkedList<Position>();
+                            alerts.add(position);
+                            break;
                         }
                     }
                 }
@@ -144,7 +142,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                  * Draw positions
                  */
                 mapView.showLatestPositions(result);
-                mapView.showAlert(alerts);
+                mapView.showAlerts(alerts);
                 mapView.showDeviceName(result);
                 /**
                  * Follow positions and draw track if necessary
@@ -240,5 +238,9 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public void updateIcon(Device device) {
         mapView.updateIcon(device);
+    }
+
+    public void updateAlert(Device device, boolean show) {
+        mapView.updateAlert(device, show);
     }
 }

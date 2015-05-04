@@ -108,10 +108,10 @@ public class MapPositionRenderer {
     private Map<Long, Marker> markerMap = new HashMap<Long, Marker>(); // Position.id -> Marker
     private Map<Long, Long> deviceMap = new HashMap<Long, Long>(); // Device.id -> Position.id
     private Map<Long, Position> positionMap = new HashMap<Long, Position>(); // Position.id -> Position
+    private Map<Long, VectorFeature> alertMap = new HashMap<Long, VectorFeature>(); // Device.id -> vector feature
 
     private List<VectorFeature> tracks = new ArrayList<VectorFeature>();
     private List<VectorFeature> labels = new ArrayList<VectorFeature>();
-    private List<VectorFeature> alerts = new ArrayList<VectorFeature>();
 
     private final DateTimeFormat timeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE);
 
@@ -175,27 +175,46 @@ public class MapPositionRenderer {
         }
     }
 
-    public void showAlert(List<Position> positions) {
-        for (VectorFeature alert : alerts) {
+    public void showAlerts(List<Position> positions) {
+        for (VectorFeature alert : alertMap.values()) {
             getVectorLayer().removeFeature(alert);
             alert.destroy();
         }
-        alerts.clear();
+        alertMap.clear();
 
         if (positions != null) {
             for (Position position : positions) {
-                int iconWidthHalf = position.getIconType().getWidth() / 2;
-                int iconHeight = position.getIconType().getHeight();
+                drawAlert(position);
+            }
+        }
+    }
 
-                Style alertCircleStyle = new org.gwtopenmaps.openlayers.client.Style();
-                alertCircleStyle.setPointRadius(Math.sqrt(iconWidthHalf * iconWidthHalf + iconHeight * iconHeight) + 1);
-                alertCircleStyle.setFillOpacity(0d);
-                alertCircleStyle.setStrokeWidth(2d);
-                alertCircleStyle.setStrokeColor("#ff0000");
+    private void drawAlert(Position position) {
+        int iconWidthHalf = position.getIconType().getWidth() / 2;
+        int iconHeight = position.getIconType().getHeight();
 
-                VectorFeature alertCircle = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), alertCircleStyle);
-                getVectorLayer().addFeature(alertCircle);
-                alerts.add(alertCircle);
+        Style alertCircleStyle = new org.gwtopenmaps.openlayers.client.Style();
+        alertCircleStyle.setPointRadius(Math.sqrt(iconWidthHalf * iconWidthHalf + iconHeight * iconHeight) + 1);
+        alertCircleStyle.setFillOpacity(0d);
+        alertCircleStyle.setStrokeWidth(2d);
+        alertCircleStyle.setStrokeColor("#ff0000");
+
+        VectorFeature alertCircle = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), alertCircleStyle);
+        getVectorLayer().addFeature(alertCircle);
+        alertMap.put(position.getDevice().getId(), alertCircle);
+    }
+
+    public void updateAlert(Device device, boolean show) {
+        VectorFeature alert = alertMap.remove(device.getId());
+        if (alert != null) {
+            getVectorLayer().removeFeature(alert);
+            alert.destroy();
+        }
+        if (show) {
+            Long latestPositionId = deviceMap.get(device.getId());
+            Position latestPosition = positionMap.get(latestPositionId);
+            if (latestPosition != null) {
+                drawAlert(latestPosition);
             }
         }
     }

@@ -173,6 +173,14 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                     public void onSuccess(Device result) {
                         deviceStore.update(result);
                         mapController.updateIcon(result);
+                        boolean showAlert = false;
+                        for (Maintenance maintenance : result.getMaintenances()) {
+                            if (result.getOdometer() >= maintenance.getLastService() + maintenance.getServiceInterval()) {
+                                showAlert = true;
+                                break;
+                            }
+                        }
+                        mapController.updateAlert(result, showAlert);
                     }
                     @Override
                     public void onFailure(Throwable caught) {
