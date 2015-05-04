@@ -27,11 +27,14 @@ import org.gwtopenmaps.openlayers.client.event.EventObject;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.LineString;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
+import org.gwtopenmaps.openlayers.client.geometry.Polygon;
 import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.traccar.web.client.ArchiveStyle;
+import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.Position;
 
 public class MapPositionRenderer {
@@ -108,6 +111,7 @@ public class MapPositionRenderer {
 
     private List<VectorFeature> tracks = new ArrayList<VectorFeature>();
     private List<VectorFeature> labels = new ArrayList<VectorFeature>();
+    private List<VectorFeature> alerts = new ArrayList<VectorFeature>();
 
     private final DateTimeFormat timeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE);
 
@@ -168,6 +172,31 @@ public class MapPositionRenderer {
             final VectorFeature point = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), st);
             getVectorLayer().addFeature(point);
             labels.add(point);
+        }
+    }
+
+    public void showAlert(List<Position> positions) {
+        for (VectorFeature alert : alerts) {
+            getVectorLayer().removeFeature(alert);
+            alert.destroy();
+        }
+        alerts.clear();
+
+        if (positions != null) {
+            for (Position position : positions) {
+                int iconWidthHalf = position.getIconType().getWidth() / 2;
+                int iconHeight = position.getIconType().getHeight();
+
+                Style alertCircleStyle = new org.gwtopenmaps.openlayers.client.Style();
+                alertCircleStyle.setPointRadius(Math.sqrt(iconWidthHalf * iconWidthHalf + iconHeight * iconHeight) + 1);
+                alertCircleStyle.setFillOpacity(0d);
+                alertCircleStyle.setStrokeWidth(2d);
+                alertCircleStyle.setStrokeColor("#ff0000");
+
+                VectorFeature alertCircle = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), alertCircleStyle);
+                getVectorLayer().addFeature(alertCircle);
+                alerts.add(alertCircle);
+            }
         }
     }
 

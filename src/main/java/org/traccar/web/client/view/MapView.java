@@ -231,6 +231,10 @@ public class MapView {
         latestPositionRenderer.showDeviceName(positions);
     }
 
+    public void showAlert(List<Position> positions) {
+        latestPositionRenderer.showAlert(positions);
+    }
+
     public void showLatestTrackPositions(List<Position> positions) {
         latestPositionTrackRenderer.showTrackPositions(positions);
     }

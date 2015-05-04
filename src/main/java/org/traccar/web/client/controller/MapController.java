@@ -29,15 +29,9 @@ import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.view.MapView;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.GeoFence;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MapController implements ContentController, MapView.MapHandler {
     private final static Messages i18n = GWT.create(Messages.class);
@@ -112,16 +106,19 @@ public class MapController implements ContentController, MapView.MapHandler {
             @Override
             public void onSuccess(List<Position> result) {
                 /**
-                 * Set up icon and 'idle since'
+                 * Set up icon, 'idle since' and calculate alerts
                  */
+                List<Position> alerts = null;
                 long currentTime = System.currentTimeMillis();
                 for (Position position : result) {
                     Device device = position.getDevice();
+                    // update status and icon
                     boolean isOffline = currentTime - position.getTime().getTime() > position.getDevice().getTimeout() * 1000;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
                     position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
+                    // check 'idle since'
                     if (position.getSpeed() != null) {
-                        if (position.getSpeed().doubleValue() > position.getDevice().getIdleSpeedThreshold()) {
+                        if (position.getSpeed() > position.getDevice().getIdleSpeedThreshold()) {
                             latestNonIdlePositionMap.put(device.getId(), position);
                         } else {
                             Position latestNonIdlePosition = latestNonIdlePositionMap.get(device.getId());
@@ -132,11 +129,22 @@ public class MapController implements ContentController, MapView.MapHandler {
                     }
                     device = deviceStore.findModelWithKey(Long.toString(device.getId()));
                     device.setOdometer(position.getDistance());
+                    // check maintenances
+                    if (device.getMaintenances() != null) {
+                        for (Maintenance maintenance : device.getMaintenances()) {
+                            if (maintenance.getLastService() + maintenance.getServiceInterval() >= device.getOdometer()) {
+                                if (alerts == null) alerts = new LinkedList<Position>();
+                                alerts.add(position);
+                                break;
+                            }
+                        }
+                    }
                 }
                 /**
                  * Draw positions
                  */
                 mapView.showLatestPositions(result);
+                mapView.showAlert(alerts);
                 mapView.showDeviceName(result);
                 /**
                  * Follow positions and draw track if necessary
