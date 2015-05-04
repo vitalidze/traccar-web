@@ -24,7 +24,6 @@ import com.google.inject.persist.PersistService;
 import com.google.inject.persist.jpa.JpaPersistModule;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.traccar.web.client.Traccar;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
 import org.traccar.web.shared.model.*;
@@ -35,6 +34,7 @@ import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -86,6 +86,7 @@ public class DataServiceTest {
         Device device = new Device();
         device.setUniqueId("1");
         device.setName("D1");
+        device.setMaintenances(Collections.<Maintenance>emptyList());
         device = dataService.addDevice(device);
 
         GeoFence geoFence = new GeoFence();
