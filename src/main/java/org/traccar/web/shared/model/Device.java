@@ -179,6 +179,7 @@ public class Device implements IsSerializable {
     }
 
     // contains current odometer value in kilometers
+    @Column(nullable = true)
     private double odometer;
 
     public double getOdometer() {
@@ -190,6 +191,7 @@ public class Device implements IsSerializable {
     }
 
     // indicates that odometer must be updated automatically by positions history
+    @Column(nullable = true)
     private boolean autoUpdateOdometer;
 
     public boolean isAutoUpdateOdometer() {

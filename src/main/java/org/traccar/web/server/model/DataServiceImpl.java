@@ -552,7 +552,6 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 }
             }
         }
-        // TODO: check on H2 database
         return positions;
     }
 

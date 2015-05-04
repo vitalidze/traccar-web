@@ -33,6 +33,7 @@ public class DBMigrations {
                 new SetReadOnlyFlag(),
                 new AddDefaultNotifications(),
                 new SetDefaultDeviceTimeout(),
+                new SetDefaultDeviceOdometer(),
                 new SetDefaultIdleSpeedThreshold(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
                 new SetDefaultEventRecordingEnabled(),
@@ -277,6 +278,19 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.language = :b WHERE S.language IS NULL")
                     .setParameter("b", "default")
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultDeviceOdometer implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.odometer = :o WHERE D.odometer IS NULL OR D.odometer <= 0")
+                    .setParameter("o", 0d)
+                    .executeUpdate();
+
+            em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.autoUpdateOdometer = :b WHERE D.autoUpdateOdometer IS NULL")
+                    .setParameter("b", Boolean.FALSE)
                     .executeUpdate();
         }
     }
