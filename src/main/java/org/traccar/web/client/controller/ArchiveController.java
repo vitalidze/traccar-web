@@ -48,8 +48,6 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
 
     private final FilterDialog.FilterSettingsHandler filterSettingsHandler;
 
-    private final Map<Long, List<Position>> positionArchives; // Device.id <-> position archive
-
     private final ArchiveView archiveView;
 
     private final Messages i18n = GWT.create(Messages.class);
@@ -57,7 +55,6 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     public ArchiveController(ArchiveHandler archiveHandler, FilterDialog.FilterSettingsHandler filterSettingsHandler, ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;
         this.filterSettingsHandler = filterSettingsHandler;
-        this.positionArchives = new HashMap<Long, List<Position>>();
         this.archiveView = new ArchiveView(this, deviceStore);
     }
 
@@ -94,7 +91,6 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
                             }
                         }
                     }
-                    positionArchives.put(device.getId(), result);
                     archiveHandler.onDrawTrack(new Track(result, style));
                     archiveView.showPositions(device, result);
                 }
@@ -107,7 +103,6 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     @Override
     public void onClear(Device device) {
         archiveHandler.onClear(device);
-        positionArchives.remove(device.getId());
     }
 
     @Override

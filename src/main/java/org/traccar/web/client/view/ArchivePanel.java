@@ -22,7 +22,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.NumberCell;
-import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.loader.*;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -33,7 +32,6 @@ import com.sencha.gxt.widget.core.client.grid.LiveGridView;
 import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.PositionProperties;
 import org.traccar.web.client.state.GridStateHandler;
 import org.traccar.web.shared.model.Position;
@@ -73,7 +71,7 @@ public class ArchivePanel {
     @UiField(provided = true)
     final Messages i18n = GWT.create(Messages.class);
 
-    private final PagingLoader<PagingLoadConfig, PagingLoadResult<Position>> loader;
+    final PagingLoader<PagingLoadConfig, PagingLoadResult<Position>> loader;
     private final PagingMemoryProxy memoryProxy;
 
     static class PagingMemoryProxy extends MemoryProxy<PagingLoadConfig, PagingLoadResult<Position>> {
@@ -136,6 +134,13 @@ public class ArchivePanel {
         memoryProxy = new PagingMemoryProxy();
         loader = new PagingLoader<PagingLoadConfig, PagingLoadResult<Position>>(memoryProxy);
         loader.setRemoteSort(true);
+        loader.addLoadHandler(new LoadHandler<PagingLoadConfig, PagingLoadResult<Position>>() {
+            @Override
+            public void onLoad(LoadEvent<PagingLoadConfig, PagingLoadResult<Position>> event) {
+                view.getHeader().refresh();
+            }
+        });
+
         grid.setLoader(loader);
 
         new GridStateHandler<Position>(grid).loadState();

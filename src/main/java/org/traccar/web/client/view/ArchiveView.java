@@ -308,17 +308,15 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     public void selectDevice(Device device) {
         deviceCombo.setValue(device, false);
-        ArchivePanel panel = archivePanels.get(device.getId());
-        if (panel != null) {
-            devicesTabs.setActiveWidget(panel.getContentPanel());
-        }
     }
 
     public void showPositions(Device device, List<Position> positions) {
-        getArchivePanel(device).setPositions(positions);
+        ArchivePanel panel = getArchivePanel(device);
+        devicesTabs.setActiveWidget(panel.getContentPanel());
+        panel.setPositions(positions);
     }
 
-    ArchivePanel getArchivePanel(Device device) {
+    private ArchivePanel getArchivePanel(Device device) {
         ArchivePanel panel = archivePanels.get(device.getId());
         if (panel == null) {
             panel = new ArchivePanel();

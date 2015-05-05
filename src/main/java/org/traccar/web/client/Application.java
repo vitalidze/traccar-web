@@ -111,7 +111,7 @@ public class Application {
 
         @Override
         public void onClear(Device device) {
-            // TODO
+            mapController.clearArchive(device);
         }
 
         @Override
