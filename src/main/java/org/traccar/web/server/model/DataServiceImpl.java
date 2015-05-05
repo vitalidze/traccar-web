@@ -423,6 +423,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
         }
 
+        queryString += " ORDER BY x.time";
+
         TypedQuery<Position> query = entityManager.createQuery(queryString, Position.class);
         query.setParameter("device", device);
         query.setParameter("from", from);
@@ -453,7 +455,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             if (add) positions.add(queryResult.get(i));
         }
-        return positions;
+        return new ArrayList<Position>(positions);
     }
 
     @RequireUser

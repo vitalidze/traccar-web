@@ -16,14 +16,16 @@
 package org.traccar.web.client.controller;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.ArchiveStyle;
+import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
-import org.traccar.web.client.model.PositionProperties;
 import org.traccar.web.client.view.ArchiveView;
 import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.shared.model.Device;
@@ -37,29 +39,26 @@ import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 public class ArchiveController implements ContentController, ArchiveView.ArchiveHandler {
 
     public interface ArchiveHandler {
-        public void onSelected(Position position);
+        void onSelected(Position position);
+        void onClear(Device device);
+        void onDrawTrack(Track track);
     }
 
     private final ArchiveHandler archiveHandler;
 
     private final FilterDialog.FilterSettingsHandler filterSettingsHandler;
 
-    private ListStore<Position> positionStore;
+    private final Map<Long, List<Position>> positionArchives; // Device.id <-> position archive
 
-    private ArchiveView archiveView;
+    private final ArchiveView archiveView;
 
-    private Messages i18n = GWT.create(Messages.class);
+    private final Messages i18n = GWT.create(Messages.class);
 
     public ArchiveController(ArchiveHandler archiveHandler, FilterDialog.FilterSettingsHandler filterSettingsHandler, ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;
         this.filterSettingsHandler = filterSettingsHandler;
-        PositionProperties positionProperties = GWT.create(PositionProperties.class);
-        positionStore = new ListStore<Position>(positionProperties.id());
-        archiveView = new ArchiveView(this, positionStore, deviceStore);
-    }
-
-    public ListStore<Position> getPositionStore() {
-        return positionStore;
+        this.positionArchives = new HashMap<Long, List<Position>>();
+        this.archiveView = new ArchiveView(this, deviceStore);
     }
 
     @Override
@@ -82,7 +81,7 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
             Application.getDataService().getPositions(device, from, to, filter, new BaseAsyncCallback<List<Position>>(i18n) {
                 @Override
                 public void onSuccess(List<Position> result) {
-                    positionStore.clear();
+                    archiveHandler.onClear(device);
                     if (result.isEmpty()) {
                         new AlertMessageBox(i18n.error(), i18n.errNoResults()).show();
                     } else {
@@ -94,8 +93,10 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
                                 position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
                             }
                         }
-                        positionStore.addAll(result);
                     }
+                    positionArchives.put(device.getId(), result);
+                    archiveHandler.onDrawTrack(new Track(result, style));
+                    archiveView.showPositions(device, result);
                 }
             });
         } else {
@@ -104,8 +105,9 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     }
 
     @Override
-    public void onClear() {
-        positionStore.clear();
+    public void onClear(Device device) {
+        archiveHandler.onClear(device);
+        positionArchives.remove(device.getId());
     }
 
     @Override
@@ -119,9 +121,5 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
 
     public void selectDevice(Device device) {
         archiveView.selectDevice(device);
-    }
-
-    public ArchiveStyle getStyle() {
-        return archiveView.style;
     }
 }
