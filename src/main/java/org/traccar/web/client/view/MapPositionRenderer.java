@@ -212,8 +212,8 @@ public class MapPositionRenderer {
     }
 
     public void showDeviceName(List<Position> positions) {
-        DeviceData deviceData = getDeviceData(positions);
         for (Position position : positions) {
+            DeviceData deviceData = getDeviceData(position.getDevice());
             org.gwtopenmaps.openlayers.client.Style st = new org.gwtopenmaps.openlayers.client.Style();
             st.setLabel(position.getDevice().getName());
             st.setLabelXOffset(0);
