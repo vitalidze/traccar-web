@@ -107,13 +107,17 @@ public class MapPositionRenderer {
         VectorFeature title;
         List<VectorFeature> tracks = new ArrayList<VectorFeature>();
         List<VectorFeature> labels = new ArrayList<VectorFeature>();
+
+        Position getLatestPosition() {
+            return positions == null || positions.isEmpty() ? null : positions.get(positions.size() - 1);
+        }
     }
 
     private Map<Long, DeviceData> deviceMap = new HashMap<Long, DeviceData>(); // Device.id -> Device Data
 
     private final DateTimeFormat timeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE);
 
-    private Long selectedPositionId;
+    private Position selectedPosition;
     private Long selectedDeviceId;
 
     private DeviceData getDeviceData(List<Position> positions) {
@@ -121,10 +125,17 @@ public class MapPositionRenderer {
     }
 
     private DeviceData getDeviceData(Device device) {
-        DeviceData deviceData = deviceMap.get(device.getId());
+        return getDeviceData(device.getId());
+    }
+
+    private DeviceData getDeviceData(Long deviceId) {
+        if (deviceId == null) {
+            return null;
+        }
+        DeviceData deviceData = deviceMap.get(deviceId);
         if (deviceData == null) {
             deviceData = new DeviceData();
-            deviceMap.put(device.getId(), deviceData);
+            deviceMap.put(deviceId, deviceData);
         }
         return deviceData;
     }
@@ -187,15 +198,13 @@ public class MapPositionRenderer {
             getMarkerLayer().addMarker(marker);
         }
 
-        if (selectedPositionId != null) {
-            if (!selectPosition(null, selectedPositionId, false)) {
-                selectedPositionId = null;
-            }
+        if (!selectPosition(null, selectedPosition, false)) {
+            this.selectedPosition = null;
         }
 
         if (positions.size() == 1) {
             if (selectedDeviceId != null && selectedDeviceId.equals(positions.get(0).getDevice().getId())) {
-                if (!selectPosition(null, positions.get(0).getId(), false)) {
+                if (!selectPosition(null, positions.get(0), false)) {
                     selectedDeviceId = null;
                 }
             }
@@ -264,40 +273,43 @@ public class MapPositionRenderer {
     }
 
     public void selectPosition(Position position, boolean center) {
-        Long oldPositionId = selectedPositionId;
-        Long newPositionId = (position != null) ? position.getId() : null;
-        if (selectPosition(oldPositionId, newPositionId, center)) {
-            selectedPositionId = position.getId();
+        if (selectPosition(selectedPosition, position, center)) {
+            selectedPosition = position;
         } else {
-            selectedPositionId = null;
+            selectedPosition = null;
         }
     }
 
     public void selectDevice(Device device, boolean center) {
-//         TODO
-//        Long oldPositionId = (selectedDeviceId != null) ? deviceMap.get(selectedDeviceId) : null;
-//        Long newPositionId = (device != null) ? deviceMap.get(device.getId()) : null;
-//        if (selectPosition(oldPositionId, newPositionId, center)) {
-//            selectedDeviceId = device.getId();
-//        } else {
-//            selectedDeviceId = null;
-//        }
+        DeviceData oldDeviceData = getDeviceData(selectedDeviceId);
+        Position oldPosition = oldDeviceData == null ? null : oldDeviceData.getLatestPosition();
+
+        DeviceData newDeviceData = getDeviceData(device);
+        Position newPosition = newDeviceData == null ? null : newDeviceData.getLatestPosition();
+        if (selectPosition(oldPosition, newPosition, center)) {
+            selectedDeviceId = device.getId();
+        } else {
+            selectedDeviceId = null;
+        }
     }
 
-    private boolean selectPosition(Long oldPositionId, Long newPositionId, boolean center) {
-//        TODO
-//        if (oldPositionId != null && markerMap.containsKey(oldPositionId)) {
-//            Position oldPosition = positionMap.get(oldPositionId);
-//            changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getIconType(), false));
-//        }
-//        if (newPositionId != null && markerMap.containsKey(newPositionId)) {
-//            Position newPosition = positionMap.get(newPositionId);
-//            changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getIconType(), true));
-//            if (center) {
-//                mapView.getMap().panTo(markerMap.get(newPositionId).getLonLat());
-//            }
-//            return true;
-//        }
+    private boolean selectPosition(Position oldPosition, Position newPosition, boolean center) {
+        if (oldPosition != null) {
+            DeviceData deviceData = getDeviceData(oldPosition.getDevice());
+            if (deviceData.markerMap.containsKey(oldPosition.getId())) {
+                changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getIconType(), false));
+            }
+        }
+        if (newPosition != null) {
+            DeviceData deviceData = getDeviceData(newPosition.getDevice());
+            if (deviceData.markerMap.containsKey(newPosition.getId())) {
+                changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getIconType(), true));
+                if (center) {
+                    mapView.getMap().panTo(deviceData.markerMap.get(newPosition.getId()).getLonLat());
+                }
+                return true;
+            }
+        }
         return false;
     }
 
@@ -333,7 +345,7 @@ public class MapPositionRenderer {
         if (position != null) {
             position.setDevice(device);
             position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
-            boolean selected = selectedPositionId != null && selectedPositionId.equals(position.getId());
+            boolean selected = selectedPosition != null && selectedPosition.getId() == position.getId();
             changeMarkerIcon(position, MarkerIconFactory.getIcon(position.getIconType(), selected));
         }
     }

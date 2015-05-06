@@ -319,7 +319,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     private ArchivePanel getArchivePanel(Device device) {
         ArchivePanel panel = archivePanels.get(device.getId());
         if (panel == null) {
-            panel = new ArchivePanel();
+            panel = new ArchivePanel(archiveHandler);
             archivePanels.put(device.getId(), panel);
             devicesTabs.add(panel.getContentPanel(), new TabItemConfig(device.getName(), true));
         }

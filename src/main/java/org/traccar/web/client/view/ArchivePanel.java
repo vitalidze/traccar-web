@@ -22,6 +22,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.NumberCell;
+import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.loader.*;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -29,6 +30,7 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.LiveGridView;
+import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
@@ -41,7 +43,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ArchivePanel {
+public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandler<Position> {
     private static ArchivePanelUiBinder uiBinder = GWT.create(ArchivePanelUiBinder.class);
 
     interface ArchivePanelUiBinder extends UiBinder<Widget, ArchivePanel> {
@@ -73,6 +75,7 @@ public class ArchivePanel {
 
     final PagingLoader<PagingLoadConfig, PagingLoadResult<Position>> loader;
     private final PagingMemoryProxy memoryProxy;
+    final ArchiveView.ArchiveHandler archiveHandler;
 
     static class PagingMemoryProxy extends MemoryProxy<PagingLoadConfig, PagingLoadResult<Position>> {
         List<Position> positions = Collections.emptyList();
@@ -91,7 +94,9 @@ public class ArchivePanel {
         }
     }
 
-    public ArchivePanel() {
+    public ArchivePanel(ArchiveView.ArchiveHandler archiveHandler) {
+        this.archiveHandler = archiveHandler;
+
         PositionProperties positionProperties = GWT.create(PositionProperties.class);
 
         this.positionStore = new ListStore<Position>(positionProperties.id());
@@ -145,9 +150,8 @@ public class ArchivePanel {
 
         new GridStateHandler<Position>(grid).loadState();
 
-//        TODO
-//        grid.getSelectionModel().addSelectionChangedHandler(this);
-//        grid.getSelectionModel().setSelectionMode(Style.SelectionMode.SINGLE);
+        grid.getSelectionModel().addSelectionChangedHandler(this);
+        grid.getSelectionModel().setSelectionMode(Style.SelectionMode.SINGLE);
     }
 
     void updateTotals(List<Position> positions) {
@@ -175,5 +179,14 @@ public class ArchivePanel {
 
     public void selectPosition(Position position) {
         grid.getSelectionModel().select(position, false);
+    }
+
+    @Override
+    public void onSelectionChanged(SelectionChangedEvent<Position> event) {
+        if (event.getSelection().isEmpty()) {
+            archiveHandler.onSelected(null);
+        } else {
+            archiveHandler.onSelected(event.getSelection().get(0));
+        }
     }
 }
