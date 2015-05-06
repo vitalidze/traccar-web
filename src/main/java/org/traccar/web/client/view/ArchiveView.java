@@ -24,6 +24,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
+import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
 import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
@@ -291,7 +292,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         @Override
         public void onAnything() {
-            // TODO update tab name when device name changes
             Device oldDevice = deviceCombo.getValue();
             if (oldDevice != null) {
                 deviceCombo.setValue(deviceStore.findModel(oldDevice));
@@ -300,6 +300,20 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
             }
         }
 
+        @Override
+        public void onUpdate(StoreUpdateEvent<Device> event) {
+            super.onUpdate(event);
+            if (event.getItems() != null) {
+                for (Device device : event.getItems()) {
+                    ArchivePanel panel = archivePanels.get(device.getId());
+                    if (panel != null) {
+                        TabItemConfig config = devicesTabs.getConfig(panel.getContentPanel());
+                        config.setText(device.getName());
+                        devicesTabs.update(panel.getContentPanel(), config);
+                    }
+                }
+            }
+        }
     };
 
     public void selectPosition(Position position) {
