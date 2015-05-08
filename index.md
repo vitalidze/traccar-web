@@ -3,7 +3,7 @@ layout: default
 title: About
 ---
 
-##### Project info
+### Project info
 
 Web interface for [traccar](http://www.traccar.org) server.
 
@@ -15,7 +15,7 @@ Author: Vitaly Litvak (<vitavaque@gmail.com>)
 
 Github project: [https://github.com/vitalidze/traccar-web](https://github.com/vitalidze/traccar-web)
 
-##### License
+### License
 
 Apache License, Version 2.0
 
@@ -31,7 +31,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-##### Original project
+### Original project
 
 Web page - [http://www.traccar.org](http://www.traccar.org)
 
