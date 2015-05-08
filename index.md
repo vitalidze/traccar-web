@@ -7,11 +7,22 @@ Web interface for [traccar](http://www.traccar.org) server.
 
 This is the modified version of [original project](https://github.com/tananaev/traccar-web) (also called "fork") with many [features](/features/) added.
 
+Web page - [http://traccar.litvak.su](http://traccar.litvak.su)
+
+Author: Vitaly Litvak (<vitavaque@gmail.com>)
+
+Github project: [https://github.com/vitalidze/traccar-web](https://github.com/vitalidze/traccar-web)
+
+## Original project
+
 Web page - [http://www.traccar.org](http://www.traccar.org)
 
-Github project - [https://github.com/vitalidze/traccar-web](https://github.com/vitalidze/traccar-web)
+Github projects:
 
-Authors: Anton Tananaev (<anton.tananaev@gmail.com>), Vitaly Litvak (<vitavaque@gmail.com>)
+* [https://github.com/trananaev/traccar-web](https://github.com/tananaev/traccar-web)
+* [https://github.com/tananaev/traccar](https://github.com/tananaev/traccar)
+
+Author: Anton Tananaev (<anton.tananaev@gmail.com>)
 
 ## License
 
