@@ -26,6 +26,33 @@ var i18n = {
         course: 'Course',
         address: 'Address'
     },
+    bg: {
+        _name_: 'Български',
+        // login screen
+        language: 'Език',
+        username: 'Потребител',
+        password: 'Парола',
+        your_username: 'Потребителско име',
+        your_password: 'Вашата парола',
+        sign_in: 'Вход',
+        user_name_and_password_must_not_be_empty: 'Потребителското име или парола не може да са празни',
+        user_name_or_password_is_invalid: 'Грешен потребител или парола',
+        unexpected_error: 'Неочаквана грешка',
+        open_desktop_version: 'Отвори Десктоп версията',
+        // sidebar
+        devices: 'Обекти',
+        logout: 'Изход',
+        // device details
+        select_on_map: 'Избери на картата',
+        no_data_available: 'Няма данни',
+        time: 'Време',
+        latitude: 'Ширина',
+        longitude: 'Дължина',
+        altitude: 'Височина',
+        speed: 'Скорост',
+        course: 'Курс',
+        address: 'Адрес'
+    },
     de: {
         _name_: 'German',
         // login screen
