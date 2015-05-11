@@ -126,6 +126,7 @@ public class MapPositionRenderer {
             this.mapView = mapView;
             this.vectorLayer = vectorLayer;
             this.mouseHandler = mouseHandler;
+            mapView.getMap().getEvents().register("mousemove", mapView.getMap(), this);
         }
 
         @Override
@@ -206,6 +207,16 @@ public class MapPositionRenderer {
                 pointStyle.setFillOpacity(1d);
             }
             return pointStyle;
+        }
+
+        void destroy() {
+            mapView.getMap().getEvents().unregister("mousemove", mapView.getMap(), this);
+            if (feature != null) {
+                vectorLayer.removeFeature(feature);
+                feature.destroy();
+                feature = null;
+                position = null;
+            }
         }
     }
 
@@ -401,11 +412,10 @@ public class MapPositionRenderer {
         if (snap) {
             if (deviceData.snappingHandler == null) {
                 deviceData.snappingHandler = new SnappingHandler(deviceData, mapView, getVectorLayer(), mouseHandler);
-                mapView.getMap().getEvents().register("mousemove", mapView.getMap(), deviceData.snappingHandler);
             }
         } else {
             if (deviceData.snappingHandler != null) {
-                mapView.getMap().getEvents().unregister("mousemove", mapView.getMap(), deviceData.snappingHandler);
+                deviceData.snappingHandler.destroy();
                 deviceData.snappingHandler = null;
             }
         }
