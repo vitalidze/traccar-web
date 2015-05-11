@@ -22,6 +22,7 @@ This project has following features, which don't exist in original `traccar-web`
     * [lithuanian language](lithuanian.html) (available via ?locale=lt URL parameter)
     * [dutch language](dutch.html) (available via ?locale=nl URL parameter)
     * [swedish language](swedish.html) (available via ?locale=sv_SE URL parameter)
+    * [bulgarian language](bulgarian.html) (available via ?locale=bg URL parameter)
 * 'show server log' menu for viewing tracker-server.log file on Web
 * [archive filtering](archive-filtering.html)
 * change default map center position, zoom, provider (Google, OSM, Bing) (in Settings >> Preferences)
