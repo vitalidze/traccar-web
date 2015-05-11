@@ -18,6 +18,8 @@ package org.traccar.web.client.view;
 import com.google.gwt.cell.client.DateCell;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
@@ -142,7 +144,16 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
         loader.addLoadHandler(new LoadHandler<PagingLoadConfig, PagingLoadResult<Position>>() {
             @Override
             public void onLoad(LoadEvent<PagingLoadConfig, PagingLoadResult<Position>> event) {
-                view.getHeader().refresh();
+                view.setForceFit(true);
+                view.refresh();
+            }
+        });
+
+        grid.addResizeHandler(new ResizeHandler() {
+            @Override
+            public void onResize(ResizeEvent event) {
+                visible = event.getHeight() > 16;
+                initialize();
             }
         });
 
@@ -173,7 +184,8 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
 
     public void setPositions(List<Position> positions) {
         memoryProxy.setPositions(positions);
-        loader.load(0, view.getCacheSize());
+        initialized = false;
+        initialize();
         updateTotals(positions);
     }
 
@@ -187,6 +199,15 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
             archiveHandler.onSelected(null);
         } else {
             archiveHandler.onSelected(event.getSelection().get(0));
+        }
+    }
+
+    private boolean visible;
+    private boolean initialized;
+    private void initialize() {
+        if (visible && !initialized) {
+            loader.load(0, view.getCacheSize());
+            initialized = true;
         }
     }
 }
