@@ -25,10 +25,7 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.view.MapView;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.GeoFence;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -185,8 +182,17 @@ public class MapController implements ContentController, MapView.MapHandler {
     }
 
     public void showArchivePositions(Track track) {
+        List<Position> positions = track.getPositions();
+        for (Position position : positions) {
+            position.setIconType(position.getIconType() == null ? PositionIconType.dotArchive : track.getStyle().getIconType());
+        }
         mapView.showArchiveTrack(track);
-        mapView.showArchivePositions(track);
+
+        if (track.getStyle().getIconType() == null) {
+            mapView.setArchiveSnapToTrack(positions);
+        } else {
+            mapView.showArchivePositions(positions);
+        }
         List<Position> withTime = track.getTimePositions(ApplicationContext.getInstance().getUserSettings().getTimePrintInterval());
         mapView.showArchiveTime(withTime);
     }

@@ -252,8 +252,14 @@ public class MapView {
         archivePositionRenderer.showTrack(track);
     }
 
-    public void showArchivePositions(Track track) {
-        archivePositionRenderer.showPositions(track.getPositions());
+    public void showArchivePositions(List<Position> positions) {
+        archivePositionRenderer.showPositions(positions);
+    }
+
+    public void setArchiveSnapToTrack(List<Position> positions) {
+        if (!positions.isEmpty()) {
+            archivePositionRenderer.setSnapToTrack(positions.get(0).getDevice(), true);
+        }
     }
 
     public void showArchiveTime(List<Position> positions) {

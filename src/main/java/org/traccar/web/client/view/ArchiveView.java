@@ -166,6 +166,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
             final PositionIconType iconType = (PositionIconType) obj[1];
             item.setGroup("markers");
             item.setChecked(iconType == ApplicationContext.getInstance().getUserSettings().getArchiveMarkerType());
+            if (item.isChecked()) {
+                style.setIconType(iconType);
+            }
             item.addSelectionHandler(new SelectionHandler<Item>() {
                 @Override
                 public void onSelection(SelectionEvent<Item> event) {

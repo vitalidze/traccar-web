@@ -56,7 +56,7 @@ public enum PositionIconType {
     phoneLatest("phone-green.png", "phone-red.png", 12, 20),
     phoneOffline("phone-green.png", "phone-white.png", 12, 20),
 
-    dotArchive("dot-orange.png", "dot-orange.png", 6, 7);
+    dotArchive("dot-orange.png", "dot-orange.png", 13, 14);
 
     private final String selectedURL;
     private final String notSelectedURL;
