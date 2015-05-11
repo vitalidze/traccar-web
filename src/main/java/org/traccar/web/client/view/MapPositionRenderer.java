@@ -16,10 +16,14 @@
 package org.traccar.web.client.view;
 
 import java.util.*;
+import java.util.Map;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.Icon;
+import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Marker;
+import org.gwtopenmaps.openlayers.client.Pixel;
 import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.event.EventHandler;
 import org.gwtopenmaps.openlayers.client.event.EventObject;
@@ -28,6 +32,7 @@ import org.gwtopenmaps.openlayers.client.geometry.LineString;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
+import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.client.Track;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -101,12 +106,119 @@ public class MapPositionRenderer {
         getMarkerLayer().removeMarker(oldMarker);
     }
 
+    private static class SnappingHandler extends EventHandler {
+        // minimum distance in pixels for snapping to occur
+        static final int TOLERANCE = 15;
+        final DeviceData deviceData;
+        final MapView mapView;
+        final Vector vectorLayer;
+        final MouseHandler mouseHandler;
+
+        VectorFeature feature;
+        Style pointStyle;
+        Position position;
+
+        double resolution;
+        Double cachedTolerance;
+
+        SnappingHandler(DeviceData deviceData, MapView mapView, Vector vectorLayer, MouseHandler mouseHandler) {
+            this.deviceData = deviceData;
+            this.mapView = mapView;
+            this.vectorLayer = vectorLayer;
+            this.mouseHandler = mouseHandler;
+        }
+
+        @Override
+        public void onHandle(EventObject eventObject) {
+            JSObject xy = eventObject.getJSObject().getProperty("xy");
+            Pixel px = Pixel.narrowToPixel(xy);
+            LonLat lonLat = mapView.getMap().getLonLatFromPixel(px);
+
+            Position closestPosition = null;
+            double closestSquaredDistance = 0;
+
+            double mouseX = lonLat.lon();
+            double mouseY = lonLat.lat();
+
+            LineString lineString = deviceData.trackLine;
+            // check bounds
+            Bounds bounds = lineString.getBounds();
+            if (mouseX >= bounds.getLowerLeftX() - getTolerance() && mouseX <= bounds.getUpperRightX() + getTolerance() &&
+                mouseY >= bounds.getLowerLeftY() - getTolerance() && mouseY <= bounds.getUpperRightY() + getTolerance()) {
+                // check all points
+                for (int j = 0; j < lineString.getNumberOfComponents(); j++) {
+                    JSObject jsObject = lineString.getComponent(j);
+                    double dX = jsObject.getPropertyAsDouble("x") - mouseX;
+                    double dY = jsObject.getPropertyAsDouble("y") - mouseY;
+
+                    double squaredDistance = dX * dX + dY * dY;
+                    if (closestPosition == null || squaredDistance < closestSquaredDistance) {
+                        closestPosition = deviceData.positions.get(j);
+                        closestSquaredDistance = squaredDistance;
+                    }
+                }
+            }
+
+            double distance = Math.sqrt(closestSquaredDistance);
+            if (closestPosition != null && distance < getTolerance()) {
+                LonLat posLonLat = mapView.createLonLat(closestPosition.getLongitude(), closestPosition.getLatitude());
+
+                if (feature == null) {
+                    feature = new VectorFeature(new Point(posLonLat.lon(), posLonLat.lat()), getPointStyle());
+                    vectorLayer.addFeature(feature);
+                } else {
+                    feature.move(new LonLat(posLonLat.lon(), posLonLat.lat()));
+                }
+            } else {
+                if (feature != null) {
+                    vectorLayer.removeFeature(feature);
+                    feature = null;
+                }
+            }
+
+            if (position != null &&
+                (closestPosition == null || distance > getTolerance() || closestPosition.getId() != position.getId())) {
+                mouseHandler.onMouseOut(position);
+                position = null;
+            }
+
+            if (closestPosition != null && distance < getTolerance()) {
+                position = closestPosition;
+                mouseHandler.onMouseOver(closestPosition);
+            }
+        }
+
+        /**
+         * @return tolerance in map units
+         */
+        private double getTolerance() {
+            if (cachedTolerance == null || resolution != mapView.getMap().getResolution()) {
+                resolution = mapView.getMap().getResolution();
+                cachedTolerance = TOLERANCE * resolution;
+            }
+            return cachedTolerance;
+        }
+
+        private Style getPointStyle() {
+            if (pointStyle == null) {
+                pointStyle = new Style();
+                pointStyle.setPointRadius(5d);
+                pointStyle.setFillOpacity(1d);
+            }
+            return pointStyle;
+        }
+    }
+
     private static class DeviceData {
         Map<Long, Marker> markerMap = new HashMap<Long, Marker>(); // Position.id -> Marker
         List<Position> positions;
         VectorFeature title;
-        List<VectorFeature> tracks = new ArrayList<VectorFeature>();
+        VectorFeature track;
+        LineString trackLine;
+        List<VectorFeature> trackPoints = new ArrayList<VectorFeature>();
         List<VectorFeature> labels = new ArrayList<VectorFeature>();
+
+        SnappingHandler snappingHandler;
 
         Position getLatestPosition() {
             return positions == null || positions.isEmpty() ? null : positions.get(positions.size() - 1);
@@ -165,11 +277,18 @@ public class MapPositionRenderer {
         }
         deviceData.labels.clear();
         // clear tracks
-        for (VectorFeature mapTrack : deviceData.tracks) {
-            getVectorLayer().removeFeature(mapTrack);
-            mapTrack.destroy();
+        if (deviceData.track != null) {
+            getVectorLayer().removeFeature(deviceData.track);
+            deviceData.track.destroy();
         }
-        deviceData.tracks.clear();
+        deviceData.track = null;
+        deviceData.trackLine = null;
+        for (VectorFeature trackPoint : deviceData.trackPoints) {
+            getVectorLayer().removeFeature(trackPoint);
+            trackPoint.destroy();
+        }
+        deviceData.trackPoints.clear();
+        setSnapToTrack(deviceData, false);
     }
 
     public void clearPositionsAndTitles() {
@@ -263,12 +382,32 @@ public class MapPositionRenderer {
             Style style = mapView.getVectorLayer().getStyle();
             style.setStrokeColor("#" + track.getStyle().getTrackColor());
 
-            LineString lineString = new LineString(linePoints);
+            final LineString lineString = new LineString(linePoints);
             VectorFeature mapTrack = new VectorFeature(lineString, style);
             getVectorLayer().addFeature(mapTrack);
-            deviceData.tracks.add(mapTrack);
+            deviceData.track = mapTrack;
+            deviceData.trackLine = lineString;
+            deviceData.positions = positions;
             if (track.getStyle().getZoomToTrack())
                 mapView.getMap().zoomToExtent(lineString.getBounds());
+        }
+    }
+
+    public void setSnapToTrack(Device device, boolean snap) {
+        setSnapToTrack(getDeviceData(device), snap);
+    }
+
+    private void setSnapToTrack(DeviceData deviceData, boolean snap) {
+        if (snap) {
+            if (deviceData.snappingHandler == null) {
+                deviceData.snappingHandler = new SnappingHandler(deviceData, mapView, getVectorLayer(), mouseHandler);
+                mapView.getMap().getEvents().register("mousemove", mapView.getMap(), deviceData.snappingHandler);
+            }
+        } else {
+            if (deviceData.snappingHandler != null) {
+                mapView.getMap().getEvents().unregister("mousemove", mapView.getMap(), deviceData.snappingHandler);
+                deviceData.snappingHandler = null;
+            }
         }
     }
 
@@ -324,7 +463,7 @@ public class MapPositionRenderer {
         for (Position position : positions) {
             VectorFeature point = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), getTrackPointStyle());
             getVectorLayer().addFeature(point);
-            deviceData.tracks.add(point);
+            deviceData.trackPoints.add(point);
         }
     }
 
