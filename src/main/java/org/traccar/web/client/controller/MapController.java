@@ -184,7 +184,7 @@ public class MapController implements ContentController, MapView.MapHandler {
     public void showArchivePositions(Track track) {
         List<Position> positions = track.getPositions();
         for (Position position : positions) {
-            position.setIconType(position.getIconType() == null ? PositionIconType.dotArchive : track.getStyle().getIconType());
+            position.setIconType(track.getStyle().getIconType() == null ? PositionIconType.dotArchive : track.getStyle().getIconType());
         }
         mapView.showArchiveTrack(track);
 
