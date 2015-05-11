@@ -70,7 +70,6 @@ public class MapView {
     private Vector vectorLayer;
     private Markers markerLayer;
     private Vector geofenceLayer;
-    private Vector archiveLayer;
 
     private Messages i18n = GWT.create(Messages.class);
 
@@ -88,10 +87,6 @@ public class MapView {
 
     public Markers getMarkerLayer() {
         return markerLayer;
-    }
-
-    public Vector getArchiveLayer() {
-        return archiveLayer;
     }
 
     public LonLat createLonLat(double longitude, double latitude) {
