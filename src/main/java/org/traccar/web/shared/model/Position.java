@@ -47,7 +47,7 @@ public class Position implements IsSerializable, Cloneable {
     private static final long serialVersionUID = 1;
 
     public enum Status {
-        ARCHIVE, OFFLINE, LATEST;
+        OFFLINE, LATEST;
     }
 
     public Position() {

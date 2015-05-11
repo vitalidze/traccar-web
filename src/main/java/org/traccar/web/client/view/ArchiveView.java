@@ -67,6 +67,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         void onLoad(Device device, Date from, Date to, boolean filter, ArchiveStyle style);
         void onFilterSettings();
         void onClear(Device device);
+        void onChangeArchiveMarkerType(PositionIconType newMarkerType);
     }
 
     private ArchiveHandler archiveHandler;
@@ -121,7 +122,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public ArchiveView(ArchiveHandler archiveHandler, ListStore<Device> deviceStore) {
+    public ArchiveView(final ArchiveHandler archiveHandler, ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;
         deviceStore.addStoreHandlers(deviceStoreHandlers);
         this.deviceStore = deviceStore;
@@ -131,11 +132,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         // Element that displays the current track color
         styleButtonTrackColor = new TextButton();
-        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(style.DEFAULT_COLOR));
+        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor", "#".concat(style.DEFAULT_COLOR));
         styleButtonTrackColor.getElement().getStyle().setCursor(Style.Cursor.TEXT);
         // Menu with the small palette
-        smallColorMenu = new ExtColorMenu(style.COLORS, style.COLORS);
-        smallColorMenu.setColor(style.DEFAULT_COLOR);
+        smallColorMenu = new ExtColorMenu(ArchiveStyle.COLORS, ArchiveStyle.COLORS);
+        smallColorMenu.setColor(ArchiveStyle.DEFAULT_COLOR);
         smallColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
@@ -158,25 +159,22 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         });
         // Markers
         routeMarkersType = new Menu();
-        final CheckMenuItem item1 = new CheckMenuItem(i18n.standardMarkers());
-        item1.setGroup("markers");
-        item1.setChecked(true);
-        item1.addSelectionHandler(new SelectionHandler<Item>() {
-            @Override
-            public void onSelection(SelectionEvent<Item> selectionEvent) {
-                style.setIconType(PositionIconType.iconArchive);
-            }
-        });
-        final CheckMenuItem item2 = new CheckMenuItem(i18n.reducedMarkers());
-        item2.setGroup("markers");
-        item2.addSelectionHandler(new SelectionHandler<Item>() {
-            @Override
-            public void onSelection(SelectionEvent<Item> selectionEvent) {
-                style.setIconType(PositionIconType.dotArchive);
-            }
-        });
-        routeMarkersType.add(item1);
-        routeMarkersType.add(item2);
+        for (Object[] obj : new Object[][] { { i18n.noMarkers(), null },
+                                             { i18n.standardMarkers(), PositionIconType.iconArchive },
+                                             { i18n.reducedMarkers(), PositionIconType.dotArchive } }) {
+            CheckMenuItem item = new CheckMenuItem((String) obj[0]);
+            final PositionIconType iconType = (PositionIconType) obj[1];
+            item.setGroup("markers");
+            item.setChecked(iconType == ApplicationContext.getInstance().getUserSettings().getArchiveMarkerType());
+            item.addSelectionHandler(new SelectionHandler<Item>() {
+                @Override
+                public void onSelection(SelectionEvent<Item> event) {
+                    style.setIconType(iconType);
+                    archiveHandler.onChangeArchiveMarkerType(iconType);
+                }
+            });
+            routeMarkersType.add(item);
+        }
 
         devicesTabs = new TabPanel(GWT.<TabPanel.TabPanelAppearance>create(BlueTabPanelBottomAppearance.class));
         archivePanels = new HashMap<Long, ArchivePanel>();
@@ -228,7 +226,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
                 !disableFilter.getValue(),
-                style
+                new ArchiveStyle(style)
         );
     }
 

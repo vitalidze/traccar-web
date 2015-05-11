@@ -305,4 +305,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
                                        @Optional String geoFenceName,
                                        @Optional String eventTime,
                                        @Optional String positionTime);
+
+    String noMarkers();
 }

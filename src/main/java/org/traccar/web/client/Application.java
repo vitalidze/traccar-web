@@ -153,7 +153,7 @@ public class Application {
         }
     };
 
-    private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler, FilterDialog.FilterSettingsHandler {
+    private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler {
         @Override
         public void onSave(UserSettings userSettings) {
             ApplicationContext.getInstance().setUserSettings(userSettings);
