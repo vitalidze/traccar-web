@@ -11,4 +11,6 @@ New option on archive toolbar allows to change line color and marker style. Curr
 
 ![Full palette](http://i60.tinypic.com/1ta7it.png)
 
-![Markers selection](http://i60.tinypic.com/2ntk5xw.png)
+![Markers selection](http://i60.tinypic.com/6g94jc.png)
+
+Marker selection is saved in user's settings.
