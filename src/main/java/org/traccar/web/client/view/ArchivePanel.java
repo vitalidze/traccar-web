@@ -244,10 +244,10 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
         loader.addLoadHandler(new LoadHandler<PagingLoadConfig, PagingLoadResult<Position>>() {
             @Override
             public void onLoad(LoadEvent<PagingLoadConfig, PagingLoadResult<Position>> event) {
-                if (!initialized && visible) {
+                if (!initialized || (view.getHeader() != null &&
+                    view.getHeader().getOffsetWidth(true) > grid.getColumnModel().getTotalWidth() + 25)) {
                     view.setForceFit(true);
                     view.refresh();
-                    initialized = true;
                 }
             }
         });
@@ -310,6 +310,7 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
     private void initialize() {
         if (visible && !initialized) {
             loader.load(0, view.getCacheSize());
+            initialized = true;
         }
     }
 }
