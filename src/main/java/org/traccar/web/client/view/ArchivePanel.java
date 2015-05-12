@@ -144,8 +144,11 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
         loader.addLoadHandler(new LoadHandler<PagingLoadConfig, PagingLoadResult<Position>>() {
             @Override
             public void onLoad(LoadEvent<PagingLoadConfig, PagingLoadResult<Position>> event) {
-                view.setForceFit(true);
-                view.refresh();
+                if (!initialized && visible) {
+                    view.setForceFit(true);
+                    view.refresh();
+                    initialized = true;
+                }
             }
         });
 
@@ -207,7 +210,6 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
     private void initialize() {
         if (visible && !initialized) {
             loader.load(0, view.getCacheSize());
-            initialized = true;
         }
     }
 }
