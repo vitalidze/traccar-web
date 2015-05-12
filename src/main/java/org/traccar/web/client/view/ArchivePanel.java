@@ -25,7 +25,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.NumberCell;
 import com.sencha.gxt.core.client.Style;
+import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.SortDir;
+import com.sencha.gxt.data.shared.SortInfo;
+import com.sencha.gxt.data.shared.SortInfoBean;
 import com.sencha.gxt.data.shared.loader.*;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
@@ -40,7 +44,9 @@ import org.traccar.web.client.model.PositionProperties;
 import org.traccar.web.client.state.GridStateHandler;
 import org.traccar.web.shared.model.Position;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,7 +85,74 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
     private final PagingMemoryProxy memoryProxy;
     final ArchiveView.ArchiveHandler archiveHandler;
 
+    static class PositionComparator implements Comparator<Position> {
+        final PositionProperties props = GWT.create(PositionProperties.class);
+
+        static class ExtendedSortInfo {
+            final ValueProvider<Position, ?> provider;
+            final SortDir sortDir;
+
+            ExtendedSortInfo(ValueProvider<Position, ?> provider) {
+                this(provider, null);
+            }
+
+            ExtendedSortInfo(ValueProvider<Position, ?> provider, SortDir sortDir) {
+                this.provider = provider;
+                this.sortDir = sortDir;
+            }
+        }
+
+        final List<ExtendedSortInfo> sortInfos;
+
+        PositionComparator(List<? extends SortInfo> sortInfos) {
+            this.sortInfos = new ArrayList<ExtendedSortInfo>(sortInfos.size());
+
+            ExtendedSortInfo[] availableProviders = new ExtendedSortInfo[] {
+                    new ExtendedSortInfo(props.time()),
+                    new ExtendedSortInfo(props.address()),
+                    new ExtendedSortInfo(props.course()),
+                    new ExtendedSortInfo(props.latitude()),
+                    new ExtendedSortInfo(props.longitude()),
+                    new ExtendedSortInfo(props.altitude()),
+                    new ExtendedSortInfo(props.distance()),
+                    new ExtendedSortInfo(props.power()),
+                    new ExtendedSortInfo(props.speed())
+            };
+
+            for (SortInfo sortInfo : sortInfos) {
+                for (ExtendedSortInfo info : availableProviders) {
+                    if (info.provider.getPath().equals(sortInfo.getSortField())) {
+                        this.sortInfos.add(new ExtendedSortInfo(info.provider, sortInfo.getSortDir()));
+                        break;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public int compare(Position o1, Position o2) {
+            for (int i = 0; i < sortInfos.size(); i++) {
+                ExtendedSortInfo sortInfo = sortInfos.get(i);
+                Object v1 = sortInfo.provider.getValue(o1);
+                Object v2 = sortInfo.provider.getValue(o2);
+
+                int r = 0;
+                if (v1 == null && v2 != null) {
+                    r = -1;
+                } else if (v1 != null && v2 == null) {
+                    r = 1;
+                } else if (v1 != null && v2 != null) {
+                    r = ((Comparable) v1).compareTo(v2);
+                }
+                return sortInfo.sortDir == SortDir.DESC ? -1 * r : r;
+            }
+
+            return 0;
+        }
+    }
+
     static class PagingMemoryProxy extends MemoryProxy<PagingLoadConfig, PagingLoadResult<Position>> {
+        List<SortInfo> currentSorting = new ArrayList<SortInfo>();
         List<Position> positions = Collections.emptyList();
 
         public PagingMemoryProxy() {
@@ -87,12 +160,38 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
         }
         @Override
         public void load(PagingLoadConfig config, Callback<PagingLoadResult<Position>, Throwable> callback) {
+            // sort if necessary
+            if (!isEqualSorting(config.getSortInfo())) {
+                Collections.sort(positions, new PositionComparator(config.getSortInfo()));
+                currentSorting.clear();
+                for (SortInfo sortInfo : config.getSortInfo()) {
+                    currentSorting.add(new SortInfoBean(sortInfo.getSortField(), sortInfo.getSortDir()));
+                }
+            }
             List<Position> results = positions.subList(config.getOffset(), Math.min(positions.size(), config.getOffset() + config.getLimit())); // Get results list based on the data the proxy was created with
             callback.onSuccess(new PagingLoadResultBean<Position>(results, positions.size(), config.getOffset()));  // again, data from the config
         }
 
         public void setPositions(List<Position> positions) {
             this.positions = positions;
+            this.currentSorting.clear();
+        }
+
+        boolean isEqualSorting(List<? extends SortInfo> sortInfos) {
+            if (currentSorting.size() != sortInfos.size()) {
+                return false;
+            }
+
+            for (int i = 0; i < currentSorting.size(); i++) {
+                SortInfo current = currentSorting.get(i);
+                SortInfo other = sortInfos.get(i);
+                if (current.getSortDir() != other.getSortDir() ||
+                    !current.getSortField().equals(other.getSortField())) {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 
@@ -106,6 +205,7 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
         List<ColumnConfig<Position, ?>> columnConfigList = new LinkedList<ColumnConfig<Position, ?>>();
 
         ColumnConfig<Position, Boolean> columnConfigValid = new ColumnConfig<Position, Boolean>(positionProperties.valid(), 25, i18n.valid());
+        columnConfigValid.setSortable(false);
         columnConfigList.add(columnConfigValid);
 
         ColumnConfig<Position, Date> columnConfigDate = new ColumnConfig<Position, Date>(positionProperties.time(), 25, i18n.time());
