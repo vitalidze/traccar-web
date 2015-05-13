@@ -15,7 +15,6 @@
  */
 package org.traccar.web.shared.model;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -37,17 +36,18 @@ import javax.persistence.Transient;
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import org.traccar.web.client.ArchiveStyle;
 
 @Entity
 @Table(name = "positions",
        indexes = { @Index(name="positionsIndex", columnList="device_id,time") })
-public class Position implements Serializable, Cloneable {
+public class Position implements IsSerializable, Cloneable {
 
     private static final long serialVersionUID = 1;
 
     public enum Status {
-        ARCHIVE, OFFLINE, LATEST;
+        OFFLINE, LATEST;
     }
 
     public Position() {

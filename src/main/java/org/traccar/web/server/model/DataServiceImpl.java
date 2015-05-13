@@ -301,7 +301,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         if (user.getAdmin()) {
             return getSessionEntityManager().createQuery("SELECT x FROM Device x LEFT JOIN FETCH x.latestPosition").getResultList();
         }
-        return user.getAllAvailableDevices();
+        return new LinkedList<Device>(user.getAllAvailableDevices());
     }
 
     @Transactional
@@ -390,6 +390,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             query.setParameter("device", device);
             query.executeUpdate();
 
+            query = entityManager.createQuery("SELECT g FROM GeoFence g WHERE :device MEMBER OF g.devices");
+            query.setParameter("device", device);
+            for (GeoFence geoFence : (List<GeoFence>) query.getResultList()) {
+                geoFence.getDevices().remove(device);
+            }
+
             entityManager.remove(device);
         }
         return device;
@@ -416,6 +422,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 queryString += " AND x.speed " + filters.getSpeedModifier() + " :speed";
             }
         }
+
+        queryString += " ORDER BY x.time";
 
         TypedQuery<Position> query = entityManager.createQuery(queryString, Position.class);
         query.setParameter("device", device);
@@ -447,7 +455,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             if (add) positions.add(queryResult.get(i));
         }
-        return positions;
+        return new ArrayList<Position>(positions);
     }
 
     @RequireUser

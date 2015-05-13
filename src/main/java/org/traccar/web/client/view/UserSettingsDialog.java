@@ -52,8 +52,8 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     }
 
     public interface UserSettingsHandler {
-        public void onSave(UserSettings userSettings);
-        public void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
+        void onSave(UserSettings userSettings);
+        void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
                                           NumberField<Double> centerLongitude,
                                           NumberField<Double> centerLatitude,
                                           NumberField<Integer> zoomLevel);

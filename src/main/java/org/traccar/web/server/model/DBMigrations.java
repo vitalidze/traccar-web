@@ -30,19 +30,20 @@ public class DBMigrations {
                 new SetDefaultMapViewSettings(),
                 new SetManagerFlag(),
                 new SetNotificationsFlag(),
-                new AddDefaultNotifications(),
                 new SetReadOnlyFlag(),
+                new AddDefaultNotifications(),
                 new SetDefaultDeviceTimeout(),
                 new SetDefaultIdleSpeedThreshold(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
                 new SetDefaultEventRecordingEnabled(),
+                new SetDefaultLanguage(),
                 new SetDefaultMapType(),
                 new CreateAdmin(),
                 new SetDefaultDeviceIconType(),
                 new SetDefaultHashImplementation(),
                 new SetDefaultUserSettings(),
                 new SetArchiveDefaultColumns(),
-                new SetAllDevicesFlag()
+                new SetGeoFenceAllDevicesFlag()
         }) {
             em.getTransaction().begin();
             try {
@@ -262,11 +263,20 @@ public class DBMigrations {
         }
     }
 
-    static class SetAllDevicesFlag implements Migration {
+    static class SetGeoFenceAllDevicesFlag implements Migration {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + GeoFence.class.getName() + " G SET G.allDevices = :b WHERE G.allDevices IS NULL")
                     .setParameter("b", Boolean.TRUE)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultLanguage implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.language = :b WHERE S.language IS NULL")
+                    .setParameter("b", "default")
                     .executeUpdate();
         }
     }

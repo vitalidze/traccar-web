@@ -16,13 +16,17 @@
 package org.traccar.web.shared.model;
 
 import com.google.gwt.user.client.rpc.GwtTransient;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.*;
-import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Table(name = "notification_settings")
-public class NotificationSettings implements Serializable {
+public class NotificationSettings implements IsSerializable {
     public enum SecureConnectionType {
         NONE("None"),
         SSL_TLS("SSL/TLS"),
@@ -44,6 +48,8 @@ public class NotificationSettings implements Serializable {
         port = 465;
         useAuthorization = true;
         secureConnectionType = SecureConnectionType.SSL_TLS;
+        templates = new HashSet<NotificationTemplate>();
+        transferTemplates = new HashMap<DeviceEventType, NotificationTemplate>();
     }
 
     @Id
@@ -96,6 +102,13 @@ public class NotificationSettings implements Serializable {
     private String password;
     @Enumerated(EnumType.STRING)
     private SecureConnectionType secureConnectionType;
+
+    @GwtTransient
+    @OneToMany(mappedBy = "settings", fetch = FetchType.LAZY)
+    private Set<NotificationTemplate> templates;
+
+    @Transient
+    private Map<DeviceEventType, NotificationTemplate> transferTemplates;
 
     public String getFromAddress() {
         return fromAddress;
@@ -163,6 +176,22 @@ public class NotificationSettings implements Serializable {
         this.pushbulletAccessToken = pushbulletApiKey;
     }
 
+    public Set<NotificationTemplate> getTemplates() {
+        return templates;
+    }
+
+    public void setTemplates(Set<NotificationTemplate> templates) {
+        this.templates = templates;
+    }
+
+    public Map<DeviceEventType, NotificationTemplate> getTransferTemplates() {
+        return transferTemplates;
+    }
+
+    public void setTransferTemplates(Map<DeviceEventType, NotificationTemplate> transferTemplates) {
+        this.transferTemplates = transferTemplates;
+    }
+
     public void copyFrom(NotificationSettings s) {
         setFromAddress(s.getFromAddress());
         setServer(s.getServer());
@@ -172,5 +201,17 @@ public class NotificationSettings implements Serializable {
         setPassword(s.getPassword());
         setSecureConnectionType(s.getSecureConnectionType());
         setPushbulletAccessToken(s.getPushbulletAccessToken());
+    }
+
+    public NotificationTemplate findTemplate(DeviceEventType type) {
+        if (getTransferTemplates() == null) {
+            setTransferTemplates(new HashMap<DeviceEventType, NotificationTemplate>());
+        }
+        if (getTransferTemplates().size() < getTemplates().size()) {
+            for (NotificationTemplate template : getTemplates()) {
+                getTransferTemplates().put(template.getType(), template);
+            }
+        }
+        return getTransferTemplates().get(type);
     }
 }

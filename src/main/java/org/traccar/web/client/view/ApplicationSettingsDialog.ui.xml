@@ -15,7 +15,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <gxt:Window ui:field="window" pixelSize="300, 190" modal="true" headingText="{i18n.globalSettings}" focusWidget="{saveButton}">
+    <gxt:Window ui:field="window" pixelSize="340, 220" modal="true" headingText="{i18n.globalSettings}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.registration}" labelWidth="210">
@@ -56,6 +56,13 @@
                   <form:ComboBox ui:field="defaultHashImplementation" />
               </form:widget>
           </form:FieldLabel>
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:FieldLabel text="{i18n.language}" labelWidth="210">
+            <form:widget>
+                <form:ComboBox ui:field="language" />
+            </form:widget>
+        </form:FieldLabel>
       </container:child>
     </container:VerticalLayoutContainer>
       

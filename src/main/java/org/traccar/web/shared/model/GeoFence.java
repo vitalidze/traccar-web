@@ -17,15 +17,15 @@ package org.traccar.web.shared.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.*;
 
 @Entity
 @Table(name = "geofences",
        indexes = { @Index(name = "geofences_pkey", columnList = "id") })
-public class GeoFence implements Serializable {
+public class GeoFence implements IsSerializable {
 
     public GeoFence() {
         type = GeoFenceType.LINE;
@@ -176,22 +176,22 @@ public class GeoFence implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof GeoFence)) return false;
 
         GeoFence geoFence = (GeoFence) o;
 
-        if (id != geoFence.id) return false;
-        if (name != null ? !name.equals(geoFence.name) : geoFence.name != null) return false;
-        if (type != geoFence.type) return false;
+        if (getId() != geoFence.getId()) return false;
+        if (getName() != null ? !getName().equals(geoFence.getName()) : geoFence.getName() != null) return false;
+        if (getType() != geoFence.getType()) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
+        int result = (int) (getId() ^ (getId() >>> 32));
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + (getType() != null ? getType().hashCode() : 0);
         return result;
     }
 

@@ -207,6 +207,7 @@ public class GeoFenceWindow implements Editor<GeoFence> {
 
         driver.initialize(this);
         driver.edit(this.geoFence);
+        toggleRadiusField(this.geoFence.getType());
 
         this.geoFenceDrawing = geoFenceDrawing;
         if (geoFenceDrawing == null) {
@@ -259,7 +260,10 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     @UiHandler("type")
     public void onTypeChanged(SelectionEvent<GeoFenceType> event) {
         clear();
-        GeoFenceType type = event.getSelectedItem();
+        toggleRadiusField(event.getSelectedItem());
+    }
+
+    private void toggleRadiusField(GeoFenceType type) {
         radius.setEnabled(type == GeoFenceType.CIRCLE || type == GeoFenceType.LINE);
     }
 

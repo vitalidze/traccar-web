@@ -5,8 +5,26 @@ function getParameterByName(name) {
     results = regex.exec(location.search);
     return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
+//
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+//
 var locale = getParameterByName("locale");
-i18n = i18n[locale === null ? 'en' : locale];
+if (locale === null) {
+    locale = readCookie('GWT_LOCALE');
+}
+if (locale === null || locale == 'default') {
+    locale = 'en';
+}
+i18n = i18n[locale];
 
 // Initialize app
 var myApp = new Framework7({
@@ -36,10 +54,12 @@ Template7.registerHelper('formatDate', function(timestamp) {
 });
 
 Template7.registerHelper('formatDouble', function(double, options) {
-    return double.toFixed(options.hash.n);
+    return isNaN(double) ? "-" : double.toFixed(options.hash.n);
 });
 
 Template7.registerHelper('formatSpeed', function(speed) {
+    if (isNaN(speed)) return "-";
+
     var factor = 1;
     var suffix = 'kn';
 
@@ -97,7 +117,7 @@ myApp.onPageInit('login-screen', function (page) {
     language.on('change', function() {
         var sel = pageContainer.find('#language')[0];
         var newLocale = sel.options[sel.selectedIndex].value;
-        window.location = newLocale == 'en' ? '?' : ('?locale=' + newLocale);
+        window.location = newLocale == locale ? '?' : ('?locale=' + newLocale);
     });
 
     // set up open desktop version action
@@ -286,7 +306,7 @@ function loadPositions() {
 
             currentTime = new Date().getTime();
 
-            for (i = 0; i < positions.length; i++) {
+            for (var i = 0; i < positions.length; i++) {
                 var position = positions[i];
 
                 // save 'selected' state from previous position
@@ -393,7 +413,7 @@ function drawDeviceDetails(deviceId, position) {
             } else {
                 position.other = {};
                 var nodes = xmlDoc.documentElement.childNodes;
-                for (i = 0; i < nodes.length; i++) {
+                for (var i = 0; i < nodes.length; i++) {
                     if (nodes[i].textContent == null) {
                         position.other[nodes[i].nodeName] = nodes[i].nodeValue;
                     } else {

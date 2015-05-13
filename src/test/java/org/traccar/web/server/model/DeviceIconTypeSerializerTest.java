@@ -41,7 +41,6 @@ public class DeviceIconTypeSerializerTest {
         assertNotNull(jsonDeviceIconType);
 
         testDefaultPositionIconType(jsonDeviceIconType, Position.Status.OFFLINE, "OFFLINE");
-        testDefaultPositionIconType(jsonDeviceIconType, Position.Status.ARCHIVE, "ARCHIVE");
         testDefaultPositionIconType(jsonDeviceIconType, Position.Status.LATEST, "LATEST");
     }
 

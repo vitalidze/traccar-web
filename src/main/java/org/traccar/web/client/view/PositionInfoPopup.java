@@ -82,7 +82,7 @@ public class PositionInfoPopup {
 
         ToolTipConfig config = new ToolTipConfig();
 
-        PositionIconType iconType = position.getDevice().getIconType().getPositionIconType(position.getStatus());
+        PositionIconType iconType = position.getIconType() == null ? position.getDevice().getIconType().getPositionIconType(position.getStatus()) : position.getIconType();
         String deviceTitle = position.getDevice().getName() + (position.getStatus() == Position.Status.OFFLINE ? " (" + i18n.offline() + ")" : "");
 
         config.setTitleHtml(

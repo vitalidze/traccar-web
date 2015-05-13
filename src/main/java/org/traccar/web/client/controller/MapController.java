@@ -15,23 +15,17 @@
  */
 package org.traccar.web.client.controller;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.widget.core.client.ContentPanel;
-import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
-import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.view.MapView;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.GeoFence;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,11 +33,9 @@ import java.util.List;
 import java.util.Map;
 
 public class MapController implements ContentController, MapView.MapHandler {
-    private final static Messages i18n = GWT.create(Messages.class);
-
     public interface MapHandler {
-        public void onDeviceSelected(Device device);
-        public void onArchivePositionSelected(Position position);
+        void onDeviceSelected(Device device);
+        void onArchivePositionSelected(Position position);
     }
 
     private MapHandler mapHandler;
@@ -130,6 +122,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                 /**
                  * Draw positions
                  */
+                mapView.clearLatestPositions();
                 mapView.showLatestPositions(result);
                 mapView.showDeviceName(result);
                 /**
@@ -151,7 +144,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                         Position prevTimestampPosition = timestampMap.get(device.getId());
 
                         if (prevTimestampPosition == null ||
-                            (position.getTime().getTime() - prevTimestampPosition.getTime().getTime() >= ApplicationContext.getInstance().getUserSettings().getTimePrintInterval() * 60 * 1000)) {
+                                (position.getTime().getTime() - prevTimestampPosition.getTime().getTime() >= ApplicationContext.getInstance().getUserSettings().getTimePrintInterval() * 60 * 1000)) {
                             mapView.showLatestTime(Arrays.asList(position));
                             timestampMap.put(device.getId(), position);
                         }
@@ -189,8 +182,17 @@ public class MapController implements ContentController, MapView.MapHandler {
     }
 
     public void showArchivePositions(Track track) {
+        List<Position> positions = track.getPositions();
+        for (Position position : positions) {
+            position.setIconType(track.getStyle().getIconType() == null ? PositionIconType.dotArchive : track.getStyle().getIconType());
+        }
         mapView.showArchiveTrack(track);
-        mapView.showArchivePositions(track);
+
+        if (track.getStyle().getIconType() == null) {
+            mapView.setArchiveSnapToTrack(positions);
+        } else {
+            mapView.showArchivePositions(positions);
+        }
         List<Position> withTime = track.getTimePositions(ApplicationContext.getInstance().getUserSettings().getTimePrintInterval());
         mapView.showArchiveTime(withTime);
     }
@@ -226,5 +228,9 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public void updateIcon(Device device) {
         mapView.updateIcon(device);
+    }
+
+    public void clearArchive(Device device) {
+        mapView.clearArchive(device);
     }
 }

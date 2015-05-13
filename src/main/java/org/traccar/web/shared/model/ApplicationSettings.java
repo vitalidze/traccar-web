@@ -1,10 +1,7 @@
 package org.traccar.web.shared.model;
 
 import com.google.gson.annotations.Expose;
-
-import java.io.Serializable;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,7 +14,7 @@ import javax.persistence.EnumType;
 
 @Entity
 @Table(name="application_settings")
-public class ApplicationSettings implements Serializable {
+public class ApplicationSettings implements IsSerializable {
 
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_UPDATE_INTERVAL = 15000;
@@ -32,6 +29,7 @@ public class ApplicationSettings implements Serializable {
         updateInterval = DEFAULT_UPDATE_INTERVAL;
         defaultPasswordHash = PasswordHashMethod.PLAIN;
         eventRecordingEnabled = true;
+        language = "default";
     }
 
     @Expose
@@ -89,6 +87,16 @@ public class ApplicationSettings implements Serializable {
 
     public void setEventRecordingEnabled(boolean eventRecordingEnabled) {
         this.eventRecordingEnabled = eventRecordingEnabled;
+    }
+
+    private String language;
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     @Override

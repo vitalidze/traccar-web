@@ -51,6 +51,13 @@ public class DeviceEvent {
     public DeviceEvent() {
     }
 
+    public DeviceEvent(Date time, Device device, Position position, GeoFence geoFence) {
+        this.time = time;
+        this.device = device;
+        this.position = position;
+        this.geoFence = geoFence;
+    }
+
     public long getId() {
         return id;
     }
@@ -111,26 +118,26 @@ public class DeviceEvent {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof DeviceEvent)) return false;
 
         DeviceEvent that = (DeviceEvent) o;
 
-        if (device != null ? !device.equals(that.device) : that.device != null) return false;
-        if (geoFence != null ? !geoFence.equals(that.geoFence) : that.geoFence != null) return false;
-        if (position != null ? !position.equals(that.position) : that.position != null) return false;
-        if (!time.equals(that.time)) return false;
-        if (type != that.type) return false;
+        if (getDevice() != null ? !getDevice().equals(that.getDevice()) : that.getDevice() != null) return false;
+        if (getGeoFence() != null ? !getGeoFence().equals(that.getGeoFence()) : that.getGeoFence() != null) return false;
+        if (getPosition() != null ? !getPosition().equals(that.getPosition()) : that.getPosition() != null) return false;
+        if (!getTime().equals(that.getTime())) return false;
+        if (getType() != that.getType()) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = time.hashCode();
-        result = 31 * result + (device != null ? device.hashCode() : 0);
-        result = 31 * result + type.hashCode();
-        result = 31 * result + (position != null ? position.hashCode() : 0);
-        result = 31 * result + (geoFence != null ? geoFence.hashCode() : 0);
+        int result = getTime().hashCode();
+        result = 31 * result + (getDevice() != null ? getDevice().hashCode() : 0);
+        result = 31 * result + getType().hashCode();
+        result = 31 * result + (getPosition() != null ? getPosition().hashCode() : 0);
+        result = 31 * result + (getGeoFence() != null ? getGeoFence().hashCode() : 0);
         return result;
     }
 }

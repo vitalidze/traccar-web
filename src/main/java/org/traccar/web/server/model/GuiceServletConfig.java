@@ -57,6 +57,7 @@ public class GuiceServletConfig extends GuiceServletContextListener {
                 install(new JpaPersistModule(persistenceUnit));
 
                 filter("/traccar/*").through(PersistFilter.class);
+                filter("/", "/traccar.html", "/m/", "/m/index.html").through(LocaleFilter.class);
 
                 serve("/traccar/dataService").with(DataServiceImpl.class);
                 serve("/traccar/uiStateService").with(UIStateServiceImpl.class);

@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.view;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -32,7 +33,6 @@ import org.gwtopenmaps.openlayers.client.control.LayerSwitcher;
 import org.gwtopenmaps.openlayers.client.control.ScaleLine;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
-import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
@@ -53,8 +53,8 @@ import org.traccar.web.shared.model.UserSettings;
 public class MapView {
 
     public interface MapHandler {
-        public void onPositionSelected(Position position);
-        public void onArchivePositionSelected(Position position);
+        void onPositionSelected(Position position);
+        void onArchivePositionSelected(Position position);
     }
 
     private MapHandler mapHandler;
@@ -70,7 +70,6 @@ public class MapView {
     private Vector vectorLayer;
     private Markers markerLayer;
     private Vector geofenceLayer;
-    private Vector archiveLayer;
 
     private Messages i18n = GWT.create(Messages.class);
 
@@ -88,10 +87,6 @@ public class MapView {
 
     public Markers getMarkerLayer() {
         return markerLayer;
-    }
-
-    public Vector getArchiveLayer() {
-        return archiveLayer;
     }
 
     public LonLat createLonLat(double longitude, double latitude) {
@@ -223,8 +218,14 @@ public class MapView {
     private final MapPositionRenderer latestPositionTrackRenderer;
     private final GeoFenceRenderer geoFenceRenderer;
 
+    public void clearLatestPositions() {
+        latestPositionRenderer.clearPositionsAndTitles();
+    }
+
     public void showLatestPositions(List<Position> positions) {
-        latestPositionRenderer.showPositions(positions);
+        for (Position position : positions) {
+            latestPositionRenderer.showPositions(Arrays.asList(position));
+        }
     }
 
     public void showDeviceName(List<Position> positions) {
@@ -236,24 +237,33 @@ public class MapView {
     }
 
     public void showLatestTime(List<Position> positions) {
-        latestPositionTrackRenderer.showTime(positions, true, false);
+        latestPositionTrackRenderer.showTime(positions, true);
     }
 
     public void showLatestTrack(Track track) {
-        latestPositionTrackRenderer.showTrack(track, false);
+        latestPositionTrackRenderer.showTrack(track);
+    }
+
+    public void clearArchive(Device device) {
+        archivePositionRenderer.clear(device);
     }
 
     public void showArchiveTrack(Track track) {
-        archivePositionRenderer.showTrack(track, true);
+        archivePositionRenderer.showTrack(track);
     }
 
-    public void showArchivePositions(Track track) {
-        List<Position> positions = track.getPositions();
+    public void showArchivePositions(List<Position> positions) {
         archivePositionRenderer.showPositions(positions);
     }
 
+    public void setArchiveSnapToTrack(List<Position> positions) {
+        if (!positions.isEmpty()) {
+            archivePositionRenderer.setSnapToTrack(positions.get(0).getDevice(), true);
+        }
+    }
+
     public void showArchiveTime(List<Position> positions) {
-        archivePositionRenderer.showTime(positions, false, true);
+        archivePositionRenderer.showTime(positions, false);
     }
 
     public void selectDevice(Device device) {

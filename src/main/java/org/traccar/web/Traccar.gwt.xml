@@ -13,6 +13,7 @@
 
     <set-property name="gwt.logging.enabled" value="FALSE"/>
     <set-property name="gwt.logging.consoleHandler" value="DISABLED"/>
+    <set-configuration-property name="locale.cookie" value="GWT_LOCALE" />
 
     <entry-point class='org.traccar.web.client.Traccar'/>
 
@@ -30,4 +31,5 @@
     <extend-property name="locale" values="lt" />
     <extend-property name="locale" values="nl" />
     <extend-property name="locale" values="sv_SE" />
+    <extend-property name="locale" values="bg" />
 </module>

@@ -74,7 +74,6 @@ public class Application {
                 geoFenceController.getDeviceGeoFences(),
                 this);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
-        archiveController.getPositionStore().addStoreHandlers(archiveStoreHandler);
 
         view = new ApplicationView(
                 deviceController.getView(), mapController.getView(), archiveController.getView());
@@ -110,6 +109,15 @@ public class Application {
             mapController.selectArchivePosition(position);
         }
 
+        @Override
+        public void onClear(Device device) {
+            mapController.clearArchive(device);
+        }
+
+        @Override
+        public void onDrawTrack(Track track) {
+            mapController.showArchivePositions(track);
+        }
     };
 
     public ArchiveController getArchiveController() {
@@ -131,20 +139,6 @@ public class Application {
 
     };
 
-    private StoreHandlers<Position> archiveStoreHandler = new BaseStoreHandlers<Position>() {
-
-        @Override
-        public void onAnything() {
-            mapController.showArchivePositions(
-                    new Track(
-                            archiveController.getPositionStore().getAll(),
-                            archiveController.getStyle()
-                    )
-            );
-        }
-
-    };
-
     private StoreHandlers<GeoFence> geoFenceStoreHandler = new BaseStoreHandlers<GeoFence>() {
         @Override
         public void onAdd(StoreAddEvent<GeoFence> event) {
@@ -159,7 +153,7 @@ public class Application {
         }
     };
 
-    private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler, FilterDialog.FilterSettingsHandler {
+    private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler {
         @Override
         public void onSave(UserSettings userSettings) {
             ApplicationContext.getInstance().setUserSettings(userSettings);

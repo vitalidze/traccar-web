@@ -29,12 +29,6 @@ public class TrackSegment {
 
     public TrackSegment(List<Position> positions, ArchiveStyle style) {
         this.positions = new ArrayList<Position>(positions);
-        Collections.sort(this.positions, new Comparator<Position>() {
-            @Override
-            public int compare(Position o1, Position o2) {
-            return o1.getTime().compareTo(o2.getTime());
-            }
-        });
         this.style = style;
     }
 

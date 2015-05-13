@@ -21,11 +21,12 @@ import java.util.List;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.ArchiveStyle;
+import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
-import org.traccar.web.client.model.PositionProperties;
 import org.traccar.web.client.view.ArchiveView;
 import org.traccar.web.client.view.FilterDialog;
+import org.traccar.web.client.view.UserSettingsDialog;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -33,33 +34,29 @@ import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import org.traccar.web.shared.model.PositionIconType;
+import org.traccar.web.shared.model.UserSettings;
 
 public class ArchiveController implements ContentController, ArchiveView.ArchiveHandler {
 
     public interface ArchiveHandler {
-        public void onSelected(Position position);
+        void onSelected(Position position);
+        void onClear(Device device);
+        void onDrawTrack(Track track);
     }
 
     private final ArchiveHandler archiveHandler;
 
-    private final FilterDialog.FilterSettingsHandler filterSettingsHandler;
+    private final UserSettingsDialog.UserSettingsHandler userSettingsHandler;
 
-    private ListStore<Position> positionStore;
+    private final ArchiveView archiveView;
 
-    private ArchiveView archiveView;
+    private final Messages i18n = GWT.create(Messages.class);
 
-    private Messages i18n = GWT.create(Messages.class);
-
-    public ArchiveController(ArchiveHandler archiveHandler, FilterDialog.FilterSettingsHandler filterSettingsHandler, ListStore<Device> deviceStore) {
+    public ArchiveController(ArchiveHandler archiveHandler, UserSettingsDialog.UserSettingsHandler userSettingsHandler, ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;
-        this.filterSettingsHandler = filterSettingsHandler;
-        PositionProperties positionProperties = GWT.create(PositionProperties.class);
-        positionStore = new ListStore<Position>(positionProperties.id());
-        archiveView = new ArchiveView(this, positionStore, deviceStore);
-    }
-
-    public ListStore<Position> getPositionStore() {
-        return positionStore;
+        this.userSettingsHandler = userSettingsHandler;
+        this.archiveView = new ArchiveView(this, deviceStore);
     }
 
     @Override
@@ -82,20 +79,12 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
             Application.getDataService().getPositions(device, from, to, filter, new BaseAsyncCallback<List<Position>>(i18n) {
                 @Override
                 public void onSuccess(List<Position> result) {
-                    positionStore.clear();
+                    archiveHandler.onClear(device);
                     if (result.isEmpty()) {
                         new AlertMessageBox(i18n.error(), i18n.errNoResults()).show();
-                    } else {
-                        for (Position position : result) {
-                            position.setStatus(Position.Status.ARCHIVE);
-                            if (style.getIconType() != null) { // If style is set, override device's icon
-                                position.setIconType(style.getIconType());
-                            } else {
-                                position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
-                            }
-                        }
-                        positionStore.addAll(result);
                     }
+                    archiveHandler.onDrawTrack(new Track(result, style));
+                    archiveView.showPositions(device, result);
                 }
             });
         } else {
@@ -104,13 +93,20 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     }
 
     @Override
-    public void onClear() {
-        positionStore.clear();
+    public void onClear(Device device) {
+        archiveHandler.onClear(device);
     }
 
     @Override
     public void onFilterSettings() {
-        new FilterDialog(ApplicationContext.getInstance().getUserSettings(), filterSettingsHandler).show();
+        new FilterDialog(ApplicationContext.getInstance().getUserSettings(), userSettingsHandler).show();
+    }
+
+    @Override
+    public void onChangeArchiveMarkerType(PositionIconType newMarkerType) {
+        UserSettings settings = ApplicationContext.getInstance().getUserSettings();
+        settings.setArchiveMarkerType(newMarkerType);
+        userSettingsHandler.onSave(settings);
     }
 
     public void selectPosition(Position position) {
@@ -119,9 +115,5 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
 
     public void selectDevice(Device device) {
         archiveView.selectDevice(device);
-    }
-
-    public ArchiveStyle getStyle() {
-        return archiveView.style;
     }
 }
