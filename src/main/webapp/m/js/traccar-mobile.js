@@ -54,10 +54,12 @@ Template7.registerHelper('formatDate', function(timestamp) {
 });
 
 Template7.registerHelper('formatDouble', function(double, options) {
-    return double.toFixed(options.hash.n);
+    return isNaN(double) ? "-" : double.toFixed(options.hash.n);
 });
 
 Template7.registerHelper('formatSpeed', function(speed) {
+    if (isNaN(speed)) return "-";
+
     var factor = 1;
     var suffix = 'kn';
 
