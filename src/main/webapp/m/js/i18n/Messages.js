@@ -24,7 +24,38 @@ var i18n = {
         altitude: 'Altitude',
         speed: 'Speed',
         course: 'Course',
-        address: 'Address'
+        address: 'Address',
+        follow: 'Follow',
+        stop_following: 'Stop following'
+    },
+    bg: {
+        _name_: 'Български',
+        // login screen
+        language: 'Език',
+        username: 'Потребител',
+        password: 'Парола',
+        your_username: 'Потребителско име',
+        your_password: 'Вашата парола',
+        sign_in: 'Вход',
+        user_name_and_password_must_not_be_empty: 'Потребителското име или парола не може да са празни',
+        user_name_or_password_is_invalid: 'Грешен потребител или парола',
+        unexpected_error: 'Неочаквана грешка',
+        open_desktop_version: 'Отвори Десктоп версията',
+        // sidebar
+        devices: 'Обекти',
+        logout: 'Изход',
+        // device details
+        select_on_map: 'Избери на картата',
+        no_data_available: 'Няма данни',
+        time: 'Време',
+        latitude: 'Ширина',
+        longitude: 'Дължина',
+        altitude: 'Височина',
+        speed: 'Скорост',
+        course: 'Курс',
+        address: 'Адрес',
+        follow: 'Следвай',
+        stop_following: 'Stop following'
     },
     de: {
         _name_: 'German',
@@ -51,7 +82,9 @@ var i18n = {
         altitude: 'Höhe',
         speed: 'Geschw.',
         course: 'Richtung',
-        address: 'Adresse'
+        address: 'Adresse',
+        follow: 'Folgen',
+        stop_following: 'Stop following'
     },
     es: {
         _name_: 'Spanish',
@@ -78,7 +111,9 @@ var i18n = {
         altitude: 'Altura',
         speed: 'Velocidad',
         course: 'Curso',
-        address: 'Dirección'
+        address: 'Dirección',
+        follow: 'Seguir',
+        stop_following: 'Stop following'
     },
     hu: {
         _name_: 'Hungarian',
@@ -105,7 +140,9 @@ var i18n = {
         altitude: 'Magasság',
         speed: 'Sebesség',
         course: 'Irány',
-        address: 'Cím'
+        address: 'Cím',
+        follow: 'Követés',
+        stop_following: 'Stop following'
     },
     it: {
         _name_: 'Italian',
@@ -132,7 +169,9 @@ var i18n = {
         altitude: 'Altitudine',
         speed: 'Velocità',
         course: 'Percorso',
-        address: 'Indirizzo'
+        address: 'Indirizzo',
+        follow: 'Segui',
+        stop_following: 'Stop following'
     },
     lt: {
         _name_: 'Latvian',
@@ -159,7 +198,9 @@ var i18n = {
         altitude: 'Aukštis',
         speed: 'Greitis',
         course: 'Kursas',
-        address: 'Adresas'
+        address: 'Adresas',
+        follow: 'Centruoti',
+        stop_following: 'Stop following'
     },
     nl: {
         _name_: 'Danish',
@@ -186,7 +227,9 @@ var i18n = {
         altitude: 'Hoogte',
         speed: 'Snelheid',
         course: 'Richting',
-        address: 'Adres'
+        address: 'Adres',
+        follow: 'Volgen',
+        stop_following: 'Stop following'
     },
     pl: {
         _name_: 'Polish',
@@ -213,7 +256,9 @@ var i18n = {
         altitude: 'Wysoko\u015B\u0107',
         speed: 'Pr\u0119dko\u015B\u0107',
         course: 'Przebieg',
-        address: 'Adres'
+        address: 'Adres',
+        follow: 'Obserwuj',
+        stop_following: 'Stop following'
     },
     pt_PT: {
         _name_: 'Portuguese',
@@ -240,7 +285,9 @@ var i18n = {
         altitude: 'Altitude',
         speed: 'Velocidade',
         course: 'Rota',
-        address: 'Morada'
+        address: 'Morada',
+        follow: 'Seguir',
+        stop_following: 'Stop following'
     },
     ru: {
         _name_: 'Russian',
@@ -267,7 +314,9 @@ var i18n = {
         altitude: 'Высота',
         speed: 'Скорость',
         course: 'Курс',
-        address: 'Адрес'
+        address: 'Адрес',
+        follow: 'Отслеживать',
+        stop_following: 'Прекратить отслеживание'
     },
     tl: {
         _name_: 'Tagalog',
@@ -294,7 +343,9 @@ var i18n = {
         altitude: 'Altitude',
         speed: 'Speed',
         course: 'Course',
-        address: 'Address'
+        address: 'Address',
+        follow: 'Sundin',
+        stop_following: 'Stop following'
     },
     sv_SE: {
         _name_: 'Svenska',
@@ -321,6 +372,8 @@ var i18n = {
         altitude: 'Altitud',
         speed: 'Hastighet',
         course: 'Kurs',
-        address: 'Adress'
+        address: 'Adress',
+        follow: 'F\u00f6lj',
+        stop_following: 'Stop following'
     }
 };

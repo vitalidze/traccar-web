@@ -46,8 +46,6 @@ public enum DeviceIconType {
                 return iconLatest;
             case OFFLINE:
                 return iconOffline;
-            case ARCHIVE:
-                return PositionIconType.iconArchive; // for now all device icons have same archive icon
         }
         return null;
     }

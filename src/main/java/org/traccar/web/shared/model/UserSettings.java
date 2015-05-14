@@ -241,6 +241,18 @@ public class UserSettings implements IsSerializable {
         this.speedForFilter = speedForFilter;
     }
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private PositionIconType archiveMarkerType;
+
+    public PositionIconType getArchiveMarkerType() {
+        return archiveMarkerType;
+    }
+
+    public void setArchiveMarkerType(PositionIconType archiveMarkerType) {
+        this.archiveMarkerType = archiveMarkerType;
+    }
+
     public long getId() {
         return id;
     }

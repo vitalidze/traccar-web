@@ -17,13 +17,6 @@
         <ui:attributes width="1" height="1" />
     </ui:with>
 
-    <ui:with type="com.sencha.gxt.data.shared.ListStore" field="positionStore" />
-    <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
-
-    <ui:with type="com.sencha.gxt.widget.core.client.grid.LiveGridView" field="view">
-        <ui:attributes stripeRows="true" autoFill="true" />
-    </ui:with>
-
     <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
     <gxt:ContentPanel ui:field="contentPanel" headingText="{i18n.archive}">
@@ -96,18 +89,9 @@
                     </button:TextButton>
                 </toolbar:ToolBar>
             </container:child>
-
             <container:child layoutData="{layoutData}">
-                <grid:Grid ui:field="grid" store="{positionStore}" cm="{columnModel}" view="{view}" stateful="true" stateId="archiveGrid" />
-            </container:child>
-            <container:child layoutData="{toolBarRowData}">
-                <toolbar:ToolBar>
-                    <toolbar:FillToolItem />
-                    <toolbar:LabelToolItem label="{i18n.distance}:" />
-                    <toolbar:LabelToolItem ui:field="totalDistance" label="0" width="80" />
-                    <toolbar:LabelToolItem label="{i18n.speed}:" />
-                    <toolbar:LabelToolItem ui:field="averageSpeed" label="0" width="80" />
-                </toolbar:ToolBar>
+                <gxt:TabPanel ui:field="devicesTabs">
+                </gxt:TabPanel>
             </container:child>
         </container:VerticalLayoutContainer>
     </gxt:ContentPanel>

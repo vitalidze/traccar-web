@@ -126,7 +126,7 @@ public class ExportServlet extends HttpServlet {
     }
 
     void gpx(HttpServletResponse response, Device device, Date from, Date to, boolean filter) throws IOException, XMLStreamException {
-        response.setContentType("text/xml;charset=UTF-8");
+        response.setContentType("application/gpx+xml;charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=traccar-positions.gpx");
 
         TimeZone tz = TimeZone.getTimeZone("UTC");

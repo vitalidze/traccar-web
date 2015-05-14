@@ -19,10 +19,7 @@ import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
-import com.sencha.gxt.widget.core.client.grid.CheckBoxSelectionModel;
-import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.grid.*;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
@@ -87,6 +84,9 @@ public class UserDialog implements Editor<User> {
     Grid<DeviceEventType> grid;
 
     @UiField(provided = true)
+    GridView<DeviceEventType> view;
+
+    @UiField(provided = true)
     ColumnModel<DeviceEventType> columnModel;
 
     @UiField(provided = true)
@@ -94,6 +94,19 @@ public class UserDialog implements Editor<User> {
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
+
+    static class NoScrollbarGridView<M> extends GridView<M> {
+        public NoScrollbarGridView() {
+            this.scrollOffset = 1;
+            this.vbar = false;
+            this.setAdjustForHScroll(false);
+        }
+
+        @Override
+        protected int getScrollAdjust() {
+            return 0;
+        }
+    }
 
     public UserDialog(User user, UserHandler userHandler) {
         this.userHandler = userHandler;
@@ -113,6 +126,10 @@ public class UserDialog implements Editor<User> {
         columns.add(nameCol);
 
         columnModel = new ColumnModel<DeviceEventType>(columns);
+
+        view = new NoScrollbarGridView<DeviceEventType>();
+        view.setAutoFill(true);
+        view.setStripeRows(true);
 
         notificationEventStore = new ListStore<DeviceEventType>(new EnumKeyProvider<DeviceEventType>());
         notificationEventStore.addAll(Arrays.asList(DeviceEventType.values()));
