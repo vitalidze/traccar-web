@@ -330,7 +330,8 @@ function loadPositions() {
                 drawMarker(position);
 
                 // center if necessary
-                if (position.follow != undefined && position.follow) {
+                if (position.follow != undefined && position.follow &&
+                    (prevPosition == null || prevPosition.id != position.id)) {
                     catchPosition(position);
                 }
 
