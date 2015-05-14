@@ -313,6 +313,9 @@ function loadPositions() {
                 prevPosition = appState.latestPositions[position.device.id];
                 if (prevPosition != undefined) {
                     position.selected = prevPosition.selected;
+                    if (prevPosition.follow != undefined) {
+                        position.follow = prevPosition.follow;
+                    }
                 }
                 if (position.selected == undefined) {
                     position.selected = false;
@@ -325,6 +328,11 @@ function loadPositions() {
 
                 // draw marker on map
                 drawMarker(position);
+
+                // center if necessary
+                if (position.follow != undefined && position.follow) {
+                    catchPosition(position);
+                }
 
                 // update position details in side panel
                 if (prevPosition != undefined && position.id != prevPosition.id) {
@@ -339,6 +347,14 @@ function loadPositions() {
 
 function createPoint(lon, lat) {
     return ol.proj.transform([lon, lat], 'EPSG:4326', map.getView().getProjection());
+}
+
+function catchPosition(position) {
+    var mapExtent = map.getView().calculateExtent(map.getSize());
+    var point = createPoint(position.longitude, position.latitude);
+    if (!ol.extent.containsCoordinate(mapExtent, point)) {
+        map.getView().setCenter(point);
+    }
 }
 
 function loadDevices() {
@@ -443,6 +459,22 @@ function drawDeviceDetails(deviceId, position) {
                 });
                 map.getView().setCenter(createPoint(position.longitude, position.latitude));
                 myApp.closePanel();
+            });
+
+            $$('#device-' + deviceId + '-follow').on('click', function() {
+                appState.latestPositions.forEach(function(pos) {
+                    pos.follow = false;
+                });
+                position = appState.latestPositions[deviceId];
+                position.follow = true;
+                drawDeviceDetails(deviceId, position);
+                catchPosition(position);
+            });
+
+            $$('#device-' + deviceId + '-unfollow').on('click', function() {
+                position = appState.latestPositions[deviceId];
+                position.follow = false;
+                drawDeviceDetails(deviceId, position);
             });
         }
     }

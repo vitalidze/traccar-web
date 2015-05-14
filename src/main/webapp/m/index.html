@@ -68,17 +68,15 @@
                 <a href="#" class="button button-fill color-green" id="device-{{device.id}}-select-on-map">{{i18n.select_on_map}}</a>
             </div>
         </div>
-        <!-- div class="row" style="padding-top: 20px;">
-            <div class="col-33">Follow</div>
-            <div class="col-66">
-                <div class="item-input">
-                    <label class="label-switch">
-                        <input type="checkbox">
-                        <div class="checkbox"></div>
-                    </label>
-                </div>
+        <div class="row" style="margin-top: 10px;">
+            <div class="col-100">
+                {{#if follow}}
+                <a href="#" class="button color-blue active" id="device-{{device.id}}-unfollow">{{i18n.stop_following}}</a>
+                {{else}}
+                <a href="#" class="button color-blue" id="device-{{device.id}}-follow">{{i18n.follow}}</a>
+                {{/if}}
             </div>
-        </div -->
+        </div>
     </div>
     <div class="content-block">
         <div class="row">
