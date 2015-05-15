@@ -27,7 +27,11 @@ var i18n = {
         address: 'Address',
         follow: 'Follow',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     bg: {
         _name_: 'Български',
@@ -57,7 +61,11 @@ var i18n = {
         address: 'Адрес',
         follow: 'Следвай',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     de: {
         _name_: 'German',
@@ -87,7 +95,11 @@ var i18n = {
         address: 'Adresse',
         follow: 'Folgen',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     es: {
         _name_: 'Spanish',
@@ -117,7 +129,11 @@ var i18n = {
         address: 'Dirección',
         follow: 'Seguir',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     hu: {
         _name_: 'Hungarian',
@@ -147,7 +163,11 @@ var i18n = {
         address: 'Cím',
         follow: 'Követés',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     it: {
         _name_: 'Italian',
@@ -177,7 +197,11 @@ var i18n = {
         address: 'Indirizzo',
         follow: 'Segui',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     lt: {
         _name_: 'Latvian',
@@ -207,7 +231,11 @@ var i18n = {
         address: 'Adresas',
         follow: 'Centruoti',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     nl: {
         _name_: 'Danish',
@@ -237,7 +265,11 @@ var i18n = {
         address: 'Adres',
         follow: 'Volgen',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     pl: {
         _name_: 'Polish',
@@ -267,7 +299,11 @@ var i18n = {
         address: 'Adres',
         follow: 'Obserwuj',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     pt_PT: {
         _name_: 'Portuguese',
@@ -297,7 +333,11 @@ var i18n = {
         address: 'Morada',
         follow: 'Seguir',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     ru: {
         _name_: 'Russian',
@@ -327,7 +367,11 @@ var i18n = {
         address: 'Адрес',
         follow: 'Отслеживать',
         stop_following: 'Прекратить отслеживание',
-        geo_fence: 'Геозона'
+        geo_fence: 'Геозона',
+        send_location_by_email: 'Отправить по эл. почте',
+        send_location_url_by_email: 'Отправить ссылку по эл. почте',
+        send_location_by_sms: 'Отправить по SMS',
+        send_location_url_by_sms: 'Отправить ссылку по SMS'
     },
     tl: {
         _name_: 'Tagalog',
@@ -357,7 +401,11 @@ var i18n = {
         address: 'Address',
         follow: 'Sundin',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     sv_SE: {
         _name_: 'Svenska',
@@ -387,6 +435,10 @@ var i18n = {
         address: 'Adress',
         follow: 'F\u00f6lj',
         stop_following: 'Stop following',
-        geo_fence: 'Geo-fence'
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     }
 };

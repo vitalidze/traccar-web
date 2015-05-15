@@ -497,56 +497,57 @@ function drawDeviceDetails(deviceId, position) {
                 drawDeviceDetails(deviceId, position);
             });
 
+            var drawSubject = function() {
+                for (var i = 0; i < appState.devices.length; i++) {
+                    if (appState.devices[i].id == deviceId) {
+                        return appState.devices[i].name;
+                    }
+                }
+                return "";
+            };
+            var drawCoordinatesText = function() {
+                var p = appState.latestPositions[deviceId];
+                var text =
+                    i18n.time + ': ' + formatDate(p.time) + '\n' +
+                    i18n.latitude + ': ' + formatDouble(p.latitude, 4) + '\n' +
+                    i18n.longitude + ': ' + formatDouble(p.longitude, 4) + '\n' +
+                    i18n.speed + ': ' + formatSpeed(p.speed) + '\n' +
+                    i18n.course + ': ' + formatDouble(p.course, 2) + '\n';
+                if (p.address != undefined && p.address != null) {
+                    text += i18n.address + ': ' + p.address + '\n';
+                }
+                var other = parseOther(p);
+                if (other != undefined && other != null) {
+                    for (var k in other) {
+                        text += k + ': ' + other[k] + '\n';
+                    }
+                }
+                if (p.geoFences != undefined && p.geoFences != null) {
+                    for (var i = 0; i < p.geoFences.length; i++) {
+                        text += i18n.geo_fence + ': ' + p.geoFences[i].name + '\n';
+                    }
+                }
+                return text;
+            };
+            var drawURL = function() {
+                var p = appState.latestPositions[deviceId];
+                return 'http://www.openstreetmap.org/?mlat=' + p.latitude + '&mlon=' + p.longitude;
+            };
+
             // register 'send by email' function
             $$('#device-' + deviceId + '-send-email').on('click', function () {
                 var target = this;
-                var drawSubject = function() {
-                    for (var i = 0; i < appState.devices.length; i++) {
-                        if (appState.devices[i].id == deviceId) {
-                            return appState.devices[i].name;
-                        }
-                    }
-                    return "";
-                };
-                var drawCoordinatesText = function() {
-                    var p = appState.latestPositions[deviceId];
-                    var text =
-                        i18n.time + ': ' + formatDate(p.time) + '\n' +
-                        i18n.latitude + ': ' + formatDouble(p.latitude, 4) + '\n' +
-                        i18n.longitude + ': ' + formatDouble(p.longitude, 4) + '\n' +
-                        i18n.speed + ': ' + formatSpeed(p.speed) + '\n' +
-                        i18n.course + ': ' + formatDouble(p.course, 2) + '\n';
-                    if (p.address != undefined && p.address != null) {
-                        text += i18n.address + ': ' + p.address + '\n';
-                    }
-                    var other = parseOther(p);
-                    if (other != undefined && other != null) {
-                        for (var k in other) {
-                            text += k + ': ' + other[k] + '\n';
-                        }
-                    }
-                    if (p.geoFences != undefined && p.geoFences != null) {
-                        for (var i = 0; i < p.geoFences.length; i++) {
-                            text += i18n.geo_fence + ': ' + p.geoFences[i].name + '\n';
-                        }
-                    }
-                    return text;
-                };
-                var drawURL = function() {
-                    var p = appState.latestPositions[deviceId];
-                    return 'http://www.openstreetmap.org/?mlat=' + p.latitude + '&mlon=' + p.longitude;
-                };
                 var buttons = [
                     {
-                        text: 'Send coordinates',
+                        text: i18n.send_location_by_email,
                         onClick: function () {
-                            window.open('mailto:?subject=' + encodeURIComponent(drawSubject()) + '&body=' + encodeURIComponent(drawCoordinatesText()), '_blank');
+                            window.location = 'mailto:?subject=' + encodeURIComponent(drawSubject()) + '&body=' + encodeURIComponent(drawCoordinatesText());
                         }
                     },
                     {
-                        text: 'Send location URL',
+                        text: i18n.send_location_url_by_email,
                         onClick: function () {
-                            window.open('mailto:?subject=' + encodeURIComponent(drawSubject()) + '&body=' + encodeURIComponent(drawURL()), '_blank');
+                            window.location = 'mailto:?subject=' + encodeURIComponent(drawSubject()) + '&body=' + encodeURIComponent(drawURL());
                         }
                     }
                 ];
@@ -558,20 +559,25 @@ function drawDeviceDetails(deviceId, position) {
                 var target = this;
                 var buttons = [
                     {
-                        text: 'Send coordinates',
+                        text: i18n.send_location_by_sms,
                         onClick: function () {
-                            myApp.alert('Button1 clicked');
+                            window.location = 'sms:?body=' + encodeURIComponent(drawCoordinatesText());
                         }
                     },
                     {
-                        text: 'Send location URL',
+                        text: i18n.send_location_url_by_sms,
                         onClick: function () {
-                            myApp.alert('Button2 clicked');
+                            window.location = 'sms:?body=' + encodeURIComponent(drawURL());
                         }
                     }
                 ];
                 myApp.actions(target, buttons);
             });
+
+            // hide 'send by sms' on ios devices since 'body' is not supported in sms URLs there
+            if (myApp.device.ios) {
+                $$('#device-' + deviceId + '-send-sms').hide();
+            }
         }
     }
 }
