@@ -41,7 +41,8 @@ var myApp = new Framework7({
 var $$ = Dom7;
 
 // register template7 helpers
-Template7.registerHelper('formatDate', function(timestamp) {
+
+function formatDate(timestamp) {
     var date = new Date(timestamp);
     var month = date.getMonth() + 1;
 
@@ -51,13 +52,19 @@ Template7.registerHelper('formatDate', function(timestamp) {
         (date.getHours() < 10 ? '0' : '') + date.getHours() + ':' +
         (date.getMinutes() < 10 ? '0' : '') + date.getMinutes() + ':' +
         (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
-});
+}
+
+Template7.registerHelper('formatDate', formatDate);
+
+function formatDouble(double, n) {
+    return isNaN(double) ? "-" : double.toFixed(n)
+}
 
 Template7.registerHelper('formatDouble', function(double, options) {
-    return isNaN(double) ? "-" : double.toFixed(options.hash.n);
+    return formatDouble(double, options.hash.n);
 });
 
-Template7.registerHelper('formatSpeed', function(speed) {
+function formatSpeed(speed) {
     if (isNaN(speed)) return "-";
 
     var factor = 1;
@@ -71,7 +78,9 @@ Template7.registerHelper('formatSpeed', function(speed) {
         suffix = 'mph';
     }
     return (speed * factor).toFixed(2) + ' ' + suffix;
-});
+}
+
+Template7.registerHelper('formatSpeed', formatSpeed);
 
 // Add view
 var mainView = myApp.addView('.view-main');
@@ -406,6 +415,37 @@ function loadDevices() {
     });
 }
 
+function parseOther(position) {
+    // parse 'other' field
+    var xmlDoc;
+    if (window.DOMParser)  {
+        parser = new DOMParser();
+        xmlDoc = parser.parseFromString(position.other, "text/xml");
+        // Internet Explorer
+    } else {
+        xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+        xmlDoc.async = false;
+        xmlDoc.loadXML(position.other);
+    }
+
+    var result;
+    if (xmlDoc.documentElement == null) {
+        result = null;
+    } else {
+        result = {};
+        var nodes = xmlDoc.documentElement.childNodes;
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].textContent == null) {
+                result[nodes[i].nodeName] = nodes[i].nodeValue;
+            } else {
+                result[nodes[i].nodeName] = nodes[i].textContent;
+            }
+        }
+    }
+
+    return result;
+}
+
 function drawDeviceDetails(deviceId, position) {
     var deviceDetails = $$('#device-' + deviceId + '-details');
     if (deviceDetails != undefined) {
@@ -413,31 +453,7 @@ function drawDeviceDetails(deviceId, position) {
             deviceDetails.html('<div class="content-block">' + i18n.no_data_available + '</div>');
         } else {
             var otherXML = position.other;
-
-            // parse 'other' field
-            if (window.DOMParser)  {
-                parser = new DOMParser();
-                xmlDoc = parser.parseFromString(otherXML, "text/xml");
-            // Internet Explorer
-            } else {
-                xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-                xmlDoc.async = false;
-                xmlDoc.loadXML(otherXML);
-            }
-
-            if (xmlDoc.documentElement == null) {
-                position.other = null;
-            } else {
-                position.other = {};
-                var nodes = xmlDoc.documentElement.childNodes;
-                for (var i = 0; i < nodes.length; i++) {
-                    if (nodes[i].textContent == null) {
-                        position.other[nodes[i].nodeName] = nodes[i].nodeValue;
-                    } else {
-                        position.other[nodes[i].nodeName] = nodes[i].textContent;
-                    }
-                }
-            }
+            position.other = parseOther(position);
 
             var source   = $$('#device-details-template').html();
             var template = Template7.compile(source);
@@ -447,6 +463,7 @@ function drawDeviceDetails(deviceId, position) {
             // restore back XML
             position.other = otherXML;
 
+            // register 'select on map' function
             $$('#device-' + deviceId +'-select-on-map').on('click', function() {
                 position = appState.latestPositions[deviceId];
                 position.selected = true;
@@ -462,6 +479,7 @@ function drawDeviceDetails(deviceId, position) {
                 myApp.closePanel();
             });
 
+            // register 'follow' function
             $$('#device-' + deviceId + '-follow').on('click', function() {
                 appState.latestPositions.forEach(function(pos) {
                     pos.follow = false;
@@ -472,10 +490,87 @@ function drawDeviceDetails(deviceId, position) {
                 catchPosition(position);
             });
 
+            // register 'unfollow' function
             $$('#device-' + deviceId + '-unfollow').on('click', function() {
                 position = appState.latestPositions[deviceId];
                 position.follow = false;
                 drawDeviceDetails(deviceId, position);
+            });
+
+            // register 'send by email' function
+            $$('#device-' + deviceId + '-send-email').on('click', function () {
+                var target = this;
+                var drawSubject = function() {
+                    for (var i = 0; i < appState.devices.length; i++) {
+                        if (appState.devices[i].id == deviceId) {
+                            return appState.devices[i].name;
+                        }
+                    }
+                    return "";
+                };
+                var drawCoordinatesText = function() {
+                    var p = appState.latestPositions[deviceId];
+                    var text =
+                        i18n.time + ': ' + formatDate(p.time) + '\n' +
+                        i18n.latitude + ': ' + formatDouble(p.latitude, 4) + '\n' +
+                        i18n.longitude + ': ' + formatDouble(p.longitude, 4) + '\n' +
+                        i18n.speed + ': ' + formatSpeed(p.speed) + '\n' +
+                        i18n.course + ': ' + formatDouble(p.course, 2) + '\n';
+                    if (p.address != undefined && p.address != null) {
+                        text += i18n.address + ': ' + p.address + '\n';
+                    }
+                    var other = parseOther(p);
+                    if (other != undefined && other != null) {
+                        for (var k in other) {
+                            text += k + ': ' + other[k] + '\n';
+                        }
+                    }
+                    if (p.geoFences != undefined && p.geoFences != null) {
+                        for (var i = 0; i < p.geoFences.length; i++) {
+                            text += i18n.geo_fence + ': ' + p.geoFences[i].name + '\n';
+                        }
+                    }
+                    return text;
+                };
+                var drawURL = function() {
+                    var p = appState.latestPositions[deviceId];
+                    return 'http://www.openstreetmap.org/?mlat=' + p.latitude + '&mlon=' + p.longitude;
+                };
+                var buttons = [
+                    {
+                        text: 'Send coordinates',
+                        onClick: function () {
+                            window.open('mailto:?subject=' + encodeURIComponent(drawSubject()) + '&body=' + encodeURIComponent(drawCoordinatesText()), '_blank');
+                        }
+                    },
+                    {
+                        text: 'Send location URL',
+                        onClick: function () {
+                            window.open('mailto:?subject=' + encodeURIComponent(drawSubject()) + '&body=' + encodeURIComponent(drawURL()), '_blank');
+                        }
+                    }
+                ];
+                myApp.actions(target, buttons);
+            });
+
+            // register 'send by sms' function
+            $$('#device-' + deviceId + '-send-sms').on('click', function() {
+                var target = this;
+                var buttons = [
+                    {
+                        text: 'Send coordinates',
+                        onClick: function () {
+                            myApp.alert('Button1 clicked');
+                        }
+                    },
+                    {
+                        text: 'Send location URL',
+                        onClick: function () {
+                            myApp.alert('Button2 clicked');
+                        }
+                    }
+                ];
+                myApp.actions(target, buttons);
             });
         }
     }

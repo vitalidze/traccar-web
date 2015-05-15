@@ -26,7 +26,8 @@ var i18n = {
         course: 'Course',
         address: 'Address',
         follow: 'Follow',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     bg: {
         _name_: 'Български',
@@ -55,7 +56,8 @@ var i18n = {
         course: 'Курс',
         address: 'Адрес',
         follow: 'Следвай',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     de: {
         _name_: 'German',
@@ -84,7 +86,8 @@ var i18n = {
         course: 'Richtung',
         address: 'Adresse',
         follow: 'Folgen',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     es: {
         _name_: 'Spanish',
@@ -113,7 +116,8 @@ var i18n = {
         course: 'Curso',
         address: 'Dirección',
         follow: 'Seguir',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     hu: {
         _name_: 'Hungarian',
@@ -142,7 +146,8 @@ var i18n = {
         course: 'Irány',
         address: 'Cím',
         follow: 'Követés',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     it: {
         _name_: 'Italian',
@@ -171,7 +176,8 @@ var i18n = {
         course: 'Percorso',
         address: 'Indirizzo',
         follow: 'Segui',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     lt: {
         _name_: 'Latvian',
@@ -200,7 +206,8 @@ var i18n = {
         course: 'Kursas',
         address: 'Adresas',
         follow: 'Centruoti',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     nl: {
         _name_: 'Danish',
@@ -229,7 +236,8 @@ var i18n = {
         course: 'Richting',
         address: 'Adres',
         follow: 'Volgen',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     pl: {
         _name_: 'Polish',
@@ -258,7 +266,8 @@ var i18n = {
         course: 'Przebieg',
         address: 'Adres',
         follow: 'Obserwuj',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     pt_PT: {
         _name_: 'Portuguese',
@@ -287,7 +296,8 @@ var i18n = {
         course: 'Rota',
         address: 'Morada',
         follow: 'Seguir',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     ru: {
         _name_: 'Russian',
@@ -316,7 +326,8 @@ var i18n = {
         course: 'Курс',
         address: 'Адрес',
         follow: 'Отслеживать',
-        stop_following: 'Прекратить отслеживание'
+        stop_following: 'Прекратить отслеживание',
+        geo_fence: 'Геозона'
     },
     tl: {
         _name_: 'Tagalog',
@@ -345,7 +356,8 @@ var i18n = {
         course: 'Course',
         address: 'Address',
         follow: 'Sundin',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     },
     sv_SE: {
         _name_: 'Svenska',
@@ -374,6 +386,7 @@ var i18n = {
         course: 'Kurs',
         address: 'Adress',
         follow: 'F\u00f6lj',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence'
     }
 };
