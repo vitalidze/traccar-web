@@ -514,7 +514,7 @@ function drawDeviceDetails(deviceId, position) {
                     i18n.speed + ': ' + formatSpeed(p.speed) + '\n' +
                     i18n.course + ': ' + formatDouble(p.course, 2) + '\n';
                 if (p.address != undefined && p.address != null) {
-                    text += i18n.address + ': ' + p.address + '\n';
+                    text += i18n.address + ': ' + encodeURIComponent(p.address) + '\n';
                 }
                 var other = parseOther(p);
                 if (other != undefined && other != null) {
@@ -531,7 +531,7 @@ function drawDeviceDetails(deviceId, position) {
             };
             var drawURL = function() {
                 var p = appState.latestPositions[deviceId];
-                return 'http://www.openstreetmap.org/?mlat=' + p.latitude + '&mlon=' + p.longitude;
+                return 'http://www.openstreetmap.org/?mlat=' + p.latitude + '%26mlon=' + p.longitude;
             };
 
             // register 'send by email' function
