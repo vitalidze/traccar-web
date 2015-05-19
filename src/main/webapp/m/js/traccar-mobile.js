@@ -529,9 +529,13 @@ function drawDeviceDetails(deviceId, position) {
                 }
                 return text;
             };
-            var drawURL = function() {
+            var drawURL = function(sms) {
                 var p = appState.latestPositions[deviceId];
-                return 'http://www.openstreetmap.org/?mlat=' + p.latitude + '%26mlon=' + p.longitude;
+                var amp = '&';
+                if (sms || myApp.device.android && myApp.device.osVersion == '4.4.2') {
+                    amp = '%26';
+                }
+                return 'http://www.openstreetmap.org/?mlat=' + p.latitude + amp + 'mlon=' + p.longitude;
             };
 
             // register 'send by email' function
@@ -547,7 +551,7 @@ function drawDeviceDetails(deviceId, position) {
                     {
                         text: i18n.send_location_url_by_email,
                         onClick: function () {
-                            window.location = 'mailto:?subject=' + encodeURIComponent(drawSubject()) + '&body=' + encodeURIComponent(drawURL());
+                            window.location = 'mailto:?subject=' + encodeURIComponent(drawSubject()) + '&body=' + encodeURIComponent(drawURL(false));
                         }
                     }
                 ];
@@ -567,7 +571,7 @@ function drawDeviceDetails(deviceId, position) {
                     {
                         text: i18n.send_location_url_by_sms,
                         onClick: function () {
-                            window.location = 'sms:?body=' + encodeURIComponent(drawURL());
+                            window.location = 'sms:?body=' + encodeURIComponent(drawURL(true));
                         }
                     }
                 ];
