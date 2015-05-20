@@ -11,6 +11,14 @@
     <ui:attributes width="1" height="-1" />
   </ui:with>
 
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="rightMargins">
+    <ui:attributes top="0" right="4" bottom="0" left="0" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutData">
+      <ui:attributes width="-1" height="-1" margins="{rightMargins}" />
+  </ui:with>
+
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="integerPropertyEditor" />
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="doublePropertyEditor" />
 
@@ -59,10 +67,24 @@
         </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
+        <form:FieldLabel text="{i18n.markers}" labelWidth="140">
+            <form:widget>
+                <container:HorizontalLayoutContainer>
+                    <container:child layoutData="{horizontalLayoutData}">
+                        <g:Image ui:field="markerImage" />
+                    </container:child>
+                    <container:child layoutData="{horizontalLayoutData}">
+                        <button:TextButton ui:field="selectButton" text="{i18n.select}..." />
+                    </container:child>
+                </container:HorizontalLayoutContainer>
+            </form:widget>
+        </form:FieldLabel>
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
           <container:VerticalLayoutContainer ui:field="devicePictures" />
       </container:child>
     </container:VerticalLayoutContainer>
-      
+
     <gxt:button>
       <button:TextButton ui:field="saveButton" text="{i18n.save}" />
     </gxt:button>

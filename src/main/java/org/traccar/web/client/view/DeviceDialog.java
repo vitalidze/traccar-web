@@ -16,6 +16,7 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.ToggleGroup;
@@ -40,6 +41,7 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import org.traccar.web.shared.model.DeviceIconType;
 import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.PositionIconType;
 
 public class DeviceDialog implements Editor<Device> {
 
@@ -83,10 +85,15 @@ public class DeviceDialog implements Editor<Device> {
     @UiField
     NumberField<Double> idleSpeedThreshold;
 
+    @UiField(provided = true)
+    final Image markerImage;
+
     ToggleGroup iconRadioGroup = new ToggleGroup();
 
     public DeviceDialog(Device device, DeviceHandler deviceHandler) {
         this.deviceHandler = deviceHandler;
+        markerImage = new Image(device.getIconType().getPositionIconType(Position.Status.OFFLINE).getURL(false));
+
         uiBinder.createAndBindUi(this);
 
         timeout.addValidator(new MinNumberValidator<Integer>(1));
