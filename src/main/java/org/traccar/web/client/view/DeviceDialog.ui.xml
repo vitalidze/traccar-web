@@ -24,7 +24,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="375, 280" modal="true" headingText="{i18n.device}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="375, 210" modal="true" headingText="{i18n.device}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.name}" labelWidth="140">
@@ -69,7 +69,7 @@
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.markers}" labelWidth="140">
             <form:widget>
-                <container:HorizontalLayoutContainer>
+                <container:HorizontalLayoutContainer ui:field="panelMarkers">
                     <container:child layoutData="{horizontalLayoutData}">
                         <g:Image ui:field="markerImage" />
                     </container:child>
@@ -79,9 +79,6 @@
                 </container:HorizontalLayoutContainer>
             </form:widget>
         </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-          <container:VerticalLayoutContainer ui:field="devicePictures" />
       </container:child>
     </container:VerticalLayoutContainer>
 

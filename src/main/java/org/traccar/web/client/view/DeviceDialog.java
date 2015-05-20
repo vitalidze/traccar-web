@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.ToggleGroup;
+import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
@@ -70,9 +71,6 @@ public class DeviceDialog implements Editor<Device> {
     @UiField
     TextField uniqueId;
 
-    @UiField
-    VerticalLayoutContainer devicePictures;
-
     @UiField(provided = true)
     NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
 
@@ -85,14 +83,17 @@ public class DeviceDialog implements Editor<Device> {
     @UiField
     NumberField<Double> idleSpeedThreshold;
 
-    @UiField(provided = true)
-    final Image markerImage;
+    @UiField
+    HorizontalLayoutContainer panelMarkers;
 
-    ToggleGroup iconRadioGroup = new ToggleGroup();
+    @UiField
+    Image markerImage;
+
+    DeviceIconType selectedIcon;
 
     public DeviceDialog(Device device, DeviceHandler deviceHandler) {
         this.deviceHandler = deviceHandler;
-        markerImage = new Image(device.getIconType().getPositionIconType(Position.Status.OFFLINE).getURL(false));
+        selectedIcon = device.getIconType();
 
         uiBinder.createAndBindUi(this);
 
@@ -103,24 +104,7 @@ public class DeviceDialog implements Editor<Device> {
         driver.edit(device);
 
         idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
-
-
-        HorizontalPanel nextPanel = null;
-        DeviceIconType[] deviceIconTypes = DeviceIconType.values();
-        for (int i = 0; i < deviceIconTypes.length; i++) {
-            DeviceIconType deviceIconType = deviceIconTypes[i];
-            if (nextPanel == null || i % 5 == 0) {
-                nextPanel = new HorizontalPanel();
-                devicePictures.add(nextPanel, new VerticalLayoutContainer.VerticalLayoutData(-1, -1, new Margins(5, 0, 5, 5)));
-            }
-
-            Radio radio = new Radio();
-            radio.setBoxLabel("<img src=\"" + deviceIconType.getPositionIconType(Position.Status.OFFLINE).getURL(false) + "\">");
-            nextPanel.add(radio);
-            iconRadioGroup.add(radio);
-            radio.setValue(deviceIconType == device.getIconType());
-            radio.setId(deviceIconType.name());
-        }
+        updateIcon();
     }
 
     public void show() {
@@ -136,9 +120,7 @@ public class DeviceDialog implements Editor<Device> {
         window.hide();
         Device device = driver.flush();
         device.setIdleSpeedThreshold(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getIdleSpeedThreshold()));
-        if (iconRadioGroup.getValue() != null) {
-            device.setIconType(DeviceIconType.valueOf(((Radio) iconRadioGroup.getValue()).getId()));
-        }
+        device.setIconType(selectedIcon);
         deviceHandler.onSave(device);
     }
 
@@ -147,4 +129,21 @@ public class DeviceDialog implements Editor<Device> {
         window.hide();
     }
 
+    @UiHandler("selectButton")
+    public void onSelectMarkerIconClicked(SelectEvent event) {
+        new DeviceMarkersDialog(selectedIcon, new DeviceMarkersDialog.DeviceMarkerHandler() {
+            @Override
+            public void onSave(DeviceIconType icon) {
+                if (icon != null) {
+                    selectedIcon = icon;
+                    updateIcon();
+                }
+            }
+        }).show();
+    }
+
+    private void updateIcon() {
+        markerImage.setUrl(selectedIcon.getPositionIconType(Position.Status.OFFLINE).getURL(false));
+        panelMarkers.forceLayout();
+    }
 }
