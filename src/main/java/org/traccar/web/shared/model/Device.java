@@ -170,6 +170,42 @@ public class Device implements IsSerializable {
         this.iconType = iconType;
     }
 
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_def_icon_id"))
+    private Picture defaultIcon;
+
+    public Picture getDefaultIcon() {
+        return defaultIcon;
+    }
+
+    public void setDefaultIcon(Picture defaultIcon) {
+        this.defaultIcon = defaultIcon;
+    }
+
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_sel_icon_id"))
+    private Picture selectedIcon;
+
+    public Picture getSelectedIcon() {
+        return selectedIcon;
+    }
+
+    public void setSelectedIcon(Picture selectedIcon) {
+        this.selectedIcon = selectedIcon;
+    }
+
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_off_icon_id"))
+    private Picture offlineIcon;
+
+    public Picture getOfflineIcon() {
+        return offlineIcon;
+    }
+
+    public void setOfflineIcon(Picture offlineIcon) {
+        this.offlineIcon = offlineIcon;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
