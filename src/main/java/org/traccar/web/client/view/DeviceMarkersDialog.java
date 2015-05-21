@@ -16,6 +16,8 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -24,18 +26,20 @@ import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.SimpleSafeHtmlCell;
 import com.sencha.gxt.core.client.IdentityValueProvider;
-import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.core.client.resources.CommonStyles;
+import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.theme.base.client.listview.ListViewCustomAppearance;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.DeviceIconType;
 import org.traccar.web.shared.model.Position;
 
@@ -72,11 +76,31 @@ public class DeviceMarkersDialog {
     @UiField(provided = true)
     ListView<Marker, Marker> view;
 
+    @UiField(provided = true)
+    BorderLayoutContainer.BorderLayoutData centerData;
+
+    @UiField(provided = true)
+    BorderLayoutContainer.BorderLayoutData eastData;
+
+    @UiField
+    VerticalLayoutContainer panelImages;
+
+    @UiField
+    Image defaultImage;
+
+    @UiField
+    Image selectedImage;
+
+    @UiField
+    Image offlineImage;
+
     final DeviceMarkerHandler handler;
 
     static abstract class Marker {
         abstract String getKey();
-        abstract String getURL();
+        abstract String getDefaultURL();
+        abstract String getSelectedURL();
+        abstract String getOfflineURL();
     }
 
     class BuiltInMarker extends Marker {
@@ -92,8 +116,18 @@ public class DeviceMarkersDialog {
         }
 
         @Override
-        String getURL() {
+        String getOfflineURL() {
             return icon.getPositionIconType(Position.Status.OFFLINE).getURL(false);
+        }
+
+        @Override
+        String getDefaultURL() {
+            return icon.getPositionIconType(Position.Status.LATEST).getURL(false);
+        }
+
+        @Override
+        String getSelectedURL() {
+            return icon.getPositionIconType(Position.Status.LATEST).getURL(true);
         }
     }
 
@@ -151,17 +185,32 @@ public class DeviceMarkersDialog {
                         .appendHtmlConstant("<div class=\"")
                         .appendHtmlConstant(style.thumb())
                         .appendHtmlConstant("\" style=\"background: url(")
-                        .appendHtmlConstant(object.getURL())
+                        .appendHtmlConstant(object.getOfflineURL())
                         .appendHtmlConstant(") no-repeat center center;\"></div>")
                         .toSafeHtml();
             }
         }));
 
         view.getSelectionModel().setSelectionMode(com.sencha.gxt.core.client.Style.SelectionMode.SINGLE);
+        view.getSelectionModel().addSelectionHandler(new SelectionHandler<Marker>() {
+            @Override
+            public void onSelection(SelectionEvent<Marker> event) {
+                updateImages();
+            }
+        });
+
+        eastData = new BorderLayoutContainer.BorderLayoutData(85);
+        eastData.setSplit(true);
+        eastData.setMargins(new Margins(5, 0, 0, 0));
+
+        centerData = new BorderLayoutContainer.BorderLayoutData();
+        centerData.setMargins(new Margins(0, 5, 0, 0));
 
         uiBinder.createAndBindUi(this);
 
         view.getSelectionModel().select(selectedMarker, false);
+
+        updateImages();
     }
 
     public void show() {
@@ -182,5 +231,19 @@ public class DeviceMarkersDialog {
     @UiHandler("cancelButton")
     public void onCancelClicked(SelectEvent event) {
         hide();
+    }
+
+    private void updateImages() {
+        Marker marker = view.getSelectionModel().getSelectedItem();
+        if (marker == null) {
+            defaultImage.setUrl("");
+            selectedImage.setUrl("");
+            offlineImage.setUrl("");
+        } else {
+            defaultImage.setUrl(marker.getDefaultURL());
+            selectedImage.setUrl(marker.getSelectedURL());
+            offlineImage.setUrl(marker.getOfflineURL());
+        }
+        panelImages.forceLayout();
     }
 }

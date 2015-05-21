@@ -1,22 +1,56 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder
-    xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
-  	xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
-  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
+        xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        xmlns:ui="urn:ui:com.google.gwt.uibinder"
+        xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+        xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+        xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button" xmlns:field="http://www.w3.org/1999/html">
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
-    <ui:attributes width="1" height="1" />
+    <ui:attributes width="1" height="-1" />
   </ui:with>
+
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="imageMargins">
+    <ui:attributes top="5" right="0" bottom="5" left="0" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="imageLayoutData">
+    <ui:attributes width="-1" height="-1" margins="{imageMargins}" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="centerData" />
+  <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="eastData" />
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
   <gxt:Window ui:field="window" pixelSize="386, 280" modal="true" headingText="{i18n.markers}" focusWidget="{saveButton}">
-    <container:VerticalLayoutContainer>
-      <container:child layoutData="{verticalLayoutData}">
-          <gxt:ListView ui:field="view"/>
-      </container:child>
-    </container:VerticalLayoutContainer>
+    <container:BorderLayoutContainer ui:field="con" borders="true">
+      <container:center layoutData="{centerData}">
+        <gxt:ListView ui:field="view"/>
+      </container:center>
+      <container:east layoutData="{eastData}">
+        <container:VerticalLayoutContainer ui:field="panelImages">
+            <container:child layoutData="{verticalLayoutData}">
+                <g:Label text="{i18n.defaultIcon}" />
+            </container:child>
+            <container:child layoutData="{imageLayoutData}">
+                <g:Image ui:field="defaultImage" />
+            </container:child>
+            <container:child layoutData="{verticalLayoutData}">
+                <g:Label text="{i18n.selectedIcon}" />
+            </container:child>
+            <container:child layoutData="{imageLayoutData}">
+                <g:Image ui:field="selectedImage" />
+            </container:child>
+            <container:child layoutData="{verticalLayoutData}">
+                <g:Label text="{i18n.offlineIcon}"/>
+            </container:child>
+            <container:child layoutData="{imageLayoutData}">
+                <g:Image ui:field="offlineImage" />
+            </container:child>
+        </container:VerticalLayoutContainer>
+      </container:east>
+    </container:BorderLayoutContainer>
 
     <gxt:button>
       <button:TextButton ui:field="saveButton" text="OK" />

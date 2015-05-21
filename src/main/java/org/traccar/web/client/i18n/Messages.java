@@ -309,4 +309,10 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String noMarkers();
 
     String select();
+
+    String defaultIcon();
+
+    String selectedIcon();
+
+    String offlineIcon();
 }
