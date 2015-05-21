@@ -63,6 +63,7 @@ public class Picture implements IsSerializable {
 
     private int width;
     private int height;
+    private String mimeType;
 
     public int getWidth() {
         return width;
@@ -78,6 +79,14 @@ public class Picture implements IsSerializable {
 
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
     }
 
     @Override

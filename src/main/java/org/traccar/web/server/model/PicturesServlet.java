@@ -26,6 +26,9 @@ import org.traccar.web.shared.model.Picture;
 import org.traccar.web.shared.model.PictureType;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -36,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,11 +83,25 @@ public class PicturesServlet  extends HttpServlet {
                     return;
                 }
 
-                BufferedImage image = ImageIO.read(file);
-                if (image == null) {
+                ImageInputStream imageStream = ImageIO.createImageInputStream(file);
+                Iterator<ImageReader> readers = ImageIO.getImageReaders(imageStream);
+                if (readers == null || !readers.hasNext()) {
                     resp.getWriter().write("This is not an image.");
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     return;
+                }
+
+                ImageReader reader = readers.next();
+                String mimeType = reader.getFormatName();
+                ImageReadParam param = reader.getDefaultReadParam();
+                reader.setInput(imageStream, true, true);
+
+                BufferedImage image;
+                try {
+                    image = reader.read(0, param);
+                } finally {
+                    reader.dispose();
+                    imageStream.close();
                 }
 
                 if (image.getWidth() > pictureType.getMaxWidth() || image.getHeight() > pictureType.getMaxHeight()) {
@@ -96,6 +114,7 @@ public class PicturesServlet  extends HttpServlet {
                 picture.setType(pictureType);
                 picture.setWidth(image.getWidth());
                 picture.setHeight(image.getHeight());
+                picture.setMimeType(mimeType);
                 picture.setData(FileUtils.readFileToByteArray(file));
                 entityManager.get().persist(picture);
             }
