@@ -40,6 +40,9 @@ import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.SubmitCompleteEvent;
+import com.sencha.gxt.widget.core.client.form.FileUploadField;
+import com.sencha.gxt.widget.core.client.form.FormPanel;
 import org.traccar.web.shared.model.DeviceIconType;
 import org.traccar.web.shared.model.Position;
 
@@ -82,6 +85,9 @@ public class DeviceMarkersDialog {
     @UiField(provided = true)
     BorderLayoutContainer.BorderLayoutData eastData;
 
+    @UiField(provided = true)
+    BorderLayoutContainer.BorderLayoutData southData;
+
     @UiField
     VerticalLayoutContainer panelImages;
 
@@ -93,6 +99,12 @@ public class DeviceMarkersDialog {
 
     @UiField
     Image offlineImage;
+
+    @UiField
+    FormPanel form;
+
+    @UiField
+    FileUploadField fileToImport;
 
     final DeviceMarkerHandler handler;
 
@@ -200,13 +212,24 @@ public class DeviceMarkersDialog {
         });
 
         eastData = new BorderLayoutContainer.BorderLayoutData(85);
-        eastData.setSplit(true);
+        eastData.setSplit(false);
         eastData.setMargins(new Margins(5, 0, 0, 0));
 
         centerData = new BorderLayoutContainer.BorderLayoutData();
         centerData.setMargins(new Margins(0, 5, 0, 0));
 
+        southData = new BorderLayoutContainer.BorderLayoutData(32);
+        southData.setSplit(false);
+        southData.setMargins(new Margins(5, 0, 0, 5));
+
         uiBinder.createAndBindUi(this);
+
+        form.addSubmitCompleteHandler(new SubmitCompleteEvent.SubmitCompleteHandler() {
+            @Override
+            public void onSubmitComplete(SubmitCompleteEvent event) {
+                new LogViewDialog(event.getResults()).show();
+            }
+        });
 
         view.getSelectionModel().select(selectedMarker, false);
 
@@ -231,6 +254,11 @@ public class DeviceMarkersDialog {
     @UiHandler("cancelButton")
     public void onCancelClicked(SelectEvent event) {
         hide();
+    }
+
+    @UiHandler("uploadButton")
+    public void onUploadClicked(SelectEvent event) {
+        form.submit();
     }
 
     private void updateImages() {
