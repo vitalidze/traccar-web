@@ -16,11 +16,27 @@
 package org.traccar.web.shared.model;
 
 public enum PictureType {
-    MARKER(20 * 1024), DEVICE_PHOTO(300 * 1024);
+    MARKER(20 * 1024, 70, 30), DEVICE_PHOTO(300 * 1024, 1024, 768);
 
-    final int maxLength;
+    final int maxFileSize;
+    final int maxWidth;
+    final int maxHeight;
 
-    PictureType(int maxLength) {
-        this.maxLength = maxLength;
+    PictureType(int maxFileSize, int maxWidth, int maxHeight) {
+        this.maxFileSize = maxFileSize;
+        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
+    }
+
+    public int getMaxFileSize() {
+        return maxFileSize;
+    }
+
+    public int getMaxWidth() {
+        return maxWidth;
+    }
+
+    public int getMaxHeight() {
+        return maxHeight;
     }
 }
