@@ -17,7 +17,6 @@ package org.traccar.web.server.model;
 
 import com.google.inject.persist.Transactional;
 import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
@@ -128,5 +127,31 @@ public class PicturesServlet  extends HttpServlet {
             IOUtils.closeQuietly(os);
             FileUtils.deleteQuietly(file);
         }
+    }
+
+    @Transactional(rollbackOn = { IOException.class, RuntimeException.class })
+    @RequireUser
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        long pictureId;
+        try {
+            pictureId = Long.parseLong(req.getPathInfo().substring(1));
+        } catch (NumberFormatException nfe) {
+            resp.getWriter().write("Incorrect picture id: " + req.getPathInfo().substring(1));
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        Picture picture = entityManager.get().find(Picture.class, pictureId);
+        if (picture == null) {
+            resp.getWriter().write("Picture with id " + pictureId + " does not exist");
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        resp.setContentType("image/" + picture.getMimeType());
+        resp.setContentLength(picture.getData().length);
+        IOUtils.write(picture.getData(), resp.getOutputStream());
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 }
