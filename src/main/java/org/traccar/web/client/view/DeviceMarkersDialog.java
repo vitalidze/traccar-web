@@ -49,6 +49,7 @@ import com.sencha.gxt.widget.core.client.form.FormPanel;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
+import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.shared.model.DeviceIcon;
 import org.traccar.web.shared.model.DeviceIconType;
 import org.traccar.web.shared.model.Position;
@@ -210,6 +211,8 @@ public class DeviceMarkersDialog {
         }
     };
 
+    Marker selected;
+
     public DeviceMarkersDialog(DeviceIconType selectedIcon, DeviceMarkerHandler handler) {
         this.handler = handler;
 
@@ -240,7 +243,7 @@ public class DeviceMarkersDialog {
             }
         };
 
-        ListStore<Marker> store = new ListStore<Marker>(keyProvider);
+        final ListStore<Marker> store = new ListStore<Marker>(keyProvider);
         Loader<Object, List<Marker>> loader = new Loader<Object, List<Marker>>(hybridProxy);
         loader.addLoadHandler(new ListStoreBinding<Object, Marker, List<Marker>>(store));
 
@@ -292,8 +295,19 @@ public class DeviceMarkersDialog {
             }
         });
 
+        selected = new BuiltInMarker(selectedIcon);
+        store.addStoreHandlers(new BaseStoreHandlers<Marker>() {
+            @Override
+            public void onAnything() {
+                for (int i = 0; i < store.size(); i++) {
+                    if (store.get(i).getKey().equals(selected.getKey())) {
+                        view.getSelectionModel().select(i, false);
+                        break;
+                    }
+                }
+            }
+        });
         loader.load();
-        view.getSelectionModel().select(new BuiltInMarker(selectedIcon), false);
 
         updateImages();
     }
