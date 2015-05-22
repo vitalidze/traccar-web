@@ -23,6 +23,8 @@ import javax.persistence.*;
 @Entity
 @Table(name = "pictures")
 public class Picture implements IsSerializable {
+    public static final String URL_PREFIX = "/traccar/p/";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)

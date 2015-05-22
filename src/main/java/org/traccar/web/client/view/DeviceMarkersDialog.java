@@ -26,14 +26,17 @@ import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.SimpleSafeHtmlCell;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.resources.CommonStyles;
 import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.data.client.loader.RpcProxy;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.data.shared.loader.*;
 import com.sencha.gxt.theme.base.client.listview.ListViewCustomAppearance;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.Window;
@@ -43,8 +46,15 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SubmitCompleteEvent;
 import com.sencha.gxt.widget.core.client.form.FileUploadField;
 import com.sencha.gxt.widget.core.client.form.FormPanel;
+import org.traccar.web.client.Application;
+import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.model.BaseAsyncCallback;
+import org.traccar.web.shared.model.DeviceIcon;
 import org.traccar.web.shared.model.DeviceIconType;
 import org.traccar.web.shared.model.Position;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DeviceMarkersDialog {
     private static DeviceMarkersDialogUiBinder uiBinder = GWT.create(DeviceMarkersDialogUiBinder.class);
@@ -73,8 +83,6 @@ public class DeviceMarkersDialog {
 
     @UiField
     Window window;
-
-    ListStore<Marker> store;
 
     @UiField(provided = true)
     ListView<Marker, Marker> view;
@@ -106,6 +114,9 @@ public class DeviceMarkersDialog {
     @UiField
     FileUploadField fileToImport;
 
+    @UiField(provided = true)
+    final Messages i18n = GWT.create(Messages.class);
+
     final DeviceMarkerHandler handler;
 
     static abstract class Marker {
@@ -115,7 +126,7 @@ public class DeviceMarkersDialog {
         abstract String getOfflineURL();
     }
 
-    class BuiltInMarker extends Marker {
+    static class BuiltInMarker extends Marker {
         final DeviceIconType icon;
 
         BuiltInMarker(DeviceIconType icon) {
@@ -143,6 +154,62 @@ public class DeviceMarkersDialog {
         }
     }
 
+    static class DatabaseMarker extends Marker {
+        final DeviceIcon icon;
+
+        DatabaseMarker(DeviceIcon icon) {
+            this.icon = icon;
+        }
+
+        @Override
+        String getKey() {
+            return Long.toString(icon.getId());
+        }
+
+        @Override
+        String getDefaultURL() {
+            return icon.defaultURL();
+        }
+
+        @Override
+        String getSelectedURL() {
+            return icon.selectedURL();
+        }
+
+        @Override
+        String getOfflineURL() {
+            return icon.offlineURL();
+        }
+    }
+
+    static class MergingCallback extends BaseAsyncCallback<List<DeviceIcon>> {
+        final AsyncCallback<List<Marker>> markerLoaderCallback;
+
+        MergingCallback(Messages i18n, AsyncCallback<List<Marker>> markerLoaderCallback) {
+            super(i18n);
+            this.markerLoaderCallback = markerLoaderCallback;
+        }
+
+        @Override
+        public void onSuccess(List<DeviceIcon> loaded) {
+            List<Marker> result = new ArrayList<Marker>(loaded.size() + DeviceIconType.values().length);
+            for (DeviceIcon icon : loaded) {
+                result.add(new DatabaseMarker(icon));
+            }
+            for (DeviceIconType icon : DeviceIconType.values()) {
+                result.add(new BuiltInMarker(icon));
+            }
+            markerLoaderCallback.onSuccess(result);
+        }
+    }
+
+    RpcProxy<Object, List<Marker>> hybridProxy = new RpcProxy<Object, List<Marker>>() {
+        @Override
+        public void load(Object loadConfig, AsyncCallback<List<Marker>> callback) {
+            Application.getDataService().getMarkerPictures(new MergingCallback(i18n, callback));
+        }
+    };
+
     public DeviceMarkersDialog(DeviceIconType selectedIcon, DeviceMarkerHandler handler) {
         this.handler = handler;
 
@@ -152,16 +219,6 @@ public class DeviceMarkersDialog {
                 return item.getKey();
             }
         };
-
-        Marker selectedMarker = null;
-        store = new ListStore<Marker>(keyProvider);
-        for (DeviceIconType icon : DeviceIconType.values()) {
-            Marker marker = new BuiltInMarker(icon);
-            store.add(marker);
-            if (selectedIcon == icon) {
-                selectedMarker = marker;
-            }
-        }
 
         final Resources resources = GWT.create(Resources.class);
         resources.css().ensureInjected();
@@ -182,6 +239,10 @@ public class DeviceMarkersDialog {
                 builder.appendHtmlConstant("</div>");
             }
         };
+
+        ListStore<Marker> store = new ListStore<Marker>(keyProvider);
+        Loader<Object, List<Marker>> loader = new Loader<Object, List<Marker>>(hybridProxy);
+        loader.addLoadHandler(new ListStoreBinding<Object, Marker, List<Marker>>(store));
 
         view = new ListView<Marker, Marker>(store, new IdentityValueProvider<Marker>() {
             @Override
@@ -231,7 +292,8 @@ public class DeviceMarkersDialog {
             }
         });
 
-        view.getSelectionModel().select(selectedMarker, false);
+        loader.load();
+        view.getSelectionModel().select(new BuiltInMarker(selectedIcon), false);
 
         updateImages();
     }

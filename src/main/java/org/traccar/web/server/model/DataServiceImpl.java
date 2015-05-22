@@ -768,4 +768,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             entityManager.merge(user);
         }
     }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public List<DeviceIcon> getMarkerPictures() {
+        return getSessionEntityManager().createQuery("SELECT i FROM DeviceIcon i ORDER BY i.id", DeviceIcon.class)
+                .getResultList();
+    }
 }
