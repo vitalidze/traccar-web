@@ -773,7 +773,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public List<DeviceIcon> getMarkerPictures() {
-        return getSessionEntityManager().createQuery("SELECT i FROM DeviceIcon i ORDER BY i.id", DeviceIcon.class)
+        return getSessionEntityManager().createQuery("SELECT i FROM DeviceIcon i ORDER BY i.id DESC", DeviceIcon.class)
                 .getResultList();
     }
 }
