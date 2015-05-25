@@ -53,6 +53,8 @@ import org.traccar.web.client.Application;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.BaseStoreHandlers;
+import org.traccar.web.client.model.PicturesService;
+import org.traccar.web.client.model.PicturesServiceAsync;
 import org.traccar.web.shared.model.DeviceIcon;
 import org.traccar.web.shared.model.DeviceIconType;
 import org.traccar.web.shared.model.Picture;
@@ -132,6 +134,8 @@ public class DeviceMarkersDialog {
 
     @UiField(provided = true)
     final Messages i18n = GWT.create(Messages.class);
+
+    final PicturesServiceAsync picturesService = GWT.create(PicturesService.class);
 
     final DeviceMarkerHandler handler;
 
@@ -256,7 +260,7 @@ public class DeviceMarkersDialog {
     RpcProxy<Object, List<Marker>> hybridProxy = new RpcProxy<Object, List<Marker>>() {
         @Override
         public void load(Object loadConfig, AsyncCallback<List<Marker>> callback) {
-            Application.getDataService().getMarkerPictures(new MergingCallback(i18n, callback));
+            picturesService.getMarkerPictures(new MergingCallback(i18n, callback));
         }
     };
 
