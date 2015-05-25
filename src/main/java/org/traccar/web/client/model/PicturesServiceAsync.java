@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface PicturesServiceAsync {
     void getMarkerPictures(AsyncCallback<List<DeviceIcon>> async);
+
+    void addMarkerPicture(DeviceIcon marker, AsyncCallback<DeviceIcon> async);
 }

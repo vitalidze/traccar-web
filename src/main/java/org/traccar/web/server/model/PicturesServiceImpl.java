@@ -19,6 +19,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.PicturesService;
 import org.traccar.web.shared.model.DeviceIcon;
+import org.traccar.web.shared.model.Picture;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -37,5 +38,22 @@ public class PicturesServiceImpl extends RemoteServiceServlet implements Picture
     public List<DeviceIcon> getMarkerPictures() {
         return entityManager.get().createQuery("SELECT i FROM DeviceIcon i ORDER BY i.id DESC", DeviceIcon.class)
                 .getResultList();
+    }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public DeviceIcon addMarkerPicture(DeviceIcon marker) {
+        if (marker.getDefaultIcon() != null) {
+            marker.setDefaultIcon(entityManager.get().find(Picture.class, marker.getDefaultIcon().getId()));
+        }
+        if (marker.getSelectedIcon() != null) {
+            marker.setSelectedIcon(entityManager.get().find(Picture.class, marker.getSelectedIcon().getId()));
+        }
+        if (marker.getOfflineIcon() != null) {
+            marker.setOfflineIcon(entityManager.get().find(Picture.class, marker.getOfflineIcon().getId()));
+        }
+        entityManager.get().persist(marker);
+        return marker;
     }
 }

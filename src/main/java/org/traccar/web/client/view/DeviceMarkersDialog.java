@@ -239,24 +239,6 @@ public class DeviceMarkersDialog {
         }
     }
 
-    static class DeviceIconJso extends JavaScriptObject {
-        protected DeviceIconJso() {}
-
-        public final native int getId() /*-{ return this.id; }-*/;
-        public final native PictureJso getDefaultIcon()  /*-{ return this.defaultIcon;  }-*/;
-        public final native PictureJso getSelectedIcon()  /*-{ return this.selectedIcon;  }-*/;
-        public final native PictureJso getOfflineIcon()  /*-{ return this.offlineIcon;  }-*/;
-
-        final DeviceIcon toDeviceIcon() {
-            DeviceIcon di = new DeviceIcon();
-            di.setId(getId());
-            di.setDefaultIcon(getDefaultIcon().toPicture());
-            di.setSelectedIcon(getSelectedIcon().toPicture());
-            di.setOfflineIcon(getOfflineIcon().toPicture());
-            return di;
-        }
-    }
-
     RpcProxy<Object, List<Marker>> hybridProxy = new RpcProxy<Object, List<Marker>>() {
         @Override
         public void load(Object loadConfig, AsyncCallback<List<Marker>> callback) {
@@ -265,6 +247,8 @@ public class DeviceMarkersDialog {
     };
 
     Marker selected;
+
+    final ListStore<Marker> store;
 
     public DeviceMarkersDialog(final DeviceIconType selectedIcon, DeviceMarkerHandler handler) {
         this.handler = handler;
@@ -295,7 +279,7 @@ public class DeviceMarkersDialog {
             }
         };
 
-        final ListStore<Marker> store = new ListStore<Marker>(keyProvider);
+        store = new ListStore<Marker>(keyProvider);
         Loader<Object, List<Marker>> loader = new Loader<Object, List<Marker>>(hybridProxy);
         loader.addLoadHandler(new ListStoreBinding<Object, Marker, List<Marker>>(store));
 
@@ -332,25 +316,6 @@ public class DeviceMarkersDialog {
         southData.setMargins(new Margins(5, 0, 0, 5));
 
         uiBinder.createAndBindUi(this);
-
-        form.addSubmitCompleteHandler(new SubmitCompleteEvent.SubmitCompleteHandler() {
-            @Override
-            public void onSubmitComplete(SubmitCompleteEvent event) {
-                String s = event.getResults();
-                if (s.indexOf('>') >= 0) {
-                    s = s.substring(s.indexOf('>') + 1, s.lastIndexOf('<'));
-                }
-                if (JsonUtils.safeToEval(s)) {
-                    DeviceIconJso deviceIconJso = JsonUtils.safeEval(s);
-                    Marker marker = new DatabaseMarker(deviceIconJso.toDeviceIcon());
-                    selected = marker;
-                    store.add(0, marker);
-                    fileToImport.reset();
-                } else {
-                    new LogViewDialog(event.getResults()).show();
-                }
-            }
-        });
 
         selected = new BuiltInMarker(selectedIcon);
         store.addStoreHandlers(new BaseStoreHandlers<Marker>() {
@@ -408,5 +373,31 @@ public class DeviceMarkersDialog {
             offlineImage.setUrl(marker.getOfflineURL());
         }
         panelImages.forceLayout();
+    }
+
+    @UiHandler("form")
+    public void onUploadCompleted(SubmitCompleteEvent event) {
+        String s = event.getResults();
+        if (s.indexOf('>') >= 0) {
+            s = s.substring(s.indexOf('>') + 1, s.lastIndexOf('<'));
+        }
+        if (JsonUtils.safeToEval(s)) {
+            PictureJso picture = JsonUtils.safeEval(s);
+            DeviceIcon marker = new DeviceIcon();
+            marker.setDefaultIcon(picture.toPicture());
+            marker.setSelectedIcon(picture.toPicture());
+            marker.setOfflineIcon(picture.toPicture());
+            picturesService.addMarkerPicture(marker, new BaseAsyncCallback<DeviceIcon>(i18n) {
+                @Override
+                public void onSuccess(DeviceIcon added) {
+                    Marker marker = new DatabaseMarker(added);
+                    selected = marker;
+                    store.add(0, marker);
+                    fileToImport.reset();
+                }
+            });
+        } else {
+            new LogViewDialog(event.getResults()).show();
+        }
     }
 }

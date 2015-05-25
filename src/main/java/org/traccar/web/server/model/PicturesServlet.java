@@ -22,7 +22,6 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.traccar.web.shared.model.DeviceIcon;
 import org.traccar.web.shared.model.Picture;
 import org.traccar.web.shared.model.PictureType;
 
@@ -120,16 +119,7 @@ public class PicturesServlet  extends HttpServlet {
                 entityManager.get().persist(picture);
 
                 Gson gson = GsonUtils.create();
-                // create new device icon when 'MARKER' was uploaded
-                if (pictureType == PictureType.MARKER) {
-                    DeviceIcon deviceIcon = new DeviceIcon();
-                    deviceIcon.setDefaultIcon(picture);
-                    deviceIcon.setSelectedIcon(picture);
-                    deviceIcon.setOfflineIcon(picture);
-                    entityManager.get().persist(deviceIcon);
-
-                    resp.getWriter().write(gson.toJson(deviceIcon));
-                }
+                gson.toJson(picture, resp.getWriter());
             }
         } catch (FileUploadException fue) {
             logger.log(Level.WARNING, fue.getLocalizedMessage(), fue);

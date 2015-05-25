@@ -24,4 +24,5 @@ import java.util.List;
 @RemoteServiceRelativePath("picturesService")
 public interface PicturesService extends RemoteService {
     List<DeviceIcon> getMarkerPictures();
+    DeviceIcon addMarkerPicture(DeviceIcon marker);
 }
