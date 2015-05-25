@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.SimpleSafeHtmlCell;
 import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.XTemplates;
 import com.sencha.gxt.core.client.resources.CommonStyles;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.client.loader.RpcProxy;
@@ -79,6 +80,17 @@ public class DeviceMarkersDialog {
         String over();
 
         String select();
+    }
+
+    interface MarkerListItemTemplate extends XTemplates {
+        @XTemplates.XTemplate("<div class='{style.thumbWrap}' style='border: 1px solid white'>{content}</div>")
+        SafeHtml renderListItem(Style style, SafeHtml content);
+
+        @XTemplates.XTemplate("<div class='{styles.clear}'></div>'")
+        SafeHtml renderEndListItem(CommonStyles.Styles styles);
+
+        @XTemplates.XTemplate("<div class='{style.thumb}' style='background: url(\"{marker.offlineURL}\") no-repeat center center;'></div>")
+        SafeHtml listCell(Style style, Marker marker);
     }
 
     public interface DeviceMarkerHandler {
@@ -265,18 +277,17 @@ public class DeviceMarkersDialog {
 
         final Style style = resources.css();
 
+        final MarkerListItemTemplate renderer = GWT.create(MarkerListItemTemplate.class);
+
         ListViewCustomAppearance<Marker> appearance = new ListViewCustomAppearance<Marker>("." + style.thumbWrap(), style.over(), style.select()) {
             @Override
             public void renderEnd(SafeHtmlBuilder builder) {
-                String markup = new StringBuilder("<div class=\"").append(CommonStyles.get().clear()).append("\"></div>").toString();
-                builder.appendHtmlConstant(markup);
+                renderer.renderEndListItem(CommonStyles.get());
             }
 
             @Override
             public void renderItem(SafeHtmlBuilder builder, SafeHtml content) {
-                builder.appendHtmlConstant("<div class='" + style.thumbWrap() + "' style='border: 1px solid white'>");
-                builder.append(content);
-                builder.appendHtmlConstant("</div>");
+                builder.append(renderer.renderListItem(style, content));
             }
         };
 
@@ -293,14 +304,7 @@ public class DeviceMarkersDialog {
         view.setCell(new SimpleSafeHtmlCell<Marker>(new AbstractSafeHtmlRenderer<Marker>() {
             @Override
             public SafeHtml render(Marker object) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                return builder
-                        .appendHtmlConstant("<div class=\"")
-                        .appendHtmlConstant(style.thumb())
-                        .appendHtmlConstant("\" style=\"background: url(")
-                        .appendHtmlConstant(object.getOfflineURL())
-                        .appendHtmlConstant(") no-repeat center center;\"></div>")
-                        .toSafeHtml();
+                return renderer.listCell(style, object);
             }
         }));
 
