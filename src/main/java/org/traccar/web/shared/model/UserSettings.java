@@ -37,7 +37,7 @@ public class UserSettings implements IsSerializable {
         mapType = MapType.OSM;
     }
 
-    public enum SpeedUnit {
+    public enum SpeedUnit implements IsSerializable {
         knots("kn", 1d, DistanceUnit.km),
         kilometersPerHour("km/h", 1.852, DistanceUnit.km),
         milesPerHour("mph", 1.150779, DistanceUnit.mile);
@@ -69,7 +69,7 @@ public class UserSettings implements IsSerializable {
         }
     }
 
-    public enum MapType {
+    public enum MapType implements IsSerializable {
         OSM("OpenStreetMap"),
         GOOGLE_HYBRID("Google Hybrid"),
         GOOGLE_NORMAL("Google Normal"),
@@ -94,7 +94,7 @@ public class UserSettings implements IsSerializable {
         }
     }
 
-    public enum DistanceUnit {
+    public enum DistanceUnit implements IsSerializable {
         km("km", 1d),
         mile("mi", 0.621371192);
 
