@@ -15,7 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
-import com.google.gwt.user.client.rpc.GwtTransient;
+import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.*;
@@ -23,6 +23,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "device_icons")
 public class DeviceIcon implements IsSerializable {
+    @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -36,6 +37,7 @@ public class DeviceIcon implements IsSerializable {
         this.id = id;
     }
 
+    @Expose
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "device_icons_fkey_def_icon_id"))
     private Picture defaultIcon;
@@ -48,6 +50,7 @@ public class DeviceIcon implements IsSerializable {
         this.defaultIcon = defaultIcon;
     }
 
+    @Expose
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "device_icons_fkey_sel_icon_id"))
     private Picture selectedIcon;
@@ -60,6 +63,7 @@ public class DeviceIcon implements IsSerializable {
         this.selectedIcon = selectedIcon;
     }
 
+    @Expose
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "device_icons_fkey_off_icon_id"))
     private Picture offlineIcon;

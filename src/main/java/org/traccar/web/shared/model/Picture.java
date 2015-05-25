@@ -15,6 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -25,6 +26,7 @@ import javax.persistence.*;
 public class Picture implements IsSerializable {
     public static final String URL_PREFIX = "/traccar/p/";
 
+    @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -63,7 +65,9 @@ public class Picture implements IsSerializable {
         this.data = data;
     }
 
+    @Expose
     private int width;
+    @Expose
     private int height;
     private String mimeType;
 

@@ -16,6 +16,8 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.resources.client.ClientBundle;
@@ -52,6 +54,7 @@ import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.shared.model.DeviceIcon;
 import org.traccar.web.shared.model.DeviceIconType;
+import org.traccar.web.shared.model.Picture;
 import org.traccar.web.shared.model.Position;
 
 import java.util.ArrayList;
@@ -204,6 +207,40 @@ public class DeviceMarkersDialog {
         }
     }
 
+    static class PictureJso extends JavaScriptObject {
+        protected PictureJso() {}
+
+        public final native int getId() /*-{ return this.id; }-*/;
+        public final native int getWidth() /*-{ return this.width; }-*/;
+        public final native int getHeight() /*-{ return this.height; }-*/;
+
+        final Picture toPicture() {
+            Picture p = new Picture();
+            p.setId(getId());
+            p.setWidth(getWidth());
+            p.setHeight(getHeight());
+            return p;
+        }
+    }
+
+    static class DeviceIconJso extends JavaScriptObject {
+        protected DeviceIconJso() {}
+
+        public final native int getId() /*-{ return this.id; }-*/;
+        public final native PictureJso getDefaultIcon()  /*-{ return this.defaultIcon;  }-*/;
+        public final native PictureJso getSelectedIcon()  /*-{ return this.selectedIcon;  }-*/;
+        public final native PictureJso getOfflineIcon()  /*-{ return this.offlineIcon;  }-*/;
+
+        final DeviceIcon toDeviceIcon() {
+            DeviceIcon di = new DeviceIcon();
+            di.setId(getId());
+            di.setDefaultIcon(getDefaultIcon().toPicture());
+            di.setSelectedIcon(getSelectedIcon().toPicture());
+            di.setOfflineIcon(getOfflineIcon().toPicture());
+            return di;
+        }
+    }
+
     RpcProxy<Object, List<Marker>> hybridProxy = new RpcProxy<Object, List<Marker>>() {
         @Override
         public void load(Object loadConfig, AsyncCallback<List<Marker>> callback) {
@@ -213,7 +250,7 @@ public class DeviceMarkersDialog {
 
     Marker selected;
 
-    public DeviceMarkersDialog(DeviceIconType selectedIcon, DeviceMarkerHandler handler) {
+    public DeviceMarkersDialog(final DeviceIconType selectedIcon, DeviceMarkerHandler handler) {
         this.handler = handler;
 
         ModelKeyProvider<Marker> keyProvider = new ModelKeyProvider<Marker>() {
@@ -291,7 +328,19 @@ public class DeviceMarkersDialog {
         form.addSubmitCompleteHandler(new SubmitCompleteEvent.SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-                new LogViewDialog(event.getResults()).show();
+                String s = event.getResults();
+                if (s.indexOf('>') >= 0) {
+                    s = s.substring(s.indexOf('>') + 1, s.lastIndexOf('<'));
+                }
+                if (JsonUtils.safeToEval(s)) {
+                    DeviceIconJso deviceIconJso = JsonUtils.safeEval(s);
+                    Marker marker = new DatabaseMarker(deviceIconJso.toDeviceIcon());
+                    selected = marker;
+                    store.add(0, marker);
+                    fileToImport.reset();
+                } else {
+                    new LogViewDialog(event.getResults()).show();
+                }
             }
         });
 
