@@ -350,6 +350,8 @@ public class DeviceMarkersDialog {
             public void onAnything() {
                 for (int i = 0; i < store.size(); i++) {
                     if (store.get(i).getKey().equals(selected.getKey())) {
+                        view.getElement(i).ensureVisible();
+                        view.getElement(i).scrollIntoView();
                         view.getSelectionModel().select(i, false);
                         break;
                     }
