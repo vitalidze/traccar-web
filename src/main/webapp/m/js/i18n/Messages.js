@@ -135,6 +135,40 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
+    fr: {
+        _name_: 'Français',
+        // login screen
+        language: 'Langue',
+        username: 'Nom',
+        password: 'Mot de passe',
+        your_username: 'votre Nom',
+        your_password: 'votre Mot de passe',
+        sign_in: 'Connexion',
+        user_name_and_password_must_not_be_empty: 'Nom et mot de passe ne doivent pas être vides',
+        user_name_or_password_is_invalid: 'Nom ou mot de passe invalide',
+        unexpected_error: 'Erreur inattendue',
+        open_desktop_version: 'Ouvrir version bureau',
+        // sidebar
+        devices: 'Appareils',
+        logout: 'Déconnexion',
+        // device details
+        select_on_map: 'Sélectionner sur carte',
+        no_data_available: 'Aucune donnée disponible',
+        time: 'Heure',
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        altitude: 'Altitude',
+        speed: 'Vitesse',
+        course: 'Cap',
+        address: 'Adresse',
+        follow: 'Poursuite',
+        stop_following: 'Arrêt de la poursuite',
+        geo_fence: 'Limite-Géo',
+        send_location_by_email: 'Envoyer position par Email',
+        send_location_url_by_email: 'Envoyer l\'URL de la position par Email',
+        send_location_by_sms: 'Envoyer position par SMS',
+        send_location_url_by_sms: 'Envoyer l\'URL de la position par SMS'
+    },
     hu: {
         _name_: 'Hungarian',
         // login screen
