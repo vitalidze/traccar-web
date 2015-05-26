@@ -13,6 +13,12 @@
     font: 11px Arial, Helvetica, sans-serif;
 }
 
+.thumbWrap span {
+    display: block;
+    overflow: hidden;
+    text-align: center;
+}
+
 .over {
     background: repeat-x scroll left top #EFEFEF;
     border: 1px solid #ddd !important;

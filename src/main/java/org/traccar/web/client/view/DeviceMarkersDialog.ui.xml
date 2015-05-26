@@ -11,12 +11,8 @@
     <ui:attributes width="1" height="-1" />
   </ui:with>
 
-  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="imageMargins">
-    <ui:attributes top="5" right="0" bottom="5" left="0" />
-  </ui:with>
-
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="imageLayoutData">
-    <ui:attributes width="-1" height="-1" margins="{imageMargins}" />
+    <ui:attributes width="-1" height="-1" />
   </ui:with>
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutData">
@@ -29,7 +25,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="386, 310" modal="true" headingText="{i18n.markers}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="494, 340" modal="true" headingText="{i18n.markers}" focusWidget="{saveButton}">
     <container:BorderLayoutContainer ui:field="con" borders="true">
       <container:center layoutData="{centerData}">
         <gxt:ListView ui:field="view"/>
@@ -37,22 +33,13 @@
       <container:east layoutData="{eastData}">
         <container:VerticalLayoutContainer ui:field="panelImages">
             <container:child layoutData="{verticalLayoutData}">
-                <g:Label text="{i18n.defaultIcon}" />
+                <g:HTML ui:field="defaultImage" />
             </container:child>
             <container:child layoutData="{imageLayoutData}">
-                <g:Image ui:field="defaultImage" />
-            </container:child>
-            <container:child layoutData="{verticalLayoutData}">
-                <g:Label text="{i18n.selectedIcon}" />
+                <g:HTML ui:field="selectedImage" />
             </container:child>
             <container:child layoutData="{imageLayoutData}">
-                <g:Image ui:field="selectedImage" />
-            </container:child>
-            <container:child layoutData="{verticalLayoutData}">
-                <g:Label text="{i18n.offlineIcon}"/>
-            </container:child>
-            <container:child layoutData="{imageLayoutData}">
-                <g:Image ui:field="offlineImage" />
+                <g:HTML ui:field="offlineImage" />
             </container:child>
         </container:VerticalLayoutContainer>
       </container:east>

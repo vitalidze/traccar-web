@@ -29,6 +29,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.SimpleSafeHtmlCell;
@@ -93,6 +94,9 @@ public class DeviceMarkersDialog {
 
         @XTemplates.XTemplate("<div class='{style.thumb}' style='background: url(\"{marker.offlineURL}\") no-repeat center center;'></div>")
         SafeHtml listCell(Style style, Marker marker);
+
+        @XTemplates.XTemplate("<div class='{style.thumbWrap}' style='background: #ffffff;'><span class=\"x-editable\">{text}</span><div class='{style.thumb}' style='background: url(\"{pictureURL}\") no-repeat center center;'></div></div>")
+        SafeHtml pictureView(Style style, String text, String pictureURL);
     }
 
     public interface DeviceMarkerHandler {
@@ -118,13 +122,13 @@ public class DeviceMarkersDialog {
     VerticalLayoutContainer panelImages;
 
     @UiField
-    Image defaultImage;
+    HTML defaultImage;
 
     @UiField
-    Image selectedImage;
+    HTML selectedImage;
 
     @UiField
-    Image offlineImage;
+    HTML offlineImage;
 
     @UiField
     FormPanel form;
@@ -250,6 +254,9 @@ public class DeviceMarkersDialog {
 
     final ListStore<Marker> store;
 
+    final Resources resources = GWT.create(Resources.class);
+    final MarkerListItemTemplate renderer = GWT.create(MarkerListItemTemplate.class);
+
     public DeviceMarkersDialog(final DeviceIconType selectedIcon, DeviceMarkerHandler handler) {
         this.handler = handler;
 
@@ -260,12 +267,8 @@ public class DeviceMarkersDialog {
             }
         };
 
-        final Resources resources = GWT.create(Resources.class);
         resources.css().ensureInjected();
-
         final Style style = resources.css();
-
-        final MarkerListItemTemplate renderer = GWT.create(MarkerListItemTemplate.class);
 
         ListViewCustomAppearance<Marker> appearance = new ListViewCustomAppearance<Marker>("." + style.thumbWrap(), style.over(), style.select()) {
             @Override
@@ -304,7 +307,7 @@ public class DeviceMarkersDialog {
             }
         });
 
-        eastData = new BorderLayoutContainer.BorderLayoutData(85);
+        eastData = new BorderLayoutContainer.BorderLayoutData(100);
         eastData.setSplit(false);
         eastData.setMargins(new Margins(5, 0, 0, 0));
 
@@ -364,13 +367,13 @@ public class DeviceMarkersDialog {
     private void updateImages() {
         Marker marker = view.getSelectionModel().getSelectedItem();
         if (marker == null) {
-            defaultImage.setUrl("");
-            selectedImage.setUrl("");
-            offlineImage.setUrl("");
+            defaultImage.setHTML("");
+            selectedImage.setHTML("");
+            offlineImage.setHTML("");
         } else {
-            defaultImage.setUrl(marker.getDefaultURL());
-            selectedImage.setUrl(marker.getSelectedURL());
-            offlineImage.setUrl(marker.getOfflineURL());
+            defaultImage.setHTML(renderer.pictureView(resources.css(), i18n.defaultIcon(), marker.getDefaultURL()));
+            selectedImage.setHTML(renderer.pictureView(resources.css(), i18n.selectedIcon(), marker.getSelectedURL()));
+            offlineImage.setHTML(renderer.pictureView(resources.css(), i18n.offlineIcon(), marker.getOfflineURL()));
         }
         panelImages.forceLayout();
     }
