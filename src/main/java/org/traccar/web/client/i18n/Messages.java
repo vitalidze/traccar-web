@@ -315,4 +315,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String selectedIcon();
 
     String offlineIcon();
+
+    String upload();
 }

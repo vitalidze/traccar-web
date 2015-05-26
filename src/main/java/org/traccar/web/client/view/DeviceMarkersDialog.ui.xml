@@ -54,7 +54,7 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{horizontalLayoutData}">
-                      <button:TextButton ui:field="uploadButton" text="Upload" />
+                      <button:TextButton ui:field="uploadButton" text="{i18n.upload}" />
                   </container:child>
               </container:HorizontalLayoutContainer>
           </form:FormPanel>
