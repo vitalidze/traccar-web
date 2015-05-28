@@ -597,8 +597,7 @@ function drawMarker(position) {
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
             opacity: 0.9,
-            src: position.offline ? position.device.iconType.OFFLINE.urls[position.selected ? 1 : 0] :
-                                    position.device.iconType.LATEST.urls[position.selected ? 1 : 0]
+            src: getIconURL(position)
         }),
         text: new ol.style.Text({
             text: position.device.name,
@@ -623,6 +622,21 @@ function drawMarker(position) {
     }
     position.marker = markerFeature;
     vectorLayer.getSource().addFeature(markerFeature);
+}
+
+function getIconURL(position) {
+    if (position.device.icon == null) {
+        return position.offline ? position.device.iconType.OFFLINE.urls[position.selected ? 1 : 0] :
+                                  position.device.iconType.LATEST.urls[position.selected ? 1 : 0];
+    } else {
+        var pictureId;
+        if (position.selected) {
+            pictureId = position.device.icon.selectedIcon.id;
+        } else {
+            pictureId = position.offline ? position.device.icon.offlineIcon.id : position.device.icon.defaultIcon.id;
+        }
+        return '/traccar/p/' + pictureId;
+    }
 }
 
 function callGet(options) {

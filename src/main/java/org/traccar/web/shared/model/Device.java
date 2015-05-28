@@ -171,6 +171,7 @@ public class Device implements IsSerializable {
         this.iconType = iconType;
     }
 
+    @Expose
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_icon_id"))
     private DeviceIcon icon;
