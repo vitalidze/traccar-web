@@ -25,4 +25,6 @@ import java.util.List;
 public interface PicturesService extends RemoteService {
     List<DeviceIcon> getMarkerPictures();
     DeviceIcon addMarkerPicture(DeviceIcon marker);
+    DeviceIcon updateMarkerPicture(DeviceIcon marker);
+    void removeMarkerPicture(DeviceIcon marker);
 }

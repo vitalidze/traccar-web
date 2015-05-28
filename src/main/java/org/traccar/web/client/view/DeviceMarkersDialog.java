@@ -16,8 +16,6 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.resources.client.ClientBundle;
@@ -30,7 +28,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.SimpleSafeHtmlCell;
 import com.sencha.gxt.core.client.IdentityValueProvider;
@@ -42,24 +39,21 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.loader.*;
 import com.sencha.gxt.theme.base.client.listview.ListViewCustomAppearance;
+import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
+import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.event.SubmitCompleteEvent;
-import com.sencha.gxt.widget.core.client.form.FileUploadField;
-import com.sencha.gxt.widget.core.client.form.FormPanel;
-import org.traccar.web.client.Application;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.PicturesService;
 import org.traccar.web.client.model.PicturesServiceAsync;
-import org.traccar.web.shared.model.DeviceIcon;
-import org.traccar.web.shared.model.DeviceIconType;
-import org.traccar.web.shared.model.Picture;
-import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,13 +104,13 @@ public class DeviceMarkersDialog {
     ListView<Marker, Marker> view;
 
     @UiField(provided = true)
+    BorderLayoutContainer.BorderLayoutData northData;
+
+    @UiField(provided = true)
     BorderLayoutContainer.BorderLayoutData centerData;
 
     @UiField(provided = true)
     BorderLayoutContainer.BorderLayoutData eastData;
-
-    @UiField(provided = true)
-    BorderLayoutContainer.BorderLayoutData southData;
 
     @UiField
     VerticalLayoutContainer panelImages;
@@ -131,10 +125,13 @@ public class DeviceMarkersDialog {
     HTML offlineImage;
 
     @UiField
-    FormPanel form;
+    TextButton addButton;
 
     @UiField
-    FileUploadField fileToImport;
+    TextButton editButton;
+
+    @UiField
+    TextButton removeButton;
 
     @UiField(provided = true)
     final Messages i18n = GWT.create(Messages.class);
@@ -179,7 +176,7 @@ public class DeviceMarkersDialog {
     }
 
     static class DatabaseMarker extends Marker {
-        final DeviceIcon icon;
+        DeviceIcon icon;
 
         DatabaseMarker(DeviceIcon icon) {
             this.icon = icon;
@@ -224,22 +221,6 @@ public class DeviceMarkersDialog {
                 result.add(new BuiltInMarker(icon));
             }
             markerLoaderCallback.onSuccess(result);
-        }
-    }
-
-    static class PictureJso extends JavaScriptObject {
-        protected PictureJso() {}
-
-        public final native int getId() /*-{ return this.id; }-*/;
-        public final native int getWidth() /*-{ return this.width; }-*/;
-        public final native int getHeight() /*-{ return this.height; }-*/;
-
-        final Picture toPicture() {
-            Picture p = new Picture();
-            p.setId(getId());
-            p.setWidth(getWidth());
-            p.setHeight(getHeight());
-            return p;
         }
     }
 
@@ -303,9 +284,12 @@ public class DeviceMarkersDialog {
         view.getSelectionModel().addSelectionHandler(new SelectionHandler<Marker>() {
             @Override
             public void onSelection(SelectionEvent<Marker> event) {
-                updateImages();
+                selectionChanged();
             }
         });
+
+        northData = new BorderLayoutContainer.BorderLayoutData(28);
+        northData.setSplit(false);
 
         eastData = new BorderLayoutContainer.BorderLayoutData(100);
         eastData.setSplit(false);
@@ -313,10 +297,6 @@ public class DeviceMarkersDialog {
 
         centerData = new BorderLayoutContainer.BorderLayoutData();
         centerData.setMargins(new Margins(0, 5, 0, 0));
-
-        southData = new BorderLayoutContainer.BorderLayoutData(32);
-        southData.setSplit(false);
-        southData.setMargins(new Margins(5, 0, 0, 5));
 
         uiBinder.createAndBindUi(this);
 
@@ -336,7 +316,7 @@ public class DeviceMarkersDialog {
         });
         loader.load();
 
-        updateImages();
+        selectionChanged();
     }
 
     public void show() {
@@ -359,12 +339,7 @@ public class DeviceMarkersDialog {
         hide();
     }
 
-    @UiHandler("uploadButton")
-    public void onUploadClicked(SelectEvent event) {
-        form.submit();
-    }
-
-    private void updateImages() {
+    private void selectionChanged() {
         Marker marker = view.getSelectionModel().getSelectedItem();
         if (marker == null) {
             defaultImage.setHTML("");
@@ -376,31 +351,74 @@ public class DeviceMarkersDialog {
             offlineImage.setHTML(renderer.pictureView(resources.css(), i18n.offlineIcon(), marker.getOfflineURL()));
         }
         panelImages.forceLayout();
+
+        editButton.setEnabled(marker instanceof DatabaseMarker);
+        removeButton.setEnabled(marker instanceof DatabaseMarker);
     }
 
-    @UiHandler("form")
-    public void onUploadCompleted(SubmitCompleteEvent event) {
-        String s = event.getResults();
-        if (s.indexOf('>') >= 0) {
-            s = s.substring(s.indexOf('>') + 1, s.lastIndexOf('<'));
-        }
-        if (JsonUtils.safeToEval(s)) {
-            PictureJso picture = JsonUtils.safeEval(s);
-            DeviceIcon marker = new DeviceIcon();
-            marker.setDefaultIcon(picture.toPicture());
-            marker.setSelectedIcon(picture.toPicture());
-            marker.setOfflineIcon(picture.toPicture());
-            picturesService.addMarkerPicture(marker, new BaseAsyncCallback<DeviceIcon>(i18n) {
-                @Override
-                public void onSuccess(DeviceIcon added) {
-                    Marker marker = new DatabaseMarker(added);
-                    selected = marker;
-                    store.add(0, marker);
-                    fileToImport.reset();
+    @UiHandler("addButton")
+    public void addIcon(SelectEvent event) {
+        new DeviceIconDialog(false, new DeviceIconDialog.DeviceIconHandler() {
+            @Override
+            public void uploaded(Picture defaultIcon, Picture selectedIcon, Picture offlineIcon) {
+                DeviceIcon marker = new DeviceIcon();
+                marker.setDefaultIcon(defaultIcon);
+                marker.setSelectedIcon(selectedIcon);
+                marker.setOfflineIcon(offlineIcon);
+                picturesService.addMarkerPicture(marker, new BaseAsyncCallback<DeviceIcon>(i18n) {
+                    @Override
+                    public void onSuccess(DeviceIcon added) {
+                        Marker marker = new DatabaseMarker(added);
+                        selected = marker;
+                        store.add(0, marker);
+                    }
+                });
+            }
+        }).show();
+    }
+
+    @UiHandler("editButton")
+    public void editIcon(SelectEvent event) {
+        final DatabaseMarker marker = (DatabaseMarker) view.getSelectionModel().getSelectedItem();
+        new DeviceIconDialog(true, new DeviceIconDialog.DeviceIconHandler() {
+            @Override
+            public void uploaded(Picture defaultIcon, Picture selectedIcon, Picture offlineIcon) {
+                DeviceIcon icon = marker.icon;
+                if (defaultIcon != null) icon.setDefaultIcon(defaultIcon);
+                if (selectedIcon != null) icon.setSelectedIcon(selectedIcon);
+                if (offlineIcon != null) icon.setOfflineIcon(offlineIcon);
+                if (defaultIcon != null || selectedIcon != null || offlineIcon != null) {
+                    picturesService.updateMarkerPicture(icon, new BaseAsyncCallback<DeviceIcon>(i18n) {
+                        @Override
+                        public void onSuccess(DeviceIcon updated) {
+                            selected = marker;
+                            marker.icon = updated;
+                            selectionChanged();
+                        }
+                    });
                 }
-            });
-        } else {
-            new LogViewDialog(event.getResults()).show();
-        }
+            }
+        }).show();
+    }
+
+    @UiHandler("removeButton")
+    public void removeIcon(SelectEvent event) {
+        final Marker marker = view.getSelectionModel().getSelectedItem();
+        final ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmDeviceIconRemoval());
+        dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+            @Override
+            public void onDialogHide(DialogHideEvent event) {
+                if (event.getHideButton() == Dialog.PredefinedButton.YES) {
+                    picturesService.removeMarkerPicture(((DatabaseMarker) marker).icon, new BaseAsyncCallback<Void>(i18n) {
+                        @Override
+                        public void onSuccess(Void result) {
+                            view.getSelectionModel().deselectAll();
+                            store.remove(marker);
+                        }
+                    });
+                }
+            }
+        });
+        dialog.show();
     }
 }

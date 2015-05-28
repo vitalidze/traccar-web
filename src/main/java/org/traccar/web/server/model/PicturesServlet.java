@@ -18,6 +18,7 @@ package org.traccar.web.server.model;
 import com.google.gson.Gson;
 import com.google.inject.persist.Transactional;
 import org.apache.commons.fileupload.FileItemIterator;
+import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
@@ -39,7 +40,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,8 +67,11 @@ public class PicturesServlet  extends HttpServlet {
             return;
         }
 
+        boolean allowSkippingPictures = "true".equals(req.getParameter("allowSkippingPictures"));
+
         ServletFileUpload servletFileUpload = new ServletFileUpload();
 
+        Map<String, Picture> uploadedPictures = new HashMap<String, Picture>();
         OutputStream os = null;
         File file = null;
         try {
@@ -74,11 +80,23 @@ public class PicturesServlet  extends HttpServlet {
                 file = File.createTempFile("uploaded", ".image");
                 file.deleteOnExit();
                 os = new BufferedOutputStream(new FileOutputStream(file));
-                IOUtils.copy(fileItemIterator.next().openStream(), os);
+                FileItemStream next = fileItemIterator.next();
+                IOUtils.copy(next.openStream(), os);
                 os.flush();
                 os.close();
+                if (file.length() == 0) {
+                    if (allowSkippingPictures) {
+                        file.delete();
+                        continue;
+                    } else {
+                        resp.getWriter().write(next.getFieldName() + ": File is empty.");
+                        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        return;
+                    }
+                }
+
                 if (file.length() > pictureType.getMaxFileSize()) {
-                    resp.getWriter().write("File is too big. Max size is " + pictureType.getMaxFileSize() + " bytes.");
+                    resp.getWriter().write(next.getFieldName() + ": File is too big. Max size is " + pictureType.getMaxFileSize() + " bytes.");
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
@@ -86,7 +104,7 @@ public class PicturesServlet  extends HttpServlet {
                 ImageInputStream imageStream = ImageIO.createImageInputStream(file);
                 Iterator<ImageReader> readers = ImageIO.getImageReaders(imageStream);
                 if (readers == null || !readers.hasNext()) {
-                    resp.getWriter().write("This is not an image.");
+                    resp.getWriter().write(next.getFieldName() + ": This is not an image.");
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
@@ -105,7 +123,7 @@ public class PicturesServlet  extends HttpServlet {
                 }
 
                 if (image.getWidth() > pictureType.getMaxWidth() || image.getHeight() > pictureType.getMaxHeight()) {
-                    resp.getWriter().write("Image dimesions are too big. Max dimensions are: " + pictureType.getMaxWidth() + "x" + pictureType.getMaxHeight());
+                    resp.getWriter().write(next.getFieldName() + ": Image dimesions are too big. Max dimensions are: " + pictureType.getMaxWidth() + "x" + pictureType.getMaxHeight() + ".");
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
@@ -118,8 +136,9 @@ public class PicturesServlet  extends HttpServlet {
                 picture.setData(FileUtils.readFileToByteArray(file));
                 entityManager.get().persist(picture);
 
-                Gson gson = GsonUtils.create();
-                gson.toJson(picture, resp.getWriter());
+                uploadedPictures.put(next.getFieldName(), picture);
+
+                file.delete();
             }
         } catch (FileUploadException fue) {
             logger.log(Level.WARNING, fue.getLocalizedMessage(), fue);
@@ -131,6 +150,9 @@ public class PicturesServlet  extends HttpServlet {
             IOUtils.closeQuietly(os);
             FileUtils.deleteQuietly(file);
         }
+
+        Gson gson = GsonUtils.create();
+        gson.toJson(uploadedPictures, resp.getWriter());
     }
 
     @Transactional(rollbackOn = { IOException.class, RuntimeException.class })
