@@ -90,11 +90,7 @@ public class DeviceDialog implements Editor<Device> {
 
     public DeviceDialog(Device device, DeviceHandler deviceHandler) {
         this.deviceHandler = deviceHandler;
-        if (device.getIconType() == null) {
-            selectedIcon = new MarkerIcon.Database(device.getIcon());
-        } else {
-            selectedIcon = new MarkerIcon.BuiltIn(device.getIconType());
-        }
+        this.selectedIcon = MarkerIcon.create(device);
 
         uiBinder.createAndBindUi(this);
 

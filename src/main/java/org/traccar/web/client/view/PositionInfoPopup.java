@@ -26,7 +26,7 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.PositionIconType;
+import org.traccar.web.shared.model.PositionIcon;
 
 public class PositionInfoPopup {
     private final static Messages i18n = GWT.create(Messages.class);
@@ -82,12 +82,12 @@ public class PositionInfoPopup {
 
         ToolTipConfig config = new ToolTipConfig();
 
-        PositionIconType iconType = position.getIconType() == null ? position.getDevice().getIconType().getPositionIconType(position.getStatus()) : position.getIconType();
+        PositionIcon icon = position.getIcon() == null ? MarkerIcon.create(position) : position.getIcon();
         String deviceTitle = position.getDevice().getName() + (position.getStatus() == Position.Status.OFFLINE ? " (" + i18n.offline() + ")" : "");
 
         config.setTitleHtml(
                 "<table height=\"100%\"><tr>" +
-                "<td>" +"<img src=\"" + iconType.getURL(false) + "\">&nbsp;</td>" +
+                "<td>" +"<img src=\"" + icon.getURL() + "\">&nbsp;</td>" +
                 "<td valign=\"center\">" + deviceTitle + "</td>" +
                 "</tr></table>");
 

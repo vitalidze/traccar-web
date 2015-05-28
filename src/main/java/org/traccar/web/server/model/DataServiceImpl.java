@@ -356,6 +356,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setTimeout(device.getTimeout());
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
             tmp_device.setIconType(device.getIconType());
+            tmp_device.setIcon(device.getIcon() == null ? null : entityManager.find(DeviceIcon.class, device.getIcon().getId()));
             return tmp_device;
         } else {
             throw new DeviceExistsException();

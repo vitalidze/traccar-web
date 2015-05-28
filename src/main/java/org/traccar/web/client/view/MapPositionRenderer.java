@@ -321,7 +321,7 @@ public class MapPositionRenderer {
         for (Position position : positions) {
             Marker marker = new Marker(
                     mapView.createLonLat(position.getLongitude(), position.getLatitude()),
-                    MarkerIconFactory.getIcon(position.getIconType(), false));
+                    MarkerIconFactory.getIcon(position.getIcon(), false));
             deviceData.markerMap.put(position.getId(), marker);
             addSelectEvent(marker, position);
             addMouseEvent(marker, position);
@@ -446,13 +446,13 @@ public class MapPositionRenderer {
         if (oldPosition != null) {
             DeviceData deviceData = getDeviceData(oldPosition.getDevice());
             if (deviceData.markerMap.containsKey(oldPosition.getId())) {
-                changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getIconType(), false));
+                changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getIcon(), false));
             }
         }
         if (newPosition != null) {
             DeviceData deviceData = getDeviceData(newPosition.getDevice());
             if (deviceData.markerMap.containsKey(newPosition.getId())) {
-                changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getIconType(), true));
+                changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getIcon(), true));
                 if (center) {
                     mapView.getMap().panTo(deviceData.markerMap.get(newPosition.getId()).getLonLat());
                 }
@@ -493,9 +493,9 @@ public class MapPositionRenderer {
         Position position = deviceData.positions == null || deviceData.positions.size() != 1 ? null : deviceData.positions.get(0);
         if (position != null) {
             position.setDevice(device);
-            position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
+            position.setIcon(MarkerIcon.create(position));
             boolean selected = selectedPosition != null && selectedPosition.getId() == position.getId();
-            changeMarkerIcon(position, MarkerIconFactory.getIcon(position.getIconType(), selected));
+            changeMarkerIcon(position, MarkerIconFactory.getIcon(position.getIcon(), selected));
         }
     }
 }

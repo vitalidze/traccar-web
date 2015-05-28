@@ -15,15 +15,31 @@
  */
 package org.traccar.web.client.view;
 
-import org.traccar.web.shared.model.DeviceIcon;
-import org.traccar.web.shared.model.DeviceIconType;
-import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.*;
 
 public abstract class MarkerIcon {
     abstract String getKey();
+
     abstract String getDefaultURL();
+    abstract int getDefaultWidth();
+    abstract int getDefaultHeight();
+
     abstract String getSelectedURL();
+    int getSelectedWidth() {
+        return getDefaultWidth();
+    }
+    int getSelectedHeight() {
+        return getDefaultHeight();
+    }
+
     abstract String getOfflineURL();
+    int getOfflineWidth() {
+        return getDefaultWidth();
+    }
+    int getOfflineHeight() {
+        return getDefaultHeight();
+    }
+
     DeviceIconType getBuiltInIcon() {
         return null;
     }
@@ -51,6 +67,16 @@ public abstract class MarkerIcon {
         @Override
         String getDefaultURL() {
             return icon.getPositionIconType(Position.Status.LATEST).getURL(false);
+        }
+
+        @Override
+        int getDefaultWidth() {
+            return icon.getPositionIconType(Position.Status.LATEST).getWidth();
+        }
+
+        @Override
+        int getDefaultHeight() {
+            return icon.getPositionIconType(Position.Status.LATEST).getHeight();
         }
 
         @Override
@@ -82,8 +108,28 @@ public abstract class MarkerIcon {
         }
 
         @Override
+        int getDefaultWidth() {
+            return getWidth(icon.getDefaultIcon());
+        }
+
+        @Override
+        int getDefaultHeight() {
+            return getHeight(icon.getDefaultIcon());
+        }
+
+        @Override
         String getSelectedURL() {
             return icon.selectedURL();
+        }
+
+        @Override
+        int getSelectedWidth() {
+            return getWidth(icon.getSelectedIcon());
+        }
+
+        @Override
+        int getSelectedHeight() {
+            return getHeight(icon.getSelectedIcon());
         }
 
         @Override
@@ -92,8 +138,43 @@ public abstract class MarkerIcon {
         }
 
         @Override
+        int getOfflineWidth() {
+            return getWidth(icon.getOfflineIcon());
+        }
+
+        @Override
+        int getOfflineHeight() {
+            return getHeight(icon.getOfflineIcon());
+        }
+
+        @Override
         DeviceIcon getDatabaseIcon() {
             return icon;
         }
+
+        private int getWidth(Picture pic) {
+            return pic == null ? 0 : pic.getWidth();
+        }
+
+        private int getHeight(Picture pic) {
+            return pic == null ? 0 : pic.getHeight();
+        }
+    }
+
+    public static MarkerIcon create(Device device) {
+        if (device.getIconType() == null) {
+            return new MarkerIcon.Database(device.getIcon());
+        } else {
+            return new MarkerIcon.BuiltIn(device.getIconType());
+        }
+    }
+
+    public static PositionIcon create(Position position) {
+        MarkerIcon deviceIcon = create(position.getDevice());
+        String url = position.getStatus() == Position.Status.OFFLINE ? deviceIcon.getOfflineURL() : deviceIcon.getDefaultURL();
+        int width = position.getStatus() == Position.Status.OFFLINE ? deviceIcon.getOfflineWidth() : deviceIcon.getDefaultWidth();
+        int height = position.getStatus() == Position.Status.OFFLINE ? deviceIcon.getOfflineHeight() : deviceIcon.getDefaultHeight();
+        return new PositionIcon(url, width, height,
+                deviceIcon.getSelectedURL(), deviceIcon.getSelectedWidth(), deviceIcon.getSelectedHeight());
     }
 }

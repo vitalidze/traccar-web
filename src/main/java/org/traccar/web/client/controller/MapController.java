@@ -25,6 +25,7 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.view.MapView;
+import org.traccar.web.client.view.MarkerIcon;
 import org.traccar.web.shared.model.*;
 
 import java.util.Arrays;
@@ -107,7 +108,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                     Device device = position.getDevice();
                     boolean isOffline = currentTime - position.getTime().getTime() > position.getDevice().getTimeout() * 1000;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
-                    position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
+                    position.setIcon(MarkerIcon.create(position));
                     if (position.getSpeed() != null) {
                         if (position.getSpeed().doubleValue() > position.getDevice().getIdleSpeedThreshold()) {
                             latestNonIdlePositionMap.put(device.getId(), position);
@@ -183,8 +184,10 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public void showArchivePositions(Track track) {
         List<Position> positions = track.getPositions();
+        PositionIcon icon = new PositionIcon(track.getStyle().getIconType() == null ?
+                PositionIconType.dotArchive : track.getStyle().getIconType());
         for (Position position : positions) {
-            position.setIconType(track.getStyle().getIconType() == null ? PositionIconType.dotArchive : track.getStyle().getIconType());
+            position.setIcon(icon);
         }
         mapView.showArchiveTrack(track);
 

@@ -43,6 +43,7 @@ public class Device implements IsSerializable {
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
         iconType = device.iconType;
+        icon = device.getIcon();
     }
 
     @Expose
