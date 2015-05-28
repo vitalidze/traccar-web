@@ -87,21 +87,21 @@ public class DeviceMarkersDialog {
         SafeHtml renderEndListItem(CommonStyles.Styles styles);
 
         @XTemplates.XTemplate("<div class='{style.thumb}' style='background: url(\"{marker.offlineURL}\") no-repeat center center;'></div>")
-        SafeHtml listCell(Style style, Marker marker);
+        SafeHtml listCell(Style style, MarkerIcon marker);
 
         @XTemplates.XTemplate("<div class='{style.thumbWrap}' style='background: #ffffff;'><span class=\"x-editable\">{text}</span><div class='{style.thumb}' style='background: url(\"{pictureURL}\") no-repeat center center;'></div></div>")
         SafeHtml pictureView(Style style, String text, String pictureURL);
     }
 
     public interface DeviceMarkerHandler {
-        void onSave(DeviceIconType icon);
+        void onSave(MarkerIcon icon);
     }
 
     @UiField
     Window window;
 
     @UiField(provided = true)
-    ListView<Marker, Marker> view;
+    ListView<MarkerIcon, MarkerIcon> view;
 
     @UiField(provided = true)
     BorderLayoutContainer.BorderLayoutData northData;
@@ -140,110 +140,47 @@ public class DeviceMarkersDialog {
 
     final DeviceMarkerHandler handler;
 
-    static abstract class Marker {
-        abstract String getKey();
-        abstract String getDefaultURL();
-        abstract String getSelectedURL();
-        abstract String getOfflineURL();
-    }
-
-    static class BuiltInMarker extends Marker {
-        final DeviceIconType icon;
-
-        BuiltInMarker(DeviceIconType icon) {
-            this.icon = icon;
-        }
-
-        @Override
-        String getKey() {
-            return icon.name();
-        }
-
-        @Override
-        String getOfflineURL() {
-            return icon.getPositionIconType(Position.Status.OFFLINE).getURL(false);
-        }
-
-        @Override
-        String getDefaultURL() {
-            return icon.getPositionIconType(Position.Status.LATEST).getURL(false);
-        }
-
-        @Override
-        String getSelectedURL() {
-            return icon.getPositionIconType(Position.Status.LATEST).getURL(true);
-        }
-    }
-
-    static class DatabaseMarker extends Marker {
-        DeviceIcon icon;
-
-        DatabaseMarker(DeviceIcon icon) {
-            this.icon = icon;
-        }
-
-        @Override
-        String getKey() {
-            return Long.toString(icon.getId());
-        }
-
-        @Override
-        String getDefaultURL() {
-            return icon.defaultURL();
-        }
-
-        @Override
-        String getSelectedURL() {
-            return icon.selectedURL();
-        }
-
-        @Override
-        String getOfflineURL() {
-            return icon.offlineURL();
-        }
-    }
-
     static class MergingCallback extends BaseAsyncCallback<List<DeviceIcon>> {
-        final AsyncCallback<List<Marker>> markerLoaderCallback;
+        final AsyncCallback<List<MarkerIcon>> markerLoaderCallback;
 
-        MergingCallback(Messages i18n, AsyncCallback<List<Marker>> markerLoaderCallback) {
+        MergingCallback(Messages i18n, AsyncCallback<List<MarkerIcon>> markerLoaderCallback) {
             super(i18n);
             this.markerLoaderCallback = markerLoaderCallback;
         }
 
         @Override
         public void onSuccess(List<DeviceIcon> loaded) {
-            List<Marker> result = new ArrayList<Marker>(loaded.size() + DeviceIconType.values().length);
+            List<MarkerIcon> result = new ArrayList<MarkerIcon>(loaded.size() + DeviceIconType.values().length);
             for (DeviceIcon icon : loaded) {
-                result.add(new DatabaseMarker(icon));
+                result.add(new MarkerIcon.Database(icon));
             }
             for (DeviceIconType icon : DeviceIconType.values()) {
-                result.add(new BuiltInMarker(icon));
+                result.add(new MarkerIcon.BuiltIn(icon));
             }
             markerLoaderCallback.onSuccess(result);
         }
     }
 
-    RpcProxy<Object, List<Marker>> hybridProxy = new RpcProxy<Object, List<Marker>>() {
+    RpcProxy<Object, List<MarkerIcon>> hybridProxy = new RpcProxy<Object, List<MarkerIcon>>() {
         @Override
-        public void load(Object loadConfig, AsyncCallback<List<Marker>> callback) {
+        public void load(Object loadConfig, AsyncCallback<List<MarkerIcon>> callback) {
             picturesService.getMarkerPictures(new MergingCallback(i18n, callback));
         }
     };
 
-    Marker selected;
+    MarkerIcon selected;
 
-    final ListStore<Marker> store;
+    final ListStore<MarkerIcon> store;
 
     final Resources resources = GWT.create(Resources.class);
     final MarkerListItemTemplate renderer = GWT.create(MarkerListItemTemplate.class);
 
-    public DeviceMarkersDialog(final DeviceIconType selectedIcon, DeviceMarkerHandler handler) {
+    public DeviceMarkersDialog(final MarkerIcon selectedIcon, DeviceMarkerHandler handler) {
         this.handler = handler;
 
-        ModelKeyProvider<Marker> keyProvider = new ModelKeyProvider<Marker>() {
+        ModelKeyProvider<MarkerIcon> keyProvider = new ModelKeyProvider<MarkerIcon>() {
             @Override
-            public String getKey(Marker item) {
+            public String getKey(MarkerIcon item) {
                 return item.getKey();
             }
         };
@@ -251,7 +188,7 @@ public class DeviceMarkersDialog {
         resources.css().ensureInjected();
         final Style style = resources.css();
 
-        ListViewCustomAppearance<Marker> appearance = new ListViewCustomAppearance<Marker>("." + style.thumbWrap(), style.over(), style.select()) {
+        ListViewCustomAppearance<MarkerIcon> appearance = new ListViewCustomAppearance<MarkerIcon>("." + style.thumbWrap(), style.over(), style.select()) {
             @Override
             public void renderEnd(SafeHtmlBuilder builder) {
                 renderer.renderEndListItem(CommonStyles.get());
@@ -263,27 +200,27 @@ public class DeviceMarkersDialog {
             }
         };
 
-        store = new ListStore<Marker>(keyProvider);
-        Loader<Object, List<Marker>> loader = new Loader<Object, List<Marker>>(hybridProxy);
-        loader.addLoadHandler(new ListStoreBinding<Object, Marker, List<Marker>>(store));
+        store = new ListStore<MarkerIcon>(keyProvider);
+        Loader<Object, List<MarkerIcon>> loader = new Loader<Object, List<MarkerIcon>>(hybridProxy);
+        loader.addLoadHandler(new ListStoreBinding<Object, MarkerIcon, List<MarkerIcon>>(store));
 
-        view = new ListView<Marker, Marker>(store, new IdentityValueProvider<Marker>() {
+        view = new ListView<MarkerIcon, MarkerIcon>(store, new IdentityValueProvider<MarkerIcon>() {
             @Override
-            public void setValue(Marker object, Marker value) {
+            public void setValue(MarkerIcon object, MarkerIcon value) {
             }
         }, appearance);
 
-        view.setCell(new SimpleSafeHtmlCell<Marker>(new AbstractSafeHtmlRenderer<Marker>() {
+        view.setCell(new SimpleSafeHtmlCell<MarkerIcon>(new AbstractSafeHtmlRenderer<MarkerIcon>() {
             @Override
-            public SafeHtml render(Marker object) {
+            public SafeHtml render(MarkerIcon object) {
                 return renderer.listCell(style, object);
             }
         }));
 
         view.getSelectionModel().setSelectionMode(com.sencha.gxt.core.client.Style.SelectionMode.SINGLE);
-        view.getSelectionModel().addSelectionHandler(new SelectionHandler<Marker>() {
+        view.getSelectionModel().addSelectionHandler(new SelectionHandler<MarkerIcon>() {
             @Override
-            public void onSelection(SelectionEvent<Marker> event) {
+            public void onSelection(SelectionEvent<MarkerIcon> event) {
                 selectionChanged();
             }
         });
@@ -300,8 +237,8 @@ public class DeviceMarkersDialog {
 
         uiBinder.createAndBindUi(this);
 
-        selected = new BuiltInMarker(selectedIcon);
-        store.addStoreHandlers(new BaseStoreHandlers<Marker>() {
+        selected = selectedIcon;
+        store.addStoreHandlers(new BaseStoreHandlers<MarkerIcon>() {
             @Override
             public void onAnything() {
                 for (int i = 0; i < store.size(); i++) {
@@ -329,8 +266,7 @@ public class DeviceMarkersDialog {
 
     @UiHandler("saveButton")
     public void onOKClicked(SelectEvent event) {
-        Marker selected = view.getSelectionModel().getSelectedItem();
-        handler.onSave(selected == null ? null : ((BuiltInMarker) selected).icon);
+        handler.onSave(view.getSelectionModel().getSelectedItem());
         hide();
     }
 
@@ -340,7 +276,7 @@ public class DeviceMarkersDialog {
     }
 
     private void selectionChanged() {
-        Marker marker = view.getSelectionModel().getSelectedItem();
+        MarkerIcon marker = view.getSelectionModel().getSelectedItem();
         if (marker == null) {
             defaultImage.setHTML("");
             selectedImage.setHTML("");
@@ -352,8 +288,8 @@ public class DeviceMarkersDialog {
         }
         panelImages.forceLayout();
 
-        editButton.setEnabled(marker instanceof DatabaseMarker);
-        removeButton.setEnabled(marker instanceof DatabaseMarker);
+        editButton.setEnabled(marker instanceof MarkerIcon.Database);
+        removeButton.setEnabled(marker instanceof MarkerIcon.Database);
     }
 
     @UiHandler("addButton")
@@ -368,7 +304,7 @@ public class DeviceMarkersDialog {
                 picturesService.addMarkerPicture(marker, new BaseAsyncCallback<DeviceIcon>(i18n) {
                     @Override
                     public void onSuccess(DeviceIcon added) {
-                        Marker marker = new DatabaseMarker(added);
+                        MarkerIcon marker = new MarkerIcon.Database(added);
                         selected = marker;
                         store.add(0, marker);
                     }
@@ -379,7 +315,7 @@ public class DeviceMarkersDialog {
 
     @UiHandler("editButton")
     public void editIcon(SelectEvent event) {
-        final DatabaseMarker marker = (DatabaseMarker) view.getSelectionModel().getSelectedItem();
+        final MarkerIcon.Database marker = (MarkerIcon.Database) view.getSelectionModel().getSelectedItem();
         new DeviceIconDialog(true, new DeviceIconDialog.DeviceIconHandler() {
             @Override
             public void uploaded(Picture defaultIcon, Picture selectedIcon, Picture offlineIcon) {
@@ -403,13 +339,13 @@ public class DeviceMarkersDialog {
 
     @UiHandler("removeButton")
     public void removeIcon(SelectEvent event) {
-        final Marker marker = view.getSelectionModel().getSelectedItem();
+        final MarkerIcon.Database marker = (MarkerIcon.Database) view.getSelectionModel().getSelectedItem();
         final ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmDeviceIconRemoval());
         dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
             @Override
             public void onDialogHide(DialogHideEvent event) {
                 if (event.getHideButton() == Dialog.PredefinedButton.YES) {
-                    picturesService.removeMarkerPicture(((DatabaseMarker) marker).icon, new BaseAsyncCallback<Void>(i18n) {
+                    picturesService.removeMarkerPicture(marker.icon, new BaseAsyncCallback<Void>(i18n) {
                         @Override
                         public void onSuccess(Void result) {
                             view.getSelectionModel().deselectAll();

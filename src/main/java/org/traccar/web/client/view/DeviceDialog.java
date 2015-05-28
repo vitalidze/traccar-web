@@ -28,7 +28,7 @@ import com.sencha.gxt.widget.core.client.form.Radio;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.ApplicationContext;
-import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -40,9 +40,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.TextField;
-import org.traccar.web.shared.model.DeviceIconType;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.PositionIconType;
 
 public class DeviceDialog implements Editor<Device> {
 
@@ -89,11 +86,15 @@ public class DeviceDialog implements Editor<Device> {
     @UiField
     Image markerImage;
 
-    DeviceIconType selectedIcon;
+    MarkerIcon selectedIcon;
 
     public DeviceDialog(Device device, DeviceHandler deviceHandler) {
         this.deviceHandler = deviceHandler;
-        selectedIcon = device.getIconType();
+        if (device.getIconType() == null) {
+            selectedIcon = new MarkerIcon.Database(device.getIcon());
+        } else {
+            selectedIcon = new MarkerIcon.BuiltIn(device.getIconType());
+        }
 
         uiBinder.createAndBindUi(this);
 
@@ -120,7 +121,8 @@ public class DeviceDialog implements Editor<Device> {
         window.hide();
         Device device = driver.flush();
         device.setIdleSpeedThreshold(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getIdleSpeedThreshold()));
-        device.setIconType(selectedIcon);
+        device.setIconType(selectedIcon.getBuiltInIcon());
+        device.setIcon(selectedIcon.getDatabaseIcon());
         deviceHandler.onSave(device);
     }
 
@@ -133,7 +135,7 @@ public class DeviceDialog implements Editor<Device> {
     public void onSelectMarkerIconClicked(SelectEvent event) {
         new DeviceMarkersDialog(selectedIcon, new DeviceMarkersDialog.DeviceMarkerHandler() {
             @Override
-            public void onSave(DeviceIconType icon) {
+            public void onSave(MarkerIcon icon) {
                 if (icon != null) {
                     selectedIcon = icon;
                     updateIcon();
@@ -143,7 +145,7 @@ public class DeviceDialog implements Editor<Device> {
     }
 
     private void updateIcon() {
-        markerImage.setUrl(selectedIcon.getPositionIconType(Position.Status.OFFLINE).getURL(false));
+        markerImage.setUrl(selectedIcon.getOfflineURL());
         panelMarkers.forceLayout();
     }
 }
