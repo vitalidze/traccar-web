@@ -23,10 +23,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.NotificationService;
-import org.traccar.web.server.entity.ApplicationSettings;
-import org.traccar.web.server.entity.NotificationSettings;
-import org.traccar.web.server.entity.NotificationTemplate;
-import org.traccar.web.server.entity.User;
+import org.traccar.web.server.entity.*;
 import org.traccar.web.shared.model.*;
 
 import javax.inject.Inject;

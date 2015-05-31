@@ -19,6 +19,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.EventService;
 import org.traccar.web.server.entity.ApplicationSettings;
+import org.traccar.web.server.entity.DeviceEvent;
 import org.traccar.web.shared.model.*;
 
 import javax.inject.Inject;

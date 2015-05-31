@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.shared.model;
+package org.traccar.web.server.entity;
+
+import org.traccar.web.shared.model.*;
 
 import javax.persistence.*;
 import java.util.Date;
