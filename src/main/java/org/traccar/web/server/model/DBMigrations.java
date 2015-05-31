@@ -16,6 +16,7 @@
 package org.traccar.web.server.model;
 
 import org.traccar.web.server.entity.ApplicationSettings;
+import org.traccar.web.server.entity.UIStateEntry;
 import org.traccar.web.server.entity.User;
 import org.traccar.web.server.entity.UserSettings;
 import org.traccar.web.shared.model.*;

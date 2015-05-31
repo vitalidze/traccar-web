@@ -34,10 +34,7 @@ import com.google.inject.persist.Transactional;
 
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
-import org.traccar.web.server.entity.ApplicationSettings;
-import org.traccar.web.server.entity.DeviceIcon;
-import org.traccar.web.server.entity.User;
-import org.traccar.web.server.entity.UserSettings;
+import org.traccar.web.server.entity.*;
 import org.traccar.web.shared.model.*;
 
 @Singleton
