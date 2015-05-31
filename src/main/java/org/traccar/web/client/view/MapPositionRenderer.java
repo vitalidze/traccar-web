@@ -225,6 +225,7 @@ public class MapPositionRenderer {
         List<Position> positions;
         VectorFeature title;
         VectorFeature track;
+        VectorFeature alert;
         LineString trackLine;
         List<VectorFeature> trackPoints = new ArrayList<VectorFeature>();
         List<VectorFeature> labels = new ArrayList<VectorFeature>();
@@ -267,20 +268,26 @@ public class MapPositionRenderer {
         clear(getDeviceData(device));
     }
 
-    private void clearMarkersAndTitle(DeviceData deviceData) {
+    private void clearMarkersAndTitleAndAlert(DeviceData deviceData) {
         for (Marker marker : deviceData.markerMap.values()) {
             getMarkerLayer().removeMarker(marker);
         }
         deviceData.markerMap.clear();
         if (deviceData.title != null) {
             getVectorLayer().removeFeature(deviceData.title);
+            deviceData.title.destroy();
             deviceData.title = null;
+        }
+        if (deviceData.alert != null) {
+            getVectorLayer().removeFeature(deviceData.alert);
+            deviceData.alert.destroy();
+            deviceData.alert = null;
         }
     }
 
     private void clear(DeviceData deviceData) {
         // clear markers and title
-        clearMarkersAndTitle(deviceData);
+        clearMarkersAndTitleAndAlert(deviceData);
         // clear labels
         for (VectorFeature label : deviceData.labels) {
             getVectorLayer().removeFeature(label);
@@ -302,9 +309,9 @@ public class MapPositionRenderer {
         setSnapToTrack(deviceData, false);
     }
 
-    public void clearPositionsAndTitles() {
+    public void clearPositionsAndTitlesAndAlerts() {
         for (DeviceData deviceData : deviceMap.values()) {
-            clearMarkersAndTitle(deviceData);
+            clearMarkersAndTitleAndAlert(deviceData);
         }
     }
 
@@ -500,12 +507,6 @@ public class MapPositionRenderer {
     }
 
     public void showAlerts(List<Position> positions) {
-        for (VectorFeature alert : alertMap.values()) {
-            getVectorLayer().removeFeature(alert);
-            alert.destroy();
-        }
-        alertMap.clear();
-
         if (positions != null) {
             for (Position position : positions) {
                 drawAlert(position);
@@ -514,8 +515,10 @@ public class MapPositionRenderer {
     }
 
     private void drawAlert(Position position) {
-        int iconWidthHalf = position.getIconType().getWidth() / 2;
-        int iconHeight = position.getIconType().getHeight();
+        DeviceData deviceData = getDeviceData(position.getDevice());
+
+        int iconWidthHalf = position.getIcon().getWidth() / 2;
+        int iconHeight = position.getIcon().getHeight();
 
         Style alertCircleStyle = new org.gwtopenmaps.openlayers.client.Style();
         alertCircleStyle.setPointRadius(Math.sqrt(iconWidthHalf * iconWidthHalf + iconHeight * iconHeight) + 1);
@@ -525,18 +528,17 @@ public class MapPositionRenderer {
 
         VectorFeature alertCircle = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), alertCircleStyle);
         getVectorLayer().addFeature(alertCircle);
-        alertMap.put(position.getDevice().getId(), alertCircle);
+        deviceData.alert = alertCircle;
     }
 
     public void updateAlert(Device device, boolean show) {
-        VectorFeature alert = alertMap.remove(device.getId());
-        if (alert != null) {
-            getVectorLayer().removeFeature(alert);
-            alert.destroy();
+        DeviceData deviceData = getDeviceData(device);
+        if (deviceData.alert != null) {
+            getVectorLayer().removeFeature(deviceData.alert);
+            deviceData.alert.destroy();
         }
         if (show) {
-            Long latestPositionId = deviceMap.get(device.getId());
-            Position latestPosition = positionMap.get(latestPositionId);
+            Position latestPosition = deviceData.getLatestPosition();
             if (latestPosition != null) {
                 drawAlert(latestPosition);
             }

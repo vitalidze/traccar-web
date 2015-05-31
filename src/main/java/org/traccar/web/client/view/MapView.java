@@ -219,7 +219,7 @@ public class MapView {
     private final GeoFenceRenderer geoFenceRenderer;
 
     public void clearLatestPositions() {
-        latestPositionRenderer.clearPositionsAndTitles();
+        latestPositionRenderer.clearPositionsAndTitlesAndAlerts();
     }
 
     public void showLatestPositions(List<Position> positions) {
