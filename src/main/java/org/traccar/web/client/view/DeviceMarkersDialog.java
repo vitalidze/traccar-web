@@ -140,7 +140,7 @@ public class DeviceMarkersDialog {
 
     final DeviceMarkerHandler handler;
 
-    static class MergingCallback extends BaseAsyncCallback<List<DeviceIcon>> {
+    static class MergingCallback extends BaseAsyncCallback<List<DeviceIconDTO>> {
         final AsyncCallback<List<MarkerIcon>> markerLoaderCallback;
 
         MergingCallback(Messages i18n, AsyncCallback<List<MarkerIcon>> markerLoaderCallback) {
@@ -149,9 +149,9 @@ public class DeviceMarkersDialog {
         }
 
         @Override
-        public void onSuccess(List<DeviceIcon> loaded) {
+        public void onSuccess(List<DeviceIconDTO> loaded) {
             List<MarkerIcon> result = new ArrayList<MarkerIcon>(loaded.size() + DeviceIconType.values().length);
-            for (DeviceIcon icon : loaded) {
+            for (DeviceIconDTO icon : loaded) {
                 result.add(new MarkerIcon.Database(icon));
             }
             for (DeviceIconType icon : DeviceIconType.values()) {
@@ -296,14 +296,14 @@ public class DeviceMarkersDialog {
     public void addIcon(SelectEvent event) {
         new DeviceIconDialog(false, new DeviceIconDialog.DeviceIconHandler() {
             @Override
-            public void uploaded(Picture defaultIcon, Picture selectedIcon, Picture offlineIcon) {
-                DeviceIcon marker = new DeviceIcon();
+            public void uploaded(PictureDTO defaultIcon, PictureDTO selectedIcon, PictureDTO offlineIcon) {
+                DeviceIconDTO marker = new DeviceIconDTO();
                 marker.setDefaultIcon(defaultIcon);
                 marker.setSelectedIcon(selectedIcon);
                 marker.setOfflineIcon(offlineIcon);
-                picturesService.addMarkerPicture(marker, new BaseAsyncCallback<DeviceIcon>(i18n) {
+                picturesService.addMarkerPicture(marker, new BaseAsyncCallback<DeviceIconDTO>(i18n) {
                     @Override
-                    public void onSuccess(DeviceIcon added) {
+                    public void onSuccess(DeviceIconDTO added) {
                         MarkerIcon marker = new MarkerIcon.Database(added);
                         selected = marker;
                         store.add(0, marker);
@@ -318,15 +318,15 @@ public class DeviceMarkersDialog {
         final MarkerIcon.Database marker = (MarkerIcon.Database) view.getSelectionModel().getSelectedItem();
         new DeviceIconDialog(true, new DeviceIconDialog.DeviceIconHandler() {
             @Override
-            public void uploaded(Picture defaultIcon, Picture selectedIcon, Picture offlineIcon) {
-                DeviceIcon icon = marker.icon;
+            public void uploaded(PictureDTO defaultIcon, PictureDTO selectedIcon, PictureDTO offlineIcon) {
+                DeviceIconDTO icon = marker.icon;
                 if (defaultIcon != null) icon.setDefaultIcon(defaultIcon);
                 if (selectedIcon != null) icon.setSelectedIcon(selectedIcon);
                 if (offlineIcon != null) icon.setOfflineIcon(offlineIcon);
                 if (defaultIcon != null || selectedIcon != null || offlineIcon != null) {
-                    picturesService.updateMarkerPicture(icon, new BaseAsyncCallback<DeviceIcon>(i18n) {
+                    picturesService.updateMarkerPicture(icon, new BaseAsyncCallback<DeviceIconDTO>(i18n) {
                         @Override
-                        public void onSuccess(DeviceIcon updated) {
+                        public void onSuccess(DeviceIconDTO updated) {
                             selected = marker;
                             marker.icon = updated;
                             selectionChanged();

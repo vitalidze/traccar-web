@@ -25,8 +25,9 @@ import com.google.inject.servlet.ServletModule;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
 import org.traccar.web.server.entity.ApplicationSettings;
-import org.traccar.web.shared.model.Picture;
+import org.traccar.web.server.entity.Picture;
 import org.traccar.web.server.entity.User;
+import org.traccar.web.shared.model.PictureDTO;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -70,7 +71,7 @@ public class GuiceServletConfig extends GuiceServletContextListener {
                 serve("/traccar/export/*").with(ExportServlet.class);
                 serve("/traccar/import/*").with(ImportServlet.class);
                 serve("/traccar/s/login").with(LoginServlet.class);
-                serve(Picture.URL_PREFIX + "*").with(PicturesServlet.class);
+                serve(PictureDTO.URL_PREFIX + "*").with(PicturesServlet.class);
 
                 UserCheck userCheck = new UserCheck();
                 requestInjection(userCheck);

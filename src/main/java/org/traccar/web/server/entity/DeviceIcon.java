@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.shared.model;
+package org.traccar.web.server.entity;
 
-import com.google.gson.annotations.Expose;
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.traccar.web.shared.model.DeviceIconDTO;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "device_icons")
-public class DeviceIcon implements IsSerializable {
-    @Expose
+public class DeviceIcon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -37,7 +35,6 @@ public class DeviceIcon implements IsSerializable {
         this.id = id;
     }
 
-    @Expose
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "device_icons_fkey_def_icon_id"))
     private Picture defaultIcon;
@@ -50,7 +47,6 @@ public class DeviceIcon implements IsSerializable {
         this.defaultIcon = defaultIcon;
     }
 
-    @Expose
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "device_icons_fkey_sel_icon_id"))
     private Picture selectedIcon;
@@ -63,7 +59,6 @@ public class DeviceIcon implements IsSerializable {
         this.selectedIcon = selectedIcon;
     }
 
-    @Expose
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "device_icons_fkey_off_icon_id"))
     private Picture offlineIcon;
@@ -90,19 +85,12 @@ public class DeviceIcon implements IsSerializable {
         return (int)(getId() ^ (getId() >>> 32));
     }
 
-    public String defaultURL() {
-        return URL(getDefaultIcon());
-    }
-
-    public String selectedURL() {
-        return URL(getSelectedIcon());
-    }
-
-    public String offlineURL() {
-        return URL(getOfflineIcon());
-    }
-
-    private String URL(Picture picture) {
-        return picture == null ? "" : (Picture.URL_PREFIX + picture.getId());
+    public DeviceIconDTO dto() {
+        DeviceIconDTO dto = new DeviceIconDTO();
+        dto.setId(getId());
+        dto.setDefaultIcon(getDefaultIcon() == null ? null : getDefaultIcon().dto());
+        dto.setSelectedIcon(getSelectedIcon() == null ? null : getSelectedIcon().dto());
+        dto.setOfflineIcon(getOfflineIcon() == null ? null : getOfflineIcon().dto());
+        return dto;
     }
 }

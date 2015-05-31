@@ -23,7 +23,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.traccar.web.shared.model.Picture;
+import org.traccar.web.server.entity.Picture;
 import org.traccar.web.shared.model.PictureType;
 
 import javax.imageio.ImageIO;

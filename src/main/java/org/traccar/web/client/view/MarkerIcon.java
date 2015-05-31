@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.view;
 
+import org.traccar.web.server.entity.Picture;
 import org.traccar.web.shared.model.*;
 
 public abstract class MarkerIcon {
@@ -43,7 +44,7 @@ public abstract class MarkerIcon {
     DeviceIconType getBuiltInIcon() {
         return null;
     }
-    DeviceIcon getDatabaseIcon() {
+    DeviceIconDTO getDatabaseIcon() {
         return null;
     }
 
@@ -91,9 +92,9 @@ public abstract class MarkerIcon {
     }
 
     static class Database extends MarkerIcon {
-        DeviceIcon icon;
+        DeviceIconDTO icon;
 
-        Database(DeviceIcon icon) {
+        Database(DeviceIconDTO icon) {
             this.icon = icon;
         }
 
@@ -148,15 +149,15 @@ public abstract class MarkerIcon {
         }
 
         @Override
-        DeviceIcon getDatabaseIcon() {
+        DeviceIconDTO getDatabaseIcon() {
             return icon;
         }
 
-        private int getWidth(Picture pic) {
+        private int getWidth(PictureDTO pic) {
             return pic == null ? 0 : pic.getWidth();
         }
 
-        private int getHeight(Picture pic) {
+        private int getHeight(PictureDTO pic) {
             return pic == null ? 0 : pic.getHeight();
         }
     }

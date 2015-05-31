@@ -1,16 +1,16 @@
 package org.traccar.web.client.model;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.traccar.web.shared.model.DeviceIcon;
+import org.traccar.web.shared.model.DeviceIconDTO;
 
 import java.util.List;
 
 public interface PicturesServiceAsync {
-    void getMarkerPictures(AsyncCallback<List<DeviceIcon>> async);
+    void getMarkerPictures(AsyncCallback<List<DeviceIconDTO>> async);
 
-    void addMarkerPicture(DeviceIcon marker, AsyncCallback<DeviceIcon> async);
+    void addMarkerPicture(DeviceIconDTO marker, AsyncCallback<DeviceIconDTO> async);
 
-    void updateMarkerPicture(DeviceIcon marker, AsyncCallback<DeviceIcon> async);
+    void updateMarkerPicture(DeviceIconDTO marker, AsyncCallback<DeviceIconDTO> async);
 
-    void removeMarkerPicture(DeviceIcon marker, AsyncCallback<Void> async);
+    void removeMarkerPicture(DeviceIconDTO marker, AsyncCallback<Void> async);
 }

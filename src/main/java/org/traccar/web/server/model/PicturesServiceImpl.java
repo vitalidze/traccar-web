@@ -18,13 +18,15 @@ package org.traccar.web.server.model;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.PicturesService;
-import org.traccar.web.shared.model.DeviceIcon;
-import org.traccar.web.shared.model.Picture;
+import org.traccar.web.server.entity.DeviceIcon;
+import org.traccar.web.server.entity.Picture;
+import org.traccar.web.shared.model.DeviceIconDTO;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
@@ -35,43 +37,49 @@ public class PicturesServiceImpl extends RemoteServiceServlet implements Picture
     @Transactional
     @RequireUser
     @Override
-    public List<DeviceIcon> getMarkerPictures() {
-        return entityManager.get().createQuery("SELECT i FROM DeviceIcon i ORDER BY i.id DESC", DeviceIcon.class)
+    public List<DeviceIconDTO> getMarkerPictures() {
+        List<DeviceIcon> icons = entityManager.get().createQuery("SELECT i FROM DeviceIcon i ORDER BY i.id DESC", DeviceIcon.class)
                 .getResultList();
+        List<DeviceIconDTO> result = new ArrayList<DeviceIconDTO>(icons.size());
+        for (DeviceIcon icon : icons) {
+            result.add(icon.dto());
+        }
+        return result;
     }
 
     @Transactional
     @RequireUser
     @Override
-    public DeviceIcon addMarkerPicture(DeviceIcon marker) {
-        if (marker.getDefaultIcon() != null) {
-            marker.setDefaultIcon(entityManager.get().find(Picture.class, marker.getDefaultIcon().getId()));
+    public DeviceIconDTO addMarkerPicture(DeviceIconDTO markerDTO) {
+        DeviceIcon newMarker = new DeviceIcon();
+        if (markerDTO.getDefaultIcon() != null) {
+            newMarker.setDefaultIcon(entityManager.get().find(Picture.class, markerDTO.getDefaultIcon().getId()));
         }
-        if (marker.getSelectedIcon() != null) {
-            marker.setSelectedIcon(entityManager.get().find(Picture.class, marker.getSelectedIcon().getId()));
+        if (markerDTO.getSelectedIcon() != null) {
+            newMarker.setSelectedIcon(entityManager.get().find(Picture.class, markerDTO.getSelectedIcon().getId()));
         }
-        if (marker.getOfflineIcon() != null) {
-            marker.setOfflineIcon(entityManager.get().find(Picture.class, marker.getOfflineIcon().getId()));
+        if (markerDTO.getOfflineIcon() != null) {
+            newMarker.setOfflineIcon(entityManager.get().find(Picture.class, markerDTO.getOfflineIcon().getId()));
         }
-        entityManager.get().persist(marker);
-        return marker;
+        entityManager.get().persist(newMarker);
+        return newMarker.dto();
     }
 
     @Transactional
     @RequireUser
     @Override
-    public DeviceIcon updateMarkerPicture(DeviceIcon marker) {
-        DeviceIcon icon = entityManager.get().find(DeviceIcon.class, marker.getId());
-        icon.setDefaultIcon(marker.getDefaultIcon() == null ? null : entityManager.get().find(Picture.class, marker.getDefaultIcon().getId()));
-        icon.setSelectedIcon(marker.getSelectedIcon() == null ? null : entityManager.get().find(Picture.class, marker.getSelectedIcon().getId()));
-        icon.setOfflineIcon(marker.getOfflineIcon() == null ? null : entityManager.get().find(Picture.class, marker.getOfflineIcon().getId()));
-        return icon;
+    public DeviceIconDTO updateMarkerPicture(DeviceIconDTO markerDTO) {
+        DeviceIcon marker = entityManager.get().find(DeviceIcon.class, markerDTO.getId());
+        marker.setDefaultIcon(markerDTO.getDefaultIcon() == null ? null : entityManager.get().find(Picture.class, markerDTO.getDefaultIcon().getId()));
+        marker.setSelectedIcon(markerDTO.getSelectedIcon() == null ? null : entityManager.get().find(Picture.class, markerDTO.getSelectedIcon().getId()));
+        marker.setOfflineIcon(markerDTO.getOfflineIcon() == null ? null : entityManager.get().find(Picture.class, markerDTO.getOfflineIcon().getId()));
+        return marker.dto();
     }
 
     @Transactional
     @RequireUser
     @Override
-    public void removeMarkerPicture(DeviceIcon marker) {
+    public void removeMarkerPicture(DeviceIconDTO marker) {
         DeviceIcon icon = entityManager.get().find(DeviceIcon.class, marker.getId());
         entityManager.get().remove(icon);
         for (Picture picture : new Picture[] { icon.getOfflineIcon(), icon.getSelectedIcon(), icon.getOfflineIcon() }) {

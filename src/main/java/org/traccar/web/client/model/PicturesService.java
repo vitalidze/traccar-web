@@ -17,14 +17,14 @@ package org.traccar.web.client.model;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import org.traccar.web.shared.model.DeviceIcon;
+import org.traccar.web.shared.model.DeviceIconDTO;
 
 import java.util.List;
 
 @RemoteServiceRelativePath("picturesService")
 public interface PicturesService extends RemoteService {
-    List<DeviceIcon> getMarkerPictures();
-    DeviceIcon addMarkerPicture(DeviceIcon marker);
-    DeviceIcon updateMarkerPicture(DeviceIcon marker);
-    void removeMarkerPicture(DeviceIcon marker);
+    List<DeviceIconDTO> getMarkerPictures();
+    DeviceIconDTO addMarkerPicture(DeviceIconDTO marker);
+    DeviceIconDTO updateMarkerPicture(DeviceIconDTO marker);
+    void removeMarkerPicture(DeviceIconDTO marker);
 }

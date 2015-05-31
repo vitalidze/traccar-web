@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.shared.model;
+package org.traccar.web.server.entity;
 
-import com.google.gson.annotations.Expose;
-import com.google.gwt.user.client.rpc.GwtTransient;
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.traccar.web.shared.model.PictureDTO;
+import org.traccar.web.shared.model.PictureType;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "pictures")
-public class Picture implements IsSerializable {
-    public static final String URL_PREFIX = "/traccar/p/";
-
-    @Expose
+public class Picture {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -54,7 +50,6 @@ public class Picture implements IsSerializable {
     @Lob
     @Basic(fetch = FetchType.LAZY)
     @Column(length = 1024 * 1024) // max 1 MB
-    @GwtTransient
     private byte[] data;
 
     public byte[] getData() {
@@ -65,9 +60,7 @@ public class Picture implements IsSerializable {
         this.data = data;
     }
 
-    @Expose
     private int width;
-    @Expose
     private int height;
     private String mimeType;
 
@@ -107,5 +100,13 @@ public class Picture implements IsSerializable {
     @Override
     public int hashCode() {
         return (int)(getId() ^ (getId() >>> 32));
+    }
+
+    public PictureDTO dto() {
+        PictureDTO dto = new PictureDTO();
+        dto.setId(getId());
+        dto.setWidth(getWidth());
+        dto.setHeight(getHeight());
+        return dto;
     }
 }

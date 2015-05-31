@@ -16,9 +16,7 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
-import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -26,16 +24,13 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SubmitCompleteEvent;
 import com.sencha.gxt.widget.core.client.form.FileUploadField;
 import com.sencha.gxt.widget.core.client.form.FormPanel;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseAsyncCallback;
-import org.traccar.web.shared.model.DeviceIcon;
-import org.traccar.web.shared.model.Picture;
+import org.traccar.web.shared.model.PictureDTO;
 import org.traccar.web.shared.model.PictureType;
 
 public class DeviceIconDialog {
@@ -46,7 +41,7 @@ public class DeviceIconDialog {
     }
 
     interface DeviceIconHandler {
-        void uploaded(Picture defaultIcon, Picture selectedIcon, Picture offlineIcon);
+        void uploaded(PictureDTO defaultIcon, PictureDTO selectedIcon, PictureDTO offlineIcon);
     }
 
     @UiField
@@ -72,7 +67,7 @@ public class DeviceIconDialog {
     public DeviceIconDialog(boolean allowSkippingPictures, DeviceIconHandler handler) {
         this.handler = handler;
         uiBinder.createAndBindUi(this);
-        form.setAction(Picture.URL_PREFIX + PictureType.MARKER.name() + "?allowSkippingPictures=" + allowSkippingPictures);
+        form.setAction(PictureDTO.URL_PREFIX + PictureType.MARKER.name() + "?allowSkippingPictures=" + allowSkippingPictures);
     }
 
     public void show() {
@@ -110,10 +105,10 @@ public class DeviceIconDialog {
         }
     }
 
-    Picture picture(JSONValue v) {
+    PictureDTO picture(JSONValue v) {
         if (v == null) return null;
         JSONObject o = (JSONObject) v;
-        Picture picture = new Picture();
+        PictureDTO picture = new PictureDTO();
         picture.setId(Long.parseLong(o.get("id").toString()));
         picture.setWidth(Integer.parseInt(o.get("width").toString()));
         picture.setHeight(Integer.parseInt(o.get("height").toString()));
