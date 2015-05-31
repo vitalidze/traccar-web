@@ -16,9 +16,12 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
@@ -41,7 +44,10 @@ public class LogViewDialog {
     Window window;
 
     @UiField
-    TextArea logArea;
+    ScrollPanel logScroll;
+
+    @UiField
+    HTML logArea;
 
     @UiField(provided = true)
     String log;
@@ -50,6 +56,9 @@ public class LogViewDialog {
         this.log = log;
 
         uiBinder.createAndBindUi(this);
+
+        logScroll.getElement().getStyle().setBackgroundColor("white");
+        logArea.getElement().getStyle().setPadding(2, Style.Unit.PX);
     }
 
     public void show() {

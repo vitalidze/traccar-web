@@ -47,7 +47,7 @@ public class Position implements IsSerializable, Cloneable {
     private static final long serialVersionUID = 1;
 
     public enum Status {
-        ARCHIVE, OFFLINE, LATEST;
+        OFFLINE, LATEST;
     }
 
     public Position() {
@@ -214,14 +214,14 @@ public class Position implements IsSerializable, Cloneable {
     }
 
     @GwtTransient
-    private transient PositionIconType iconType;
+    private transient PositionIcon icon;
 
-    public PositionIconType getIconType() {
-        return iconType;
+    public PositionIcon getIcon() {
+        return icon;
     }
 
-    public void setIconType(PositionIconType iconType) {
-        this.iconType = iconType;
+    public void setIcon(PositionIcon icon) {
+        this.icon = icon;
     }
 
     @GwtTransient

@@ -44,11 +44,7 @@ public class FilterDialog implements Editor<UserSettings> {
     interface FilterSettingsDriver extends SimpleBeanEditorDriver<UserSettings, FilterDialog> {
     }
 
-    public interface FilterSettingsHandler {
-        public void onSave(UserSettings filterSettings);
-    }
-
-    private FilterSettingsHandler filterSettingsHandler;
+    private UserSettingsDialog.UserSettingsHandler userSettingsHandler;
 
     @UiField
     Window window;
@@ -82,8 +78,8 @@ public class FilterDialog implements Editor<UserSettings> {
     @Ignore
     Label speedUnits;
 
-    public FilterDialog(UserSettings filterSettings, FilterSettingsHandler filterSettingsHandler) {
-        this.filterSettingsHandler = filterSettingsHandler;
+    public FilterDialog(UserSettings filterSettings, UserSettingsDialog.UserSettingsHandler userSettingsHandler) {
+        this.userSettingsHandler = userSettingsHandler;
 
         speedModifier = new SimpleComboBox<String>(new StringLabelProvider<String>());
         speedModifier.add("<");
@@ -127,7 +123,7 @@ public class FilterDialog implements Editor<UserSettings> {
         if (filterSettings.getMinDistance() != null) {
             filterSettings.setMinDistance(filterSettings.getMinDistance() * filterSettings.getSpeedUnit().getDistanceUnit().getFactor());
         }
-        filterSettingsHandler.onSave(driver.flush());
+        userSettingsHandler.onSave(driver.flush());
     }
 
     @UiHandler("cancelButton")

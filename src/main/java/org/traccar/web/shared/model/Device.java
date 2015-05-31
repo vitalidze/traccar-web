@@ -45,6 +45,7 @@ public class Device implements IsSerializable {
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
         iconType = device.iconType;
+        icon = device.getIcon();
         odometer = device.odometer;
         autoUpdateOdometer = device.autoUpdateOdometer;
         maintenances = new ArrayList<Maintenance>(device.maintenances.size());
@@ -176,6 +177,19 @@ public class Device implements IsSerializable {
 
     public void setIconType(DeviceIconType iconType) {
         this.iconType = iconType;
+    }
+
+    @Expose
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_icon_id"))
+    private DeviceIcon icon;
+
+    public DeviceIcon getIcon() {
+        return icon;
+    }
+
+    public void setIcon(DeviceIcon icon) {
+        this.icon = icon;
     }
 
     // contains current odometer value in kilometers

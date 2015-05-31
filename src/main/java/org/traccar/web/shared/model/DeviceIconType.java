@@ -15,7 +15,9 @@
  */
 package org.traccar.web.shared.model;
 
-public enum DeviceIconType {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public enum DeviceIconType implements IsSerializable {
     DEFAULT(PositionIconType.iconLatest, PositionIconType.iconOffline),
     PHONE(PositionIconType.phoneLatest, PositionIconType.phoneOffline),
     BICYCLE(PositionIconType.bicycleLatest, PositionIconType.bicycleOffline),
@@ -46,8 +48,6 @@ public enum DeviceIconType {
                 return iconLatest;
             case OFFLINE:
                 return iconOffline;
-            case ARCHIVE:
-                return PositionIconType.iconArchive; // for now all device icons have same archive icon
         }
         return null;
     }

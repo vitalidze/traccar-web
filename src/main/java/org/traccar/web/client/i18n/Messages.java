@@ -307,6 +307,20 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
                                        @Optional String positionTime,
                                        @Optional String maintenanceName);
 
+    String noMarkers();
+
+    String select();
+
+    String defaultIcon();
+
+    String selectedIcon();
+
+    String offlineIcon();
+
+    String upload();
+
+    String confirmDeviceIconRemoval();
+
     String odometer();
 
     String km();

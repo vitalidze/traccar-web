@@ -373,6 +373,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setTimeout(device.getTimeout());
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
             tmp_device.setIconType(device.getIconType());
+            tmp_device.setIcon(device.getIcon() == null ? null : entityManager.find(DeviceIcon.class, device.getIcon().getId()));
+
             double prevOdometer = tmp_device.getOdometer();
             tmp_device.setOdometer(device.getOdometer());
             tmp_device.setAutoUpdateOdometer(device.isAutoUpdateOdometer());
@@ -421,6 +423,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     }
                 }
             }
+
             return tmp_device;
         } else {
             throw new DeviceExistsException();
@@ -492,6 +495,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
         }
 
+        queryString += " ORDER BY x.time";
+
         TypedQuery<Position> query = entityManager.createQuery(queryString, Position.class);
         query.setParameter("device", device);
         query.setParameter("from", from);
@@ -522,7 +527,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             if (add) positions.add(queryResult.get(i));
         }
-        return positions;
+        return new ArrayList<Position>(positions);
     }
 
     @RequireUser

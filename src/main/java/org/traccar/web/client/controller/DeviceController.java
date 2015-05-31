@@ -63,7 +63,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     public DeviceController(MapController mapController,
                             DeviceView.GeoFenceHandler geoFenceHandler,
                             DeviceView.SettingsHandler settingsHandler,
-                            ListStore<Device> deviceStore,
+                            final ListStore<Device> deviceStore,
                             StoreHandlers<Device> deviceStoreHandler,
                             ListStore<GeoFence> geoFenceStore,
                             Map<Long, Set<GeoFence>> deviceGeoFences,
@@ -82,6 +82,13 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                     Device device = event.getRecord().getModel();
                     if (follow) {
                         ApplicationContext.getInstance().follow(device);
+                        for (int i = 0; i < deviceStore.size(); i++) {
+                            Device next = deviceStore.get(i);
+                            if (next.getId() != device.getId()) {
+                                ApplicationContext.getInstance().stopFollowing(next);
+                                deviceStore.getRecord(next).revert(event.getProperty());
+                            }
+                        }
                     } else {
                         ApplicationContext.getInstance().stopFollowing(device);
                     }

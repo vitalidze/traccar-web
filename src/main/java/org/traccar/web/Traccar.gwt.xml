@@ -10,6 +10,7 @@
     <inherits name="com.google.gwt.xml.XML"/>
     <inherits name='com.sencha.gxt.ui.GXT'/>
     <inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
+    <inherits name="com.google.gwt.resources.Resources" />
 
     <set-property name="gwt.logging.enabled" value="FALSE"/>
     <set-property name="gwt.logging.consoleHandler" value="DISABLED"/>
@@ -31,4 +32,6 @@
     <extend-property name="locale" values="lt" />
     <extend-property name="locale" values="nl" />
     <extend-property name="locale" values="sv_SE" />
+    <extend-property name="locale" values="bg" />
+    <extend-property name="locale" values="fr" />
 </module>

@@ -24,7 +24,48 @@ var i18n = {
         altitude: 'Altitude',
         speed: 'Speed',
         course: 'Course',
-        address: 'Address'
+        address: 'Address',
+        follow: 'Follow',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
+    },
+    bg: {
+        _name_: 'Български',
+        // login screen
+        language: 'Език',
+        username: 'Потребител',
+        password: 'Парола',
+        your_username: 'Потребителско име',
+        your_password: 'Вашата парола',
+        sign_in: 'Вход',
+        user_name_and_password_must_not_be_empty: 'Потребителското име или парола не може да са празни',
+        user_name_or_password_is_invalid: 'Грешен потребител или парола',
+        unexpected_error: 'Неочаквана грешка',
+        open_desktop_version: 'Отвори Десктоп версията',
+        // sidebar
+        devices: 'Обекти',
+        logout: 'Изход',
+        // device details
+        select_on_map: 'Избери на картата',
+        no_data_available: 'Няма данни',
+        time: 'Време',
+        latitude: 'Ширина',
+        longitude: 'Дължина',
+        altitude: 'Височина',
+        speed: 'Скорост',
+        course: 'Курс',
+        address: 'Адрес',
+        follow: 'Следвай',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     de: {
         _name_: 'German',
@@ -51,7 +92,14 @@ var i18n = {
         altitude: 'Höhe',
         speed: 'Geschw.',
         course: 'Richtung',
-        address: 'Adresse'
+        address: 'Adresse',
+        follow: 'Folgen',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     es: {
         _name_: 'Spanish',
@@ -78,7 +126,48 @@ var i18n = {
         altitude: 'Altura',
         speed: 'Velocidad',
         course: 'Curso',
-        address: 'Dirección'
+        address: 'Dirección',
+        follow: 'Seguir',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
+    },
+    fr: {
+        _name_: 'Français',
+        // login screen
+        language: 'Langue',
+        username: 'Nom',
+        password: 'Mot de passe',
+        your_username: 'votre Nom',
+        your_password: 'votre Mot de passe',
+        sign_in: 'Connexion',
+        user_name_and_password_must_not_be_empty: 'Nom et mot de passe ne doivent pas être vides',
+        user_name_or_password_is_invalid: 'Nom ou mot de passe invalide',
+        unexpected_error: 'Erreur inattendue',
+        open_desktop_version: 'Ouvrir version bureau',
+        // sidebar
+        devices: 'Appareils',
+        logout: 'Déconnexion',
+        // device details
+        select_on_map: 'Sélectionner sur carte',
+        no_data_available: 'Aucune donnée disponible',
+        time: 'Heure',
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        altitude: 'Altitude',
+        speed: 'Vitesse',
+        course: 'Cap',
+        address: 'Adresse',
+        follow: 'Poursuite',
+        stop_following: 'Arrêt de la poursuite',
+        geo_fence: 'Limite-Géo',
+        send_location_by_email: 'Envoyer position par Email',
+        send_location_url_by_email: 'Envoyer l\'URL de la position par Email',
+        send_location_by_sms: 'Envoyer position par SMS',
+        send_location_url_by_sms: 'Envoyer l\'URL de la position par SMS'
     },
     hu: {
         _name_: 'Hungarian',
@@ -105,7 +194,14 @@ var i18n = {
         altitude: 'Magasság',
         speed: 'Sebesség',
         course: 'Irány',
-        address: 'Cím'
+        address: 'Cím',
+        follow: 'Követés',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     it: {
         _name_: 'Italian',
@@ -132,7 +228,14 @@ var i18n = {
         altitude: 'Altitudine',
         speed: 'Velocità',
         course: 'Percorso',
-        address: 'Indirizzo'
+        address: 'Indirizzo',
+        follow: 'Segui',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     lt: {
         _name_: 'Latvian',
@@ -159,7 +262,14 @@ var i18n = {
         altitude: 'Aukštis',
         speed: 'Greitis',
         course: 'Kursas',
-        address: 'Adresas'
+        address: 'Adresas',
+        follow: 'Centruoti',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     nl: {
         _name_: 'Danish',
@@ -186,7 +296,14 @@ var i18n = {
         altitude: 'Hoogte',
         speed: 'Snelheid',
         course: 'Richting',
-        address: 'Adres'
+        address: 'Adres',
+        follow: 'Volgen',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     pl: {
         _name_: 'Polish',
@@ -213,7 +330,14 @@ var i18n = {
         altitude: 'Wysoko\u015B\u0107',
         speed: 'Pr\u0119dko\u015B\u0107',
         course: 'Przebieg',
-        address: 'Adres'
+        address: 'Adres',
+        follow: 'Obserwuj',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     pt_PT: {
         _name_: 'Portuguese',
@@ -240,7 +364,14 @@ var i18n = {
         altitude: 'Altitude',
         speed: 'Velocidade',
         course: 'Rota',
-        address: 'Morada'
+        address: 'Morada',
+        follow: 'Seguir',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     ru: {
         _name_: 'Russian',
@@ -267,7 +398,14 @@ var i18n = {
         altitude: 'Высота',
         speed: 'Скорость',
         course: 'Курс',
-        address: 'Адрес'
+        address: 'Адрес',
+        follow: 'Отслеживать',
+        stop_following: 'Прекратить отслеживание',
+        geo_fence: 'Геозона',
+        send_location_by_email: 'Отправить по эл. почте',
+        send_location_url_by_email: 'Отправить ссылку по эл. почте',
+        send_location_by_sms: 'Отправить по SMS',
+        send_location_url_by_sms: 'Отправить ссылку по SMS'
     },
     tl: {
         _name_: 'Tagalog',
@@ -294,7 +432,14 @@ var i18n = {
         altitude: 'Altitude',
         speed: 'Speed',
         course: 'Course',
-        address: 'Address'
+        address: 'Address',
+        follow: 'Sundin',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     sv_SE: {
         _name_: 'Svenska',
@@ -321,6 +466,13 @@ var i18n = {
         altitude: 'Altitud',
         speed: 'Hastighet',
         course: 'Kurs',
-        address: 'Adress'
+        address: 'Adress',
+        follow: 'F\u00f6lj',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     }
 };
