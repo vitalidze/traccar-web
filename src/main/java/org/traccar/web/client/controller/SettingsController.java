@@ -55,10 +55,10 @@ public class SettingsController implements DeviceView.SettingsHandler {
                 ApplicationContext.getInstance().getUser(),
                 new UserDialog.UserHandler() {
                     @Override
-                    public void onSave(User user) {
-                        Application.getDataService().updateUser(user, new BaseAsyncCallback<User>(i18n) {
+                    public void onSave(UserDTO user) {
+                        Application.getDataService().updateUser(user, new BaseAsyncCallback<UserDTO>(i18n) {
                             @Override
-                            public void onSuccess(User result) {
+                            public void onSuccess(UserDTO result) {
                                 ApplicationContext.getInstance().setUser(result);
                             }
                         });
@@ -73,11 +73,11 @@ public class SettingsController implements DeviceView.SettingsHandler {
 
     @Override
     public void onUsersSelected() {
-        Application.getDataService().getUsers(new BaseAsyncCallback<List<User>>(i18n) {
+        Application.getDataService().getUsers(new BaseAsyncCallback<List<UserDTO>>(i18n) {
             @Override
-            public void onSuccess(List<User> result) {
+            public void onSuccess(List<UserDTO> result) {
                 UserProperties userProperties = GWT.create(UserProperties.class);
-                final ListStore<User> userStore = new ListStore<User>(userProperties.id());
+                final ListStore<UserDTO> userStore = new ListStore<UserDTO>(userProperties.id());
                 userStore.addAll(result);
 
                 new UsersDialog(userStore, new UsersDialog.UserHandler() {
@@ -85,13 +85,13 @@ public class SettingsController implements DeviceView.SettingsHandler {
                     @Override
                     public void onAdd() {
                         new UserDialog(
-                                new User(),
+                                new UserDTO(),
                                 new UserDialog.UserHandler() {
                                     @Override
-                                    public void onSave(User user) {
-                                        Application.getDataService().addUser(user, new BaseAsyncCallback<User>(i18n) {
+                                    public void onSave(UserDTO user) {
+                                        Application.getDataService().addUser(user, new BaseAsyncCallback<UserDTO>(i18n) {
                                             @Override
-                                            public void onSuccess(User result) {
+                                            public void onSuccess(UserDTO result) {
                                                 userStore.add(result);
                                             }
                                             @Override
@@ -104,15 +104,15 @@ public class SettingsController implements DeviceView.SettingsHandler {
                     }
 
                     @Override
-                    public void onRemove(final User user) {
+                    public void onRemove(final UserDTO user) {
                         final ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmUserRemoval());
                         dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
 							@Override
 							public void onDialogHide(DialogHideEvent event) {
 								if (event.getHideButton() == PredefinedButton.YES) {
-                                    Application.getDataService().removeUser(user, new BaseAsyncCallback<User>(i18n) {
+                                    Application.getDataService().removeUser(user, new BaseAsyncCallback<UserDTO>(i18n) {
                                         @Override
-                                        public void onSuccess(User result) {
+                                        public void onSuccess(UserDTO result) {
                                             userStore.remove(user);
                                         }
                                     });
@@ -124,10 +124,10 @@ public class SettingsController implements DeviceView.SettingsHandler {
 
                     @Override
                     public void onSaveRoles() {
-                        List<User> updatedUsers = new ArrayList<User>(userStore.getModifiedRecords().size());
-                        for (Store<User>.Record record : userStore.getModifiedRecords()) {
-                            User updatedUser = new User(record.getModel());
-                            for (Store.Change<User, ?> change : record.getChanges()) {
+                        List<UserDTO> updatedUsers = new ArrayList<UserDTO>(userStore.getModifiedRecords().size());
+                        for (Store<UserDTO>.Record record : userStore.getModifiedRecords()) {
+                            UserDTO updatedUser = new UserDTO(record.getModel());
+                            for (Store.Change<UserDTO, ?> change : record.getChanges()) {
                                 change.modify(updatedUser);
                             }
                             updatedUsers.add(updatedUser);
@@ -142,7 +142,7 @@ public class SettingsController implements DeviceView.SettingsHandler {
                     }
 
                     @Override
-                    public void onChangePassword(final User user) {
+                    public void onChangePassword(final UserDTO user) {
                         final AbstractInputMessageBox passwordInput = new AbstractInputMessageBox(new PasswordField(), i18n.changePassword(), i18n.enterNewPassword(user.getLogin())) {};
                         passwordInput.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
                             @Override
@@ -150,7 +150,7 @@ public class SettingsController implements DeviceView.SettingsHandler {
                                 if (event.getHideButton() == PredefinedButton.OK) {
                                     final String oldPassword = user.getPassword();
                                     user.setPassword(passwordInput.getValue());
-                                    Application.getDataService().updateUser(user, new BaseAsyncCallback<User>(i18n) {
+                                    Application.getDataService().updateUser(user, new BaseAsyncCallback<UserDTO>(i18n) {
                                         @Override
                                         public void onFailure(Throwable caught) {
                                             user.setPassword(oldPassword);

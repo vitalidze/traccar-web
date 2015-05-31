@@ -1,7 +1,24 @@
-package org.traccar.web.shared.model;
+/*
+ * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.traccar.web.server.entity;
 
-import com.google.gson.annotations.Expose;
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.traccar.web.shared.model.MapType;
+import org.traccar.web.shared.model.PositionIconType;
+import org.traccar.web.shared.model.SpeedUnit;
+import org.traccar.web.shared.model.UserSettingsDTO;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,109 +31,17 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "user_settings")
-public class UserSettings implements IsSerializable {
-
-    private static final long serialVersionUID = 1;
-    public static final short DEFAULT_TIME_PRINT_INTERVAL = 10;
-
-    public static final int DEFAULT_ZOOM_LEVEL = 1;
-    public static final double DEFAULT_CENTER_LONGITUDE = 12.5;
-    public static final double DEFAULT_CENTER_LATITUDE = 41.9;
-
+public class UserSettings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
-    public UserSettings() {
-        speedUnit = SpeedUnit.knots;
-        timePrintInterval = DEFAULT_TIME_PRINT_INTERVAL;
-        zoomLevel = DEFAULT_ZOOM_LEVEL;
-        centerLongitude = DEFAULT_CENTER_LONGITUDE;
-        centerLatitude = DEFAULT_CENTER_LATITUDE;
-        mapType = MapType.OSM;
-    }
-
-    public enum SpeedUnit implements IsSerializable {
-        knots("kn", 1d, DistanceUnit.km),
-        kilometersPerHour("km/h", 1.852, DistanceUnit.km),
-        milesPerHour("mph", 1.150779, DistanceUnit.mile);
-
-        final String unit;
-        final double factor;
-        final DistanceUnit distanceUnit;
-
-        SpeedUnit(String unit, double factor, DistanceUnit distanceUnit) {
-            this.unit = unit;
-            this.factor = factor;
-            this.distanceUnit = distanceUnit;
-        }
-
-        public double getFactor() {
-            return factor;
-        }
-
-        public String getUnit() {
-            return unit;
-        }
-
-        public DistanceUnit getDistanceUnit() {
-            return distanceUnit;
-        }
-
-        public double toKnots(double speed) {
-            return speed / factor;
-        }
-    }
-
-    public enum MapType implements IsSerializable {
-        OSM("OpenStreetMap"),
-        GOOGLE_HYBRID("Google Hybrid"),
-        GOOGLE_NORMAL("Google Normal"),
-        GOOGLE_SATELLITE("Google Satellite"),
-        GOOGLE_TERRAIN("Google Terrain"),
-        BING_ROAD("Bing Road"),
-        BING_HYBRID("Bing Hybrid"),
-        BING_AERIAL("Bing Aerial");
-
-        final String name;
-
-        MapType(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getBingKey() {
-            return "AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F";
-        }
-    }
-
-    public enum DistanceUnit implements IsSerializable {
-        km("km", 1d),
-        mile("mi", 0.621371192);
-
-        final String unit;
-        final double factor;
-
-        DistanceUnit(String unit, double factor) {
-            this.unit = unit;
-            this.factor = factor;
-        }
-
-        public double getFactor() {
-            return factor;
-        }
-
-        public String getUnit() {
-            return unit;
-        }
+    public static UserSettings defaults() {
+        return new UserSettings().from(new UserSettingsDTO());
     }
 
     @Enumerated(EnumType.STRING)
-    @Expose
     private SpeedUnit speedUnit;
 
     public void setSpeedUnit(SpeedUnit speedUnit) {
@@ -130,7 +55,6 @@ public class UserSettings implements IsSerializable {
     /**
      * Interval of printing time on recorded trace in minutes based on position time
      */
-    @Expose
     private Short timePrintInterval;
 
     public Short getTimePrintInterval() {
@@ -141,14 +65,10 @@ public class UserSettings implements IsSerializable {
         this.timePrintInterval = timePrintInterval;
     }
 
-    @Expose
     private Integer zoomLevel;
-    @Expose
     private Double centerLongitude;
-    @Expose
     private Double centerLatitude;
     @Enumerated(EnumType.STRING)
-    @Expose
     private MapType mapType;
 
     public Integer getZoomLevel() {
@@ -275,5 +195,41 @@ public class UserSettings implements IsSerializable {
         UserSettings other = (UserSettings) object;
 
         return this.id == other.id;
+    }
+
+    public UserSettingsDTO dto() {
+        UserSettingsDTO dto = new UserSettingsDTO();
+        dto.setId(getId());
+        dto.setSpeedUnit(getSpeedUnit());
+        dto.setMapType(getMapType());
+        dto.setCenterLongitude(getCenterLongitude());
+        dto.setCenterLatitude(getCenterLatitude());
+        dto.setZoomLevel(getZoomLevel());
+        dto.setTimePrintInterval(getTimePrintInterval());
+        dto.setHideZeroCoordinates(isHideZeroCoordinates());
+        dto.setHideInvalidLocations(isHideInvalidLocations());
+        dto.setHideDuplicates(isHideDuplicates());
+        dto.setMinDistance(getMinDistance());
+        dto.setSpeedModifier(getSpeedModifier());
+        dto.setSpeedForFilter(getSpeedForFilter());
+        dto.setArchiveMarkerType(getArchiveMarkerType());
+        return dto;
+    }
+
+    public UserSettings from(UserSettingsDTO dto) {
+        setSpeedUnit(dto.getSpeedUnit());
+        setMapType(dto.getMapType());
+        setCenterLongitude(dto.getCenterLongitude());
+        setCenterLatitude(dto.getCenterLatitude());
+        setZoomLevel(dto.getZoomLevel());
+        setTimePrintInterval(dto.getTimePrintInterval());
+        setHideZeroCoordinates(dto.isHideZeroCoordinates());
+        setHideInvalidLocations(dto.isHideInvalidLocations());
+        setHideDuplicates(dto.isHideDuplicates());
+        setMinDistance(dto.getMinDistance());
+        setSpeedModifier(dto.getSpeedModifier());
+        setSpeedForFilter(dto.getSpeedForFilter());
+        setArchiveMarkerType(dto.getArchiveMarkerType());
+        return this;
     }
 }

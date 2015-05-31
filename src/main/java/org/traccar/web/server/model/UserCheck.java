@@ -18,7 +18,7 @@ package org.traccar.web.server.model;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.traccar.web.server.entity.ApplicationSettings;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.server.entity.User;
 
 import javax.inject.Inject;
 import javax.inject.Provider;

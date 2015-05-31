@@ -16,6 +16,8 @@
 package org.traccar.web.server.model;
 
 import org.traccar.web.server.entity.ApplicationSettings;
+import org.traccar.web.server.entity.User;
+import org.traccar.web.server.entity.UserSettings;
 import org.traccar.web.shared.model.*;
 
 import javax.persistence.EntityManager;
@@ -100,7 +102,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + UserSettings.class.getSimpleName() + " S SET S.timePrintInterval = :tpi WHERE S.timePrintInterval IS NULL")
-                    .setParameter("tpi", UserSettings.DEFAULT_TIME_PRINT_INTERVAL)
+                    .setParameter("tpi", UserSettingsDTO.DEFAULT_TIME_PRINT_INTERVAL)
                     .executeUpdate();
         }
     }
@@ -112,9 +114,9 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + UserSettings.class.getSimpleName() + " S SET S.zoomLevel = :zl, S.centerLongitude = :lon, S.centerLatitude = :lat WHERE S.zoomLevel IS NULL")
-                    .setParameter("zl", UserSettings.DEFAULT_ZOOM_LEVEL)
-                    .setParameter("lon", UserSettings.DEFAULT_CENTER_LONGITUDE)
-                    .setParameter("lat", UserSettings.DEFAULT_CENTER_LATITUDE)
+                    .setParameter("zl", UserSettingsDTO.DEFAULT_ZOOM_LEVEL)
+                    .setParameter("lon", UserSettingsDTO.DEFAULT_CENTER_LONGITUDE)
+                    .setParameter("lat", UserSettingsDTO.DEFAULT_CENTER_LATITUDE)
                     .executeUpdate();
         }
     }
@@ -169,7 +171,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + UserSettings.class.getName() + " S SET S.mapType = :mt WHERE S.mapType IS NULL")
-                    .setParameter("mt", UserSettings.MapType.OSM)
+                    .setParameter("mt", MapType.OSM)
                     .executeUpdate();
         }
     }
@@ -199,7 +201,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             for (User user : em.createQuery("SELECT u FROM " + User.class.getName() + " u WHERE u.userSettings IS NULL", User.class).getResultList()) {
-                user.setUserSettings(new UserSettings());
+                user.setUserSettings(UserSettings.defaults());
                 em.persist(user);
             }
         }

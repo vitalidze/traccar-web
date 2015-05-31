@@ -33,7 +33,7 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.shared.model.UserDTO;
 
 import java.util.*;
 
@@ -45,10 +45,10 @@ public class UserShareDialog {
     }
 
     public class UserShared {
-        public final User user;
+        public final UserDTO user;
         public boolean shared;
 
-        public UserShared(final User user, boolean shared) {
+        public UserShared(final UserDTO user, boolean shared) {
             this.user = user;
             this.shared = shared;
         }
@@ -79,7 +79,7 @@ public class UserShareDialog {
     }
 
     public interface UserShareHandler {
-        public void onSaveShares(Map<User, Boolean> shares);
+        void onSaveShares(Map<UserDTO, Boolean> shares);
     }
 
     private UserShareHandler shareHandler;
@@ -99,13 +99,13 @@ public class UserShareDialog {
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public UserShareDialog(Map<User, Boolean> shares, UserShareHandler shareHandler) {
+    public UserShareDialog(Map<UserDTO, Boolean> shares, UserShareHandler shareHandler) {
         this.shareHandler = shareHandler;
 
-        List<User> users = new ArrayList<User>(shares.keySet());
-        Collections.sort(users, new Comparator<User>() {
+        List<UserDTO> users = new ArrayList<UserDTO>(shares.keySet());
+        Collections.sort(users, new Comparator<UserDTO>() {
             @Override
-            public int compare(User o1, User o2) {
+            public int compare(UserDTO o1, UserDTO o2) {
                 return o1.getLogin().toLowerCase().compareTo(o2.getLogin().toLowerCase());
             }
         });
@@ -114,7 +114,7 @@ public class UserShareDialog {
 
         shareStore = new ListStore<UserShared>(userSharedProperties.id());
 
-        for (User user : users) {
+        for (UserDTO user : users) {
             shareStore.add(new UserShared(user, shares.get(user)));
         }
 
@@ -142,7 +142,7 @@ public class UserShareDialog {
 
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
-        Map<User, Boolean> updatedShare = new HashMap<User, Boolean>(shareStore.getModifiedRecords().size());
+        Map<UserDTO, Boolean> updatedShare = new HashMap<UserDTO, Boolean>(shareStore.getModifiedRecords().size());
         for (Store<UserShared>.Record record : shareStore.getModifiedRecords()) {
             UserShared updated = new UserShared(record.getModel().user, record.getModel().shared);
             for (Store.Change<UserShared, ?> change : record.getChanges()) {

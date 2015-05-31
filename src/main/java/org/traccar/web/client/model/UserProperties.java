@@ -15,27 +15,26 @@
  */
 package org.traccar.web.client.model;
 
-import org.traccar.web.shared.model.User;
-
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
+import org.traccar.web.shared.model.UserDTO;
 
-public interface UserProperties extends PropertyAccess<User> {
+public interface UserProperties extends PropertyAccess<UserDTO> {
 
-    ModelKeyProvider<User> id();
+    ModelKeyProvider<UserDTO> id();
 
-    ValueProvider<User, String> login();
+    ValueProvider<UserDTO, String> login();
 
-    ValueProvider<User, String> password();
+    ValueProvider<UserDTO, String> password();
 
-    ValueProvider<User, Boolean> admin();
+    ValueProvider<UserDTO, Boolean> admin();
 
-    ValueProvider<User, Boolean> manager();
+    ValueProvider<UserDTO, Boolean> manager();
 
-    ValueProvider<User, String> email();
+    ValueProvider<UserDTO, String> email();
 
-    ValueProvider<User, Boolean> notifications();
+    ValueProvider<UserDTO, Boolean> notifications();
 
-    ValueProvider<User, Boolean> readOnly();
+    ValueProvider<UserDTO, Boolean> readOnly();
 }

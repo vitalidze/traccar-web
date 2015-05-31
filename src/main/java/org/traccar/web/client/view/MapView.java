@@ -39,16 +39,13 @@ import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.GeoFence;
-import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Command;
 import com.sencha.gxt.widget.core.client.ContentPanel;
-import org.traccar.web.shared.model.UserSettings;
 
 public class MapView {
 
@@ -102,12 +99,12 @@ public class MapView {
     }
 
     private void initMapLayers(Map map) {
-        for (UserSettings.MapType mapType : UserSettings.MapType.values()) {
+        for (MapType mapType : MapType.values()) {
             map.addLayer(createMap(mapType));
         }
     }
 
-    private Layer createMap(UserSettings.MapType mapType) {
+    private Layer createMap(MapType mapType) {
         switch (mapType) {
             case OSM:
                 return OSM.Mapnik(mapType.getName());

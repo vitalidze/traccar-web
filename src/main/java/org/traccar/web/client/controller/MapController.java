@@ -230,7 +230,7 @@ public class MapController implements ContentController, MapView.MapHandler {
     }
 
     public void loadMapSettings() {
-        UserSettings userSettings = ApplicationContext.getInstance().getUserSettings();
+        UserSettingsDTO userSettings = ApplicationContext.getInstance().getUserSettings();
         for (Layer map : mapView.getMap().getLayers()) {
             if (map.getName().equals(userSettings.getMapType().getName())) {
                 mapView.getMap().setBaseLayer(map);

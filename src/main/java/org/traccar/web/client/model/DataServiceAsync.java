@@ -25,23 +25,23 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface DataServiceAsync {
 
-    void authenticated(AsyncCallback<User> callback);
+    void authenticated(AsyncCallback<UserDTO> callback);
 
-    void login(String login, String password, boolean passwordHashed, AsyncCallback<User> callback);
+    void login(String login, String password, boolean passwordHashed, AsyncCallback<UserDTO> callback);
 
-    void login(String login, String password, AsyncCallback<User> callback);
+    void login(String login, String password, AsyncCallback<UserDTO> callback);
 
     void logout(AsyncCallback<Boolean> callback);
 
-    void register(String login, String password, AsyncCallback<User> callback);
+    void register(String login, String password, AsyncCallback<UserDTO> callback);
 
-    void getUsers(AsyncCallback<List<User>> callback);
+    void getUsers(AsyncCallback<List<UserDTO>> callback);
 
-    void addUser(User user, AsyncCallback<User> callback);
+    void addUser(UserDTO user, AsyncCallback<UserDTO> callback);
 
-    void updateUser(User user, AsyncCallback<User> callback);
+    void updateUser(UserDTO user, AsyncCallback<UserDTO> callback);
 
-    void removeUser(User user, AsyncCallback<User> callback);
+    void removeUser(UserDTO user, AsyncCallback<UserDTO> callback);
 
     void getDevices(AsyncCallback<List<Device>> callback);
 
@@ -61,11 +61,11 @@ public interface DataServiceAsync {
 
     void getTrackerServerLog(short sizeKB, AsyncCallback<String> async);
 
-    void saveRoles(List<User> users, AsyncCallback<Void> async);
+    void saveRoles(List<UserDTO> users, AsyncCallback<Void> async);
 
-    void getDeviceShare(Device device, AsyncCallback<Map<User, Boolean>> async);
+    void getDeviceShare(Device device, AsyncCallback<Map<UserDTO, Boolean>> async);
 
-    void saveDeviceShare(Device device, Map<User, Boolean> share, AsyncCallback<Void> async);
+    void saveDeviceShare(Device device, Map<UserDTO, Boolean> share, AsyncCallback<Void> async);
 
     void getLatestNonIdlePositions(AsyncCallback<List<Position>> async);
 
@@ -77,7 +77,7 @@ public interface DataServiceAsync {
 
     void removeGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
 
-    void getGeoFenceShare(GeoFence geoFence, AsyncCallback<Map<User, Boolean>> async);
+    void getGeoFenceShare(GeoFence geoFence, AsyncCallback<Map<UserDTO, Boolean>> async);
 
-    void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share, AsyncCallback<Void> async);
+    void saveGeoFenceShare(GeoFence geoFence, Map<UserDTO, Boolean> share, AsyncCallback<Void> async);
 }

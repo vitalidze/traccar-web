@@ -30,9 +30,9 @@ import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.ApplicationContext;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.UserSettingsDTO;
 
-public class FilterDialog implements Editor<UserSettings> {
+public class FilterDialog implements Editor<UserSettingsDTO> {
 
     private static FilterDialogDialogUiBinder uiBinder = GWT.create(FilterDialogDialogUiBinder.class);
 
@@ -41,7 +41,7 @@ public class FilterDialog implements Editor<UserSettings> {
 
     private FilterSettingsDriver driver = GWT.create(FilterSettingsDriver.class);
 
-    interface FilterSettingsDriver extends SimpleBeanEditorDriver<UserSettings, FilterDialog> {
+    interface FilterSettingsDriver extends SimpleBeanEditorDriver<UserSettingsDTO, FilterDialog> {
     }
 
     private UserSettingsDialog.UserSettingsHandler userSettingsHandler;
@@ -78,7 +78,7 @@ public class FilterDialog implements Editor<UserSettings> {
     @Ignore
     Label speedUnits;
 
-    public FilterDialog(UserSettings filterSettings, UserSettingsDialog.UserSettingsHandler userSettingsHandler) {
+    public FilterDialog(UserSettingsDTO filterSettings, UserSettingsDialog.UserSettingsHandler userSettingsHandler) {
         this.userSettingsHandler = userSettingsHandler;
 
         speedModifier = new SimpleComboBox<String>(new StringLabelProvider<String>());
@@ -119,7 +119,7 @@ public class FilterDialog implements Editor<UserSettings> {
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
         window.hide();
-        UserSettings filterSettings = driver.flush();
+        UserSettingsDTO filterSettings = driver.flush();
         if (filterSettings.getMinDistance() != null) {
             filterSettings.setMinDistance(filterSettings.getMinDistance() * filterSettings.getSpeedUnit().getDistanceUnit().getFactor());
         }

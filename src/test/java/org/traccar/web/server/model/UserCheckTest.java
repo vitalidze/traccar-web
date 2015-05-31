@@ -21,7 +21,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.traccar.web.server.entity.ApplicationSettings;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.server.entity.User;
 
 public class UserCheckTest {
     @Rule

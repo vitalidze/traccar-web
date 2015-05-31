@@ -27,23 +27,23 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("dataService")
 public interface DataService extends RemoteService {
 
-    User authenticated() throws IllegalStateException;
+    UserDTO authenticated() throws IllegalStateException;
 
-    User login(String login, String password, boolean passwordHashed);
+    UserDTO login(String login, String password, boolean passwordHashed);
 
-    User login(String login, String password);
+    UserDTO login(String login, String password);
 
     boolean logout();
 
-    User register(String login, String password);
+    UserDTO register(String login, String password);
 
-    List<User> getUsers();
+    List<UserDTO> getUsers();
 
-    User addUser(User user);
+    UserDTO addUser(UserDTO user);
 
-    User updateUser(User user);
+    UserDTO updateUser(UserDTO user);
 
-    User removeUser(User user);
+    UserDTO removeUser(UserDTO user);
 
     List<Device> getDevices();
 
@@ -53,9 +53,9 @@ public interface DataService extends RemoteService {
 
     Device removeDevice(Device device);
 
-    Map<User, Boolean> getDeviceShare(Device device);
+    Map<UserDTO, Boolean> getDeviceShare(Device device);
 
-    void saveDeviceShare(Device device, Map<User, Boolean> share);
+    void saveDeviceShare(Device device, Map<UserDTO, Boolean> share);
 
     List<Position> getPositions(Device device, Date from, Date to, boolean filter);
 
@@ -69,7 +69,7 @@ public interface DataService extends RemoteService {
 
     String getTrackerServerLog(short sizeKb);
 
-    void saveRoles(List<User> users);
+    void saveRoles(List<UserDTO> users);
 
     List<GeoFence> getGeoFences();
 
@@ -79,7 +79,7 @@ public interface DataService extends RemoteService {
 
     GeoFence removeGeoFence(GeoFence geoFence);
 
-    Map<User, Boolean> getGeoFenceShare(GeoFence geoFence);
+    Map<UserDTO, Boolean> getGeoFenceShare(GeoFence geoFence);
 
-    void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share);
+    void saveGeoFenceShare(GeoFence geoFence, Map<UserDTO, Boolean> share);
 }

@@ -25,7 +25,6 @@ import org.traccar.web.client.controller.*;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.*;
 import org.traccar.web.client.view.ApplicationView;
-import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.client.view.UserSettingsDialog;
 import org.traccar.web.shared.model.*;
 
@@ -155,24 +154,24 @@ public class Application {
 
     private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler {
         @Override
-        public void onSave(UserSettings userSettings) {
+        public void onSave(UserSettingsDTO userSettings) {
             ApplicationContext.getInstance().setUserSettings(userSettings);
-            User user = ApplicationContext.getInstance().getUser();
-            Application.getDataService().updateUser(user, new BaseAsyncCallback<User>(i18n) {
+            UserDTO user = ApplicationContext.getInstance().getUser();
+            Application.getDataService().updateUser(user, new BaseAsyncCallback<UserDTO>(i18n) {
                 @Override
-                public void onSuccess(User result) {
+                public void onSuccess(UserDTO result) {
                     ApplicationContext.getInstance().setUser(result);
                 }
             });
         }
 
         @Override
-        public void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
+        public void onTakeCurrentMapState(ComboBox<MapType> mapType,
                                           NumberField<Double> centerLongitude,
                                           NumberField<Double> centerLatitude,
                                           NumberField<Integer> zoomLevel) {
             String layerName = mapController.getMap().getBaseLayer().getName();
-            for (UserSettings.MapType mapTypeXX : UserSettings.MapType.values()) {
+            for (MapType mapTypeXX : MapType.values()) {
                 if (layerName.equals(mapTypeXX.getName())) {
                     mapType.setValue(mapTypeXX);
                     break;

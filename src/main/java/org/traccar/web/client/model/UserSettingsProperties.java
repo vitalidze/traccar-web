@@ -15,21 +15,22 @@
  */
 package org.traccar.web.client.model;
 
-import org.traccar.web.shared.model.UserSettings;
-import org.traccar.web.shared.model.UserSettings.SpeedUnit;
+import org.traccar.web.shared.model.MapType;
+import org.traccar.web.shared.model.SpeedUnit;
 
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
+import org.traccar.web.shared.model.UserSettingsDTO;
 
-public interface UserSettingsProperties extends PropertyAccess<UserSettings> {
+public interface UserSettingsProperties extends PropertyAccess<UserSettingsDTO> {
 
-    ModelKeyProvider<UserSettings> id();
+    ModelKeyProvider<UserSettingsDTO> id();
 
-    ValueProvider<UserSettings, UserSettings.SpeedUnit> speedUnit();
+    ValueProvider<UserSettingsDTO, SpeedUnit> speedUnit();
 
-    public static class SpeedUnitLabelProvider implements LabelProvider<UserSettings.SpeedUnit> {
+    public static class SpeedUnitLabelProvider implements LabelProvider<SpeedUnit> {
 
         @Override
         public String getLabel(SpeedUnit item) {
@@ -47,9 +48,9 @@ public interface UserSettingsProperties extends PropertyAccess<UserSettings> {
 
     }
 
-    public static class MapTypeLabelProvider implements LabelProvider<UserSettings.MapType> {
+    public static class MapTypeLabelProvider implements LabelProvider<MapType> {
         @Override
-        public String getLabel(UserSettings.MapType item) {
+        public String getLabel(MapType item) {
             return item.getName();
         }
     }

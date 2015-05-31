@@ -13,50 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.shared.model;
+package org.traccar.web.server.entity;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.persistence.*;
 
-import com.google.gson.annotations.Expose;
-import com.google.gwt.user.client.rpc.GwtTransient;
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.traccar.web.shared.model.*;
 
 @Entity
 @Table(name="users",
        uniqueConstraints = { @UniqueConstraint(name = "users_ukey_login", columnNames = "login") })
-public class User implements IsSerializable, Cloneable {
-
-    private static final long serialVersionUID = 1;
-
+public class User {
     public User() {
-        admin = false;
-        manager = false;
-        transferNotificationEvents = new HashSet<DeviceEventType>();
     }
 
     public User(String login) {
         this.login = login;
     }
 
-    public User(User user) {
-        id = user.id;
-        admin = user.admin;
-        login = user.login;
-        password = user.password;
-        password_hash_method = user.password_hash_method;
-        manager = user.manager;
-        email = user.email;
-        userSettings = user.userSettings;
-        notifications = user.notifications;
-        if (user.notificationEvents != null) {
-            transferNotificationEvents = new HashSet<DeviceEventType>(user.notificationEvents);
-        }
-    }
-
-    @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -66,7 +43,6 @@ public class User implements IsSerializable, Cloneable {
         return id;
     }
 
-    @Expose
     private String login;
 
     public void setLogin(String login) {
@@ -87,7 +63,6 @@ public class User implements IsSerializable, Cloneable {
         return password;
     }
 
-    @Expose
     private PasswordHashMethod password_hash_method;
 
     public void setPasswordHashMethod(PasswordHashMethod type) {
@@ -100,7 +75,6 @@ public class User implements IsSerializable, Cloneable {
     }
 
     // TODO temporary nullable to migrate from old database
-    @Expose
     private Boolean admin;
 
     public void setAdmin(boolean admin) {
@@ -112,7 +86,6 @@ public class User implements IsSerializable, Cloneable {
         return (admin == null) ? false : admin;
     }
 
-    @Expose
     private Boolean manager;
 
     public Boolean getManager() {
@@ -128,7 +101,6 @@ public class User implements IsSerializable, Cloneable {
     //     reported as closed but the comments indicate it is still not fixed
     //     for @JoinTable() and targeted to be fixed in 5.x :-(.
     //                          
-    @GwtTransient
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_devices",
                foreignKey = @ForeignKey(name = "users_devices_fkey_users_id"),
@@ -155,7 +127,6 @@ public class User implements IsSerializable, Cloneable {
         return devices;
     }
 
-    @GwtTransient
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_geofences",
             foreignKey = @ForeignKey(name = "users_geofences_fkey_user_id"),
@@ -216,7 +187,6 @@ public class User implements IsSerializable, Cloneable {
         return false;
     }
 
-    @Expose
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))
     private UserSettings userSettings;
@@ -229,7 +199,6 @@ public class User implements IsSerializable, Cloneable {
         return userSettings;
     }
 
-    @GwtTransient
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_managedby_id"))
     private User managedBy;
@@ -242,7 +211,6 @@ public class User implements IsSerializable, Cloneable {
         this.managedBy = managedBy;
     }
 
-    @GwtTransient
     @OneToMany(mappedBy = "managedBy", fetch = FetchType.LAZY)
     private Set<User> managedUsers;
 
@@ -294,7 +262,6 @@ public class User implements IsSerializable, Cloneable {
     @JoinTable(name = "users_notifications", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
-    @GwtTransient
     private Set<DeviceEventType> notificationEvents;
 
     public Set<DeviceEventType> getNotificationEvents() {
@@ -305,18 +272,6 @@ public class User implements IsSerializable, Cloneable {
         this.notificationEvents = notificationEvents;
     }
 
-    @Transient
-    private Set<DeviceEventType> transferNotificationEvents;
-
-    public Set<DeviceEventType> getTransferNotificationEvents() {
-        return transferNotificationEvents;
-    }
-
-    public void setTransferNotificationEvents(Set<DeviceEventType> transferNotificationEvents) {
-        this.transferNotificationEvents = transferNotificationEvents;
-    }
-
-    @Expose
     @Column(nullable = true)
     private boolean readOnly;
 
@@ -343,5 +298,38 @@ public class User implements IsSerializable, Cloneable {
     @Override
     public int hashCode() {
         return getLogin() != null ? getLogin().hashCode() : 0;
+    }
+
+    public UserDTO dto() {
+        UserDTO dto = new UserDTO();
+        dto.setId(getId());
+        dto.setAdmin(getAdmin());
+        dto.setLogin(getLogin());
+        dto.setPassword(getPassword());
+        dto.setManager(getManager() != null && getManager());
+        dto.setReadOnly(getReadOnly());
+        dto.setNotificationEvents(new HashSet<DeviceEventType>(getNotificationEvents()));
+        dto.setUserSettings(getUserSettings() == null ? null : getUserSettings().dto());
+        return dto;
+    }
+
+    public User from(UserDTO dto) {
+        setAdmin(dto.isAdmin());
+        setLogin(dto.getLogin());
+        setPassword(dto.getPassword());
+        setManager(dto.isManager());
+        setReadOnly(dto.isReadOnly());
+        for (Iterator<DeviceEventType> it = getNotificationEvents().iterator(); it.hasNext(); ) {
+            if (!dto.getNotificationEvents().contains(it.next())) {
+                it.remove();
+            }
+        }
+        getNotificationEvents().addAll(dto.getNotificationEvents());
+        if (dto.getUserSettings() == null) {
+            setUserSettings(null);
+        } else {
+            getUserSettings().from(dto.getUserSettings());
+        }
+        return this;
     }
 }

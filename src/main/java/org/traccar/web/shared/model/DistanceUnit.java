@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Vitaly Litvak (vitavaque@gmail.com)
+ * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.server.model;
+package org.traccar.web.shared.model;
 
-import org.traccar.web.server.entity.User;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public enum Role {
-    ADMIN { @Override boolean has(User user) { return user.getAdmin(); } },
-    MANAGER { @Override boolean has(User user) { return user.getManager(); } };
+public enum DistanceUnit implements IsSerializable {
+    km("km", 1d),
+    mile("mi", 0.621371192);
 
-    abstract boolean has(User user);
+    final String unit;
+    final double factor;
+
+    DistanceUnit(String unit, double factor) {
+        this.unit = unit;
+        this.factor = factor;
+    }
+
+    public double getFactor() {
+        return factor;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
 }

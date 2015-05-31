@@ -40,27 +40,27 @@ public class ApplicationContext {
         }
     }
 
-    private User user;
+    private UserDTO user;
 
-    public void setUser(User user) {
+    public void setUser(UserDTO user) {
         this.user = user;
     }
 
-    public User getUser() {
+    public UserDTO getUser() {
         return user;
     }
 
-    public void setUserSettings(UserSettings userSettings) {
+    public void setUserSettings(UserSettingsDTO userSettings) {
         if (user != null) {
             user.setUserSettings(userSettings);
         }
     }
 
-    public UserSettings getUserSettings() {
+    public UserSettingsDTO getUserSettings() {
         if (user != null && user.getUserSettings() != null) {
             return user.getUserSettings();
         } else {
-            return new UserSettings(); // default settings
+            return new UserSettingsDTO(); // default settings
         }
     }
 

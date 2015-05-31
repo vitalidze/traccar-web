@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.server.entity.User;
 
 import javax.inject.Inject;
 import javax.inject.Provider;

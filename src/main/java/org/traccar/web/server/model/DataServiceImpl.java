@@ -32,10 +32,11 @@ import javax.servlet.http.HttpSession;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 
-import org.hibernate.proxy.HibernateProxy;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
 import org.traccar.web.server.entity.ApplicationSettings;
+import org.traccar.web.server.entity.User;
+import org.traccar.web.server.entity.UserSettings;
 import org.traccar.web.shared.model.*;
 
 @Singleton
@@ -91,13 +92,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser
     @Override
-    public User authenticated() throws IllegalStateException {
-        return fillUserSettings(new User(getSessionUser()));
+    public UserDTO authenticated() throws IllegalStateException {
+        return getSessionUser().dto();
     }
 
     @Transactional
     @Override
-    public User login(String login, String password, boolean passwordHashed) {
+    public UserDTO login(String login, String password, boolean passwordHashed) {
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT x FROM User x WHERE x.login = :login", User.class);
@@ -123,12 +124,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
 
         setSessionUser(user);
-        return fillUserSettings(new User(user));
+        return user.dto();
     }
 
     @Transactional
     @Override
-    public User login(String login, String password) {
+    public UserDTO login(String login, String password) {
         return this.login(login, password, false);
     }
 
@@ -141,23 +142,23 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @Override
-    public User register(String login, String password) {
+    public UserDTO register(String login, String password) {
         if (getApplicationSettings().getRegistrationEnabled()) {
             TypedQuery<User> query = getSessionEntityManager().createQuery(
                     "SELECT x FROM User x WHERE x.login = :login", User.class);
             query.setParameter("login", login);
             List<User> results = query.getResultList();
             if (results.isEmpty()) {
-                    User user = new User();
-                    user.setLogin(login);
-                    user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                    user.setPassword(user.getPasswordHashMethod().doHash(password));
-                    user.setManager(Boolean.TRUE); // registered users are always managers
-                    user.setUserSettings(new UserSettings());
-                    getSessionEntityManager().persist(user);
-                    getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
-                    setSessionUser(user);
-                    return fillUserSettings(new User(user));
+                User user = new User();
+                user.setLogin(login);
+                user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+                user.setPassword(user.getPasswordHashMethod().doHash(password));
+                user.setManager(Boolean.TRUE); // registered users are always managers
+                user.setUserSettings(UserSettings.defaults());
+                getSessionEntityManager().persist(user);
+                getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
+                setSessionUser(user);
+                return user.dto();
             }
             else
             {
@@ -171,7 +172,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
-    public List<User> getUsers() {
+    public List<UserDTO> getUsers() {
         User currentUser = getSessionUser();
         List<User> users = new LinkedList<User>();
         if (currentUser.getAdmin()) {
@@ -179,28 +180,30 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         } else {
             users.addAll(currentUser.getAllManagedUsers());
         }
+        List<UserDTO> result = new ArrayList<UserDTO>(users.size());
         for (User user : users) {
-            fillUserSettings(user);
+            result.add(user.dto());
         }
-        return users;
+        return result;
     }
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public User addUser(User user) {
+    public UserDTO addUser(UserDTO userDTO) {
         User currentUser = getSessionUser();
-        if (user.getLogin() == null || user.getLogin().isEmpty() ||
-            user.getPassword() == null || user.getPassword().isEmpty()) {
+        if (userDTO.getLogin() == null || userDTO.getLogin().isEmpty() ||
+            userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
             throw new IllegalArgumentException();
         }
-        String login = user.getLogin();
+        String login = userDTO.getLogin();
         TypedQuery<User> query = getSessionEntityManager().createQuery("SELECT x FROM User x WHERE x.login = :login", User.class);
         query.setParameter("login", login);
         List<User> results = query.getResultList();
 
         if (results.isEmpty()) {
+            User user = new User().from(userDTO);
             if (!currentUser.getAdmin()) {
                 user.setAdmin(false);
             }
@@ -208,12 +211,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
             user.setPassword(user.getPasswordHashMethod().doHash(user.getPassword()));
             if (user.getUserSettings() == null) {
-                user.setUserSettings(new UserSettings());
+                user.setUserSettings(UserSettings.defaults());
             }
-            user.setNotificationEvents(user.getTransferNotificationEvents());
+            user.setNotificationEvents(user.getNotificationEvents());
             getSessionEntityManager().persist(user);
             getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
-            return fillUserSettings(user);
+            return user.dto();
         } else {
             throw new IllegalStateException();
         }
@@ -223,44 +226,45 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @RequireWrite
     @Override
-    public User updateUser(User user) {
+    public UserDTO updateUser(UserDTO userDTO) {
         User currentUser = getSessionUser();
-        if (user.getLogin().isEmpty() || user.getPassword().isEmpty()) {
+        if (userDTO.getLogin().isEmpty() || userDTO.getPassword().isEmpty()) {
             throw new IllegalArgumentException();
         }
-        if (currentUser.getAdmin() || (currentUser.getId() == user.getId() && !user.getAdmin())) {
+        if (currentUser.getAdmin() || (currentUser.getId() == userDTO.getId() && !userDTO.isAdmin())) {
             EntityManager entityManager = getSessionEntityManager();
+            User user;
             // TODO: better solution?
-            if (currentUser.getId() == user.getId()) {
-                currentUser.setLogin(user.getLogin());
+            if (currentUser.getId() == userDTO.getId()) {
+                currentUser.setLogin(userDTO.getLogin());
                 // Password is different or hash method has changed since login
-                if (!currentUser.getPassword().equals(user.getPassword()) || currentUser.getPasswordHashMethod().equals(PasswordHashMethod.PLAIN) && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
+                if (!currentUser.getPassword().equals(userDTO.getPassword()) || currentUser.getPasswordHashMethod().equals(PasswordHashMethod.PLAIN) && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
                     currentUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                    currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword()));
+                    currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(userDTO.getPassword()));
                 }
-                currentUser.setUserSettings(user.getUserSettings());
-                currentUser.setAdmin(user.getAdmin());
-                currentUser.setManager(user.getManager());
-                currentUser.setEmail(user.getEmail());
-                currentUser.setNotificationEvents(user.getTransferNotificationEvents());
+                currentUser.getUserSettings().from(userDTO.getUserSettings());
+                currentUser.setAdmin(userDTO.isAdmin());
+                currentUser.setManager(userDTO.isManager());
+                currentUser.setEmail(userDTO.getEmail());
+                currentUser.setNotificationEvents(userDTO.getNotificationEvents());
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
                 // update password
                 if (currentUser.getAdmin() || currentUser.getManager()) {
-                    User existingUser = entityManager.find(User.class, user.getId());
+                    User existingUser = entityManager.find(User.class, userDTO.getId());
                     // Checks if password has changed or default hash method not equal to current user hash method
-                    if (!existingUser.getPassword().equals(user.getPassword()) && !existingUser.getPassword().equals(existingUser.getPasswordHashMethod().doHash(user.getPassword())) || !existingUser.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation())) {
+                    if (!existingUser.getPassword().equals(userDTO.getPassword()) && !existingUser.getPassword().equals(existingUser.getPasswordHashMethod().doHash(userDTO.getPassword())) || !existingUser.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation())) {
                         existingUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                        existingUser.setPassword(existingUser.getPasswordHashMethod().doHash(user.getPassword()));
+                        existingUser.setPassword(existingUser.getPasswordHashMethod().doHash(userDTO.getPassword()));
                     }
                     entityManager.merge(existingUser);
+                    user = existingUser;
                 } else {
                     throw new SecurityException();
                 }
             }
-
-            return fillUserSettings(new User(user));
+            return user.dto();
         } else {
             throw new SecurityException();
         }
@@ -270,9 +274,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public User removeUser(User user) {
+    public UserDTO removeUser(UserDTO userDTO) {
         EntityManager entityManager = getSessionEntityManager();
-        user = entityManager.find(User.class, user.getId());
+        User user = entityManager.find(User.class, userDTO.getId());
         // Don't allow user to delete himself
         if (user.equals(getSessionUser())) {
             throw new IllegalArgumentException();
@@ -289,7 +293,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             geoFence.getUsers().remove(user);
         }
         entityManager.remove(user);
-        return fillUserSettings(user);
+        return userDTO;
     }
 
     @Transactional
@@ -662,32 +666,33 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public void saveRoles(List<User> users) {
+    public void saveRoles(List<UserDTO> users) {
         if (users == null || users.isEmpty()) {
             return;
         }
 
         EntityManager entityManager = getSessionEntityManager();
         User currentUser = getSessionUser();
-        for (User _user : users) {
-            User user = entityManager.find(User.class, _user.getId());
+        for (UserDTO userDTO : users) {
+            User user = entityManager.find(User.class, userDTO.getId());
             if (currentUser.getAdmin()) {
-                user.setAdmin(_user.getAdmin());
+                user.setAdmin(userDTO.isAdmin());
             }
-            user.setManager(_user.getManager());
-            user.setReadOnly(_user.getReadOnly());
+            user.setManager(userDTO.isManager());
+            user.setReadOnly(userDTO.isReadOnly());
         }
     }
 
     @Transactional
     @RequireUser
     @Override
-    public Map<User, Boolean> getDeviceShare(Device device) {
+    public Map<UserDTO, Boolean> getDeviceShare(Device device) {
         device = getSessionEntityManager().find(Device.class, device.getId());
-        List<User> users = getUsers();
-        Map<User, Boolean> result = new HashMap<User, Boolean>(users.size());
-        for (User user : users) {
-            result.put(fillUserSettings(user), device.getUsers().contains(user));
+        List<UserDTO> users = getUsers();
+        Map<UserDTO, Boolean> result = new HashMap<UserDTO, Boolean>(users.size());
+        for (UserDTO userDTO : users) {
+            User user = getSessionEntityManager().find(User.class, userDTO.getId());
+            result.put(userDTO, device.getUsers().contains(user));
         }
         return result;
     }
@@ -696,28 +701,21 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public void saveDeviceShare(Device device, Map<User, Boolean> share) {
+    public void saveDeviceShare(Device device, Map<UserDTO, Boolean> share) {
         EntityManager entityManager = getSessionEntityManager();
         device = entityManager.find(Device.class, device.getId());
 
-        for (User user : getUsers()) {
-            Boolean shared = share.get(user);
+        for (UserDTO userDTO : getUsers()) {
+            Boolean shared = share.get(userDTO);
             if (shared == null) continue;
-            if (shared.booleanValue()) {
+            User user = entityManager.find(User.class, userDTO.getId());
+            if (shared) {
                 device.getUsers().add(user);
             } else {
                 device.getUsers().remove(user);
             }
             entityManager.merge(user);
         }
-    }
-
-    private User fillUserSettings(User user) {
-        if (user.getUserSettings() instanceof HibernateProxy) {
-            UserSettings settings = (UserSettings) ((HibernateProxy) user.getUserSettings()).getHibernateLazyInitializer().getImplementation();
-            user.setUserSettings(settings);
-        }
-        return user;
     }
 
     @Transactional
@@ -814,12 +812,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser
     @Override
-    public Map<User, Boolean> getGeoFenceShare(GeoFence geoFence) {
+    public Map<UserDTO, Boolean> getGeoFenceShare(GeoFence geoFence) {
         geoFence = getSessionEntityManager().find(GeoFence.class, geoFence.getId());
-        List<User> users = getUsers();
-        Map<User, Boolean> result = new HashMap<User, Boolean>(users.size());
-        for (User user : users) {
-            result.put(fillUserSettings(user), geoFence.getUsers().contains(user));
+        List<UserDTO> users = getUsers();
+        Map<UserDTO, Boolean> result = new HashMap<UserDTO, Boolean>(users.size());
+        for (UserDTO userDTO : users) {
+            User user = getSessionEntityManager().find(User.class, userDTO.getId());
+            result.put(userDTO, geoFence.getUsers().contains(user));
         }
         return result;
     }
@@ -828,13 +827,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share) {
+    public void saveGeoFenceShare(GeoFence geoFence, Map<UserDTO, Boolean> share) {
         EntityManager entityManager = getSessionEntityManager();
         geoFence = entityManager.find(GeoFence.class, geoFence.getId());
 
-        for (User user : getUsers()) {
-            Boolean shared = share.get(user);
+        for (UserDTO userDTO : getUsers()) {
+            Boolean shared = share.get(userDTO);
             if (shared == null) continue;
+            User user = entityManager.find(User.class, userDTO.getId());
             if (shared) {
                 geoFence.getUsers().add(user);
             } else {

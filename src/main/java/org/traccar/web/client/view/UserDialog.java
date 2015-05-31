@@ -24,7 +24,6 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.shared.model.DeviceEventType;
-import org.traccar.web.shared.model.User;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -38,13 +37,14 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.PasswordField;
 import com.sencha.gxt.widget.core.client.form.TextField;
+import org.traccar.web.shared.model.UserDTO;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-public class UserDialog implements Editor<User> {
+public class UserDialog implements Editor<UserDTO> {
 
     private static UserDialogUiBinder uiBinder = GWT.create(UserDialogUiBinder.class);
 
@@ -53,11 +53,11 @@ public class UserDialog implements Editor<User> {
 
     private UserDriver driver = GWT.create(UserDriver.class);
 
-    interface UserDriver extends SimpleBeanEditorDriver<User, UserDialog> {
+    interface UserDriver extends SimpleBeanEditorDriver<UserDTO, UserDialog> {
     }
 
     public interface UserHandler {
-        public void onSave(User user);
+        void onSave(UserDTO user);
     }
 
     private UserHandler userHandler;
@@ -108,7 +108,7 @@ public class UserDialog implements Editor<User> {
         }
     }
 
-    public UserDialog(User user, UserHandler userHandler) {
+    public UserDialog(UserDTO user, UserHandler userHandler) {
         this.userHandler = userHandler;
 
         // notification types grid
@@ -139,16 +139,16 @@ public class UserDialog implements Editor<User> {
         grid.setSelectionModel(selectionModel);
         grid.getView().setForceFit(true);
         grid.getView().setAutoFill(true);
-        for (DeviceEventType deviceEventType : user.getTransferNotificationEvents()) {
+        for (DeviceEventType deviceEventType : user.getNotificationEvents()) {
             grid.getSelectionModel().select(deviceEventType, true);
         }
 
-        if (ApplicationContext.getInstance().getUser().getAdmin()) {
+        if (ApplicationContext.getInstance().getUser().isAdmin()) {
             admin.setEnabled(true);
         }
 
-        if (ApplicationContext.getInstance().getUser().getAdmin() ||
-            ApplicationContext.getInstance().getUser().getManager()) {
+        if (ApplicationContext.getInstance().getUser().isAdmin() ||
+            ApplicationContext.getInstance().getUser().isManager()) {
             manager.setEnabled(true);
         }
 
@@ -169,8 +169,8 @@ public class UserDialog implements Editor<User> {
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
         window.hide();
-        User user = driver.flush();
-        user.setTransferNotificationEvents(new HashSet<DeviceEventType>(grid.getSelectionModel().getSelectedItems()));
+        UserDTO user = driver.flush();
+        user.setNotificationEvents(new HashSet<DeviceEventType>(grid.getSelectionModel().getSelectedItems()));
         userHandler.onSave(user);
     }
 

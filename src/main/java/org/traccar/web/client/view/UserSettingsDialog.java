@@ -24,7 +24,8 @@ import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.UserSettingsProperties;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.MapType;
+import org.traccar.web.shared.model.SpeedUnit;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -38,8 +39,9 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
+import org.traccar.web.shared.model.UserSettingsDTO;
 
-public class UserSettingsDialog implements Editor<UserSettings> {
+public class UserSettingsDialog implements Editor<UserSettingsDTO> {
 
     private static UserSettingsDialogUiBinder uiBinder = GWT.create(UserSettingsDialogUiBinder.class);
 
@@ -48,12 +50,12 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
     private UserSettingsDriver driver = GWT.create(UserSettingsDriver.class);
 
-    interface UserSettingsDriver extends SimpleBeanEditorDriver<UserSettings, UserSettingsDialog> {
+    interface UserSettingsDriver extends SimpleBeanEditorDriver<UserSettingsDTO, UserSettingsDialog> {
     }
 
     public interface UserSettingsHandler {
-        void onSave(UserSettings userSettings);
-        void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
+        void onSave(UserSettingsDTO userSettings);
+        void onTakeCurrentMapState(ComboBox<MapType> mapType,
                                           NumberField<Double> centerLongitude,
                                           NumberField<Double> centerLatitude,
                                           NumberField<Integer> zoomLevel);
@@ -65,7 +67,7 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     Window window;
 
     @UiField(provided = true)
-    ComboBox<UserSettings.SpeedUnit> speedUnit;
+    ComboBox<SpeedUnit> speedUnit;
 
     @UiField
     NumberField<Short> timePrintInterval;
@@ -89,27 +91,27 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     NumberField<Integer> zoomLevel;
 
     @UiField(provided = true)
-    ComboBox<UserSettings.MapType> mapType;
+    ComboBox<MapType> mapType;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public UserSettingsDialog(UserSettings userSettings, UserSettingsHandler userSettingsHandler) {
+    public UserSettingsDialog(UserSettingsDTO userSettings, UserSettingsHandler userSettingsHandler) {
         this.userSettingsHandler = userSettingsHandler;
 
-        ListStore<UserSettings.SpeedUnit> speedUnitStore = new ListStore<UserSettings.SpeedUnit>(
-                new EnumKeyProvider<UserSettings.SpeedUnit>());
-        speedUnitStore.addAll(Arrays.asList(UserSettings.SpeedUnit.values()));
+        ListStore<SpeedUnit> speedUnitStore = new ListStore<SpeedUnit>(
+                new EnumKeyProvider<SpeedUnit>());
+        speedUnitStore.addAll(Arrays.asList(SpeedUnit.values()));
 
-        speedUnit = new ComboBox<UserSettings.SpeedUnit>(
+        speedUnit = new ComboBox<SpeedUnit>(
                 speedUnitStore, new UserSettingsProperties.SpeedUnitLabelProvider());
         speedUnit.setForceSelection(true);
         speedUnit.setTriggerAction(TriggerAction.ALL);
 
-        ListStore<UserSettings.MapType> mapTypeStore = new ListStore<UserSettings.MapType>(
-                new EnumKeyProvider<UserSettings.MapType>());
-        mapTypeStore.addAll(Arrays.asList(UserSettings.MapType.values()));
-        mapType = new ComboBox<UserSettings.MapType>(
+        ListStore<MapType> mapTypeStore = new ListStore<MapType>(
+                new EnumKeyProvider<MapType>());
+        mapTypeStore.addAll(Arrays.asList(MapType.values()));
+        mapType = new ComboBox<MapType>(
                 mapTypeStore, new UserSettingsProperties.MapTypeLabelProvider());
 
         mapType.setForceSelection(true);
@@ -117,8 +119,8 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
         uiBinder.createAndBindUi(this);
 
-        timePrintInterval.addValidator(new MinNumberValidator<Short>(Short.valueOf((short) 1)));
-        timePrintInterval.addValidator(new MaxNumberValidator<Short>(Short.valueOf((short) 512)));
+        timePrintInterval.addValidator(new MinNumberValidator<Short>((short) 1));
+        timePrintInterval.addValidator(new MaxNumberValidator<Short>((short) 512));
 
         driver.initialize(this);
         driver.edit(userSettings);

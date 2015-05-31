@@ -23,7 +23,6 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
@@ -76,24 +75,24 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     }
 
     public interface DeviceHandler {
-        public void onSelected(Device device);
-        public void onAdd();
-        public void onEdit(Device device);
-        public void onShare(Device device);
-        public void onRemove(Device device);
-        public void onMouseOver(int mouseX, int mouseY, Device device);
-        public void onMouseOut(int mouseX, int mouseY, Device device);
-        public void doubleClicked(Device device);
-        public void onClearSelection();
+        void onSelected(Device device);
+        void onAdd();
+        void onEdit(Device device);
+        void onShare(Device device);
+        void onRemove(Device device);
+        void onMouseOver(int mouseX, int mouseY, Device device);
+        void onMouseOut(int mouseX, int mouseY, Device device);
+        void doubleClicked(Device device);
+        void onClearSelection();
     }
 
     public interface GeoFenceHandler {
-        public void onAdd();
-        public void onEdit(GeoFence geoFence);
-        public void onRemove(GeoFence geoFence);
-        public void onSelected(GeoFence geoFence);
-        public void onShare(GeoFence geoFence);
-        public void setGeoFenceListView(ListView<GeoFence, String> geoFenceListView);
+        void onAdd();
+        void onEdit(GeoFence geoFence);
+        void onRemove(GeoFence geoFence);
+        void onSelected(GeoFence geoFence);
+        void onShare(GeoFence geoFence);
+        void setGeoFenceListView(ListView<GeoFence, String> geoFenceListView);
     }
 
     private final DeviceHandler deviceHandler;
@@ -264,9 +263,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         editing.addEditor(colFollow, new CheckBox());
         editing.addEditor(colRecordTrace, new CheckBox());
 
-        boolean readOnly = ApplicationContext.getInstance().getUser().getReadOnly();
-        boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
-        boolean manager = ApplicationContext.getInstance().getUser().getManager();
+        boolean readOnly = ApplicationContext.getInstance().getUser().isReadOnly();
+        boolean admin = ApplicationContext.getInstance().getUser().isAdmin();
+        boolean manager = ApplicationContext.getInstance().getUser().isManager();
 
         settingsButton.setVisible(admin || !readOnly);
         settingsAccount.setVisible(!readOnly);
@@ -368,11 +367,11 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     }
 
     public interface SettingsHandler {
-        public void onAccountSelected();
-        public void onPreferencesSelected();
-        public void onUsersSelected();
-        public void onApplicationSelected();
-        public void onNotificationsSelected();
+        void onAccountSelected();
+        void onPreferencesSelected();
+        void onUsersSelected();
+        void onApplicationSelected();
+        void onNotificationsSelected();
     }
 
     private SettingsHandler settingsHandler;
@@ -423,8 +422,8 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     }
 
     private void toggleManagementButtons() {
-        boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
-        boolean manager = ApplicationContext.getInstance().getUser().getManager();
+        boolean admin = ApplicationContext.getInstance().getUser().isAdmin();
+        boolean manager = ApplicationContext.getInstance().getUser().isManager();
         boolean allowDeviceManagement = !ApplicationContext.getInstance().getApplicationSettings().isDisallowDeviceManagementByUsers();
 
         addButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);

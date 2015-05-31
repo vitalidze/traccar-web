@@ -21,9 +21,9 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.view.LoginDialog;
-import org.traccar.web.shared.model.User;
 
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import org.traccar.web.shared.model.UserDTO;
 
 public class LoginController implements LoginDialog.LoginHandler {
 
@@ -32,7 +32,7 @@ public class LoginController implements LoginDialog.LoginHandler {
     private Messages i18n = GWT.create(Messages.class);
 
     public interface LoginHandler {
-        public void onLogin();
+        void onLogin();
     }
 
     private LoginHandler loginHandler;
@@ -40,9 +40,9 @@ public class LoginController implements LoginDialog.LoginHandler {
     public void login(final LoginHandler loginHandler) {
         this.loginHandler = loginHandler;
 
-        Application.getDataService().authenticated(new BaseAsyncCallback<User>(i18n) {
+        Application.getDataService().authenticated(new BaseAsyncCallback<UserDTO>(i18n) {
             @Override
-            public void onSuccess(User result) {
+            public void onSuccess(UserDTO result) {
                 ApplicationContext.getInstance().setUser(result);
                 loginHandler.onLogin();
             }
@@ -65,9 +65,9 @@ public class LoginController implements LoginDialog.LoginHandler {
     @Override
     public void onLogin(String login, String password) {
         if (validate(login, password)) {
-            Application.getDataService().login(login, password, new BaseAsyncCallback<User>(i18n) {
+            Application.getDataService().login(login, password, new BaseAsyncCallback<UserDTO>(i18n) {
                 @Override
-                public void onSuccess(User result) {
+                public void onSuccess(UserDTO result) {
                     ApplicationContext.getInstance().setUser(result);
                     if (loginHandler != null) {
                         dialog.hide();
@@ -85,9 +85,9 @@ public class LoginController implements LoginDialog.LoginHandler {
     @Override
     public void onRegister(String login, String password) {
         if (validate(login, password)) {
-            Application.getDataService().register(login, password, new BaseAsyncCallback<User>(i18n) {
+            Application.getDataService().register(login, password, new BaseAsyncCallback<UserDTO>(i18n) {
                 @Override
-                public void onSuccess(User result) {
+                public void onSuccess(UserDTO result) {
                     ApplicationContext.getInstance().setUser(result);
                     if (loginHandler != null) {
                         dialog.hide();

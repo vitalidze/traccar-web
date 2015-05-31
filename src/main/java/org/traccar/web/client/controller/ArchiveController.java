@@ -27,15 +27,12 @@ import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.view.ArchiveView;
 import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.client.view.UserSettingsDialog;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
-import org.traccar.web.shared.model.PositionIconType;
-import org.traccar.web.shared.model.UserSettings;
 
 public class ArchiveController implements ContentController, ArchiveView.ArchiveHandler {
 
@@ -104,7 +101,7 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
 
     @Override
     public void onChangeArchiveMarkerType(PositionIconType newMarkerType) {
-        UserSettings settings = ApplicationContext.getInstance().getUserSettings();
+        UserSettingsDTO settings = ApplicationContext.getInstance().getUserSettings();
         settings.setArchiveMarkerType(newMarkerType);
         userSettingsHandler.onSave(settings);
     }

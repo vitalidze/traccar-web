@@ -35,7 +35,7 @@ import org.traccar.web.client.view.GeoFenceWindow;
 import org.traccar.web.client.view.UserShareDialog;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.shared.model.UserDTO;
 
 import java.util.*;
 
@@ -230,12 +230,12 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         if (geoFenceManagementInProgress()) {
             return;
         }
-        Application.getDataService().getGeoFenceShare(geoFence, new BaseAsyncCallback<Map<User, Boolean>>(i18n) {
+        Application.getDataService().getGeoFenceShare(geoFence, new BaseAsyncCallback<Map<UserDTO, Boolean>>(i18n) {
             @Override
-            public void onSuccess(final Map<User, Boolean> share) {
+            public void onSuccess(final Map<UserDTO, Boolean> share) {
                 new UserShareDialog(share, new UserShareDialog.UserShareHandler() {
                     @Override
-                    public void onSaveShares(Map<User, Boolean> shares) {
+                    public void onSaveShares(Map<UserDTO, Boolean> shares) {
                         Application.getDataService().saveGeoFenceShare(geoFence, shares, new BaseAsyncCallback<Void>(i18n));
                     }
                 }).show();

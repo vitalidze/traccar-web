@@ -15,6 +15,8 @@
  */
 package org.traccar.web.shared.model;
 
+import org.traccar.web.server.entity.User;
+
 import javax.persistence.*;
 
 @Entity

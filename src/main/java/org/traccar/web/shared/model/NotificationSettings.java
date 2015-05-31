@@ -17,6 +17,7 @@ package org.traccar.web.shared.model;
 
 import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import org.traccar.web.server.entity.User;
 
 import javax.persistence.*;
 import java.util.HashMap;

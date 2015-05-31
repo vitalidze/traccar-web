@@ -18,6 +18,7 @@ package org.traccar.web.shared.model;
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import org.traccar.web.server.entity.User;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -19,7 +19,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.UIStateService;
 import org.traccar.web.shared.model.UIStateEntry;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.server.entity.User;
 
 import javax.inject.Inject;
 import javax.inject.Provider;

@@ -216,12 +216,12 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     @Override
     public void onShare(final Device device) {
-        Application.getDataService().getDeviceShare(device, new BaseAsyncCallback<Map<User, Boolean>>(i18n) {
+        Application.getDataService().getDeviceShare(device, new BaseAsyncCallback<Map<UserDTO, Boolean>>(i18n) {
             @Override
-            public void onSuccess(final Map<User, Boolean> share) {
+            public void onSuccess(final Map<UserDTO, Boolean> share) {
                 new UserShareDialog(share, new UserShareDialog.UserShareHandler() {
                     @Override
-                    public void onSaveShares(Map<User, Boolean> shares) {
+                    public void onSaveShares(Map<UserDTO, Boolean> shares) {
                         Application.getDataService().saveDeviceShare(device, shares, new BaseAsyncCallback<Void>(i18n));
                     }
                 }).show();

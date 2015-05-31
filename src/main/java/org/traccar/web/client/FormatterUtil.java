@@ -1,9 +1,25 @@
+/*
+ * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.traccar.web.client;
 
 import com.google.gwt.i18n.client.CurrencyList;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.DistanceUnit;
+import org.traccar.web.shared.model.SpeedUnit;
 
 public class FormatterUtil {
 
@@ -17,9 +33,9 @@ public class FormatterUtil {
 
     private class SpeedNumberFormat extends NumberFormat {
 
-        private final UserSettings.SpeedUnit speedUnit;
+        private final SpeedUnit speedUnit;
 
-        public SpeedNumberFormat(UserSettings.SpeedUnit speedUnit) {
+        public SpeedNumberFormat(SpeedUnit speedUnit) {
             super("0.##", CurrencyList.get().getDefault(), true);
             this.speedUnit = speedUnit;
         }
@@ -33,9 +49,9 @@ public class FormatterUtil {
 
     private class DistanceNumberFormat extends NumberFormat {
 
-        private final UserSettings.DistanceUnit distanceUnit;
+        private final DistanceUnit distanceUnit;
 
-        public DistanceNumberFormat(UserSettings.DistanceUnit distanceUnit) {
+        public DistanceNumberFormat(DistanceUnit distanceUnit) {
             super("0.##", CurrencyList.get().getDefault(), true);
             this.distanceUnit = distanceUnit;
         }
@@ -52,7 +68,7 @@ public class FormatterUtil {
     }
 
     public NumberFormat getDistanceFormat() {
-        UserSettings.SpeedUnit speedUnit = ApplicationContext.getInstance().getUserSettings().getSpeedUnit();
+        SpeedUnit speedUnit = ApplicationContext.getInstance().getUserSettings().getSpeedUnit();
         return new DistanceNumberFormat(speedUnit.getDistanceUnit());
     }
 }

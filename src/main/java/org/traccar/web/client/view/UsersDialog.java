@@ -15,17 +15,14 @@
  */
 package org.traccar.web.client.view;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
-import com.sencha.gxt.data.shared.Store;
+import com.sencha.gxt.widget.core.client.grid.Grid;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.UserProperties;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.User;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -39,10 +36,10 @@ import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import org.traccar.web.shared.model.UserDTO;
 
-public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandler<User> {
+public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandler<UserDTO> {
 
     private static UsersDialogUiBinder uiBinder = GWT.create(UsersDialogUiBinder.class);
 
@@ -50,10 +47,10 @@ public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandle
     }
 
     public interface UserHandler {
-        public void onAdd();
-        public void onRemove(User user);
-        public void onChangePassword(User user);
-        public void onSaveRoles();
+        void onAdd();
+        void onRemove(UserDTO user);
+        void onChangePassword(UserDTO user);
+        void onSaveRoles();
     }
 
     private UserHandler userHandler;
@@ -71,41 +68,41 @@ public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandle
     TextButton changePasswordButton;
 
     @UiField(provided = true)
-    ColumnModel<User> columnModel;
+    ColumnModel<UserDTO> columnModel;
 
     @UiField(provided = true)
-    ListStore<User> userStore;
+    ListStore<UserDTO> userStore;
 
     @UiField
-    Grid<User> grid;
+    Grid<UserDTO> grid;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public UsersDialog(ListStore<User> userStore, UserHandler userHandler) {
+    public UsersDialog(ListStore<UserDTO> userStore, UserHandler userHandler) {
         this.userStore = userStore;
         this.userHandler = userHandler;
 
         UserProperties userProperties = GWT.create(UserProperties.class);
 
-        List<ColumnConfig<User, ?>> columnConfigList = new LinkedList<ColumnConfig<User, ?>>();
-        columnConfigList.add(new ColumnConfig<User, String>(userProperties.login(), 25, i18n.name()));
+        List<ColumnConfig<UserDTO, ?>> columnConfigList = new LinkedList<ColumnConfig<UserDTO, ?>>();
+        columnConfigList.add(new ColumnConfig<UserDTO, String>(userProperties.login(), 25, i18n.name()));
 
-        if (ApplicationContext.getInstance().getUser().getAdmin()) {
-            ColumnConfig<User, Boolean> colAdmin = new ColumnConfig<User, Boolean>(userProperties.admin(), 25, i18n.administrator());
+        if (ApplicationContext.getInstance().getUser().isAdmin()) {
+            ColumnConfig<UserDTO, Boolean> colAdmin = new ColumnConfig<UserDTO, Boolean>(userProperties.admin(), 25, i18n.administrator());
             colAdmin.setCell(new CheckBoxCell());
             columnConfigList.add(colAdmin);
         }
 
-        ColumnConfig<User, Boolean> colManager = new ColumnConfig<User, Boolean>(userProperties.manager(), 25, i18n.manager());
+        ColumnConfig<UserDTO, Boolean> colManager = new ColumnConfig<UserDTO, Boolean>(userProperties.manager(), 25, i18n.manager());
         colManager.setCell(new CheckBoxCell());
         columnConfigList.add(colManager);
 
-        ColumnConfig<User, Boolean> colReadOnly = new ColumnConfig<User, Boolean>(userProperties.readOnly(), 25, i18n.readOnly());
+        ColumnConfig<UserDTO, Boolean> colReadOnly = new ColumnConfig<UserDTO, Boolean>(userProperties.readOnly(), 25, i18n.readOnly());
         colReadOnly.setCell(new CheckBoxCell());
         columnConfigList.add(colReadOnly);
 
-        columnModel = new ColumnModel<User>(columnConfigList);
+        columnModel = new ColumnModel<UserDTO>(columnConfigList);
 
         uiBinder.createAndBindUi(this);
 
@@ -122,7 +119,7 @@ public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandle
     }
 
     @Override
-    public void onSelectionChanged(SelectionChangedEvent<User> event) {
+    public void onSelectionChanged(SelectionChangedEvent<UserDTO> event) {
         removeButton.setEnabled(!event.getSelection().isEmpty());
         changePasswordButton.setEnabled(!event.getSelection().isEmpty());
     }
