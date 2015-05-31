@@ -24,6 +24,8 @@ import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.NotificationService;
 import org.traccar.web.server.entity.ApplicationSettings;
+import org.traccar.web.server.entity.NotificationSettings;
+import org.traccar.web.server.entity.NotificationTemplate;
 import org.traccar.web.server.entity.User;
 import org.traccar.web.shared.model.*;
 
@@ -314,7 +316,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public void checkEmailSettings(NotificationSettings settings) {
+    public void checkEmailSettings(NotificationSettingsDTO settings) {
         // Validate smtp settings
         try {
             Session s = getSession(settings);
@@ -332,7 +334,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         }
     }
 
-    private static Session getSession(NotificationSettings settings) {
+    private static Session getSession(EMailSettings settings) {
         final boolean DEBUG = false;
         Properties props = new Properties();
 
@@ -375,7 +377,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public void checkPushbulletSettings(NotificationSettings settings) {
+    public void checkPushbulletSettings(NotificationSettingsDTO settings) {
         InputStream is = null;
         try {
             URL url = new URL("https://api.pushbullet.com/v2/users/me");
@@ -403,7 +405,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
-    public String checkTemplate(NotificationTemplate template) {
+    public String checkTemplate(NotificationTemplateDTO template) {
         List<Device> devices = dataService.getDevices();
         Device testDevice;
         if (devices.isEmpty()) {
@@ -488,19 +490,14 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
-    public NotificationSettings getSettings() {
+    public NotificationSettingsDTO getSettings() {
         List<NotificationSettings> settings = entityManager.get().createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
                 .setParameter("user", sessionUser.get())
                 .getResultList();
         if (settings.isEmpty()) {
             return null;
         } else {
-            NotificationSettings s = settings.get(0);
-            s.setTransferTemplates(new HashMap<DeviceEventType, NotificationTemplate>(s.getTemplates().size()));
-            for (NotificationTemplate t : s.getTemplates()) {
-                s.getTransferTemplates().put(t.getType(), t);
-            }
-            return s;
+            return settings.get(0).dto();
         }
     }
 
@@ -508,27 +505,35 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public void saveSettings(NotificationSettings settings) {
-        NotificationSettings currentSettings = getSettings();
+    public void saveSettings(NotificationSettingsDTO settingsDTO) {
+        NotificationSettingsDTO currentSettingsDTO = getSettings();
+        NotificationSettings currentSettings = currentSettingsDTO == null ? null :
+                entityManager.get().find(NotificationSettings.class, currentSettingsDTO.getId());
         if (currentSettings == null) {
-            currentSettings = settings;
-            settings.setUser(sessionUser.get());
+            currentSettings = new NotificationSettings();
+            currentSettings.setUser(sessionUser.get());
             entityManager.get().persist(currentSettings);
-            for (NotificationTemplate newTemplate : currentSettings.getTransferTemplates().values()) {
+            for (Map.Entry<DeviceEventType, NotificationTemplateDTO> entry : settingsDTO.getTemplates().entrySet()) {
+                NotificationTemplateDTO templateDTO = entry.getValue();
+                NotificationTemplate newTemplate = new NotificationTemplate().from(templateDTO);
+                newTemplate.setType(entry.getKey());
                 newTemplate.setSettings(currentSettings);
                 entityManager.get().persist(newTemplate);
             }
         } else {
-            currentSettings.copyFrom(settings);
+            currentSettings.from(settingsDTO);
             for (NotificationTemplate existingTemplate : currentSettings.getTemplates()) {
-                NotificationTemplate updatedTemplate = settings.getTransferTemplates().remove(existingTemplate.getType());
+                NotificationTemplateDTO updatedTemplate = settingsDTO.getTemplates().remove(existingTemplate.getType());
                 if (updatedTemplate == null) {
                     entityManager.get().remove(existingTemplate);
                 } else {
-                    existingTemplate.copyFrom(updatedTemplate);
+                    existingTemplate.from(updatedTemplate);
                 }
             }
-            for (NotificationTemplate newTemplate : settings.getTransferTemplates().values()) {
+            for (Map.Entry<DeviceEventType, NotificationTemplateDTO> entry : settingsDTO.getTemplates().entrySet()) {
+                NotificationTemplateDTO templateDTO = entry.getValue();
+                NotificationTemplate newTemplate = new NotificationTemplate().from(templateDTO);
+                newTemplate.setType(entry.getKey());
                 newTemplate.setSettings(currentSettings);
                 entityManager.get().persist(newTemplate);
             }

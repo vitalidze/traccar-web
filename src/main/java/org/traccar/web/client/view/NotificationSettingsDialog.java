@@ -25,7 +25,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.core.client.ToStringValueProvider;
-import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.Window;
@@ -46,7 +45,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class NotificationSettingsDialog implements Editor<NotificationSettings> {
+public class NotificationSettingsDialog implements Editor<NotificationSettingsDTO> {
 
     private static NotificationSettingsDialogUiBinder uiBinder = GWT.create(NotificationSettingsDialogUiBinder.class);
 
@@ -55,17 +54,17 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
 
     private NotificationSettingsDriver driver = GWT.create(NotificationSettingsDriver.class);
 
-    interface NotificationSettingsDriver extends SimpleBeanEditorDriver<NotificationSettings, NotificationSettingsDialog> {
+    interface NotificationSettingsDriver extends SimpleBeanEditorDriver<NotificationSettingsDTO, NotificationSettingsDialog> {
     }
 
     public interface NotificationSettingsHandler {
-        void onSave(NotificationSettings notificationSettings);
-        void onTestEmail(NotificationSettings notificationSettings);
-        void onTestPushbullet(NotificationSettings notificationSettings);
-        void onTestMessageTemplate(NotificationTemplate template);
+        void onSave(NotificationSettingsDTO notificationSettings);
+        void onTestEmail(NotificationSettingsDTO notificationSettings);
+        void onTestPushbullet(NotificationSettingsDTO notificationSettings);
+        void onTestMessageTemplate(NotificationTemplateDTO template);
     }
 
-    private final NotificationSettings settings;
+    private final NotificationSettingsDTO settings;
     private final NotificationSettingsHandler notificationSettingsHandler;
 
     @UiField
@@ -84,7 +83,7 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
 
     @UiField(provided = true)
-    ComboBox<NotificationSettings.SecureConnectionType> secureConnectionType;
+    ComboBox<SecureConnectionType> secureConnectionType;
 
     @UiField
     CheckBox useAuthorization;
@@ -98,7 +97,7 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     @UiField
     TextField pushbulletAccessToken;
 
-    NotificationTemplate messageTemplate;
+    NotificationTemplateDTO messageTemplate;
 
     @Ignore
     @UiField(provided = true)
@@ -122,14 +121,14 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public NotificationSettingsDialog(NotificationSettings notificationSettings, NotificationSettingsHandler notificationSettingsHandler) {
+    public NotificationSettingsDialog(NotificationSettingsDTO notificationSettings, NotificationSettingsHandler notificationSettingsHandler) {
         this.settings = notificationSettings;
         this.notificationSettingsHandler = notificationSettingsHandler;
 
-        ListStore<NotificationSettings.SecureConnectionType> secureConnectionTypeStore = new ListStore<NotificationSettings.SecureConnectionType>(new EnumKeyProvider<NotificationSettings.SecureConnectionType>());
-        secureConnectionTypeStore.addAll(Arrays.asList(NotificationSettings.SecureConnectionType.values()));
+        ListStore<SecureConnectionType> secureConnectionTypeStore = new ListStore<SecureConnectionType>(new EnumKeyProvider<SecureConnectionType>());
+        secureConnectionTypeStore.addAll(Arrays.asList(SecureConnectionType.values()));
 
-        secureConnectionType = new ComboBox<NotificationSettings.SecureConnectionType>(secureConnectionTypeStore, new NotificationSettingsProperties.SecureConnectionTypeLabelProvider());
+        secureConnectionType = new ComboBox<SecureConnectionType>(secureConnectionTypeStore, new NotificationSettingsProperties.SecureConnectionTypeLabelProvider());
         secureConnectionType.setForceSelection(true);
         secureConnectionType.setTriggerAction(TriggerAction.ALL);
 
@@ -211,12 +210,11 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
     public void onEventTypeChanged(SelectionEvent<DeviceEventType> event) {
         // save previously edited template
         flushTemplate();
-        messageTemplate = settings.getTransferTemplates().get(event.getSelectedItem());
+        messageTemplate = settings.getTemplates().get(event.getSelectedItem());
         if (messageTemplate == null) {
-            messageTemplate = new NotificationTemplate();
-            messageTemplate.setType(event.getSelectedItem());
+            messageTemplate = new NotificationTemplateDTO();
             messageTemplate.setBody(i18n.defaultNotificationTemplate(event.getSelectedItem(), "${deviceName}", "${geoFenceName}", "${eventTime}", "${positionTime}", "${maintenanceName}"));
-            settings.getTransferTemplates().put(event.getSelectedItem(), messageTemplate);
+            settings.getTemplates().put(event.getSelectedItem(), messageTemplate);
         }
         messageSubject.setText(messageTemplate.getSubject());
         messageBody.setText(messageTemplate.getBody());

@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.shared.model;
+package org.traccar.web.server.entity;
 
-import com.google.gwt.user.client.rpc.GwtTransient;
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.traccar.web.shared.model.DeviceEventType;
+import org.traccar.web.shared.model.NotificationTemplateDTO;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "notification_templates")
-public class NotificationTemplate implements IsSerializable {
+public class NotificationTemplate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
-    @GwtTransient
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "ntemplates_fkey_settings_id"))
     private NotificationSettings settings;
@@ -112,9 +111,19 @@ public class NotificationTemplate implements IsSerializable {
         this.contentType = contentType;
     }
 
-    public void copyFrom(NotificationTemplate t) {
+    public NotificationTemplateDTO dto() {
+        NotificationTemplateDTO dto = new NotificationTemplateDTO();
+        dto.setId(getId());
+        dto.setSubject(getSubject());
+        dto.setBody(getBody());
+        dto.setContentType(getContentType());
+        return dto;
+    }
+
+    public NotificationTemplate from(NotificationTemplateDTO t) {
         setSubject(t.getSubject());
         setBody(t.getBody());
         setContentType(t.getContentType());
+        return this;
     }
 }

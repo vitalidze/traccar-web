@@ -13,52 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.shared.model;
+package org.traccar.web.server.entity;
 
-import com.google.gwt.user.client.rpc.GwtTransient;
-import com.google.gwt.user.client.rpc.IsSerializable;
-import org.traccar.web.server.entity.User;
+import org.traccar.web.shared.model.*;
 
 import javax.persistence.*;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 @Entity
 @Table(name = "notification_settings")
-public class NotificationSettings implements IsSerializable {
-    public enum SecureConnectionType {
-        NONE("None"),
-        SSL_TLS("SSL/TLS"),
-        STARTTLS("STARTTLS");
-
-        final String title;
-
-        SecureConnectionType(String title) {
-            this.title = title;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-    }
-
-    public NotificationSettings() {
-        server = "smtp.gmail.com";
-        port = 465;
-        useAuthorization = true;
-        secureConnectionType = SecureConnectionType.SSL_TLS;
-        templates = new HashSet<NotificationTemplate>();
-        transferTemplates = new HashMap<DeviceEventType, NotificationTemplate>();
-    }
-
+public class NotificationSettings implements EMailSettings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
-    @GwtTransient
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "nsettings_fkey_user_id"))
     private User user;
@@ -104,12 +74,8 @@ public class NotificationSettings implements IsSerializable {
     @Enumerated(EnumType.STRING)
     private SecureConnectionType secureConnectionType;
 
-    @GwtTransient
     @OneToMany(mappedBy = "settings", fetch = FetchType.LAZY)
     private Set<NotificationTemplate> templates;
-
-    @Transient
-    private Map<DeviceEventType, NotificationTemplate> transferTemplates;
 
     public String getFromAddress() {
         return fromAddress;
@@ -185,34 +151,42 @@ public class NotificationSettings implements IsSerializable {
         this.templates = templates;
     }
 
-    public Map<DeviceEventType, NotificationTemplate> getTransferTemplates() {
-        return transferTemplates;
-    }
-
-    public void setTransferTemplates(Map<DeviceEventType, NotificationTemplate> transferTemplates) {
-        this.transferTemplates = transferTemplates;
-    }
-
-    public void copyFrom(NotificationSettings s) {
-        setFromAddress(s.getFromAddress());
-        setServer(s.getServer());
-        setUseAuthorization(s.isUseAuthorization());
-        setPort(s.getPort());
-        setUsername(s.getUsername());
-        setPassword(s.getPassword());
-        setSecureConnectionType(s.getSecureConnectionType());
-        setPushbulletAccessToken(s.getPushbulletAccessToken());
-    }
-
     public NotificationTemplate findTemplate(DeviceEventType type) {
-        if (getTransferTemplates() == null) {
-            setTransferTemplates(new HashMap<DeviceEventType, NotificationTemplate>());
-        }
-        if (getTransferTemplates().size() < getTemplates().size()) {
-            for (NotificationTemplate template : getTemplates()) {
-                getTransferTemplates().put(template.getType(), template);
+        for (NotificationTemplate template : getTemplates()) {
+            if (template.getType().equals(type)) {
+                return template;
             }
         }
-        return getTransferTemplates().get(type);
+        return null;
+    }
+
+    public NotificationSettingsDTO dto() {
+        NotificationSettingsDTO dto = new NotificationSettingsDTO();
+        dto.setId(getId());
+        dto.setFromAddress(getFromAddress());
+        dto.setPassword(getPassword());
+        dto.setPort(getPort());
+        dto.setPushbulletAccessToken(getPushbulletAccessToken());
+        dto.setSecureConnectionType(getSecureConnectionType());
+        dto.setServer(getServer());
+        dto.setUseAuthorization(isUseAuthorization());
+        dto.setUsername(getUsername());
+        dto.setTemplates(new HashMap<DeviceEventType, NotificationTemplateDTO>(getTemplates().size()));
+        for (NotificationTemplate template : getTemplates()) {
+            dto.getTemplates().put(template.getType(), template.dto());
+        }
+        return dto;
+    }
+
+    public NotificationSettings from(NotificationSettingsDTO dto) {
+        setFromAddress(dto.getFromAddress());
+        setServer(dto.getServer());
+        setUseAuthorization(dto.isUseAuthorization());
+        setPort(dto.getPort());
+        setUsername(dto.getUsername());
+        setPassword(dto.getPassword());
+        setSecureConnectionType(dto.getSecureConnectionType());
+        setPushbulletAccessToken(dto.getPushbulletAccessToken());
+        return this;
     }
 }

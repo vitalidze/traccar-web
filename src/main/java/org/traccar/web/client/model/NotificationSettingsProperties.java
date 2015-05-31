@@ -19,26 +19,27 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
-import org.traccar.web.shared.model.NotificationSettings;
+import org.traccar.web.shared.model.NotificationSettingsDTO;
+import org.traccar.web.shared.model.SecureConnectionType;
 
-public interface NotificationSettingsProperties extends PropertyAccess<NotificationSettings> {
-    ModelKeyProvider<NotificationSettings> id();
+public interface NotificationSettingsProperties extends PropertyAccess<NotificationSettingsDTO> {
+    ModelKeyProvider<NotificationSettingsDTO> id();
 
-    ValueProvider<NotificationSettings, String> server();
+    ValueProvider<NotificationSettingsDTO, String> server();
 
-    ValueProvider<NotificationSettings, Boolean> useAuthorization();
+    ValueProvider<NotificationSettingsDTO, Boolean> useAuthorization();
 
-    ValueProvider<NotificationSettings, Integer> port();
+    ValueProvider<NotificationSettingsDTO, Integer> port();
 
-    ValueProvider<NotificationSettings, String> username();
+    ValueProvider<NotificationSettingsDTO, String> username();
 
-    ValueProvider<NotificationSettings, String> password();
+    ValueProvider<NotificationSettingsDTO, String> password();
 
-    ValueProvider<NotificationSettings, NotificationSettings.SecureConnectionType> secureConnectionType();
+    ValueProvider<NotificationSettingsDTO, SecureConnectionType> secureConnectionType();
 
-    public static class SecureConnectionTypeLabelProvider implements LabelProvider<NotificationSettings.SecureConnectionType> {
+    public static class SecureConnectionTypeLabelProvider implements LabelProvider<SecureConnectionType> {
         @Override
-        public String getLabel(NotificationSettings.SecureConnectionType item) {
+        public String getLabel(SecureConnectionType item) {
             return item.getTitle();
         }
     }

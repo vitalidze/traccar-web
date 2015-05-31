@@ -187,20 +187,20 @@ public class SettingsController implements DeviceView.SettingsHandler {
     @Override
     public void onNotificationsSelected() {
         final NotificationServiceAsync service = GWT.create(NotificationService.class);
-        service.getSettings(new BaseAsyncCallback<NotificationSettings>(i18n) {
+        service.getSettings(new BaseAsyncCallback<NotificationSettingsDTO>(i18n) {
             @Override
-            public void onSuccess(NotificationSettings settings) {
+            public void onSuccess(NotificationSettingsDTO settings) {
                 if (settings == null) {
-                    settings = new NotificationSettings();
+                    settings = new NotificationSettingsDTO();
                 }
                 new NotificationSettingsDialog(settings, new NotificationSettingsDialog.NotificationSettingsHandler() {
                     @Override
-                    public void onSave(NotificationSettings notificationSettings) {
+                    public void onSave(NotificationSettingsDTO notificationSettings) {
                         service.saveSettings(notificationSettings, new BaseAsyncCallback<Void>(i18n));
                     }
 
                     @Override
-                    public void onTestEmail(NotificationSettings notificationSettings) {
+                    public void onTestEmail(NotificationSettingsDTO notificationSettings) {
                         service.checkEmailSettings(notificationSettings, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -217,7 +217,7 @@ public class SettingsController implements DeviceView.SettingsHandler {
                     }
 
                     @Override
-                    public void onTestPushbullet(NotificationSettings notificationSettings) {
+                    public void onTestPushbullet(NotificationSettingsDTO notificationSettings) {
                         service.checkPushbulletSettings(notificationSettings, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -234,7 +234,7 @@ public class SettingsController implements DeviceView.SettingsHandler {
                     }
 
                     @Override
-                    public void onTestMessageTemplate(NotificationTemplate template) {
+                    public void onTestMessageTemplate(NotificationTemplateDTO template) {
                         service.checkTemplate(template, new AsyncCallback<String>() {
                             @Override
                             public void onFailure(Throwable caught) {
