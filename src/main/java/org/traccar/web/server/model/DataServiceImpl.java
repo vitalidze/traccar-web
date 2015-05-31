@@ -35,6 +35,7 @@ import com.google.inject.persist.Transactional;
 import org.hibernate.proxy.HibernateProxy;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
+import org.traccar.web.server.entity.ApplicationSettings;
 import org.traccar.web.shared.model.*;
 
 @Singleton
@@ -592,21 +593,22 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @Override
-    public ApplicationSettings getApplicationSettings() {
+    public ApplicationSettingsDTO getApplicationSettings() {
         ApplicationSettings appSettings = applicationSettings.get();
         if (appSettings == null) {
-            appSettings = new ApplicationSettings();
+            appSettings = ApplicationSettings.defaults();
             entityManager.get().persist(appSettings);
         }
-        return appSettings;
+        return appSettings.dto();
     }
 
     @Transactional
     @RequireUser(roles = { Role.ADMIN })
     @RequireWrite
     @Override
-    public void updateApplicationSettings(ApplicationSettings applicationSettings) {
-        getSessionEntityManager().merge(applicationSettings);
+    public void updateApplicationSettings(ApplicationSettingsDTO appSetingsDTO) {
+        ApplicationSettings appSettings = applicationSettings.get().from(appSetingsDTO);
+        getSessionEntityManager().merge(appSettings);
         eventService.applicationSettingsChanged();
     }
 

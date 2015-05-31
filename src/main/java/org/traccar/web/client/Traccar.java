@@ -21,18 +21,18 @@ import org.traccar.web.client.controller.LoginController;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.state.UIStateProvider;
-import org.traccar.web.shared.model.ApplicationSettings;
 
 import com.google.gwt.core.client.EntryPoint;
+import org.traccar.web.shared.model.ApplicationSettingsDTO;
 
 public class Traccar implements EntryPoint, LoginController.LoginHandler {
     private Messages i18n = GWT.create(Messages.class);
 
     @Override
     public void onModuleLoad() {
-        Application.getDataService().getApplicationSettings(new BaseAsyncCallback<ApplicationSettings>(i18n) {
+        Application.getDataService().getApplicationSettings(new BaseAsyncCallback<ApplicationSettingsDTO>(i18n) {
             @Override
-            public void onSuccess(ApplicationSettings result) {
+            public void onSuccess(ApplicationSettingsDTO result) {
                 ApplicationContext.getInstance().setApplicationSettings(result);
                 new LoginController().login(Traccar.this);
             }

@@ -24,9 +24,7 @@ import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.model.ApplicationSettingsProperties;
 import org.traccar.web.client.model.EnumKeyProvider;
-import org.traccar.web.client.model.UserSettingsProperties;
 import org.traccar.web.client.widget.LanguageComboBox;
-import org.traccar.web.shared.model.ApplicationSettings;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -38,12 +36,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
+import org.traccar.web.shared.model.ApplicationSettingsDTO;
 import org.traccar.web.shared.model.PasswordHashMethod;
-import org.traccar.web.shared.model.UserSettings;
 
 import java.util.Arrays;
 
-public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
+public class ApplicationSettingsDialog implements Editor<ApplicationSettingsDTO> {
 
     private static ApplicationSettingsDialogUiBinder uiBinder = GWT.create(ApplicationSettingsDialogUiBinder.class);
 
@@ -52,11 +50,11 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
 
     private ApplicationSettingsDriver driver = GWT.create(ApplicationSettingsDriver.class);
 
-    interface ApplicationSettingsDriver extends SimpleBeanEditorDriver<ApplicationSettings, ApplicationSettingsDialog> {
+    interface ApplicationSettingsDriver extends SimpleBeanEditorDriver<ApplicationSettingsDTO, ApplicationSettingsDialog> {
     }
 
     public interface ApplicationSettingsHandler {
-        public void onSave(ApplicationSettings applicationSettings);
+        public void onSave(ApplicationSettingsDTO applicationSettings);
     }
 
     private ApplicationSettingsHandler applicationSettingsHandler;
@@ -85,7 +83,7 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     @UiField(provided = true)
     ComboBox<String> language;
 
-    public ApplicationSettingsDialog(ApplicationSettings applicationSettings, ApplicationSettingsHandler applicationSettingsHandler) {
+    public ApplicationSettingsDialog(ApplicationSettingsDTO applicationSettings, ApplicationSettingsHandler applicationSettingsHandler) {
         this.applicationSettingsHandler = applicationSettingsHandler;
 
         ListStore<PasswordHashMethod> dhmStore = new ListStore<PasswordHashMethod>(

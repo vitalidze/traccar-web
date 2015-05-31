@@ -16,7 +16,7 @@
 package org.traccar.web.server.model;
 
 import com.google.inject.persist.Transactional;
-import org.traccar.web.shared.model.ApplicationSettings;
+import org.traccar.web.server.entity.ApplicationSettings;
 
 import javax.inject.Inject;
 import javax.inject.Provider;

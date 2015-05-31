@@ -1,6 +1,6 @@
 package org.traccar.web.server.model;
 
-import org.traccar.web.shared.model.ApplicationSettings;
+import org.traccar.web.server.entity.ApplicationSettings;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -16,6 +16,6 @@ public class ApplicationSettingsProvider implements Provider<ApplicationSettings
     public ApplicationSettings get() {
         TypedQuery<ApplicationSettings> query = entityManager.get().createQuery("SELECT x FROM ApplicationSettings x", ApplicationSettings.class);
         List<ApplicationSettings> resultList = query.getResultList();
-        return resultList.isEmpty() ? new ApplicationSettings() : resultList.get(0);
+        return resultList.isEmpty() ? ApplicationSettings.defaults() : resultList.get(0);
     }
 }

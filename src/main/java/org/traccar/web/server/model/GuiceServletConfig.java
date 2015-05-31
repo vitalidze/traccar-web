@@ -24,7 +24,7 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
-import org.traccar.web.shared.model.ApplicationSettings;
+import org.traccar.web.server.entity.ApplicationSettings;
 import org.traccar.web.shared.model.Picture;
 import org.traccar.web.shared.model.User;
 

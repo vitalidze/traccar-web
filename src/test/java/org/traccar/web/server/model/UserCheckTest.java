@@ -20,7 +20,7 @@ import com.google.inject.util.Modules;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.traccar.web.shared.model.ApplicationSettings;
+import org.traccar.web.server.entity.ApplicationSettings;
 import org.traccar.web.shared.model.User;
 
 public class UserCheckTest {
@@ -41,7 +41,7 @@ public class UserCheckTest {
     }
 
     static class TestApplicationSettingsProvider implements Provider<ApplicationSettings> {
-        ApplicationSettings settings = new ApplicationSettings();
+        ApplicationSettings settings = ApplicationSettings.defaults();
         @Override
         public ApplicationSettings get() {
             return settings;

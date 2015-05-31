@@ -1,7 +1,7 @@
-package org.traccar.web.shared.model;
+package org.traccar.web.server.entity;
 
-import com.google.gson.annotations.Expose;
-import com.google.gwt.user.client.rpc.IsSerializable;
+import org.traccar.web.shared.model.ApplicationSettingsDTO;
+import org.traccar.web.shared.model.PasswordHashMethod;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,35 +14,26 @@ import javax.persistence.EnumType;
 
 @Entity
 @Table(name="application_settings")
-public class ApplicationSettings implements IsSerializable {
-
-    private static final long serialVersionUID = 1;
-    public static final short DEFAULT_UPDATE_INTERVAL = 15000;
-
+public class ApplicationSettings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
     private long id;
 
     public ApplicationSettings() {
-        registrationEnabled = true;
-        updateInterval = DEFAULT_UPDATE_INTERVAL;
-        defaultPasswordHash = PasswordHashMethod.PLAIN;
-        eventRecordingEnabled = true;
-        language = "default";
     }
 
-    @Expose
+    public static ApplicationSettings defaults() {
+        return new ApplicationSettings().from(new ApplicationSettingsDTO());
+    }
+
     private boolean registrationEnabled;
 
-    @Expose
     private Short updateInterval;
 
     @Enumerated(EnumType.STRING)
-    @Expose
     private PasswordHashMethod defaultPasswordHash;
 
-    @Expose
     @Column(nullable = true)
     private boolean disallowDeviceManagementByUsers;
 
@@ -113,5 +104,27 @@ public class ApplicationSettings implements IsSerializable {
         ApplicationSettings other = (ApplicationSettings) object;
         
         return this.id == other.id;
+    }
+
+    public ApplicationSettingsDTO dto() {
+        ApplicationSettingsDTO dto = new ApplicationSettingsDTO();
+        dto.setId(id);
+        dto.setDefaultHashImplementation(getDefaultHashImplementation());
+        dto.setDisallowDeviceManagementByUsers(isDisallowDeviceManagementByUsers());
+        dto.setEventRecordingEnabled(isEventRecordingEnabled());
+        dto.setLanguage(getLanguage());
+        dto.setRegistrationEnabled(getRegistrationEnabled());
+        dto.setUpdateInterval(getUpdateInterval());
+        return dto;
+    }
+
+    public ApplicationSettings from(ApplicationSettingsDTO dto) {
+        setDisallowDeviceManagementByUsers(dto.isDisallowDeviceManagementByUsers());
+        setUpdateInterval(dto.getUpdateInterval());
+        setRegistrationEnabled(dto.getRegistrationEnabled());
+        setLanguage(dto.getLanguage());
+        setDefaultHashImplementation(dto.getDefaultHashImplementation());
+        setEventRecordingEnabled(dto.isEventRecordingEnabled());
+        return this;
     }
 }

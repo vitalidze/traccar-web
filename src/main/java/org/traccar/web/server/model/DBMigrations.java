@@ -15,6 +15,7 @@
  */
 package org.traccar.web.server.model;
 
+import org.traccar.web.server.entity.ApplicationSettings;
 import org.traccar.web.shared.model.*;
 
 import javax.persistence.EntityManager;
@@ -87,7 +88,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + ApplicationSettings.class.getSimpleName() + " S SET S.updateInterval = :ui WHERE S.updateInterval IS NULL")
-                    .setParameter("ui", ApplicationSettings.DEFAULT_UPDATE_INTERVAL)
+                    .setParameter("ui", ApplicationSettingsDTO.DEFAULT_UPDATE_INTERVAL)
                     .executeUpdate();
         }
     }

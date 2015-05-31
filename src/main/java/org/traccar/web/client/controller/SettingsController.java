@@ -31,10 +31,7 @@ import org.traccar.web.client.model.NotificationService;
 import org.traccar.web.client.model.NotificationServiceAsync;
 import org.traccar.web.client.model.UserProperties;
 import org.traccar.web.client.view.*;
-import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.NotificationSettings;
-import org.traccar.web.shared.model.NotificationTemplate;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
@@ -176,7 +173,7 @@ public class SettingsController implements DeviceView.SettingsHandler {
                 ApplicationContext.getInstance().getApplicationSettings(),
                 new ApplicationSettingsDialog.ApplicationSettingsHandler() {
                     @Override
-                    public void onSave(final ApplicationSettings applicationSettings) {
+                    public void onSave(final ApplicationSettingsDTO applicationSettings) {
                         Application.getDataService().updateApplicationSettings(applicationSettings, new BaseAsyncCallback<Void>(i18n) {
                             @Override
                             public void onSuccess(Void result) {

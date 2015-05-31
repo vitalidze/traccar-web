@@ -1,9 +1,6 @@
 package org.traccar.web.client;
 
-import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.User;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,17 +26,17 @@ public class ApplicationContext {
         return formatterUtil;
     }
 
-    private ApplicationSettings applicationSettings;
+    private ApplicationSettingsDTO applicationSettings;
 
-    public void setApplicationSettings(ApplicationSettings applicationSettings) {
+    public void setApplicationSettings(ApplicationSettingsDTO applicationSettings) {
         this.applicationSettings = applicationSettings;
     }
 
-    public ApplicationSettings getApplicationSettings() {
+    public ApplicationSettingsDTO getApplicationSettings() {
         if (applicationSettings != null) {
             return applicationSettings;
         } else {
-            return new ApplicationSettings(); // default settings
+            return new ApplicationSettingsDTO(); // default settings
         }
     }
 

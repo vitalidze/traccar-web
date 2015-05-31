@@ -15,7 +15,6 @@
  */
 package org.traccar.web.client.model;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -64,9 +63,9 @@ public interface DataService extends RemoteService {
 
     List<Position> getLatestNonIdlePositions();
 
-    ApplicationSettings getApplicationSettings();
+    ApplicationSettingsDTO getApplicationSettings();
 
-    void updateApplicationSettings(ApplicationSettings applicationSettings);
+    void updateApplicationSettings(ApplicationSettingsDTO applicationSettings);
 
     String getTrackerServerLog(short sizeKb);
 
