@@ -45,19 +45,19 @@ public interface DataService extends RemoteService {
 
     UserDTO removeUser(UserDTO user);
 
-    List<Device> getDevices();
+    List<DeviceDTO> getDevices();
 
-    Device addDevice(Device device) throws TraccarException;
+    DeviceDTO addDevice(DeviceDTO device) throws TraccarException;
 
-    Device updateDevice(Device device) throws TraccarException;
+    DeviceDTO updateDevice(DeviceDTO device) throws TraccarException;
 
-    Device removeDevice(Device device);
+    DeviceDTO removeDevice(DeviceDTO device);
 
-    Map<UserDTO, Boolean> getDeviceShare(Device device);
+    Map<UserDTO, Boolean> getDeviceShare(DeviceDTO device);
 
-    void saveDeviceShare(Device device, Map<UserDTO, Boolean> share);
+    void saveDeviceShare(DeviceDTO device, Map<UserDTO, Boolean> share);
 
-    List<Position> getPositions(Device device, Date from, Date to, boolean filter);
+    List<Position> getPositions(DeviceDTO device, Date from, Date to, boolean filter);
 
     List<Position> getLatestPositions();
 

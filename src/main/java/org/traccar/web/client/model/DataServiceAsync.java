@@ -45,15 +45,15 @@ public interface DataServiceAsync {
 
     void getDevices(AsyncCallback<List<Device>> callback);
 
-    void addDevice(Device device, AsyncCallback<Device> callback);
+    void addDevice(DeviceDTO device, AsyncCallback<DeviceDTO> callback);
 
-    void updateDevice(Device device, AsyncCallback<Device> callback);
+    void updateDevice(DeviceDTO device, AsyncCallback<DeviceDTO> callback);
 
-    void removeDevice(Device device, AsyncCallback<Device> callback);
+    void removeDevice(DeviceDTO device, AsyncCallback<DeviceDTO> callback);
 
     void getLatestPositions(AsyncCallback<List<Position>> callback);
 
-    void getPositions(Device device, Date from, Date to, boolean filter, AsyncCallback<List<Position>> callback);
+    void getPositions(DeviceDTO device, Date from, Date to, boolean filter, AsyncCallback<List<Position>> callback);
 
     void updateApplicationSettings(ApplicationSettingsDTO applicationSettings, AsyncCallback<Void> callback);
 
@@ -63,9 +63,9 @@ public interface DataServiceAsync {
 
     void saveRoles(List<UserDTO> users, AsyncCallback<Void> async);
 
-    void getDeviceShare(Device device, AsyncCallback<Map<UserDTO, Boolean>> async);
+    void getDeviceShare(DeviceDTO device, AsyncCallback<Map<UserDTO, Boolean>> async);
 
-    void saveDeviceShare(Device device, Map<UserDTO, Boolean> share, AsyncCallback<Void> async);
+    void saveDeviceShare(DeviceDTO device, Map<UserDTO, Boolean> share, AsyncCallback<Void> async);
 
     void getLatestNonIdlePositions(AsyncCallback<List<Position>> async);
 

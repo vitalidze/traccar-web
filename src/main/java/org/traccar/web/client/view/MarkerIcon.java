@@ -162,7 +162,7 @@ public abstract class MarkerIcon {
         }
     }
 
-    public static MarkerIcon create(Device device) {
+    public static MarkerIcon create(DeviceDTO device) {
         if (device.getIconType() == null) {
             return new MarkerIcon.Database(device.getIcon());
         } else {

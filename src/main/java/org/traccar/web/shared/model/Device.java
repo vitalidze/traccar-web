@@ -31,10 +31,7 @@ import javax.persistence.*;
 @Table(name = "devices",
        indexes = { @Index(name = "devices_pkey", columnList = "id") },
        uniqueConstraints = { @UniqueConstraint(name = "devices_ukey_uniqueid", columnNames = "uniqueid") })
-public class Device implements IsSerializable {
-
-    private static final long serialVersionUID = 1;
-    public static final short DEFAULT_TIMEOUT = 5 * 60;
+public class Device {
 
     public Device() {
         iconType = DeviceIconType.DEFAULT;

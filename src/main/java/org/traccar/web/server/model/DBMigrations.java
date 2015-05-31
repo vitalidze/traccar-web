@@ -141,7 +141,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.timeout = :tmout WHERE D.timeout IS NULL OR D.timeout <= 0")
-                    .setParameter("tmout", Integer.valueOf(Device.DEFAULT_TIMEOUT))
+                    .setParameter("tmout", Integer.valueOf(DeviceDTO.DEFAULT_TIMEOUT))
                     .executeUpdate();
         }
     }
