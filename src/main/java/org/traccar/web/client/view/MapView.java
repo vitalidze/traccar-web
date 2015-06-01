@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.sencha.gxt.data.shared.ListStore;
 import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
@@ -141,8 +142,9 @@ public class MapView {
         throw new IllegalArgumentException("Unsupported map type: " + mapType);
     }
 
-    public MapView(MapHandler mapHandler) {
+    public MapView(MapHandler mapHandler, ListStore<Device> deviceStore) {
         this.mapHandler = mapHandler;
+        this.popup = new PositionInfoPopup(deviceStore);
         contentPanel = new ContentPanel();
         contentPanel.setHeadingText(i18n.map());
 
@@ -314,7 +316,7 @@ public class MapView {
         latestPositionRenderer.catchPosition(position);
     }
 
-    private PositionInfoPopup popup = new PositionInfoPopup();
+    private final PositionInfoPopup popup;
 
     private void showPopup(Position position) {
         popup.show(this, position);

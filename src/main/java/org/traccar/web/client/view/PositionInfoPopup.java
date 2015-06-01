@@ -19,21 +19,25 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 import com.google.gwt.xml.client.XMLParser;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.tips.ToolTip;
 import com.sencha.gxt.widget.core.client.tips.ToolTipConfig;
 import org.gwtopenmaps.openlayers.client.Pixel;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.shared.model.GeoFence;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.PositionIcon;
+import org.traccar.web.shared.model.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PositionInfoPopup {
     private final static Messages i18n = GWT.create(Messages.class);
 
     final ToolTip toolTip;
+    final ListStore<Device> deviceStore;
 
-    public PositionInfoPopup() {
+    public PositionInfoPopup(ListStore<Device> deviceStore) {
+        this.deviceStore = deviceStore;
         this.toolTip = new ToolTip(new ToolTipConfig());
     }
 
@@ -54,13 +58,29 @@ public class PositionInfoPopup {
         }
         String other = position.getOther();
         if (other != null) {
+            Device device = deviceStore.findModelWithKey(Long.toString(position.getDevice().getId()));
+            Map<String, Sensor> sensors = new HashMap<String, Sensor>(device.getSensors().size());
+            for (Sensor sensor : device.getSensors()) {
+                sensors.put(sensor.getParameterName(), sensor);
+            }
+
             try {
                 NodeList nodes = XMLParser.parse(other).getFirstChild().getChildNodes();
                 for (int i = 0; i < nodes.getLength(); i++) {
                     Node node = nodes.item(i);
+                    String parameterName = node.getNodeName();
                     String value = node.getFirstChild().getNodeValue();
+                    Sensor sensor = sensors.get(parameterName);
+                    if (sensor != null) {
+                        if (!sensor.isVisible()) {
+                            continue;
+                        }
+                        parameterName = sensor.getName();
+                    } else if (parameterName.equals("protocol")) {
+                        parameterName = i18n.protocol();
+                    }
                     if (!value.isEmpty()) {
-                        body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + node.getNodeName() + "</td><td>" + value + "</td></tr>";
+                        body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + parameterName + "</td><td>" + value + "</td></tr>";
                     }
                 }
             } catch (Exception error) {

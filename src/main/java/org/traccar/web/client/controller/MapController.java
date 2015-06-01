@@ -46,7 +46,7 @@ public class MapController implements ContentController, MapView.MapHandler {
     public MapController(MapHandler mapHandler, ListStore<Device> deviceStore) {
         this.mapHandler = mapHandler;
         this.deviceStore = deviceStore;
-        mapView = new MapView(this);
+        mapView = new MapView(this, deviceStore);
         loadMapSettings();
     }
 

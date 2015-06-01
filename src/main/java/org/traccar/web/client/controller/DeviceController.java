@@ -52,7 +52,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     private Messages i18n = GWT.create(Messages.class);
 
-    private final PositionInfoPopup positionInfo = new PositionInfoPopup();
+    private final PositionInfoPopup positionInfo;
 
     private final StoreHandlers<Device> deviceStoreHandler;
 
@@ -72,6 +72,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         this.mapController = mapController;
         this.deviceStoreHandler = deviceStoreHandler;
         this.deviceStore = deviceStore;
+        this.positionInfo = new PositionInfoPopup(deviceStore);
         this.deviceGeoFences = deviceGeoFences;
 
         this.deviceStore.addStoreRecordChangeHandler(new StoreRecordChangeEvent.StoreRecordChangeHandler<Device>() {
