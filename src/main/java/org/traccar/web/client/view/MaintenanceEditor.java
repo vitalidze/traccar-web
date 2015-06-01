@@ -33,9 +33,10 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.resources.CommonStyles;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
-import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.button.ToggleButton;
+import com.sencha.gxt.widget.core.client.container.Container;
+import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
@@ -57,15 +58,15 @@ import org.traccar.web.shared.model.Maintenance;
 
 import java.util.*;
 
-public class MaintenanceDialog implements SelectionChangedEvent.SelectionChangedHandler<Maintenance> {
+public class MaintenanceEditor implements SelectionChangedEvent.SelectionChangedHandler<Maintenance> {
 
     private static MaintenanceDialogUiBinder uiBinder = GWT.create(MaintenanceDialogUiBinder.class);
 
-    interface MaintenanceDialogUiBinder extends UiBinder<Widget, MaintenanceDialog> {
+    interface MaintenanceDialogUiBinder extends UiBinder<Widget, MaintenanceEditor> {
     }
 
     @UiField
-    Window window;
+    SimpleContainer panel;
 
     @UiField(provided = true)
     ColumnModel<Maintenance> columnModel;
@@ -112,7 +113,7 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
 
     final Device device;
 
-    public MaintenanceDialog(Device device) {
+    public MaintenanceEditor(Device device) {
         this.device = device;
 
         final MaintenanceProperties maintenanceProperties = GWT.create(MaintenanceProperties.class);
@@ -231,16 +232,11 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
         rowNumberer.initPlugin(grid);
     }
 
-    public void show() {
-        window.show();
+    public Container getPanel() {
+        return panel;
     }
 
-    public void hide() {
-        window.hide();
-    }
-
-    @UiHandler("saveButton")
-    public void onSaveClicked(SelectEvent event) {
+    public void flush() {
         maintenanceStore.commitChanges();
         device.setMaintenances(new ArrayList<Maintenance>(maintenanceStore.getAll()));
         for (int i = 0; i < device.getMaintenances().size(); i++) {
@@ -248,12 +244,6 @@ public class MaintenanceDialog implements SelectionChangedEvent.SelectionChanged
         }
         device.setOdometer(odometer.getCurrentValue());
         device.setAutoUpdateOdometer(autoUpdateOdometer.getValue());
-        hide();
-    }
-
-    @UiHandler("cancelButton")
-    public void onCancelClicked(SelectEvent event) {
-        window.hide();
     }
 
     @UiHandler("addButton")

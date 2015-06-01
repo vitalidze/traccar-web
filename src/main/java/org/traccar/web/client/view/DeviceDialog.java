@@ -15,11 +15,7 @@
  */
 package org.traccar.web.client.view;
 
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sencha.gxt.core.client.util.Margins;
-import com.sencha.gxt.core.client.util.ToggleGroup;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.*;
@@ -84,6 +80,10 @@ public class DeviceDialog implements Editor<Device> {
     @UiField
     Image markerImage;
 
+    @UiField
+    VerticalLayoutContainer maintenanceTab;
+    final MaintenanceEditor maintenanceEditor;
+
     MarkerIcon selectedIcon;
 
     final Device device;
@@ -103,6 +103,9 @@ public class DeviceDialog implements Editor<Device> {
 
         idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
         updateIcon();
+
+        maintenanceEditor = new MaintenanceEditor(device);
+        maintenanceTab.add(maintenanceEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));
     }
 
     public void show() {
@@ -120,6 +123,7 @@ public class DeviceDialog implements Editor<Device> {
         device.setIdleSpeedThreshold(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getIdleSpeedThreshold()));
         device.setIconType(selectedIcon.getBuiltInIcon());
         device.setIcon(selectedIcon.getDatabaseIcon());
+        maintenanceEditor.flush();
         deviceHandler.onSave(device);
     }
 
@@ -144,10 +148,5 @@ public class DeviceDialog implements Editor<Device> {
     private void updateIcon() {
         markerImage.setUrl(selectedIcon.getOfflineURL());
         panelMarkers.forceLayout();
-    }
-
-    @UiHandler("maintenanceButton")
-    public void onMaintenanceClicked(SelectEvent event) {
-        new MaintenanceDialog(device).show();
     }
 }
