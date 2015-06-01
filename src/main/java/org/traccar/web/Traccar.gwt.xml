@@ -34,4 +34,5 @@
     <extend-property name="locale" values="sv_SE" />
     <extend-property name="locale" values="bg" />
     <extend-property name="locale" values="fr" />
+    <extend-property name="locale" values="pt_BR" />
 </module>

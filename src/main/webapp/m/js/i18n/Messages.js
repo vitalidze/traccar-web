@@ -373,6 +373,40 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
+    pt_BR: {
+        _name_: 'Portugu\u00EAs BR',
+        // login screen
+        language: 'Idioma',
+        username: 'Usu\u00E1rio',
+        password: 'Senha',
+        your_username: 'Seu nome de usu\u00E1rio',
+        your_password: 'Sua senha',
+        sign_in: 'Entrar',
+        user_name_and_password_must_not_be_empty: 'Usu\u00E1rio e/ou senha n\u00E3o podem ficar em branco',
+        user_name_or_password_is_invalid: 'Usu\u00E1rio e/ou senha inv\u00E1lidos',
+        unexpected_error: 'Erro inesperado',
+        open_desktop_version: 'Abrir vers\u00E3o desktop',
+        // sidebar
+        devices: 'Dispositivos',
+        logout: 'Sair',
+        // device details
+        select_on_map: 'Selecionar no mapa',
+        no_data_available: 'Sem dados dispon\u00EDveis',
+        time: 'Hora',
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        altitude: 'Altitude',
+        speed: 'Velocidade',
+        course: 'Rota',
+        address: 'Endere\u00E7o',
+        follow: 'Seguir',
+        stop_following: 'Parar de seguir',
+        geo_fence: 'Cerca virtual',
+        send_location_by_email: 'Enviar localiza\u00E7\u00E3o por Email',
+        send_location_url_by_email: 'Enviar URL de localiza\u00E7\u00E3o por Email',
+        send_location_by_sms: 'Enviar localiza\u00E7\u00E3o por SMS',
+        send_location_url_by_sms: 'Enviar URL de localiza\u00E7\u00E3o por SMS'
+    },
     ru: {
         _name_: 'Russian',
         // login screen
