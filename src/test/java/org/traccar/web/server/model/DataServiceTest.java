@@ -87,6 +87,7 @@ public class DataServiceTest {
         device.setUniqueId("1");
         device.setName("D1");
         device.setMaintenances(Collections.<Maintenance>emptyList());
+        device.setSensors(Collections.<Sensor>emptyList());
         device = dataService.addDevice(device);
 
         GeoFence geoFence = new GeoFence();
