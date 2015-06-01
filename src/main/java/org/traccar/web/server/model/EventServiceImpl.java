@@ -266,11 +266,13 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
     private GeoFenceDetector geoFenceDetector;
     @Inject
     private OdometerUpdater odometerUpdater;
-    private Set<ScheduledTask> runningTasks = new HashSet<ScheduledTask>();
-    private List<ScheduledFuture<?>> futures = new ArrayList<ScheduledFuture<?>>();
+    private Map<Class<?>, ScheduledFuture<?>> futures = new HashMap<Class<?>, ScheduledFuture<?>>();
 
     @Inject
     private Provider<ApplicationSettings> applicationSettings;
+
+    @Inject
+    private Provider<EntityManager> entityManager;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -280,22 +282,21 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
 
         if (applicationSettings.get().isEventRecordingEnabled()) {
             startTasks();
+            setUpOdometerUpdater();
         }
     }
 
     private synchronized void startTasks() {
-        for (ScheduledTask task : new ScheduledTask[] { offlineDetector, geoFenceDetector, odometerUpdater }) {
-            futures.add(scheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.MINUTES));
-            runningTasks.add(task);
+        for (ScheduledTask task : new ScheduledTask[] { offlineDetector, geoFenceDetector }) {
+            futures.put(task.getClass(), scheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.MINUTES));
         }
     }
 
     private synchronized void stopTasks() {
-        for (ScheduledFuture<?> future : futures) {
+        for (ScheduledFuture<?> future : futures.values()) {
             future.cancel(true);
         }
         futures.clear();
-        runningTasks.clear();
     }
 
     @Transactional
@@ -306,6 +307,32 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
             startTasks();
         } else {
             stopTasks();
+        }
+    }
+
+    @RequireUser
+    @Transactional
+    @Override
+    public void devicesChanged() {
+        if (applicationSettings.get().isEventRecordingEnabled()) {
+            setUpOdometerUpdater();
+        }
+    }
+
+    private synchronized void setUpOdometerUpdater() {
+        Number count = (Number) entityManager.get().createQuery("SELECT COUNT(d.id) FROM Device d WHERE d.autoUpdateOdometer=:b")
+                .setParameter("b", Boolean.TRUE)
+                .getSingleResult();
+        ScheduledFuture<?> f = futures.get(odometerUpdater.getClass());
+        if (count.intValue() > 0) {
+            if (f == null) {
+                futures.put(odometerUpdater.getClass(), scheduler.scheduleAtFixedRate(odometerUpdater, 0, 1, TimeUnit.MINUTES));
+            }
+        } else {
+            if (f != null) {
+                f.cancel(true);
+                futures.remove(odometerUpdater.getClass());
+            }
         }
     }
 }

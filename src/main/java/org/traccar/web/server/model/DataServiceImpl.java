@@ -343,6 +343,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 maintenance.setDevice(device);
                 entityManager.persist(maintenance);
             }
+            eventService.devicesChanged();
             return device;
         } else {
             throw new DeviceExistsException();
@@ -424,6 +425,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 }
             }
 
+            eventService.devicesChanged();
+
             return tmp_device;
         } else {
             throw new DeviceExistsException();
@@ -469,6 +472,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             query.executeUpdate();
 
             entityManager.remove(device);
+            eventService.devicesChanged();
         }
         return device;
     }
