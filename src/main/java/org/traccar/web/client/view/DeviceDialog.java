@@ -131,6 +131,7 @@ public class DeviceDialog implements Editor<Device> {
         device.setIconType(selectedIcon.getBuiltInIcon());
         device.setIcon(selectedIcon.getDatabaseIcon());
         maintenanceEditor.flush();
+        sensorsEditor.flush();
         deviceHandler.onSave(device);
     }
 

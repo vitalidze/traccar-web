@@ -52,6 +52,10 @@ public class Device implements IsSerializable {
         for (Maintenance maintenance : device.maintenances) {
             maintenances.add(new Maintenance(maintenance));
         }
+        sensors = new ArrayList<Sensor>(device.sensors.size());
+        for (Sensor sensor : device.sensors) {
+            sensors.add(new Sensor(sensor));
+        }
     }
 
     @Expose

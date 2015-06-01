@@ -347,6 +347,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 maintenance.setDevice(device);
                 entityManager.persist(maintenance);
             }
+            for (Sensor sensor : device.getSensors()) {
+                sensor.setDevice(device);
+                sensor.setId(0);
+                entityManager.persist(sensor);
+            }
             eventService.devicesChanged();
             return device;
         } else {
@@ -456,6 +461,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             // add new
             for (Sensor sensor : device.getSensors()) {
+                sensor.setId(0);
                 sensor.setDevice(tmp_device);
                 getSessionEntityManager().persist(sensor);
             }
@@ -504,6 +510,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
 
             query = entityManager.createQuery("DELETE FROM Maintenance x WHERE x.device = :device");
+            query.setParameter("device", device);
+            query.executeUpdate();
+
+            query = entityManager.createQuery("DELETE FROM Sensor x WHERE x.device = :device");
             query.setParameter("device", device);
             query.executeUpdate();
 

@@ -16,7 +16,6 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -26,7 +25,6 @@ import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.button.TextButton;
-import com.sencha.gxt.widget.core.client.button.ToggleButton;
 import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -39,7 +37,6 @@ import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
-import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.SensorProperties;
 import org.traccar.web.shared.model.Device;
@@ -134,8 +131,9 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
 
     @UiHandler("addButton")
     public void onAddClicked(SelectEvent event) {
-        // TODO generate model identifier somehow
-        sensorStore.add(new Sensor());
+        Sensor sensor = new Sensor();
+        sensor.setId(-sensorStore.size());
+        sensorStore.add(sensor);
     }
 
     @UiHandler("removeButton")

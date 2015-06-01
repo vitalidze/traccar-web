@@ -15,13 +15,14 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
 @Table(name = "maintenances",
        indexes = { @Index(name = "maintenances_pkey", columnList = "id") })
-public class Maintenance implements Serializable {
+public class Maintenance implements IsSerializable {
 
     public Maintenance() {}
 

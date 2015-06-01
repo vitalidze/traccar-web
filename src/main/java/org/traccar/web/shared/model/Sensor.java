@@ -15,13 +15,14 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
 @Table(name = "sensors",
        indexes = { @Index(name = "sensors_pkey", columnList = "id") })
-public class Sensor implements Serializable {
+public class Sensor implements IsSerializable {
 
     public Sensor() {
         visible = true;
@@ -42,6 +43,10 @@ public class Sensor implements Serializable {
 
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     @ManyToOne(fetch = FetchType.EAGER)
