@@ -81,6 +81,10 @@ public class DeviceDialog implements Editor<Device> {
     Image markerImage;
 
     @UiField
+    VerticalLayoutContainer sensorsTab;
+    final SensorsEditor sensorsEditor;
+
+    @UiField
     VerticalLayoutContainer maintenanceTab;
     final MaintenanceEditor maintenanceEditor;
 
@@ -103,6 +107,9 @@ public class DeviceDialog implements Editor<Device> {
 
         idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
         updateIcon();
+
+        sensorsEditor = new SensorsEditor(device);
+        sensorsTab.add(sensorsEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));
 
         maintenanceEditor = new MaintenanceEditor(device);
         maintenanceTab.add(maintenanceEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));

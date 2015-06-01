@@ -167,6 +167,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
         Device newDevice = new Device();
         newDevice.setMaintenances(new ArrayList<Maintenance>());
+        newDevice.setSensors(new ArrayList<Sensor>());
         new DeviceDialog(newDevice, new AddHandler()).show();
     }
 

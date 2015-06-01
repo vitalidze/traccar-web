@@ -340,4 +340,10 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String overdue();
 
     String reset();
+
+    String sensors();
+
+    String parameter();
+
+    String visible();
 }

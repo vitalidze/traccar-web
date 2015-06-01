@@ -298,7 +298,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         return getDevices(true);
     }
 
-    private List<Device> getDevices(boolean loadMaintenances) {
+    private List<Device> getDevices(boolean full) {
         User user = getSessionUser();
         List<Device> devices;
         if (user.getAdmin()) {
@@ -306,10 +306,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         } else {
             devices = new LinkedList<Device>(user.getAllAvailableDevices());
         }
-        if (loadMaintenances) {
+        if (full) {
             for (Device device : devices) {
                 device.setMaintenances(
                         getSessionEntityManager().createQuery("SELECT s FROM Maintenance s WHERE s.device=:device ORDER BY s.indexNo ASC", Maintenance.class)
+                                .setParameter("device", device)
+                                .getResultList());
+                device.setSensors(
+                        getSessionEntityManager().createQuery("SELECT s FROM Sensor s WHERE s.device=:device ORDER BY s.id ASC", Sensor.class)
                                 .setParameter("device", device)
                                 .getResultList());
             }
@@ -379,8 +383,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             double prevOdometer = tmp_device.getOdometer();
             tmp_device.setOdometer(device.getOdometer());
             tmp_device.setAutoUpdateOdometer(device.isAutoUpdateOdometer());
-            tmp_device.setMaintenances(new ArrayList<Maintenance>(device.getMaintenances()));
 
+            // process maintenances
+            tmp_device.setMaintenances(new ArrayList<Maintenance>(device.getMaintenances()));
             List<Maintenance> currentMaintenances = new LinkedList<Maintenance>(getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device = :device", Maintenance.class)
                     .setParameter("device", device)
                     .getResultList());
@@ -425,6 +430,37 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 }
             }
 
+            // process sensors
+            tmp_device.setSensors(new ArrayList<Sensor>(device.getSensors()));
+            List<Sensor> currentSensors = new LinkedList<Sensor>(getSessionEntityManager().createQuery("SELECT s FROM Sensor s WHERE s.device = :device", Sensor.class)
+                    .setParameter("device", device)
+                    .getResultList());
+            // update and delete existing
+            for (Iterator<Sensor> it = currentSensors.iterator(); it.hasNext(); ) {
+                Sensor existingSensor = it.next();
+                boolean contains = false;
+                for (int index = 0; index < device.getSensors().size(); index++) {
+                    Sensor updatedSensor = device.getSensors().get(index);
+                    if (updatedSensor.getId() == existingSensor.getId()) {
+                        existingSensor.copyFrom(updatedSensor);
+                        updatedSensor.setDevice(tmp_device);
+                        device.getSensors().remove(index);
+                        contains = true;
+                        break;
+                    }
+                }
+                if (!contains) {
+                    getSessionEntityManager().remove(existingSensor);
+                    it.remove();
+                }
+            }
+            // add new
+            for (Sensor sensor : device.getSensors()) {
+                sensor.setDevice(tmp_device);
+                getSessionEntityManager().persist(sensor);
+            }
+
+            // notify event service about updated device
             eventService.devicesChanged();
 
             return tmp_device;
