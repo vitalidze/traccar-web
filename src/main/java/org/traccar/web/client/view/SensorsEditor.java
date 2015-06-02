@@ -16,6 +16,8 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -30,6 +32,7 @@ import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
+import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
@@ -38,6 +41,7 @@ import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.SensorProperties;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Sensor;
@@ -55,6 +59,12 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
 
     @UiField
     SimpleContainer panel;
+
+    @UiField(provided = true)
+    ComboBox<Device> deviceCombo;
+
+    @UiField
+    TextButton copyFromButton;
 
     @UiField(provided = true)
     ColumnModel<Sensor> columnModel;
@@ -76,7 +86,7 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
 
     final Device device;
 
-    public SensorsEditor(Device device) {
+    public SensorsEditor(Device device, ListStore<Device> deviceStore) {
         this.device = device;
 
         final SensorProperties sensorProperties = GWT.create(SensorProperties.class);
@@ -102,6 +112,15 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
         }
 
         columnModel = new ColumnModel<Sensor>(columnConfigList);
+
+        DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
+        deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
+        deviceCombo.addSelectionHandler(new SelectionHandler<Device>() {
+            @Override
+            public void onSelection(SelectionEvent<Device> event) {
+                copyFromButton.setEnabled(event.getSelectedItem() != null);
+            }
+        });
 
         uiBinder.createAndBindUi(this);
 
@@ -144,5 +163,25 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
     @Override
     public void onSelectionChanged(SelectionChangedEvent<Sensor> event) {
         removeButton.setEnabled(!event.getSelection().isEmpty());
+    }
+
+    @UiHandler("copyFromButton")
+    public void onCopyFromClicked(SelectEvent event) {
+        Device device = deviceCombo.getCurrentValue();
+        for (Sensor sensor : device.getSensors()) {
+            boolean found = false;
+            for (int i = 0; i < sensorStore.size(); i++) {
+                Sensor next = sensorStore.get(i);
+                if (next.getParameterName().equals(sensor.getParameterName())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                Sensor newSensor = new Sensor(sensor);
+                newSensor.setId(-sensorStore.size());
+                sensorStore.add(newSensor);
+            }
+        }
     }
 }

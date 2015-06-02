@@ -156,7 +156,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             msg.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
                                 @Override
                                 public void onDialogHide(DialogHideEvent event) {
-                                    new DeviceDialog(device, AddHandler.this).show();
+                                    new DeviceDialog(device, deviceStore, AddHandler.this).show();
                                 }
                             });
                             msg.show();
@@ -169,7 +169,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         Device newDevice = new Device();
         newDevice.setMaintenances(new ArrayList<Maintenance>());
         newDevice.setSensors(new ArrayList<Sensor>());
-        new DeviceDialog(newDevice, new AddHandler()).show();
+        new DeviceDialog(newDevice, deviceStore, new AddHandler()).show();
     }
 
     @Override
@@ -203,7 +203,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             msg.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
                                 @Override
                                 public void onDialogHide(DialogHideEvent event) {
-                                    new DeviceDialog(device, UpdateHandler.this).show();
+                                    new DeviceDialog(device, deviceStore, UpdateHandler.this).show();
                                 }
                             });
                             msg.show();
@@ -213,7 +213,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
             }
         }
 
-        new DeviceDialog(new Device(device), new UpdateHandler()).show();
+        new DeviceDialog(new Device(device), deviceStore, new UpdateHandler()).show();
     }
 
     @Override

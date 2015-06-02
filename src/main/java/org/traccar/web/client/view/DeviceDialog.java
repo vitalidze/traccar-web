@@ -16,6 +16,7 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.user.client.ui.Image;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.*;
@@ -92,7 +93,7 @@ public class DeviceDialog implements Editor<Device> {
 
     final Device device;
 
-    public DeviceDialog(Device device, DeviceHandler deviceHandler) {
+    public DeviceDialog(Device device, ListStore<Device> deviceStore, DeviceHandler deviceHandler) {
         this.device = device;
         this.deviceHandler = deviceHandler;
         this.selectedIcon = MarkerIcon.create(device);
@@ -108,10 +109,10 @@ public class DeviceDialog implements Editor<Device> {
         idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
         updateIcon();
 
-        sensorsEditor = new SensorsEditor(device);
+        sensorsEditor = new SensorsEditor(device, deviceStore);
         sensorsTab.add(sensorsEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));
 
-        maintenanceEditor = new MaintenanceEditor(device);
+        maintenanceEditor = new MaintenanceEditor(device, deviceStore);
         maintenanceTab.add(maintenanceEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));
     }
 

@@ -38,6 +38,9 @@
                 <toolbar:ToolBar ui:field="addRemoveToolbar">
                     <button:TextButton ui:field="addButton" text="{i18n.add}" />
                     <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
+                    <toolbar:FillToolItem />
+                    <button:TextButton ui:field="copyFromButton" text="{i18n.copyFrom}:" enabled="false" />
+                    <form:ComboBox ui:field="deviceCombo" editable="false" triggerAction="ALL" />
                 </toolbar:ToolBar>
             </container:child>
             <container:child layoutData="{verticalLayoutData}">

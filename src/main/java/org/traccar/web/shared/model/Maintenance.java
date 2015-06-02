@@ -43,6 +43,10 @@ public class Maintenance implements IsSerializable {
         return id;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(foreignKey = @ForeignKey(name = "maintenances_fkey_device_id"))
     private Device device;

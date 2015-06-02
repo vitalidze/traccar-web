@@ -17,6 +17,8 @@ package org.traccar.web.client.view;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
@@ -39,10 +41,7 @@ import com.sencha.gxt.widget.core.client.container.Container;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.form.CheckBox;
-import com.sencha.gxt.widget.core.client.form.NumberField;
-import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
-import com.sencha.gxt.widget.core.client.form.TextField;
+import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
@@ -52,9 +51,11 @@ import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.MaintenanceProperties;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Maintenance;
+import org.traccar.web.shared.model.Sensor;
 
 import java.util.*;
 
@@ -67,6 +68,12 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
 
     @UiField
     SimpleContainer panel;
+
+    @UiField(provided = true)
+    ComboBox<Device> deviceCombo;
+
+    @UiField
+    TextButton copyFromButton;
 
     @UiField(provided = true)
     ColumnModel<Maintenance> columnModel;
@@ -113,7 +120,7 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
 
     final Device device;
 
-    public MaintenanceEditor(Device device) {
+    public MaintenanceEditor(Device device, ListStore<Device> deviceStore) {
         this.device = device;
 
         final MaintenanceProperties maintenanceProperties = GWT.create(MaintenanceProperties.class);
@@ -213,6 +220,15 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
 
         columnModel = new ColumnModel<Maintenance>(columnConfigList);
 
+        DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
+        deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
+        deviceCombo.addSelectionHandler(new SelectionHandler<Device>() {
+            @Override
+            public void onSelection(SelectionEvent<Device> event) {
+                copyFromButton.setEnabled(event.getSelectedItem() != null);
+            }
+        });
+
         uiBinder.createAndBindUi(this);
 
         // set up device odometer settings
@@ -308,5 +324,27 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
 
         addRemoveToolbar.setVisible(false);
         grid.getView().refresh(true);
+    }
+
+    @UiHandler("copyFromButton")
+    public void onCopyFromClicked(SelectEvent event) {
+        Device device = deviceCombo.getCurrentValue();
+        for (Maintenance maintenance : device.getMaintenances()) {
+            boolean found = false;
+            for (int i = 0; i < maintenanceStore.size(); i++) {
+                Maintenance next = maintenanceStore.get(i);
+                if (next.getName().equals(maintenance.getName())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                Maintenance newMaintenance = new Maintenance(maintenance);
+                newMaintenance.setId(0);
+                newMaintenance.setIndexNo(nextIndex++);
+                newMaintenance.setLastService(0); // do not copy 'last service'
+                maintenanceStore.add(newMaintenance);
+            }
+        }
     }
 }
