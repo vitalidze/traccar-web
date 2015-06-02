@@ -142,6 +142,7 @@ public class Sensor implements IsSerializable {
         indexNo = sensor.indexNo;
         device = sensor.device;
         parameterName = sensor.parameterName;
+        description = sensor.description;
         visible = sensor.visible;
     }
 }
