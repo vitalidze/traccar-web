@@ -432,13 +432,34 @@ function parseOther(position) {
     if (xmlDoc.documentElement == null) {
         result = null;
     } else {
+        var device;
+        for (var i = 0; i < appState.devices.length; i++) {
+            if (appState.devices[i].id == position.device.id) {
+                device = appState.devices[i];
+                break;
+            }
+        }
+
         result = {};
         var nodes = xmlDoc.documentElement.childNodes;
         for (var i = 0; i < nodes.length; i++) {
+            var name = nodes[i].nodeName;
+            var visible = true;
+            for (var s = 0; s < device.sensors.length; s++) {
+                var sensor = device.sensors[s];
+                if (sensor.parameterName == name) {
+                    visible = sensor.visible;
+                    name = sensor.name;
+                    break;
+                }
+            }
+            if (!visible) {
+                continue;
+            }
             if (nodes[i].textContent == null) {
-                result[nodes[i].nodeName] = nodes[i].nodeValue;
+                result[name] = nodes[i].nodeValue;
             } else {
-                result[nodes[i].nodeName] = nodes[i].textContent;
+                result[name] = nodes[i].textContent;
             }
         }
     }

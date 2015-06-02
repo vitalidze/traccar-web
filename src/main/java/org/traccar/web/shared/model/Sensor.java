@@ -15,6 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.*;
@@ -61,17 +62,7 @@ public class Sensor implements IsSerializable {
         this.device = device;
     }
 
-    // sequence number of this interval
-    private int indexNo;
-
-    public int getIndexNo() {
-        return indexNo;
-    }
-
-    public void setIndexNo(int indexNo) {
-        this.indexNo = indexNo;
-    }
-
+    @Expose
     private String name;
 
     public String getName() {
@@ -82,6 +73,7 @@ public class Sensor implements IsSerializable {
         this.name = name;
     }
 
+    @Expose
     private String parameterName;
 
     public String getParameterName() {
@@ -102,6 +94,7 @@ public class Sensor implements IsSerializable {
         this.description = description;
     }
 
+    @Expose
     private boolean visible;
 
     public boolean isVisible() {
@@ -120,9 +113,8 @@ public class Sensor implements IsSerializable {
         Sensor that = (Sensor) o;
 
         if (getId() != that.getId()) return false;
-        if (getIndexNo() != that.getIndexNo()) return false;
         if (getDevice() != null ? !getDevice().equals(that.getDevice()) : that.getDevice() != null) return false;
-        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) return false;
+        if (getParameterName() != null ? !getParameterName().equals(that.getParameterName()) : that.getParameterName() != null) return false;
 
         return true;
     }
@@ -131,15 +123,13 @@ public class Sensor implements IsSerializable {
     public int hashCode() {
         int result = (int) (getId() ^ (getId() >>> 32));
         result = 31 * result + (getDevice() != null ? getDevice().hashCode() : 0);
-        result = 31 * result + getIndexNo();
-        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + (getParameterName() != null ? getParameterName().hashCode() : 0);
         return result;
     }
 
     public void copyFrom(Sensor sensor) {
         id = sensor.id;
         name = sensor.name;
-        indexNo = sensor.indexNo;
         device = sensor.device;
         parameterName = sensor.parameterName;
         description = sensor.description;

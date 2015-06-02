@@ -231,6 +231,7 @@ public class Device implements IsSerializable {
         this.maintenances = maintenances;
     }
 
+    @Expose
     @Transient
     private List<Sensor> sensors;
 
