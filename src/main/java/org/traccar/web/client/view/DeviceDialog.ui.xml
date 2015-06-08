@@ -11,6 +11,14 @@
     <ui:attributes width="1" height="-1" />
   </ui:with>
 
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="buttonDataMargins">
+    <ui:attributes top="2" right="0" bottom="2" left="0" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutDataWithButtons">
+      <ui:attributes width="1" height="-1" margins="{buttonDataMargins}"/>
+  </ui:with>
+
   <ui:with type="com.sencha.gxt.core.client.util.Margins" field="rightMargins">
     <ui:attributes top="0" right="4" bottom="0" left="0" />
   </ui:with>
@@ -113,7 +121,7 @@
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
-                  <container:child layoutData="{verticalLayoutData}">
+                  <container:child layoutData="{verticalLayoutDataWithButtons}">
                       <form:FieldLabel text="{i18n.markers}" labelWidth="160">
                           <form:widget>
                               <container:HorizontalLayoutContainer ui:field="panelMarkers">
@@ -126,6 +134,25 @@
                               </container:HorizontalLayoutContainer>
                           </form:widget>
                       </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutDataWithButtons}">
+                      <form:FieldLabel text="{i18n.photo}" labelWidth="160">
+                          <form:widget>
+                              <container:HorizontalLayoutContainer>
+                                  <container:child layoutData="{horizontalLayoutData}">
+                                      <button:TextButton ui:field="editPhotoButton" text="{i18n.edit}..." />
+                                  </container:child>
+                                  <container:child layoutData="{horizontalLayoutData}">
+                                      <button:TextButton ui:field="removePhotoButton" text="{i18n.remove}" />
+                                  </container:child>
+                              </container:HorizontalLayoutContainer>
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <g:ScrollPanel ui:field="panelPhoto">
+                          <g:Image ui:field="photo" />
+                      </g:ScrollPanel>
                   </container:child>
               </container:VerticalLayoutContainer>
           </gxt:child>

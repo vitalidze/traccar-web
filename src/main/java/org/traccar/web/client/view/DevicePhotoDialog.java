@@ -30,18 +30,19 @@ import com.sencha.gxt.widget.core.client.event.SubmitCompleteEvent;
 import com.sencha.gxt.widget.core.client.form.FileUploadField;
 import com.sencha.gxt.widget.core.client.form.FormPanel;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.shared.model.DeviceIcon;
 import org.traccar.web.shared.model.Picture;
 import org.traccar.web.shared.model.PictureType;
 
-public class DeviceIconDialog {
+public class DevicePhotoDialog {
 
-    private static DeviceIconDialogUiBinder uiBinder = GWT.create(DeviceIconDialogUiBinder.class);
+    private static DevicePhotoDialogUiBinder uiBinder = GWT.create(DevicePhotoDialogUiBinder.class);
 
-    interface DeviceIconDialogUiBinder extends UiBinder<Widget, DeviceIconDialog> {
+    interface DevicePhotoDialogUiBinder extends UiBinder<Widget, DevicePhotoDialog> {
     }
 
-    interface DeviceIconHandler {
-        void uploaded(Picture defaultIcon, Picture selectedIcon, Picture offlineIcon);
+    interface DevicePhotoHandler {
+        void uploaded(Picture photo);
     }
 
     @UiField
@@ -51,23 +52,17 @@ public class DeviceIconDialog {
     FormPanel form;
 
     @UiField
-    FileUploadField defaultIcon;
+    FileUploadField photo;
 
-    @UiField
-    FileUploadField selectedIcon;
-
-    @UiField
-    FileUploadField offlineIcon;
-
-    final DeviceIconHandler handler;
+    final DevicePhotoHandler handler;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public DeviceIconDialog(boolean allowSkippingPictures, DeviceIconHandler handler) {
+    public DevicePhotoDialog(DevicePhotoHandler handler) {
         this.handler = handler;
         uiBinder.createAndBindUi(this);
-        form.setAction(Picture.URL_PREFIX + PictureType.MARKER.name() + "?allowSkippingPictures=" + allowSkippingPictures);
+        form.setAction(Picture.URL_PREFIX + PictureType.DEVICE_PHOTO.name());
     }
 
     public void show() {
@@ -96,22 +91,10 @@ public class DeviceIconDialog {
         }
         if (JsonUtils.safeToEval(s)) {
             JSONObject result = (JSONObject) JSONParser.parseStrict(s);
-            handler.uploaded(picture(result.get(defaultIcon.getName())),
-                             picture(result.get(selectedIcon.getName())),
-                             picture(result.get(offlineIcon.getName())));
+            handler.uploaded(DeviceIconDialog.picture(result.get(photo.getName())));
             hide();
         } else {
             new LogViewDialog(event.getResults()).show();
         }
-    }
-
-    static Picture picture(JSONValue v) {
-        if (v == null) return null;
-        JSONObject o = (JSONObject) v;
-        Picture picture = new Picture();
-        picture.setId(Long.parseLong(o.get("id").toString()));
-        picture.setWidth(Integer.parseInt(o.get("width").toString()));
-        picture.setHeight(Integer.parseInt(o.get("height").toString()));
-        return picture;
     }
 }

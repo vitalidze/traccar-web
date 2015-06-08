@@ -50,6 +50,7 @@ public class Device implements IsSerializable {
         idleSpeedThreshold = device.idleSpeedThreshold;
         iconType = device.iconType;
         icon = device.getIcon();
+        photo = device.getPhoto();
         odometer = device.odometer;
         autoUpdateOdometer = device.autoUpdateOdometer;
         maintenances = new ArrayList<Maintenance>(device.maintenances.size());
@@ -209,6 +210,18 @@ public class Device implements IsSerializable {
 
     public void setIcon(DeviceIcon icon) {
         this.icon = icon;
+    }
+
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_photo_id"))
+    private Picture photo;
+
+    public Picture getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Picture photo) {
+        this.photo = photo;
     }
 
     private String phoneNumber;

@@ -16,6 +16,7 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -95,6 +96,12 @@ public class DeviceDialog implements Editor<Device> {
     Image markerImage;
 
     @UiField
+    ScrollPanel panelPhoto;
+
+    @UiField
+    Image photo;
+
+    @UiField
     VerticalLayoutContainer sensorsTab;
     final SensorsEditor sensorsEditor;
 
@@ -121,6 +128,8 @@ public class DeviceDialog implements Editor<Device> {
 
         idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
         updateIcon();
+
+        updatePhoto();
 
         sensorsEditor = new SensorsEditor(device, deviceStore);
         sensorsTab.add(sensorsEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));
@@ -170,5 +179,31 @@ public class DeviceDialog implements Editor<Device> {
     private void updateIcon() {
         markerImage.setUrl(selectedIcon.getOfflineURL());
         panelMarkers.forceLayout();
+    }
+
+    @UiHandler("editPhotoButton")
+    public void onEditPhoto(SelectEvent event) {
+        new DevicePhotoDialog(new DevicePhotoDialog.DevicePhotoHandler() {
+            @Override
+            public void uploaded(Picture photo) {
+                device.setPhoto(photo);
+                updatePhoto();
+            }
+        }).show();
+    }
+
+    @UiHandler("removePhotoButton")
+    public void onRemovePhoto(SelectEvent event) {
+        device.setPhoto(null);
+        updatePhoto();
+    }
+
+    private void updatePhoto() {
+        if (device.getPhoto() == null) {
+            photo.setVisible(false);
+        } else {
+            photo.setUrl(Picture.URL_PREFIX + device.getPhoto().getId());
+            photo.setVisible(true);
+        }
     }
 }
