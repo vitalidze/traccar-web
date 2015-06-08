@@ -381,6 +381,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setName(device.getName());
             tmp_device.setUniqueId(device.getUniqueId());
             tmp_device.setDescription(device.getDescription());
+            tmp_device.setPhoneNumber(device.getPhoneNumber());
+            tmp_device.setPlateNumber(device.getPlateNumber());
+            tmp_device.setVehicleInfo(device.getVehicleInfo());
             tmp_device.setTimeout(device.getTimeout());
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
             tmp_device.setIconType(device.getIconType());

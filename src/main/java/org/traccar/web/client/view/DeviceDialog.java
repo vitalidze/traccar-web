@@ -22,6 +22,7 @@ import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
+import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.shared.model.*;
 
@@ -65,6 +66,15 @@ public class DeviceDialog implements Editor<Device> {
 
     @UiField
     TextField description;
+
+    @UiField
+    TextField phoneNumber;
+
+    @UiField
+    TextField plateNumber;
+
+    @UiField
+    TextField vehicleInfo;
 
     @UiField(provided = true)
     NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();

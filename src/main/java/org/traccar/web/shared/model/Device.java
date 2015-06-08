@@ -43,6 +43,9 @@ public class Device implements IsSerializable {
         uniqueId = device.uniqueId;
         name = device.name;
         description = device.description;
+        phoneNumber = device.phoneNumber;
+        plateNumber = device.plateNumber;
+        vehicleInfo = device.vehicleInfo;
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
         iconType = device.iconType;
@@ -206,6 +209,36 @@ public class Device implements IsSerializable {
 
     public void setIcon(DeviceIcon icon) {
         this.icon = icon;
+    }
+
+    private String phoneNumber;
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    private String plateNumber;
+
+    public String getPlateNumber() {
+        return plateNumber;
+    }
+
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
+    }
+
+    private String vehicleInfo;
+
+    public String getVehicleInfo() {
+        return vehicleInfo;
+    }
+
+    public void setVehicleInfo(String vehicleInfo) {
+        this.vehicleInfo = vehicleInfo;
     }
 
     // contains current odometer value in kilometers

@@ -33,6 +33,12 @@ public interface DeviceProperties extends PropertyAccess<Device> {
 
     ValueProvider<Device, String> description();
 
+    ValueProvider<Device, String> phoneNumber();
+
+    ValueProvider<Device, String> plateNumber();
+
+    ValueProvider<Device, String> vehicleInfo();
+
     ValueProvider<Device, Integer> timeout();
 
     ValueProvider<Device, Double> idleSpeedThreshold();

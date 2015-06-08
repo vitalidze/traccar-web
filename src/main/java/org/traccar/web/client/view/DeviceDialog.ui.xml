@@ -47,28 +47,49 @@
           <gxt:child config="{settingsTabConfig}">
               <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.name}" labelWidth="140">
+                      <form:FieldLabel text="{i18n.name}" labelWidth="160">
                           <form:widget>
                               <form:TextField ui:field="name" allowBlank="false" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.uniqueIdentifier}" labelWidth="140">
+                      <form:FieldLabel text="{i18n.uniqueIdentifier}" labelWidth="160">
                           <form:widget>
                               <form:TextField ui:field="uniqueId" allowBlank="false" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.description}" labelWidth="140">
+                      <form:FieldLabel text="{i18n.description}" labelWidth="160">
                           <form:widget>
                               <form:TextField ui:field="description" allowBlank="true" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.deviceTimeout} ({i18n.second})" labelWidth="140">
+                      <form:FieldLabel text="{i18n.phoneNumber}" labelWidth="160">
+                          <form:widget>
+                              <form:TextField ui:field="phoneNumber" allowBlank="true" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.plateNumber}" labelWidth="160">
+                          <form:widget>
+                              <form:TextField ui:field="plateNumber" allowBlank="true" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.vehicleBrandModelColor}" labelWidth="160">
+                          <form:widget>
+                              <form:TextField ui:field="vehicleInfo" allowBlank="true" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.deviceTimeout} ({i18n.second})" labelWidth="160">
                           <form:widget>
                               <form:NumberField editor="{integerPropertyEditor}"
                                                 ui:field="timeout"
@@ -81,7 +102,7 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.idleWhenSpeedIsLE}" labelWidth="140">
+                      <form:FieldLabel text="{i18n.idleWhenSpeedIsLE}" labelWidth="160">
                           <form:widget>
                               <form:NumberField editor="{doublePropertyEditor}"
                                                 ui:field="idleSpeedThreshold"
@@ -93,7 +114,7 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.markers}" labelWidth="140">
+                      <form:FieldLabel text="{i18n.markers}" labelWidth="160">
                           <form:widget>
                               <container:HorizontalLayoutContainer ui:field="panelMarkers">
                                   <container:child layoutData="{horizontalLayoutData}">
