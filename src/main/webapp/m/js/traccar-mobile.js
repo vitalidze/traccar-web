@@ -444,23 +444,32 @@ function parseOther(position) {
         var nodes = xmlDoc.documentElement.childNodes;
         for (var i = 0; i < nodes.length; i++) {
             var name = nodes[i].nodeName;
+            var valueText = nodes[i].textContent;
+            if (valueText == null) {
+                valueText = nodes[i].nodeValue;
+            }
             var visible = true;
             for (var s = 0; s < device.sensors.length; s++) {
                 var sensor = device.sensors[s];
                 if (sensor.parameterName == name) {
                     visible = sensor.visible;
                     name = sensor.name;
+                    if (sensor.intervals != null && !isNaN(valueText)) {
+                        var intervals = JSON.parse(sensor.intervals);
+                        for (var j = 0; j < intervals.length; j++) {
+                            if (valueText <= intervals[j].value) {
+                                valueText = intervals[j].text;
+                                break;
+                            }
+                        }
+                    }
                     break;
                 }
             }
             if (!visible) {
                 continue;
             }
-            if (nodes[i].textContent == null) {
-                result[name] = nodes[i].nodeValue;
-            } else {
-                result[name] = nodes[i].textContent;
-            }
+            result[name] = valueText;
         }
     }
 

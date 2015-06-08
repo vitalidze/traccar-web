@@ -52,10 +52,7 @@ import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Sensor;
 import org.traccar.web.shared.model.SensorInterval;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHandler<Sensor> {
 
@@ -144,24 +141,18 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
                 new SensorIntervalsDialog(new SensorIntervalsDialog.SensorIntervalsHandler() {
                     @Override
                     public List<SensorInterval> getIntervals() {
-                        if (sensor.getIntervals() == null) {
-                            return Collections.emptyList();
-                        } else {
-                            JSONArray array = (JSONArray) JSONParser.parseStrict(sensor.getIntervals());
-                            List<SensorInterval> intervals = new ArrayList<SensorInterval>(array.size());
-                            for (int i = 0; i < array.size(); i++) {
-                                JSONObject jsonInterval = (JSONObject) array.get(i);
-                                SensorInterval interval = new SensorInterval();
-                                interval.setText(((JSONString) jsonInterval.get("text")).stringValue());
-                                interval.setValue(((JSONNumber) jsonInterval.get("value")).doubleValue());
-                                intervals.add(interval);
-                            }
-                            return intervals;
-                        }
+                        return intervals(sensor);
                     }
 
                     @Override
                     public void setIntervals(List<SensorInterval> intervals) {
+                        intervals = new ArrayList<SensorInterval>(intervals);
+                        Collections.sort(intervals, new Comparator<SensorInterval>() {
+                            @Override
+                            public int compare(SensorInterval o1, SensorInterval o2) {
+                                return o1.getValue() > o2.getValue() ? 1 : -1;
+                            }
+                        });
                         JSONArray array = new JSONArray();
                         for (SensorInterval interval : intervals) {
                             JSONObject jsonInterval = new JSONObject();
@@ -254,6 +245,23 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
                 newSensor.setId(-sensorStore.size());
                 sensorStore.add(newSensor);
             }
+        }
+    }
+
+    public static List<SensorInterval> intervals(Sensor sensor) {
+        if (sensor.getIntervals() == null) {
+            return Collections.emptyList();
+        } else {
+            JSONArray array = (JSONArray) JSONParser.parseStrict(sensor.getIntervals());
+            List<SensorInterval> intervals = new ArrayList<SensorInterval>(array.size());
+            for (int i = 0; i < array.size(); i++) {
+                JSONObject jsonInterval = (JSONObject) array.get(i);
+                SensorInterval interval = new SensorInterval();
+                interval.setText(((JSONString) jsonInterval.get("text")).stringValue());
+                interval.setValue(((JSONNumber) jsonInterval.get("value")).doubleValue());
+                intervals.add(interval);
+            }
+            return intervals;
         }
     }
 }

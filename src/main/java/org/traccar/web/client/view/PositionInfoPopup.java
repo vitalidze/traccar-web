@@ -16,6 +16,8 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 import com.google.gwt.xml.client.XMLParser;
@@ -69,18 +71,27 @@ public class PositionInfoPopup {
                 for (int i = 0; i < nodes.getLength(); i++) {
                     Node node = nodes.item(i);
                     String parameterName = node.getNodeName();
-                    String value = node.getFirstChild().getNodeValue();
+                    String valueText = node.getFirstChild().getNodeValue();
                     Sensor sensor = sensors.get(parameterName);
                     if (sensor != null) {
                         if (!sensor.isVisible()) {
                             continue;
                         }
                         parameterName = sensor.getName();
+                        if (valueText.matches("^[-+]?\\d+(\\.\\d+)?$")) {
+                            Double value = Double.parseDouble(valueText);
+                            for (SensorInterval interval : SensorsEditor.intervals(sensor)) {
+                                if (value <= interval.getValue()) {
+                                    valueText = interval.getText();
+                                    break;
+                                }
+                            }
+                        }
                     } else if (parameterName.equals("protocol")) {
                         parameterName = i18n.protocol();
                     }
-                    if (!value.isEmpty()) {
-                        body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + parameterName + "</td><td>" + value + "</td></tr>";
+                    if (!valueText.isEmpty()) {
+                        body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + parameterName + "</td><td>" + valueText + "</td></tr>";
                     }
                 }
             } catch (Exception error) {
