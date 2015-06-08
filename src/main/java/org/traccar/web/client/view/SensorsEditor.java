@@ -18,6 +18,7 @@ package org.traccar.web.client.view;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.json.client.*;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -49,8 +50,10 @@ import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.SensorProperties;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Sensor;
+import org.traccar.web.shared.model.SensorInterval;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -110,7 +113,7 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
         visibleColumn.setFixed(true);
         columnConfigList.add(visibleColumn);
 
-        ColumnConfig<Sensor, String> intervalsColumn = new ColumnConfig<Sensor, String>(new ValueProvider<Sensor, String>() {
+        final ValueProvider<Sensor, String> intervalsProperty = new ValueProvider<Sensor, String>() {
             @Override
             public String getValue(Sensor object) {
                 return i18n.edit();
@@ -124,7 +127,8 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
             public String getPath() {
                 return "intervals";
             }
-        }, 90, i18n.intervals());
+        };
+        ColumnConfig<Sensor, String> intervalsColumn = new ColumnConfig<Sensor, String>(intervalsProperty, 90, i18n.intervals());
         intervalsColumn.setFixed(true);
         intervalsColumn.setResizable(false);
         // IMPORTANT we want the text element (cell parent) to only be as wide as
@@ -136,8 +140,39 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
             @Override
             public void onSelect(SelectEvent event) {
                 int row = event.getContext().getIndex();
-//                Maintenance m = maintenanceStore.get(row);
-//                maintenanceStore.getRecord(m).addChange(maintenanceProperties.lastService(), odometer.getCurrentValue());
+                final Sensor sensor = sensorStore.get(row);
+                new SensorIntervalsDialog(new SensorIntervalsDialog.SensorIntervalsHandler() {
+                    @Override
+                    public List<SensorInterval> getIntervals() {
+                        if (sensor.getIntervals() == null) {
+                            return Collections.emptyList();
+                        } else {
+                            JSONArray array = (JSONArray) JSONParser.parseStrict(sensor.getIntervals());
+                            List<SensorInterval> intervals = new ArrayList<SensorInterval>(array.size());
+                            for (int i = 0; i < array.size(); i++) {
+                                JSONObject jsonInterval = (JSONObject) array.get(i);
+                                SensorInterval interval = new SensorInterval();
+                                interval.setText(((JSONString) jsonInterval.get("text")).stringValue());
+                                interval.setValue(((JSONNumber) jsonInterval.get("value")).doubleValue());
+                                intervals.add(interval);
+                            }
+                            return intervals;
+                        }
+                    }
+
+                    @Override
+                    public void setIntervals(List<SensorInterval> intervals) {
+                        JSONArray array = new JSONArray();
+                        for (SensorInterval interval : intervals) {
+                            JSONObject jsonInterval = new JSONObject();
+                            jsonInterval.put("text", new JSONString(interval.getText()));
+                            jsonInterval.put("value", new JSONNumber(interval.getValue()));
+                            array.set(array.size(), jsonInterval);
+                        }
+                        sensor.setIntervals(array.toString());
+                        sensorStore.getRecord(sensor).addChange(intervalsProperty, i18n.edit());
+                    }
+                }).show();
             }
         });
         intervalsColumn.setCell(intervalsEditButton);

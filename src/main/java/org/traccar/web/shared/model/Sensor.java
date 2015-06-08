@@ -105,6 +105,18 @@ public class Sensor implements IsSerializable {
         this.visible = visible;
     }
 
+    @Expose
+    @Column(length = 2048)
+    private String intervals;
+
+    public String getIntervals() {
+        return intervals;
+    }
+
+    public void setIntervals(String customIntervals) {
+        this.intervals = customIntervals;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -134,5 +146,6 @@ public class Sensor implements IsSerializable {
         parameterName = sensor.parameterName;
         description = sensor.description;
         visible = sensor.visible;
+        intervals = sensor.intervals;
     }
 }

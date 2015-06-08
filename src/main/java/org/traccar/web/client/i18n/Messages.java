@@ -348,4 +348,14 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String visible();
 
     String copyFrom();
+
+    String intervals();
+
+    String customIntervals();
+
+    String intervalFrom();
+
+    String text();
+
+    String interval();
 }

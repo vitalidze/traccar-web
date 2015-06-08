@@ -49,7 +49,7 @@ public class DeviceDialog implements Editor<Device> {
     }
 
     public interface DeviceHandler {
-        public void onSave(Device device);
+        void onSave(Device device);
     }
 
     private DeviceHandler deviceHandler;
