@@ -55,15 +55,14 @@ import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.MaintenanceProperties;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Maintenance;
-import org.traccar.web.shared.model.Sensor;
 
 import java.util.*;
 
 public class MaintenanceEditor implements SelectionChangedEvent.SelectionChangedHandler<Maintenance> {
 
-    private static MaintenanceDialogUiBinder uiBinder = GWT.create(MaintenanceDialogUiBinder.class);
+    private static MaintenanceEditorUiBinder uiBinder = GWT.create(MaintenanceEditorUiBinder.class);
 
-    interface MaintenanceDialogUiBinder extends UiBinder<Widget, MaintenanceEditor> {
+    interface MaintenanceEditorUiBinder extends UiBinder<Widget, MaintenanceEditor> {
     }
 
     @UiField

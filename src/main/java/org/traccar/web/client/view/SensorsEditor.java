@@ -18,13 +18,17 @@ package org.traccar.web.client.view;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.TextButtonCell;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.core.client.Style.SelectionMode;
+import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.core.client.resources.CommonStyles;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.Container;
@@ -52,9 +56,9 @@ import java.util.List;
 
 public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHandler<Sensor> {
 
-    private static MaintenanceDialogUiBinder uiBinder = GWT.create(MaintenanceDialogUiBinder.class);
+    private static SensorsEditorUiBinder uiBinder = GWT.create(SensorsEditorUiBinder.class);
 
-    interface MaintenanceDialogUiBinder extends UiBinder<Widget, SensorsEditor> {
+    interface SensorsEditorUiBinder extends UiBinder<Widget, SensorsEditor> {
     }
 
     @UiField
@@ -105,6 +109,39 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
         visibleColumn.setCell(new CheckBoxCell());
         visibleColumn.setFixed(true);
         columnConfigList.add(visibleColumn);
+
+        ColumnConfig<Sensor, String> intervalsColumn = new ColumnConfig<Sensor, String>(new ValueProvider<Sensor, String>() {
+            @Override
+            public String getValue(Sensor object) {
+                return i18n.edit();
+            }
+
+            @Override
+            public void setValue(Sensor object, String value) {
+            }
+
+            @Override
+            public String getPath() {
+                return "intervals";
+            }
+        }, 90, i18n.intervals());
+        intervalsColumn.setFixed(true);
+        intervalsColumn.setResizable(false);
+        // IMPORTANT we want the text element (cell parent) to only be as wide as
+        // the cell and not fill the cell
+        intervalsColumn.setColumnTextClassName(CommonStyles.get().inlineBlock());
+        intervalsColumn.setColumnTextStyle(SafeStylesUtils.fromTrustedString("padding: 1px 3px 0;"));
+        TextButtonCell intervalsEditButton = new TextButtonCell();
+        intervalsEditButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            @Override
+            public void onSelect(SelectEvent event) {
+                int row = event.getContext().getIndex();
+//                Maintenance m = maintenanceStore.get(row);
+//                maintenanceStore.getRecord(m).addChange(maintenanceProperties.lastService(), odometer.getCurrentValue());
+            }
+        });
+        intervalsColumn.setCell(intervalsEditButton);
+        columnConfigList.add(intervalsColumn);
 
         for (ColumnConfig<Sensor, ?> columnConfig : columnConfigList) {
             columnConfig.setHideable(false);
