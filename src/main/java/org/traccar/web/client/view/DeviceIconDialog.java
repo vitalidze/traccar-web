@@ -16,9 +16,7 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
-import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -26,23 +24,20 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SubmitCompleteEvent;
 import com.sencha.gxt.widget.core.client.form.FileUploadField;
 import com.sencha.gxt.widget.core.client.form.FormPanel;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseAsyncCallback;
-import org.traccar.web.shared.model.DeviceIcon;
 import org.traccar.web.shared.model.Picture;
 import org.traccar.web.shared.model.PictureType;
 
 public class DeviceIconDialog {
 
-    private static ImportDialogUiBinder uiBinder = GWT.create(ImportDialogUiBinder.class);
+    private static DeviceIconDialogUiBinder uiBinder = GWT.create(DeviceIconDialogUiBinder.class);
 
-    interface ImportDialogUiBinder extends UiBinder<Widget, DeviceIconDialog> {
+    interface DeviceIconDialogUiBinder extends UiBinder<Widget, DeviceIconDialog> {
     }
 
     interface DeviceIconHandler {
