@@ -31,6 +31,8 @@ public interface DeviceProperties extends PropertyAccess<Device> {
 
     ValueProvider<Device, String> name();
 
+    ValueProvider<Device, String> description();
+
     ValueProvider<Device, Integer> timeout();
 
     ValueProvider<Device, Double> idleSpeedThreshold();

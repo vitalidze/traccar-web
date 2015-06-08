@@ -63,6 +63,9 @@ public class DeviceDialog implements Editor<Device> {
     @UiField
     TextField uniqueId;
 
+    @UiField
+    TextField description;
+
     @UiField(provided = true)
     NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
 

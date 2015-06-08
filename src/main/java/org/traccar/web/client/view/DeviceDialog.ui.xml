@@ -61,6 +61,13 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.description}" labelWidth="140">
+                          <form:widget>
+                              <form:TextField ui:field="description" allowBlank="true" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
                       <form:FieldLabel text="{i18n.deviceTimeout} ({i18n.second})" labelWidth="140">
                           <form:widget>
                               <form:NumberField editor="{integerPropertyEditor}"

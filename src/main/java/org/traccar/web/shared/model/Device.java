@@ -42,6 +42,7 @@ public class Device implements IsSerializable {
         id = device.id;
         uniqueId = device.uniqueId;
         name = device.name;
+        description = device.description;
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
         iconType = device.iconType;
@@ -101,6 +102,17 @@ public class Device implements IsSerializable {
 
     public String getName() {
         return name;
+    }
+
+    @Expose
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     private transient boolean follow;
