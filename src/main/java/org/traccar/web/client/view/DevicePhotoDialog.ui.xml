@@ -14,7 +14,7 @@
 
     <ui:with field='device' type='org.traccar.web.shared.model.Device' />
 
-    <gxt:Window ui:field="window" pixelSize="360, 145" modal="true">
+    <gxt:Window ui:field="window" pixelSize="360, 85" modal="true">
         <form:FormPanel method="POST" encoding="MULTIPART" ui:field="form">
             <container:VerticalLayoutContainer>
                 <container:child layoutData="{verticalLayoutData}">

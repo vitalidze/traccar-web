@@ -149,7 +149,7 @@
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
-                  <container:child layoutData="{verticalLayoutData}">
+                  <container:child layoutData="{verticalLayoutDataWithButtons}">
                       <g:ScrollPanel ui:field="panelPhoto">
                           <g:Image ui:field="photo" />
                       </g:ScrollPanel>
