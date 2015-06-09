@@ -19,6 +19,14 @@ public class SensorInterval {
     private String text;
     private double value;
 
+    public SensorInterval() {
+    }
+
+    public SensorInterval(String text, double value) {
+        this.text = text;
+        this.value = value;
+    }
+
     public String getText() {
         return text;
     }

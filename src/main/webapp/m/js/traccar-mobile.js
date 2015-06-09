@@ -456,11 +456,15 @@ function parseOther(position) {
                     name = sensor.name;
                     if (sensor.intervals != null && !isNaN(valueText)) {
                         var intervals = JSON.parse(sensor.intervals);
+                        var valueText = null;
                         for (var j = 0; j < intervals.length; j++) {
-                            if (valueText <= intervals[j].value) {
+                            if (valueText == null) {
                                 valueText = intervals[j].text;
+                            }
+                            if (value < intervals[j].value) {
                                 break;
                             }
+                            valueText = intervals[j].text;
                         }
                     }
                     break;

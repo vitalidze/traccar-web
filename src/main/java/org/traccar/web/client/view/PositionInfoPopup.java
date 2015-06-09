@@ -30,6 +30,7 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PositionInfoPopup {
@@ -80,13 +81,8 @@ public class PositionInfoPopup {
                         }
                         parameterName = sensor.getName();
                         if (valueText.matches("^[-+]?\\d+(\\.\\d+)?$")) {
-                            Double value = Double.parseDouble(valueText);
-                            for (SensorInterval interval : SensorsEditor.intervals(sensor)) {
-                                if (value <= interval.getValue()) {
-                                    valueText = interval.getText();
-                                    break;
-                                }
-                            }
+                            double value = Double.parseDouble(valueText);
+                            valueText = intervalText(value, SensorsEditor.intervals(sensor));
                         }
                     } else if (parameterName.equals("protocol")) {
                         parameterName = i18n.protocol();
@@ -157,5 +153,19 @@ public class PositionInfoPopup {
         config.setAutoHide(true);
         config.setDismissDelay(10);
         toolTip.update(config);
+    }
+
+    public static String intervalText(double value, List<SensorInterval> intervals) {
+        String valueText = null;
+        for (SensorInterval interval : intervals) {
+            if (valueText == null) {
+                valueText = interval.getText();
+            }
+            if (value < interval.getValue()) {
+                break;
+            }
+            valueText = interval.getText();
+        }
+        return valueText;
     }
 }
