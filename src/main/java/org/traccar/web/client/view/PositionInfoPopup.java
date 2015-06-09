@@ -82,7 +82,10 @@ public class PositionInfoPopup {
                         parameterName = sensor.getName();
                         if (valueText.matches("^[-+]?\\d+(\\.\\d+)?$")) {
                             double value = Double.parseDouble(valueText);
-                            valueText = intervalText(value, SensorsEditor.intervals(sensor));
+                            List<SensorInterval> intervals = SensorsEditor.intervals(sensor);
+                            if (!intervals.isEmpty()) {
+                                valueText = intervalText(value, intervals);
+                            }
                         }
                     } else if (parameterName.equals("protocol")) {
                         parameterName = i18n.protocol();
