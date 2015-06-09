@@ -230,7 +230,7 @@ public class User implements IsSerializable, Cloneable {
     }
 
     @GwtTransient
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_managedby_id"))
     private User managedBy;
 
