@@ -23,6 +23,9 @@ This project has following features, which don't exist in original `traccar-web`
     * [dutch language](dutch.html) (available via ?locale=nl URL parameter)
     * [swedish language](swedish.html) (available via ?locale=sv_SE URL parameter)
     * [bulgarian language](bulgarian.html) (available via ?locale=bg URL parameter)
+    * [french language](french.html) (available via ?locale=fr URL parameter)
+    * [portuguese brazilian language](portuguese-brazilian.html) (available via ?locale=pt_BR URL parameter)
+    * [danish language](danish.html) (available via ?locale=da URL parameter)
 * 'show server log' menu for viewing tracker-server.log file on Web
 * [archive filtering](archive-filtering.html)
 * change default map center position, zoom, provider (Google, OSM, Bing) (in Settings >> Preferences)
@@ -59,3 +62,6 @@ This project has following features, which don't exist in original `traccar-web`
 * [possibility to fit line of archived track the current map view](zoom-to-track.html)
 * [language selector at login screen](language-selector-on-login-screen.html)
 * [Geo-fences](geofences.html)
+* [possibility to upload photo of device/vehicle](upload-device-photo.html)
+* [device sensors](sensors.html)
+* [device/vehicle maintenance](maintenance.html)
