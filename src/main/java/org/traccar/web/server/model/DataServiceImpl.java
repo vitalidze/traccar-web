@@ -307,15 +307,35 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             devices = new LinkedList<Device>(user.getAllAvailableDevices());
         }
         if (full) {
+            List<Maintenance> maintenaces = getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices ORDER BY m.indexNo ASC", Maintenance.class)
+                    .setParameter("devices", devices)
+                    .getResultList();
+            for (Maintenance maintenance : maintenaces) {
+                Device device = maintenance.getDevice();
+                if (device.getMaintenances() == null) {
+                    device.setMaintenances(new ArrayList<Maintenance>());
+                }
+                device.getMaintenances().add(maintenance);
+            }
+
+            List<Sensor> sensors = getSessionEntityManager().createQuery("SELECT s FROM Sensor s WHERE s.device IN :devices ORDER BY s.id ASC", Sensor.class)
+                    .setParameter("devices", devices)
+                    .getResultList();
+            for (Sensor sensor : sensors) {
+                Device device = sensor.getDevice();
+                if (device.getSensors() == null) {
+                    device.setSensors(new ArrayList<Sensor>());
+                }
+                device.getSensors().add(sensor);
+            }
+
             for (Device device : devices) {
-                device.setMaintenances(
-                        getSessionEntityManager().createQuery("SELECT s FROM Maintenance s WHERE s.device=:device ORDER BY s.indexNo ASC", Maintenance.class)
-                                .setParameter("device", device)
-                                .getResultList());
-                device.setSensors(
-                        getSessionEntityManager().createQuery("SELECT s FROM Sensor s WHERE s.device=:device ORDER BY s.id ASC", Sensor.class)
-                                .setParameter("device", device)
-                                .getResultList());
+                if (device.getMaintenances() == null) {
+                    device.setMaintenances(Collections.<Maintenance>emptyList());
+                }
+                if (device.getSensors() == null) {
+                    device.setSensors(Collections.<Sensor>emptyList());
+                }
             }
         }
         return devices;
