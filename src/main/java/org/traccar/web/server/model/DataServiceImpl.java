@@ -90,13 +90,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser
     @Override
-    public User authenticated() throws IllegalStateException {
+    public User authenticated() {
         return fillUserSettings(new User(getSessionUser()));
     }
 
     @Transactional
     @Override
-    public User login(String login, String password, boolean passwordHashed) {
+    public User login(String login, String password, boolean passwordHashed) throws TraccarException {
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT x FROM User x WHERE x.login = :login", User.class);
@@ -111,6 +111,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             throw new IllegalStateException();
         }
         User user = results.get(0);
+
+        if (user.isBlocked()) {
+            throw new UserBlockedException();
+        }
+
+        if (user.isExpired()) {
+            throw new UserExpiredException(user.getExpirationDate());
+        }
 
         /*
          * If hash method has changed in application settings and password parameter is not hashed, rehash user password
@@ -127,7 +135,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @Override
-    public User login(String login, String password) {
+    public User login(String login, String password) throws TraccarException {
         return this.login(login, password, false);
     }
 

@@ -166,6 +166,10 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             if (!user.getNotificationEvents().contains(event.getType())) {
                 return;
             }
+            // check whether user account is blocked or expired
+            if (user.isBlocked() || user.isExpired()) {
+                return;
+            }
             if (event.getType() == DeviceEventType.GEO_FENCE_ENTER || event.getType() == DeviceEventType.GEO_FENCE_EXIT) {
                 // check whether user has access to the geo-fence
                 if (!user.getAdmin() && !user.hasAccessTo(event.getGeoFence())) {
