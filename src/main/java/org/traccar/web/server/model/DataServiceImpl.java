@@ -314,7 +314,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         } else {
             devices = new LinkedList<Device>(user.getAllAvailableDevices());
         }
-        if (full) {
+        if (full && !devices.isEmpty()) {
             List<Maintenance> maintenaces = getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices ORDER BY m.indexNo ASC", Maintenance.class)
                     .setParameter("devices", devices)
                     .getResultList();
