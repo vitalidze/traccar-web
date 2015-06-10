@@ -360,12 +360,18 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             throw new ValidationException();
         }
 
+        User user = getSessionUser();
+
+        if (!user.getAdmin() &&
+            user.getMaxNumOfDevices() != null &&
+            getDevices(false).size() >= user.getMaxNumOfDevices()) {
+            throw new MaxDeviceNumberReachedException(user.getMaxNumOfDevices());
+        }
+
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<Device> query = entityManager.createQuery("SELECT x FROM Device x WHERE x.uniqueId = :id", Device.class);
         query.setParameter("id", device.getUniqueId());
         List<Device> results = query.getResultList();
-
-        User user = getSessionUser();
 
         if (results.isEmpty()) {
             device.setUsers(new HashSet<User>(1));

@@ -55,6 +55,7 @@ public class User implements IsSerializable, Cloneable {
         if (user.notificationEvents != null) {
             transferNotificationEvents = new HashSet<DeviceEventType>(user.notificationEvents);
         }
+        maxNumOfDevices = user.maxNumOfDevices;
     }
 
     @Expose

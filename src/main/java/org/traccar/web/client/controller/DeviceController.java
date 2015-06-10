@@ -149,6 +149,9 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                         MessageBox msg = null;
                         if (caught instanceof ValidationException) {
                             msg = new AlertMessageBox(i18n.error(), i18n.errNoDeviceNameOrId());
+                        } else if (caught instanceof MaxDeviceNumberReachedException) {
+                            MaxDeviceNumberReachedException e = (MaxDeviceNumberReachedException) caught;
+                            msg = new AlertMessageBox(i18n.error(), i18n.errMaxNumberDevicesReached(Integer.toString(e.getLimit())));
                         } else {
                             msg = new AlertMessageBox(i18n.error(), i18n.errDeviceExists());
                         }
@@ -164,6 +167,14 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                     }
                 });
             }
+        }
+
+        User user = ApplicationContext.getInstance().getUser();
+        if (!user.getAdmin() &&
+            user.getMaxNumOfDevices() != null &&
+            deviceStore.size() >= user.getMaxNumOfDevices()) {
+            new AlertMessageBox(i18n.error(), i18n.errMaxNumberDevicesReached(user.getMaxNumOfDevices().toString())).show();
+            return;
         }
 
         Device newDevice = new Device();

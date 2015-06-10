@@ -370,4 +370,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String errUserAccountBlocked();
 
     String errUserAccountExpired();
+
+    String errMaxNumberDevicesReached(String p0);
 }
