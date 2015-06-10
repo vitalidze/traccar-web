@@ -457,6 +457,7 @@ function parseOther(position) {
                     if (sensor.intervals != null && !isNaN(valueText)) {
                         var intervals = JSON.parse(sensor.intervals);
                         if (intervals.length > 0) {
+                            var value = valueText;
                             var valueText = null;
                             for (var j = 0; j < intervals.length; j++) {
                                 if (valueText == null) {
