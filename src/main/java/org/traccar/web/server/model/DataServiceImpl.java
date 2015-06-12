@@ -186,10 +186,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         } else {
             users.addAll(currentUser.getAllManagedUsers());
         }
+        List<User> result = new ArrayList<User>(users.size());
         for (User user : users) {
-            fillUserSettings(user);
+            result.add(fillUserSettings(unproxy(user)));
         }
-        return users;
+        return result;
     }
 
     @Transactional
@@ -801,10 +802,16 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     private User fillUserSettings(User user) {
         if (user.getUserSettings() instanceof HibernateProxy) {
-            UserSettings settings = (UserSettings) ((HibernateProxy) user.getUserSettings()).getHibernateLazyInitializer().getImplementation();
-            user.setUserSettings(settings);
+            user.setUserSettings(unproxy(user.getUserSettings()));
         }
         return user;
+    }
+
+    private <T> T unproxy(T entity) {
+        if (entity instanceof HibernateProxy) {
+            return (T) ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();
+        }
+        return entity;
     }
 
     @Transactional
