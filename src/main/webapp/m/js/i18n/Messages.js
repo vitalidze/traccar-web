@@ -67,6 +67,40 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
+    da: {
+        _name_: 'Dansk',
+        // login screen
+        language: 'Sprog',
+        username: 'Brugernavn',
+        password: 'Kodeord',
+        your_username: 'Dit brugernavn',
+        your_password: 'Dit kodeord',
+        sign_in: 'Log pÂ',
+        user_name_and_password_must_not_be_empty: 'Brugernavn og kodeord mÂ ikke vÊre blanke',
+        user_name_or_password_is_invalid: 'Brugernavn eller kodeord er forkert',
+        unexpected_error: 'Der er opstÂet en fejl',
+        open_desktop_version: '≈ben desktop versionen',
+        // sidebar
+        devices: 'Enheder',
+        logout: 'Log af',
+        // device details
+        select_on_map: 'VÊlg pÂ kort',
+        no_data_available: 'Ingen data fundet',
+        time: 'Tid',
+        latitude: 'Breddegrad',
+        longitude: 'LÊngdegrad',
+        altitude: 'H¯jde',
+        speed: 'Hastighed',
+        course: 'Kurs',
+        address: 'Addresse',
+        follow: 'F¯lg',
+        stop_following: 'Stop med at f¯lge',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send lokation med Email',
+        send_location_url_by_email: 'Send lokation URL med Email',
+        send_location_by_sms: 'Send lokation med SMS',
+        send_location_url_by_sms: 'Send lokation URL med SMS'
+    },
     de: {
         _name_: 'German',
         // login screen
@@ -272,7 +306,7 @@ var i18n = {
         send_location_url_by_sms: 'Send location URL by SMS'
     },
     nl: {
-        _name_: 'Danish',
+        _name_: 'Dutch',
         // login screen
         language: 'Language',
         username: 'Gebruiker',
