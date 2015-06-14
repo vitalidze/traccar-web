@@ -177,7 +177,7 @@ public class DBMigrations {
     static class SetDefaultDeviceIconType implements Migration {
         @Override
         public void migrate(EntityManager em) throws Exception {
-            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.iconType = :iconType WHERE D.iconType IS NULL")
+            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.iconType = :iconType WHERE D.icon IS NULL AND D.iconType IS NULL")
                     .setParameter("iconType", DeviceIconType.DEFAULT)
                     .executeUpdate();
         }
