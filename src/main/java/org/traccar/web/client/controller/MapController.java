@@ -15,16 +15,22 @@
  */
 package org.traccar.web.client.controller;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
+import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.view.MapView;
 import org.traccar.web.client.view.MarkerIcon;
 import org.traccar.web.shared.model.*;
@@ -96,11 +102,16 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     private Map<Long, Position> timestampMap = new HashMap<Long, Position>();
 
+    private int updateFailureCount = 0;
+
+    private final Messages i18n = GWT.create(Messages.class);
+
     public void update() {
         updateTimer.cancel();
         Application.getDataService().getLatestPositions(new AsyncCallback<List<Position>>() {
             @Override
             public void onSuccess(List<Position> result) {
+                updateFailureCount = 0;
                 /**
                  * Set up icon, 'idle since' and calculate alerts
                  */
@@ -172,7 +183,26 @@ public class MapController implements ContentController, MapView.MapHandler {
 
             @Override
             public void onFailure(Throwable caught) {
-                updateTimer.schedule(ApplicationContext.getInstance().getApplicationSettings().getUpdateInterval());
+                if (++updateFailureCount == 3) {
+                    updateTimer.cancel();
+                    String msg = i18n.errUserDisconnected();
+                    if (caught instanceof StatusCodeException) {
+                        StatusCodeException e = (StatusCodeException) caught;
+                        if (e.getStatusCode() == 500) {
+                            msg = i18n.errUserSessionExpired();
+                        }
+                    }
+                    AlertMessageBox msgBox = new AlertMessageBox(i18n.error(), msg);
+                    msgBox.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+                        @Override
+                        public void onDialogHide(DialogHideEvent event) {
+                            Window.Location.reload();
+                        }
+                    });
+                    msgBox.show();
+                } else {
+                    updateTimer.schedule(ApplicationContext.getInstance().getApplicationSettings().getUpdateInterval());
+                }
             }
         });
     }
