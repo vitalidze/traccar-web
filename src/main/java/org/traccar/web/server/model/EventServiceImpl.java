@@ -93,7 +93,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
 
             if (lastScannedPositionId == null) {
                 List<Long> latestPositionId = entityManager.get().createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class).getResultList();
-                if (latestPositionId.isEmpty()) {
+                if (latestPositionId.isEmpty() || latestPositionId.get(0) == null) {
                     return;
                 } else {
                     lastScannedPositionId = latestPositionId.get(0);
@@ -192,7 +192,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
             // find latest position id for the first scan
             if (lastScannedPositionId == null) {
                 List<Long> latestPositionId = entityManager.get().createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class).getResultList();
-                if (latestPositionId.isEmpty()) {
+                if (latestPositionId.isEmpty() || latestPositionId.get(0) == null) {
                     return;
                 } else {
                     lastScannedPositionId = latestPositionId.get(0);
@@ -288,7 +288,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
 
     private synchronized void startTasks() {
         for (ScheduledTask task : new ScheduledTask[] { offlineDetector, geoFenceDetector }) {
-            futures.put(task.getClass(), scheduler.scheduleAtFixedRate(task, 0, 1, TimeUnit.MINUTES));
+            futures.put(task.getClass(), scheduler.scheduleWithFixedDelay(task, 0, 1, TimeUnit.MINUTES));
         }
     }
 
@@ -326,7 +326,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         ScheduledFuture<?> f = futures.get(odometerUpdater.getClass());
         if (count.intValue() > 0) {
             if (f == null) {
-                futures.put(odometerUpdater.getClass(), scheduler.scheduleAtFixedRate(odometerUpdater, 0, 1, TimeUnit.MINUTES));
+                futures.put(odometerUpdater.getClass(), scheduler.scheduleWithFixedDelay(odometerUpdater, 0, 1, TimeUnit.MINUTES));
             }
         } else {
             if (f != null) {

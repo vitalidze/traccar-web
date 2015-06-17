@@ -309,7 +309,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     public void init() throws ServletException {
         super.init();
 
-        scheduler.scheduleAtFixedRate(notificationSender, 0, 1, TimeUnit.MINUTES);
+        scheduler.scheduleWithFixedDelay(notificationSender, 0, 1, TimeUnit.MINUTES);
     }
 
     @Transactional
