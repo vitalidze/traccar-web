@@ -31,6 +31,14 @@ public interface DeviceProperties extends PropertyAccess<Device> {
 
     ValueProvider<Device, String> name();
 
+    ValueProvider<Device, String> description();
+
+    ValueProvider<Device, String> phoneNumber();
+
+    ValueProvider<Device, String> plateNumber();
+
+    ValueProvider<Device, String> vehicleInfo();
+
     ValueProvider<Device, Integer> timeout();
 
     ValueProvider<Device, Double> idleSpeedThreshold();
@@ -41,4 +49,8 @@ public interface DeviceProperties extends PropertyAccess<Device> {
     ValueProvider<Device, Boolean> follow();
 
     ValueProvider<Device, Boolean> recordTrace();
+
+    ValueProvider<Device, Double> odometer();
+
+    ValueProvider<Device, Boolean> autoUpdateOdometer();
 }

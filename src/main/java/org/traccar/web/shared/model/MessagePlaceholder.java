@@ -16,5 +16,5 @@
 package org.traccar.web.shared.model;
 
 public enum MessagePlaceholder {
-    deviceName, geoFenceName, eventTime, positionTime;
+    deviceName, geoFenceName, eventTime, positionTime, maintenanceName;
 }

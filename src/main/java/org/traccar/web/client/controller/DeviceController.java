@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +52,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     private Messages i18n = GWT.create(Messages.class);
 
-    private final PositionInfoPopup positionInfo = new PositionInfoPopup();
+    private final PositionInfoPopup positionInfo;
 
     private final StoreHandlers<Device> deviceStoreHandler;
 
@@ -62,7 +63,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     public DeviceController(MapController mapController,
                             DeviceView.GeoFenceHandler geoFenceHandler,
                             DeviceView.SettingsHandler settingsHandler,
-                            ListStore<Device> deviceStore,
+                            final ListStore<Device> deviceStore,
                             StoreHandlers<Device> deviceStoreHandler,
                             ListStore<GeoFence> geoFenceStore,
                             Map<Long, Set<GeoFence>> deviceGeoFences,
@@ -71,6 +72,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         this.mapController = mapController;
         this.deviceStoreHandler = deviceStoreHandler;
         this.deviceStore = deviceStore;
+        this.positionInfo = new PositionInfoPopup(deviceStore);
         this.deviceGeoFences = deviceGeoFences;
 
         this.deviceStore.addStoreRecordChangeHandler(new StoreRecordChangeEvent.StoreRecordChangeHandler<Device>() {
@@ -81,6 +83,13 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                     Device device = event.getRecord().getModel();
                     if (follow) {
                         ApplicationContext.getInstance().follow(device);
+                        for (int i = 0; i < deviceStore.size(); i++) {
+                            Device next = deviceStore.get(i);
+                            if (next.getId() != device.getId()) {
+                                ApplicationContext.getInstance().stopFollowing(next);
+                                deviceStore.getRecord(next).revert(event.getProperty());
+                            }
+                        }
                     } else {
                         ApplicationContext.getInstance().stopFollowing(device);
                     }
@@ -140,6 +149,9 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                         MessageBox msg = null;
                         if (caught instanceof ValidationException) {
                             msg = new AlertMessageBox(i18n.error(), i18n.errNoDeviceNameOrId());
+                        } else if (caught instanceof MaxDeviceNumberReachedException) {
+                            MaxDeviceNumberReachedException e = (MaxDeviceNumberReachedException) caught;
+                            msg = new AlertMessageBox(i18n.error(), i18n.errMaxNumberDevicesReached(Integer.toString(e.getLimit())));
                         } else {
                             msg = new AlertMessageBox(i18n.error(), i18n.errDeviceExists());
                         }
@@ -147,7 +159,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             msg.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
                                 @Override
                                 public void onDialogHide(DialogHideEvent event) {
-                                    new DeviceDialog(device, AddHandler.this).show();
+                                    new DeviceDialog(device, deviceStore, AddHandler.this).show();
                                 }
                             });
                             msg.show();
@@ -157,7 +169,18 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
             }
         }
 
-        new DeviceDialog(new Device(), new AddHandler()).show();
+        User user = ApplicationContext.getInstance().getUser();
+        if (!user.getAdmin() &&
+            user.getMaxNumOfDevices() != null &&
+            deviceStore.size() >= user.getMaxNumOfDevices()) {
+            new AlertMessageBox(i18n.error(), i18n.errMaxNumberDevicesReached(user.getMaxNumOfDevices().toString())).show();
+            return;
+        }
+
+        Device newDevice = new Device();
+        newDevice.setMaintenances(new ArrayList<Maintenance>());
+        newDevice.setSensors(new ArrayList<Sensor>());
+        new DeviceDialog(newDevice, deviceStore, new AddHandler()).show();
     }
 
     @Override
@@ -170,6 +193,14 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                     public void onSuccess(Device result) {
                         deviceStore.update(result);
                         mapController.updateIcon(result);
+                        boolean showAlert = false;
+                        for (Maintenance maintenance : result.getMaintenances()) {
+                            if (result.getOdometer() >= maintenance.getLastService() + maintenance.getServiceInterval()) {
+                                showAlert = true;
+                                break;
+                            }
+                        }
+                        mapController.updateAlert(result, showAlert);
                     }
                     @Override
                     public void onFailure(Throwable caught) {
@@ -183,7 +214,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             msg.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
                                 @Override
                                 public void onDialogHide(DialogHideEvent event) {
-                                    new DeviceDialog(device, UpdateHandler.this).show();
+                                    new DeviceDialog(device, deviceStore, UpdateHandler.this).show();
                                 }
                             });
                             msg.show();
@@ -193,7 +224,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
             }
         }
 
-        new DeviceDialog(new Device(device), new UpdateHandler()).show();
+        new DeviceDialog(new Device(device), deviceStore, new UpdateHandler()).show();
     }
 
     @Override

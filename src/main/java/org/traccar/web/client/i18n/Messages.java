@@ -304,7 +304,76 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
                                        @Optional String deviceName,
                                        @Optional String geoFenceName,
                                        @Optional String eventTime,
-                                       @Optional String positionTime);
+                                       @Optional String positionTime,
+                                       @Optional String maintenanceName);
 
     String noMarkers();
+
+    String select();
+
+    String defaultIcon();
+
+    String selectedIcon();
+
+    String offlineIcon();
+
+    String upload();
+
+    String confirmDeviceIconRemoval();
+
+    String odometer();
+
+    String km();
+
+    String auto();
+
+    String maintenance();
+
+    String serviceName();
+
+    String mileageInterval();
+
+    String lastServiceMileage();
+
+    String remaining();
+
+    String overdue();
+
+    String reset();
+
+    String sensors();
+
+    String parameter();
+
+    String visible();
+
+    String copyFrom();
+
+    String intervals();
+
+    String customIntervals();
+
+    String intervalFrom();
+
+    String text();
+
+    String interval();
+
+    String phoneNumber();
+
+    String plateNumber();
+
+    String vehicleBrandModelColor();
+
+    String photo();
+
+    String errUserAccountBlocked();
+
+    String errUserAccountExpired();
+
+    String errMaxNumberDevicesReached(String p0);
+
+    String errUserSessionExpired();
+
+    String errUserDisconnected();
 }

@@ -15,6 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,6 +55,7 @@ public class User implements IsSerializable, Cloneable {
         if (user.notificationEvents != null) {
             transferNotificationEvents = new HashSet<DeviceEventType>(user.notificationEvents);
         }
+        maxNumOfDevices = user.maxNumOfDevices;
     }
 
     @Expose
@@ -230,7 +232,7 @@ public class User implements IsSerializable, Cloneable {
     }
 
     @GwtTransient
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_managedby_id"))
     private User managedBy;
 
@@ -328,6 +330,38 @@ public class User implements IsSerializable, Cloneable {
         this.readOnly = readOnly;
     }
 
+    @Column(nullable = true)
+    private boolean blocked;
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
+    }
+
+    @Temporal(TemporalType.DATE)
+    private Date expirationDate;
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    private Integer maxNumOfDevices;
+
+    public Integer getMaxNumOfDevices() {
+        return maxNumOfDevices;
+    }
+
+    public void setMaxNumOfDevices(Integer maxNumOfDevices) {
+        this.maxNumOfDevices = maxNumOfDevices;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -343,5 +377,9 @@ public class User implements IsSerializable, Cloneable {
     @Override
     public int hashCode() {
         return getLogin() != null ? getLogin().hashCode() : 0;
+    }
+
+    public boolean isExpired() {
+        return getExpirationDate() != null && new Date().compareTo(getExpirationDate()) >= 0;
     }
 }

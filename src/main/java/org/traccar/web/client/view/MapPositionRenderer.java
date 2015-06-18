@@ -225,6 +225,7 @@ public class MapPositionRenderer {
         List<Position> positions;
         VectorFeature title;
         VectorFeature track;
+        VectorFeature alert;
         LineString trackLine;
         List<VectorFeature> trackPoints = new ArrayList<VectorFeature>();
         List<VectorFeature> labels = new ArrayList<VectorFeature>();
@@ -267,20 +268,26 @@ public class MapPositionRenderer {
         clear(getDeviceData(device));
     }
 
-    private void clearMarkersAndTitle(DeviceData deviceData) {
+    private void clearMarkersAndTitleAndAlert(DeviceData deviceData) {
         for (Marker marker : deviceData.markerMap.values()) {
             getMarkerLayer().removeMarker(marker);
         }
         deviceData.markerMap.clear();
         if (deviceData.title != null) {
             getVectorLayer().removeFeature(deviceData.title);
+            deviceData.title.destroy();
             deviceData.title = null;
+        }
+        if (deviceData.alert != null) {
+            getVectorLayer().removeFeature(deviceData.alert);
+            deviceData.alert.destroy();
+            deviceData.alert = null;
         }
     }
 
     private void clear(DeviceData deviceData) {
         // clear markers and title
-        clearMarkersAndTitle(deviceData);
+        clearMarkersAndTitleAndAlert(deviceData);
         // clear labels
         for (VectorFeature label : deviceData.labels) {
             getVectorLayer().removeFeature(label);
@@ -302,9 +309,9 @@ public class MapPositionRenderer {
         setSnapToTrack(deviceData, false);
     }
 
-    public void clearPositionsAndTitles() {
+    public void clearPositionsAndTitlesAndAlerts() {
         for (DeviceData deviceData : deviceMap.values()) {
-            clearMarkersAndTitle(deviceData);
+            clearMarkersAndTitleAndAlert(deviceData);
         }
     }
 
@@ -321,7 +328,7 @@ public class MapPositionRenderer {
         for (Position position : positions) {
             Marker marker = new Marker(
                     mapView.createLonLat(position.getLongitude(), position.getLatitude()),
-                    MarkerIconFactory.getIcon(position.getIconType(), false));
+                    MarkerIconFactory.getIcon(position.getIcon(), false));
             deviceData.markerMap.put(position.getId(), marker);
             addSelectEvent(marker, position);
             addMouseEvent(marker, position);
@@ -446,13 +453,13 @@ public class MapPositionRenderer {
         if (oldPosition != null) {
             DeviceData deviceData = getDeviceData(oldPosition.getDevice());
             if (deviceData.markerMap.containsKey(oldPosition.getId())) {
-                changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getIconType(), false));
+                changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getIcon(), false));
             }
         }
         if (newPosition != null) {
             DeviceData deviceData = getDeviceData(newPosition.getDevice());
             if (deviceData.markerMap.containsKey(newPosition.getId())) {
-                changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getIconType(), true));
+                changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getIcon(), true));
                 if (center) {
                     mapView.getMap().panTo(deviceData.markerMap.get(newPosition.getId()).getLonLat());
                 }
@@ -493,9 +500,48 @@ public class MapPositionRenderer {
         Position position = deviceData.positions == null || deviceData.positions.size() != 1 ? null : deviceData.positions.get(0);
         if (position != null) {
             position.setDevice(device);
-            position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
+            position.setIcon(MarkerIcon.create(position));
             boolean selected = selectedPosition != null && selectedPosition.getId() == position.getId();
-            changeMarkerIcon(position, MarkerIconFactory.getIcon(position.getIconType(), selected));
+            changeMarkerIcon(position, MarkerIconFactory.getIcon(position.getIcon(), selected));
+        }
+    }
+
+    public void showAlerts(List<Position> positions) {
+        if (positions != null) {
+            for (Position position : positions) {
+                drawAlert(position);
+            }
+        }
+    }
+
+    private void drawAlert(Position position) {
+        DeviceData deviceData = getDeviceData(position.getDevice());
+
+        int iconWidthHalf = position.getIcon().getWidth() / 2;
+        int iconHeight = position.getIcon().getHeight();
+
+        Style alertCircleStyle = new org.gwtopenmaps.openlayers.client.Style();
+        alertCircleStyle.setPointRadius(Math.sqrt(iconWidthHalf * iconWidthHalf + iconHeight * iconHeight) + 1);
+        alertCircleStyle.setFillOpacity(0d);
+        alertCircleStyle.setStrokeWidth(2d);
+        alertCircleStyle.setStrokeColor("#ff0000");
+
+        VectorFeature alertCircle = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), alertCircleStyle);
+        getVectorLayer().addFeature(alertCircle);
+        deviceData.alert = alertCircle;
+    }
+
+    public void updateAlert(Device device, boolean show) {
+        DeviceData deviceData = getDeviceData(device);
+        if (deviceData.alert != null) {
+            getVectorLayer().removeFeature(deviceData.alert);
+            deviceData.alert.destroy();
+        }
+        if (show) {
+            Position latestPosition = deviceData.getLatestPosition();
+            if (latestPosition != null) {
+                drawAlert(latestPosition);
+            }
         }
     }
 }

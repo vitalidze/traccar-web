@@ -15,8 +15,11 @@
  */
 package org.traccar.web.shared.model;
 
-public enum DeviceEventType {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public enum DeviceEventType implements IsSerializable {
     OFFLINE,
     GEO_FENCE_ENTER,
-    GEO_FENCE_EXIT;
+    GEO_FENCE_EXIT,
+    MAINTENANCE_REQUIRED;
 }

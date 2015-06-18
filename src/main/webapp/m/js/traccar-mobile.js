@@ -41,7 +41,8 @@ var myApp = new Framework7({
 var $$ = Dom7;
 
 // register template7 helpers
-Template7.registerHelper('formatDate', function(timestamp) {
+
+function formatDate(timestamp) {
     var date = new Date(timestamp);
     var month = date.getMonth() + 1;
 
@@ -51,13 +52,19 @@ Template7.registerHelper('formatDate', function(timestamp) {
         (date.getHours() < 10 ? '0' : '') + date.getHours() + ':' +
         (date.getMinutes() < 10 ? '0' : '') + date.getMinutes() + ':' +
         (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
-});
+}
+
+Template7.registerHelper('formatDate', formatDate);
+
+function formatDouble(double, n) {
+    return isNaN(double) ? "-" : double.toFixed(n)
+}
 
 Template7.registerHelper('formatDouble', function(double, options) {
-    return isNaN(double) ? "-" : double.toFixed(options.hash.n);
+    return formatDouble(double, options.hash.n);
 });
 
-Template7.registerHelper('formatSpeed', function(speed) {
+function formatSpeed(speed) {
     if (isNaN(speed)) return "-";
 
     var factor = 1;
@@ -71,7 +78,9 @@ Template7.registerHelper('formatSpeed', function(speed) {
         suffix = 'mph';
     }
     return (speed * factor).toFixed(2) + ' ' + suffix;
-});
+}
+
+Template7.registerHelper('formatSpeed', formatSpeed);
 
 // Add view
 var mainView = myApp.addView('.view-main');
@@ -313,6 +322,9 @@ function loadPositions() {
                 prevPosition = appState.latestPositions[position.device.id];
                 if (prevPosition != undefined) {
                     position.selected = prevPosition.selected;
+                    if (prevPosition.follow != undefined) {
+                        position.follow = prevPosition.follow;
+                    }
                 }
                 if (position.selected == undefined) {
                     position.selected = false;
@@ -325,6 +337,12 @@ function loadPositions() {
 
                 // draw marker on map
                 drawMarker(position);
+
+                // center if necessary
+                if (position.follow != undefined && position.follow &&
+                    (prevPosition == null || prevPosition.id != position.id)) {
+                    catchPosition(position);
+                }
 
                 // update position details in side panel
                 if (prevPosition != undefined && position.id != prevPosition.id) {
@@ -339,6 +357,14 @@ function loadPositions() {
 
 function createPoint(lon, lat) {
     return ol.proj.transform([lon, lat], 'EPSG:4326', map.getView().getProjection());
+}
+
+function catchPosition(position) {
+    var mapExtent = map.getView().calculateExtent(map.getSize());
+    var point = createPoint(position.longitude, position.latitude);
+    if (!ol.extent.containsCoordinate(mapExtent, point)) {
+        map.getView().setCenter(point);
+    }
 }
 
 function loadDevices() {
@@ -389,6 +415,74 @@ function loadDevices() {
     });
 }
 
+function parseOther(position) {
+    // parse 'other' field
+    var xmlDoc;
+    if (window.DOMParser)  {
+        parser = new DOMParser();
+        xmlDoc = parser.parseFromString(position.other, "text/xml");
+        // Internet Explorer
+    } else {
+        xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+        xmlDoc.async = false;
+        xmlDoc.loadXML(position.other);
+    }
+
+    var result;
+    if (xmlDoc.documentElement == null) {
+        result = null;
+    } else {
+        var device;
+        for (var i = 0; i < appState.devices.length; i++) {
+            if (appState.devices[i].id == position.device.id) {
+                device = appState.devices[i];
+                break;
+            }
+        }
+
+        result = {};
+        var nodes = xmlDoc.documentElement.childNodes;
+        for (var i = 0; i < nodes.length; i++) {
+            var name = nodes[i].nodeName;
+            var valueText = nodes[i].textContent;
+            if (valueText == null) {
+                valueText = nodes[i].nodeValue;
+            }
+            var visible = true;
+            for (var s = 0; s < device.sensors.length; s++) {
+                var sensor = device.sensors[s];
+                if (sensor.parameterName == name) {
+                    visible = sensor.visible;
+                    name = sensor.name;
+                    if (sensor.intervals != null && !isNaN(valueText)) {
+                        var intervals = JSON.parse(sensor.intervals);
+                        if (intervals.length > 0) {
+                            var value = valueText;
+                            var valueText = null;
+                            for (var j = 0; j < intervals.length; j++) {
+                                if (valueText == null) {
+                                    valueText = intervals[j].text;
+                                }
+                                if (value < intervals[j].value) {
+                                    break;
+                                }
+                                valueText = intervals[j].text;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            if (!visible) {
+                continue;
+            }
+            result[name] = valueText;
+        }
+    }
+
+    return result;
+}
+
 function drawDeviceDetails(deviceId, position) {
     var deviceDetails = $$('#device-' + deviceId + '-details');
     if (deviceDetails != undefined) {
@@ -396,31 +490,7 @@ function drawDeviceDetails(deviceId, position) {
             deviceDetails.html('<div class="content-block">' + i18n.no_data_available + '</div>');
         } else {
             var otherXML = position.other;
-
-            // parse 'other' field
-            if (window.DOMParser)  {
-                parser = new DOMParser();
-                xmlDoc = parser.parseFromString(otherXML, "text/xml");
-            // Internet Explorer
-            } else {
-                xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-                xmlDoc.async = false;
-                xmlDoc.loadXML(otherXML);
-            }
-
-            if (xmlDoc.documentElement == null) {
-                position.other = null;
-            } else {
-                position.other = {};
-                var nodes = xmlDoc.documentElement.childNodes;
-                for (var i = 0; i < nodes.length; i++) {
-                    if (nodes[i].textContent == null) {
-                        position.other[nodes[i].nodeName] = nodes[i].nodeValue;
-                    } else {
-                        position.other[nodes[i].nodeName] = nodes[i].textContent;
-                    }
-                }
-            }
+            position.other = parseOther(position);
 
             var source   = $$('#device-details-template').html();
             var template = Template7.compile(source);
@@ -430,6 +500,7 @@ function drawDeviceDetails(deviceId, position) {
             // restore back XML
             position.other = otherXML;
 
+            // register 'select on map' function
             $$('#device-' + deviceId +'-select-on-map').on('click', function() {
                 position = appState.latestPositions[deviceId];
                 position.selected = true;
@@ -444,6 +515,110 @@ function drawDeviceDetails(deviceId, position) {
                 map.getView().setCenter(createPoint(position.longitude, position.latitude));
                 myApp.closePanel();
             });
+
+            // register 'follow' function
+            $$('#device-' + deviceId + '-follow').on('click', function() {
+                appState.latestPositions.forEach(function(pos) {
+                    pos.follow = false;
+                });
+                position = appState.latestPositions[deviceId];
+                position.follow = true;
+                drawDeviceDetails(deviceId, position);
+                catchPosition(position);
+            });
+
+            // register 'unfollow' function
+            $$('#device-' + deviceId + '-unfollow').on('click', function() {
+                position = appState.latestPositions[deviceId];
+                position.follow = false;
+                drawDeviceDetails(deviceId, position);
+            });
+
+            var drawSubject = function() {
+                for (var i = 0; i < appState.devices.length; i++) {
+                    if (appState.devices[i].id == deviceId) {
+                        return appState.devices[i].name;
+                    }
+                }
+                return "";
+            };
+            var drawCoordinatesText = function() {
+                var p = appState.latestPositions[deviceId];
+                var text =
+                    i18n.time + ': ' + formatDate(p.time) + '\n' +
+                    i18n.latitude + ': ' + formatDouble(p.latitude, 4) + '\n' +
+                    i18n.longitude + ': ' + formatDouble(p.longitude, 4) + '\n' +
+                    i18n.speed + ': ' + formatSpeed(p.speed) + '\n' +
+                    i18n.course + ': ' + formatDouble(p.course, 2) + '\n';
+                if (p.address != undefined && p.address != null) {
+                    text += i18n.address + ': ' + encodeURIComponent(p.address) + '\n';
+                }
+                var other = parseOther(p);
+                if (other != undefined && other != null) {
+                    for (var k in other) {
+                        text += k + ': ' + other[k] + '\n';
+                    }
+                }
+                if (p.geoFences != undefined && p.geoFences != null) {
+                    for (var i = 0; i < p.geoFences.length; i++) {
+                        text += i18n.geo_fence + ': ' + p.geoFences[i].name + '\n';
+                    }
+                }
+                return text;
+            };
+            var drawURL = function(sms) {
+                var p = appState.latestPositions[deviceId];
+                var amp = '&';
+                if (sms || myApp.device.android && myApp.device.osVersion == '4.4.2') {
+                    amp = '%26';
+                }
+                return 'http://www.openstreetmap.org/?mlat=' + p.latitude + amp + 'mlon=' + p.longitude;
+            };
+
+            // register 'send by email' function
+            $$('#device-' + deviceId + '-send-email').on('click', function () {
+                var target = this;
+                var buttons = [
+                    {
+                        text: i18n.send_location_by_email,
+                        onClick: function () {
+                            window.location = 'mailto:?subject=' + encodeURIComponent(drawSubject()) + '&body=' + encodeURIComponent(drawCoordinatesText());
+                        }
+                    },
+                    {
+                        text: i18n.send_location_url_by_email,
+                        onClick: function () {
+                            window.location = 'mailto:?subject=' + encodeURIComponent(drawSubject()) + '&body=' + encodeURIComponent(drawURL(false));
+                        }
+                    }
+                ];
+                myApp.actions(target, buttons);
+            });
+
+            // register 'send by sms' function
+            $$('#device-' + deviceId + '-send-sms').on('click', function() {
+                var target = this;
+                var buttons = [
+                    {
+                        text: i18n.send_location_by_sms,
+                        onClick: function () {
+                            window.location = 'sms:?body=' + encodeURIComponent(drawCoordinatesText());
+                        }
+                    },
+                    {
+                        text: i18n.send_location_url_by_sms,
+                        onClick: function () {
+                            window.location = 'sms:?body=' + encodeURIComponent(drawURL(true));
+                        }
+                    }
+                ];
+                myApp.actions(target, buttons);
+            });
+
+            // hide 'send by sms' on ios devices since 'body' is not supported in sms URLs there
+            if (myApp.device.ios) {
+                $$('#device-' + deviceId + '-send-sms').hide();
+            }
         }
     }
 }
@@ -459,8 +634,7 @@ function drawMarker(position) {
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
             opacity: 0.9,
-            src: position.offline ? position.device.iconType.OFFLINE.urls[position.selected ? 1 : 0] :
-                                    position.device.iconType.LATEST.urls[position.selected ? 1 : 0]
+            src: getIconURL(position)
         }),
         text: new ol.style.Text({
             text: position.device.name,
@@ -485,6 +659,21 @@ function drawMarker(position) {
     }
     position.marker = markerFeature;
     vectorLayer.getSource().addFeature(markerFeature);
+}
+
+function getIconURL(position) {
+    if (position.device.icon == null) {
+        return position.offline ? position.device.iconType.OFFLINE.urls[position.selected ? 1 : 0] :
+                                  position.device.iconType.LATEST.urls[position.selected ? 1 : 0];
+    } else {
+        var pictureId;
+        if (position.selected) {
+            pictureId = position.device.icon.selectedIcon.id;
+        } else {
+            pictureId = position.offline ? position.device.icon.offlineIcon.id : position.device.icon.defaultIcon.id;
+        }
+        return '/traccar/p/' + pictureId;
+    }
 }
 
 function callGet(options) {

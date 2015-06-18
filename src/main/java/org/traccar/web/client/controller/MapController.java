@@ -15,22 +15,27 @@
  */
 package org.traccar.web.client.controller;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.StatusCodeException;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
+import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.view.MapView;
+import org.traccar.web.client.view.MarkerIcon;
 import org.traccar.web.shared.model.*;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MapController implements ContentController, MapView.MapHandler {
     public interface MapHandler {
@@ -38,13 +43,16 @@ public class MapController implements ContentController, MapView.MapHandler {
         void onArchivePositionSelected(Position position);
     }
 
-    private MapHandler mapHandler;
+    private final MapHandler mapHandler;
 
-    private MapView mapView;
+    private final MapView mapView;
 
-    public MapController(MapHandler mapHandler) {
+    private final ListStore<Device> deviceStore;
+
+    public MapController(MapHandler mapHandler, ListStore<Device> deviceStore) {
         this.mapHandler = mapHandler;
-        mapView = new MapView(this);
+        this.deviceStore = deviceStore;
+        mapView = new MapView(this, deviceStore);
         loadMapSettings();
     }
 
@@ -94,22 +102,30 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     private Map<Long, Position> timestampMap = new HashMap<Long, Position>();
 
+    private int updateFailureCount = 0;
+
+    private final Messages i18n = GWT.create(Messages.class);
+
     public void update() {
         updateTimer.cancel();
         Application.getDataService().getLatestPositions(new AsyncCallback<List<Position>>() {
             @Override
             public void onSuccess(List<Position> result) {
+                updateFailureCount = 0;
                 /**
-                 * Set up icon and 'idle since'
+                 * Set up icon, 'idle since' and calculate alerts
                  */
+                List<Position> alerts = null;
                 long currentTime = System.currentTimeMillis();
                 for (Position position : result) {
                     Device device = position.getDevice();
+                    // update status and icon
                     boolean isOffline = currentTime - position.getTime().getTime() > position.getDevice().getTimeout() * 1000;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
-                    position.setIconType(device.getIconType().getPositionIconType(position.getStatus()));
+                    position.setIcon(MarkerIcon.create(position));
+                    // check 'idle since'
                     if (position.getSpeed() != null) {
-                        if (position.getSpeed().doubleValue() > position.getDevice().getIdleSpeedThreshold()) {
+                        if (position.getSpeed() > position.getDevice().getIdleSpeedThreshold()) {
                             latestNonIdlePositionMap.put(device.getId(), position);
                         } else {
                             Position latestNonIdlePosition = latestNonIdlePositionMap.get(device.getId());
@@ -118,12 +134,23 @@ public class MapController implements ContentController, MapView.MapHandler {
                             }
                         }
                     }
+                    device = deviceStore.findModelWithKey(Long.toString(device.getId()));
+                    device.setOdometer(position.getDistance());
+                    // check maintenances
+                    for (Maintenance maintenance : device.getMaintenances()) {
+                        if (device.getOdometer() >= maintenance.getLastService() + maintenance.getServiceInterval()) {
+                            if (alerts == null) alerts = new LinkedList<Position>();
+                            alerts.add(position);
+                            break;
+                        }
+                    }
                 }
                 /**
                  * Draw positions
                  */
                 mapView.clearLatestPositions();
                 mapView.showLatestPositions(result);
+                mapView.showAlerts(alerts);
                 mapView.showDeviceName(result);
                 /**
                  * Follow positions and draw track if necessary
@@ -156,7 +183,26 @@ public class MapController implements ContentController, MapView.MapHandler {
 
             @Override
             public void onFailure(Throwable caught) {
-                updateTimer.schedule(ApplicationContext.getInstance().getApplicationSettings().getUpdateInterval());
+                if (++updateFailureCount == 3) {
+                    updateTimer.cancel();
+                    String msg = i18n.errUserDisconnected();
+                    if (caught instanceof StatusCodeException) {
+                        StatusCodeException e = (StatusCodeException) caught;
+                        if (e.getStatusCode() == 500) {
+                            msg = i18n.errUserSessionExpired();
+                        }
+                    }
+                    AlertMessageBox msgBox = new AlertMessageBox(i18n.error(), msg);
+                    msgBox.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+                        @Override
+                        public void onDialogHide(DialogHideEvent event) {
+                            Window.Location.reload();
+                        }
+                    });
+                    msgBox.show();
+                } else {
+                    updateTimer.schedule(ApplicationContext.getInstance().getApplicationSettings().getUpdateInterval());
+                }
             }
         });
     }
@@ -183,8 +229,10 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public void showArchivePositions(Track track) {
         List<Position> positions = track.getPositions();
+        PositionIcon icon = new PositionIcon(track.getStyle().getIconType() == null ?
+                PositionIconType.dotArchive : track.getStyle().getIconType());
         for (Position position : positions) {
-            position.setIconType(track.getStyle().getIconType() == null ? PositionIconType.dotArchive : track.getStyle().getIconType());
+            position.setIcon(icon);
         }
         mapView.showArchiveTrack(track);
 
@@ -232,5 +280,9 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public void clearArchive(Device device) {
         mapView.clearArchive(device);
+    }
+
+    public void updateAlert(Device device, boolean show) {
+        mapView.updateAlert(device, show);
     }
 }

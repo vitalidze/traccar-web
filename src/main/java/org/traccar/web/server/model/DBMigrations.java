@@ -31,8 +31,10 @@ public class DBMigrations {
                 new SetManagerFlag(),
                 new SetNotificationsFlag(),
                 new SetReadOnlyFlag(),
+                new SetBlockedFlag(),
                 new AddDefaultNotifications(),
                 new SetDefaultDeviceTimeout(),
+                new SetDefaultDeviceOdometer(),
                 new SetDefaultIdleSpeedThreshold(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
                 new SetDefaultEventRecordingEnabled(),
@@ -175,7 +177,7 @@ public class DBMigrations {
     static class SetDefaultDeviceIconType implements Migration {
         @Override
         public void migrate(EntityManager em) throws Exception {
-            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.iconType = :iconType WHERE D.iconType IS NULL")
+            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.iconType = :iconType WHERE D.icon IS NULL AND D.iconType IS NULL")
                     .setParameter("iconType", DeviceIconType.DEFAULT)
                     .executeUpdate();
         }
@@ -263,6 +265,15 @@ public class DBMigrations {
         }
     }
 
+    static class SetBlockedFlag implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + User.class.getSimpleName() + " U SET U.blocked = :b WHERE U.blocked IS NULL")
+                    .setParameter("b", Boolean.FALSE)
+                    .executeUpdate();
+        }
+    }
+
     static class SetGeoFenceAllDevicesFlag implements Migration {
         @Override
         public void migrate(EntityManager em) throws Exception {
@@ -277,6 +288,19 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.language = :b WHERE S.language IS NULL")
                     .setParameter("b", "default")
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultDeviceOdometer implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.odometer = :o WHERE D.odometer IS NULL OR D.odometer <= 0")
+                    .setParameter("o", 0d)
+                    .executeUpdate();
+
+            em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.autoUpdateOdometer = :b WHERE D.autoUpdateOdometer IS NULL")
+                    .setParameter("b", Boolean.FALSE)
                     .executeUpdate();
         }
     }

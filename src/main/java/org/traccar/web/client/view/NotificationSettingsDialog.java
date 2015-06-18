@@ -152,7 +152,7 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
             public String getValue(MessagePlaceholder ph) {
                 return "${" + ph.name() + "}";
             }
-        }, 100));
+        }, 118));
         placeholderColumns.get(placeholderColumns.size() - 1).setFixed(true);
         placeholderColumns.add(new ColumnConfig<MessagePlaceholder, String>(new ToStringValueProvider<MessagePlaceholder>() {
             @Override
@@ -215,7 +215,7 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
         if (messageTemplate == null) {
             messageTemplate = new NotificationTemplate();
             messageTemplate.setType(event.getSelectedItem());
-            messageTemplate.setBody(i18n.defaultNotificationTemplate(event.getSelectedItem(), "${deviceName}", "${geoFenceName}", "${eventTime}", "${positionTime}"));
+            messageTemplate.setBody(i18n.defaultNotificationTemplate(event.getSelectedItem(), "${deviceName}", "${geoFenceName}", "${eventTime}", "${positionTime}", "${maintenanceName}"));
             settings.getTransferTemplates().put(event.getSelectedItem(), messageTemplate);
         }
         messageSubject.setText(messageTemplate.getSubject());

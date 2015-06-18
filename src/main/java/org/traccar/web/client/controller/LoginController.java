@@ -24,6 +24,8 @@ import org.traccar.web.client.view.LoginDialog;
 import org.traccar.web.shared.model.User;
 
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import org.traccar.web.shared.model.UserBlockedException;
+import org.traccar.web.shared.model.UserExpiredException;
 
 public class LoginController implements LoginDialog.LoginHandler {
 
@@ -76,7 +78,13 @@ public class LoginController implements LoginDialog.LoginHandler {
                 }
                 @Override
                 public void onFailure(Throwable caught) {
-                    new AlertMessageBox(i18n.error(), i18n.errInvalidUsernameOrPassword()).show();
+                    if (caught instanceof UserBlockedException) {
+                        new AlertMessageBox(i18n.error(), i18n.errUserAccountBlocked()).show();
+                    } else if (caught instanceof UserExpiredException) {
+                        new AlertMessageBox(i18n.error(), i18n.errUserAccountExpired()).show();
+                    } else {
+                        new AlertMessageBox(i18n.error(), i18n.errInvalidUsernameOrPassword()).show();
+                    }
                 }
             });
         }

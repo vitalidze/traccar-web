@@ -15,7 +15,9 @@
  */
 package org.traccar.web.shared.model;
 
-public enum PositionIconType {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public enum PositionIconType implements IsSerializable {
     iconLatest("marker-green.png", true, "marker.png", true, 21, 25),
     iconOffline("marker-green.png", true, "marker-white.png", false, 21, 25),
     iconArchive("marker-gold.png", true, "marker-blue.png", true, 21, 25),

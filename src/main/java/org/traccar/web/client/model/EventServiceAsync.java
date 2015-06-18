@@ -6,4 +6,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 public interface EventServiceAsync {
     void applicationSettingsChanged(AsyncCallback<Void> async);
+
+    void devicesChanged(AsyncCallback<Void> async);
 }

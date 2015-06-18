@@ -22,6 +22,7 @@ import org.traccar.web.shared.model.User;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.Date;
 
 public class UserCheck implements MethodInterceptor {
     @Inject
@@ -67,6 +68,12 @@ public class UserCheck implements MethodInterceptor {
         User user = sessionUser.get();
         if (user == null) {
             throw new SecurityException("Not logged in");
+        }
+        if (user.isBlocked()) {
+            throw new SecurityException("User account is blocked");
+        }
+        if (user.isExpired()) {
+            throw new SecurityException("User account expired");
         }
         if (requireUser.roles().length > 0) {
             StringBuilder roles = new StringBuilder();

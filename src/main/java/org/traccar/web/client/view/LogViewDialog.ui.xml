@@ -20,12 +20,9 @@
   <ui:with field='log' type='java.lang.String' />
 
   <gxt:Window ui:field="window" pixelSize="640, 480" modal="true" headingText="{i18n.log}">
-    <container:VerticalLayoutContainer>
-      <container:child layoutData="{textAreaLayoutData}">
-        <form:TextArea ui:field="logArea" value="{log}" readOnly="true" />
-      </container:child>
-    </container:VerticalLayoutContainer>
-
+    <g:ScrollPanel ui:field="logScroll">
+      <g:HTML ui:field="logArea" HTML="{log}" />
+    </g:ScrollPanel>
     <gxt:button>
       <button:TextButton ui:field="closeButton" text="{i18n.close}" />
     </gxt:button>
