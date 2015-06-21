@@ -67,6 +67,40 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
+        cs: {
+        _name_: 'Česky',
+        // login screen
+        language: 'Jazyk',
+        username: 'Uživatel',
+        password: 'Heslo',
+        your_username: 'Vaše uživatelské jméno',
+        your_password: 'Vaše heslo',
+        sign_in: 'Přihlásit',
+        user_name_and_password_must_not_be_empty: 'Uživatelské jméno a heslo nesmí být prázdné',
+        user_name_or_password_is_invalid: 'Uživatelské jméno, nebo heslo je chybné',
+        unexpected_error: 'Neznámá chyba',
+        open_desktop_version: 'Přepnout na verzi pro PC',
+        // sidebar
+        devices: 'Zařízení',
+        logout: 'Odhlásit',
+        // device details
+        select_on_map: 'Najít na mapě',
+        no_data_available: 'Data nejsou dostupná',
+        time: 'Čas',
+        latitude: 'Z. šířka',
+        longitude: 'Z. délka',
+        altitude: 'V/n.m.',
+        speed: 'Rychlost',
+        course: 'Směr',
+        address: 'Adresa',
+        follow: 'Sledovat',
+        stop_following: 'Zastavit sledování',
+        geo_fence: 'Zóny',
+        send_location_by_email: 'Odeslat polohu emailem',
+        send_location_url_by_email: 'Odeslat URL polohy emailem',
+        send_location_by_sms: 'Odeslat polohu přes SMS',
+        send_location_url_by_sms: 'Odeslat URL polohy přes SMS'
+    },
     da: {
         _name_: 'Dansk',
         // login screen
