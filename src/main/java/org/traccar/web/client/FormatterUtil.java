@@ -8,11 +8,11 @@ import org.traccar.web.shared.model.UserSettings;
 public class FormatterUtil {
 
     public DateTimeFormat getTimeFormat() {
-        return DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
+        return DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss");
     }
 
     public DateTimeFormat getRequestTimeFormat() {
-        return DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss Z");
+        return DateTimeFormat.getFormat("dd.MM.yyyy HH:mm:ss Z");
     }
 
     private class SpeedNumberFormat extends NumberFormat {
