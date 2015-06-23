@@ -67,7 +67,7 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
-        cs: {
+    cs: {
         _name_: 'Česky',
         // login screen
         language: 'Jazyk',
@@ -236,6 +236,40 @@ var i18n = {
         send_location_url_by_email: 'Envoyer l\'URL de la position par Email',
         send_location_by_sms: 'Envoyer position par SMS',
         send_location_url_by_sms: 'Envoyer l\'URL de la position par SMS'
+    },
+    he: {
+        _name_: 'עברית',
+        // login screen
+        language: 'שפה',
+        username: 'שם משתמש',
+        password: 'סיסמה',
+        your_username: 'שם המשתמש',
+        your_password: 'סיסמה',
+        sign_in: 'התחבר',
+        user_name_and_password_must_not_be_empty: 'שם משתמש וסיסמה חייבים להיות מלאים',
+        user_name_or_password_is_invalid: 'שם משתמש וסיסמה לא תקינים,',
+        unexpected_error: 'Unexpected error',
+        open_desktop_version: 'Open Desktop version',
+        // sidebar
+        devices: 'Devices',
+        logout: 'התנתק',
+        // device details
+        select_on_map: 'Select on map',
+        no_data_available: 'אין נתונים',
+        time: 'זמן',
+        latitude: 'קו רוחב',
+        longitude: 'קו אורך',
+        altitude: 'גובה',
+        speed: 'מהירות',
+        course: 'כיוון',
+        address: 'כתובת',
+        follow: 'Follow',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     hu: {
         _name_: 'Hungarian',
