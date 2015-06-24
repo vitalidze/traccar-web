@@ -95,6 +95,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     }
 
     @Transactional
+    @LogCall("Login '{0}'")
     @Override
     public User login(String login, String password, boolean passwordHashed) throws TraccarException {
         EntityManager entityManager = getSessionEntityManager();
@@ -147,6 +148,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     }
 
     @Transactional
+    @LogCall("Register '{0}'")
     @Override
     public User register(String login, String password) {
         if (getApplicationSettings().getRegistrationEnabled()) {
