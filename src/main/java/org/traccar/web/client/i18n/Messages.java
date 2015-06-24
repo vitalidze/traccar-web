@@ -386,4 +386,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String expirationDate();
 
     String maxNumOfDevices();
+
+    String blocked();
 }

@@ -257,6 +257,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 currentUser.setFirstName(user.getFirstName());
                 currentUser.setLastName(user.getLastName());
                 currentUser.setPhoneNumber(user.getPhoneNumber());
+                currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
+                currentUser.setExpirationDate(user.getExpirationDate());
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
