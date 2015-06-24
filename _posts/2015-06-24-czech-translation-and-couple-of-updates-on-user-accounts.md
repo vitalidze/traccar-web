@@ -21,6 +21,8 @@ For the brave ones that want to contribute their translations here is the list o
      register = Register
      errUsernameOrPasswordEmpty = User name and password must not be empty
      errInvalidUsernameOrPassword = User name or password is invalid
+    +errUserAccountBlocked = User account is blocked
+    +errUserAccountExpired = User account expired
     +errUserSessionExpired = Session expired
     +errUserDisconnected = Server is not responding
      # application settings dialog
