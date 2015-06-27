@@ -376,4 +376,16 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String errUserSessionExpired();
 
     String errUserDisconnected();
+
+    String firstName();
+
+    String lastName();
+
+    String companyName();
+
+    String expirationDate();
+
+    String maxNumOfDevices();
+
+    String blocked();
 }
