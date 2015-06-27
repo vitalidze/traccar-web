@@ -95,6 +95,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     }
 
     @Transactional
+    @LogCall("Login '{0}'")
     @Override
     public User login(String login, String password, boolean passwordHashed) throws TraccarException {
         EntityManager entityManager = getSessionEntityManager();
@@ -147,6 +148,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     }
 
     @Transactional
+    @LogCall("Register '{0}'")
     @Override
     public User register(String login, String password) {
         if (getApplicationSettings().getRegistrationEnabled()) {
@@ -251,6 +253,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 currentUser.setManager(user.getManager());
                 currentUser.setEmail(user.getEmail());
                 currentUser.setNotificationEvents(user.getTransferNotificationEvents());
+                currentUser.setCompanyName(user.getCompanyName());
+                currentUser.setFirstName(user.getFirstName());
+                currentUser.setLastName(user.getLastName());
+                currentUser.setPhoneNumber(user.getPhoneNumber());
+                currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
+                currentUser.setExpirationDate(user.getExpirationDate());
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
@@ -764,6 +772,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             user.setManager(_user.getManager());
             user.setReadOnly(_user.getReadOnly());
+            user.setExpirationDate(_user.getExpirationDate());
+            user.setBlocked(_user.isBlocked());
+            user.setMaxNumOfDevices(_user.getMaxNumOfDevices());
         }
     }
 

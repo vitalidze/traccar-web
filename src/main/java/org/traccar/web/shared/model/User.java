@@ -56,6 +56,11 @@ public class User implements IsSerializable, Cloneable {
             transferNotificationEvents = new HashSet<DeviceEventType>(user.notificationEvents);
         }
         maxNumOfDevices = user.maxNumOfDevices;
+        readOnly = user.readOnly;
+        companyName = user.companyName;
+        firstName = user.firstName;
+        lastName = user.lastName;
+        phoneNumber = user.phoneNumber;
     }
 
     @Expose
@@ -360,6 +365,46 @@ public class User implements IsSerializable, Cloneable {
 
     public void setMaxNumOfDevices(Integer maxNumOfDevices) {
         this.maxNumOfDevices = maxNumOfDevices;
+    }
+
+    private String companyName;
+
+    private String firstName;
+
+    private String lastName;
+
+    private String phoneNumber;
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @Override

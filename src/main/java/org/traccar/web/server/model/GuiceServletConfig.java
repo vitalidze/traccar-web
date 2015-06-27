@@ -79,6 +79,10 @@ public class GuiceServletConfig extends GuiceServletContextListener {
                 bindInterceptor(Matchers.any(), Matchers.annotatedWith(ManagesDevices.class), userCheck);
                 bindInterceptor(Matchers.any(), Matchers.annotatedWith(RequireWrite.class), userCheck);
 
+                MethodCallLogger methodCallLogger = new MethodCallLogger();
+                requestInjection(methodCallLogger);
+                bindInterceptor(Matchers.any(), Matchers.annotatedWith(LogCall.class), methodCallLogger);
+
                 bind(User.class).toProvider(CurrentUserProvider.class);
                 bind(ApplicationSettings.class).toProvider(ApplicationSettingsProvider.class);
                 bind(DataService.class).to(DataServiceImpl.class);
