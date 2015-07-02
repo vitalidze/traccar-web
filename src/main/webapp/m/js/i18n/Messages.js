@@ -1,38 +1,4 @@
 var i18n = {
-	    rs: {
-	        _name_: 'Srpski',
-	        // login screen
-	        language: 'Jezik',
-	        username: 'Username',
-	        password: 'Password',
-	        your_username: 'Your username',
-	        your_password: 'Your password',
-	        sign_in: 'Sign In',
-	        user_name_and_password_must_not_be_empty: 'User name and password must not be empty',
-	        user_name_or_password_is_invalid: 'User name or password is invalid',
-	        unexpected_error: 'Unexpected error',
-	        open_desktop_version: 'Open Desktop version',
-	        // sidebar
-	        devices: 'Devices',
-	        logout: 'Logout',
-	        // device details
-	        select_on_map: 'Select on map',
-	        no_data_available: 'No data available',
-	        time: 'Time',
-	        latitude: 'Latitude',
-	        longitude: 'Longitude',
-	        altitude: 'Altitude',
-	        speed: 'Speed',
-	        course: 'Course',
-	        address: 'Address',
-	        follow: 'Follow',
-	        stop_following: 'Stop following',
-	        geo_fence: 'Geo-fence',
-	        send_location_by_email: 'Send location by Email',
-	        send_location_url_by_email: 'Send location URL by Email',
-	        send_location_by_sms: 'Send location by SMS',
-	        send_location_url_by_sms: 'Send location URL by SMS'
-	    },
     en: {
         _name_: 'English',
         // login screen
@@ -67,6 +33,40 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
+    	    rs: {
+	        _name_: 'Српски',
+	        // login screen
+	        language: 'Језик',
+	        username: 'Корисничко име',
+	        password: 'Лозинка',
+	        your_username: 'Ваше корисничко име',
+	        your_password: 'Ваша лозинка',
+	        sign_in: 'Пријава',
+	        user_name_and_password_must_not_be_empty: 'Корисничко име и лозинка морају бити унети',
+	        user_name_or_password_is_invalid: 'Корисничко име или лозинка су погрешни',
+	        unexpected_error: 'Unexpected error',
+	        open_desktop_version: 'Open Desktop version',
+	        // sidebar
+	        devices: 'Уређаји',
+	        logout: 'Одјави се',
+	        // device details
+	        select_on_map: 'Изабери на мапи',
+	        no_data_available: 'No data available',
+	        time: 'Време',
+	        latitude: 'Latitude',
+	        longitude: 'Longitude',
+	        altitude: 'Висина',
+	        speed: 'Брзина',
+	        course: 'Правац',
+	        address: 'Адреса',
+	        follow: 'Прати',
+	        stop_following: 'Престани са прађењем',
+	        geo_fence: 'Геозона',
+	        send_location_by_email: 'Пошаљи локацију преко Email',
+	        send_location_url_by_email: 'Пошаљи линк локације преко Email',
+	        send_location_by_sms: 'Пошаљи локцију преко SMSа',
+	        send_location_url_by_sms: 'Пошаљи линк локације преко SMSа'
+	    },
     bg: {
         _name_: 'Български',
         // login screen
