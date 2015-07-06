@@ -19,6 +19,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -40,9 +42,25 @@ public class Device implements IsSerializable {
         id = device.id;
         uniqueId = device.uniqueId;
         name = device.name;
+        description = device.description;
+        phoneNumber = device.phoneNumber;
+        plateNumber = device.plateNumber;
+        vehicleInfo = device.vehicleInfo;
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
         iconType = device.iconType;
+        icon = device.getIcon();
+        photo = device.getPhoto();
+        odometer = device.odometer;
+        autoUpdateOdometer = device.autoUpdateOdometer;
+        maintenances = new ArrayList<Maintenance>(device.maintenances.size());
+        for (Maintenance maintenance : device.maintenances) {
+            maintenances.add(new Maintenance(maintenance));
+        }
+        sensors = new ArrayList<Sensor>(device.sensors.size());
+        for (Sensor sensor : device.sensors) {
+            sensors.add(new Sensor(sensor));
+        }
     }
 
     @Expose
@@ -88,6 +106,17 @@ public class Device implements IsSerializable {
 
     public String getName() {
         return name;
+    }
+
+    @Expose
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     private transient boolean follow;
@@ -168,6 +197,108 @@ public class Device implements IsSerializable {
 
     public void setIconType(DeviceIconType iconType) {
         this.iconType = iconType;
+    }
+
+    @Expose
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_icon_id"))
+    private DeviceIcon icon;
+
+    public DeviceIcon getIcon() {
+        return icon;
+    }
+
+    public void setIcon(DeviceIcon icon) {
+        this.icon = icon;
+    }
+
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_photo_id"))
+    private Picture photo;
+
+    public Picture getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Picture photo) {
+        this.photo = photo;
+    }
+
+    private String phoneNumber;
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    private String plateNumber;
+
+    public String getPlateNumber() {
+        return plateNumber;
+    }
+
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
+    }
+
+    private String vehicleInfo;
+
+    public String getVehicleInfo() {
+        return vehicleInfo;
+    }
+
+    public void setVehicleInfo(String vehicleInfo) {
+        this.vehicleInfo = vehicleInfo;
+    }
+
+    // contains current odometer value in kilometers
+    @Column(nullable = true)
+    private double odometer;
+
+    public double getOdometer() {
+        return odometer;
+    }
+
+    public void setOdometer(double odometer) {
+        this.odometer = odometer;
+    }
+
+    // indicates that odometer must be updated automatically by positions history
+    @Column(nullable = true)
+    private boolean autoUpdateOdometer;
+
+    public boolean isAutoUpdateOdometer() {
+        return autoUpdateOdometer;
+    }
+
+    public void setAutoUpdateOdometer(boolean autoUpdateOdometer) {
+        this.autoUpdateOdometer = autoUpdateOdometer;
+    }
+
+    @Transient
+    private List<Maintenance> maintenances;
+
+    public List<Maintenance> getMaintenances() {
+        return maintenances;
+    }
+
+    public void setMaintenances(List<Maintenance> maintenances) {
+        this.maintenances = maintenances;
+    }
+
+    @Expose
+    @Transient
+    private List<Sensor> sensors;
+
+    public List<Sensor> getSensors() {
+        return sensors;
+    }
+
+    public void setSensors(List<Sensor> sensors) {
+        this.sensors = sensors;
     }
 
     @Override

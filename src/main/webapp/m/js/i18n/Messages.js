@@ -26,7 +26,12 @@ var i18n = {
         course: 'Course',
         address: 'Address',
         follow: 'Follow',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     bg: {
         _name_: 'Български',
@@ -55,7 +60,80 @@ var i18n = {
         course: 'Курс',
         address: 'Адрес',
         follow: 'Следвай',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
+    },
+        cs: {
+        _name_: 'Česky',
+        // login screen
+        language: 'Jazyk',
+        username: 'Uživatel',
+        password: 'Heslo',
+        your_username: 'Vaše uživatelské jméno',
+        your_password: 'Vaše heslo',
+        sign_in: 'Přihlásit',
+        user_name_and_password_must_not_be_empty: 'Uživatelské jméno a heslo nesmí být prázdné',
+        user_name_or_password_is_invalid: 'Uživatelské jméno, nebo heslo je chybné',
+        unexpected_error: 'Neznámá chyba',
+        open_desktop_version: 'Přepnout na verzi pro PC',
+        // sidebar
+        devices: 'Zařízení',
+        logout: 'Odhlásit',
+        // device details
+        select_on_map: 'Najít na mapě',
+        no_data_available: 'Data nejsou dostupná',
+        time: 'Čas',
+        latitude: 'Z. šířka',
+        longitude: 'Z. délka',
+        altitude: 'V/n.m.',
+        speed: 'Rychlost',
+        course: 'Směr',
+        address: 'Adresa',
+        follow: 'Sledovat',
+        stop_following: 'Zastavit sledování',
+        geo_fence: 'Zóny',
+        send_location_by_email: 'Odeslat polohu emailem',
+        send_location_url_by_email: 'Odeslat URL polohy emailem',
+        send_location_by_sms: 'Odeslat polohu přes SMS',
+        send_location_url_by_sms: 'Odeslat URL polohy přes SMS'
+    },
+    da: {
+        _name_: 'Dansk',
+        // login screen
+        language: 'Sprog',
+        username: 'Brugernavn',
+        password: 'Kodeord',
+        your_username: 'Dit brugernavn',
+        your_password: 'Dit kodeord',
+        sign_in: 'Log på',
+        user_name_and_password_must_not_be_empty: 'Brugernavn og kodeord må ikke være blanke',
+        user_name_or_password_is_invalid: 'Brugernavn eller kodeord er forkert',
+        unexpected_error: 'Der er opstået en fejl',
+        open_desktop_version: 'Åben desktop versionen',
+        // sidebar
+        devices: 'Enheder',
+        logout: 'Log af',
+        // device details
+        select_on_map: 'Vælg på kort',
+        no_data_available: 'Ingen data fundet',
+        time: 'Tid',
+        latitude: 'Breddegrad',
+        longitude: 'Længdegrad',
+        altitude: 'Højde',
+        speed: 'Hastighed',
+        course: 'Kurs',
+        address: 'Addresse',
+        follow: 'Følg',
+        stop_following: 'Stop med at følge',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send lokation med Email',
+        send_location_url_by_email: 'Send lokation URL med Email',
+        send_location_by_sms: 'Send lokation med SMS',
+        send_location_url_by_sms: 'Send lokation URL med SMS'
     },
     de: {
         _name_: 'German',
@@ -84,7 +162,12 @@ var i18n = {
         course: 'Richtung',
         address: 'Adresse',
         follow: 'Folgen',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     es: {
         _name_: 'Spanish',
@@ -113,7 +196,46 @@ var i18n = {
         course: 'Curso',
         address: 'Dirección',
         follow: 'Seguir',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
+    },
+    fr: {
+        _name_: 'Français',
+        // login screen
+        language: 'Langue',
+        username: 'Nom',
+        password: 'Mot de passe',
+        your_username: 'votre Nom',
+        your_password: 'votre Mot de passe',
+        sign_in: 'Connexion',
+        user_name_and_password_must_not_be_empty: 'Nom et mot de passe ne doivent pas être vides',
+        user_name_or_password_is_invalid: 'Nom ou mot de passe invalide',
+        unexpected_error: 'Erreur inattendue',
+        open_desktop_version: 'Ouvrir version bureau',
+        // sidebar
+        devices: 'Appareils',
+        logout: 'Déconnexion',
+        // device details
+        select_on_map: 'Sélectionner sur carte',
+        no_data_available: 'Aucune donnée disponible',
+        time: 'Heure',
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        altitude: 'Altitude',
+        speed: 'Vitesse',
+        course: 'Cap',
+        address: 'Adresse',
+        follow: 'Poursuite',
+        stop_following: 'Arrêt de la poursuite',
+        geo_fence: 'Limite-Géo',
+        send_location_by_email: 'Envoyer position par Email',
+        send_location_url_by_email: 'Envoyer l\'URL de la position par Email',
+        send_location_by_sms: 'Envoyer position par SMS',
+        send_location_url_by_sms: 'Envoyer l\'URL de la position par SMS'
     },
     hu: {
         _name_: 'Hungarian',
@@ -142,7 +264,12 @@ var i18n = {
         course: 'Irány',
         address: 'Cím',
         follow: 'Követés',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     it: {
         _name_: 'Italian',
@@ -171,7 +298,12 @@ var i18n = {
         course: 'Percorso',
         address: 'Indirizzo',
         follow: 'Segui',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     lt: {
         _name_: 'Latvian',
@@ -200,10 +332,15 @@ var i18n = {
         course: 'Kursas',
         address: 'Adresas',
         follow: 'Centruoti',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     nl: {
-        _name_: 'Danish',
+        _name_: 'Dutch',
         // login screen
         language: 'Language',
         username: 'Gebruiker',
@@ -229,7 +366,12 @@ var i18n = {
         course: 'Richting',
         address: 'Adres',
         follow: 'Volgen',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     pl: {
         _name_: 'Polish',
@@ -258,7 +400,12 @@ var i18n = {
         course: 'Przebieg',
         address: 'Adres',
         follow: 'Obserwuj',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     pt_PT: {
         _name_: 'Portuguese',
@@ -287,7 +434,46 @@ var i18n = {
         course: 'Rota',
         address: 'Morada',
         follow: 'Seguir',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
+    },
+    pt_BR: {
+        _name_: 'Portugu\u00EAs BR',
+        // login screen
+        language: 'Idioma',
+        username: 'Usu\u00E1rio',
+        password: 'Senha',
+        your_username: 'Seu nome de usu\u00E1rio',
+        your_password: 'Sua senha',
+        sign_in: 'Entrar',
+        user_name_and_password_must_not_be_empty: 'Usu\u00E1rio e/ou senha n\u00E3o podem ficar em branco',
+        user_name_or_password_is_invalid: 'Usu\u00E1rio e/ou senha inv\u00E1lidos',
+        unexpected_error: 'Erro inesperado',
+        open_desktop_version: 'Abrir vers\u00E3o desktop',
+        // sidebar
+        devices: 'Dispositivos',
+        logout: 'Sair',
+        // device details
+        select_on_map: 'Selecionar no mapa',
+        no_data_available: 'Sem dados dispon\u00EDveis',
+        time: 'Hora',
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        altitude: 'Altitude',
+        speed: 'Velocidade',
+        course: 'Rota',
+        address: 'Endere\u00E7o',
+        follow: 'Seguir',
+        stop_following: 'Parar de seguir',
+        geo_fence: 'Cerca virtual',
+        send_location_by_email: 'Enviar localiza\u00E7\u00E3o por Email',
+        send_location_url_by_email: 'Enviar URL de localiza\u00E7\u00E3o por Email',
+        send_location_by_sms: 'Enviar localiza\u00E7\u00E3o por SMS',
+        send_location_url_by_sms: 'Enviar URL de localiza\u00E7\u00E3o por SMS'
     },
     ru: {
         _name_: 'Russian',
@@ -316,7 +502,12 @@ var i18n = {
         course: 'Курс',
         address: 'Адрес',
         follow: 'Отслеживать',
-        stop_following: 'Прекратить отслеживание'
+        stop_following: 'Прекратить отслеживание',
+        geo_fence: 'Геозона',
+        send_location_by_email: 'Отправить по эл. почте',
+        send_location_url_by_email: 'Отправить ссылку по эл. почте',
+        send_location_by_sms: 'Отправить по SMS',
+        send_location_url_by_sms: 'Отправить ссылку по SMS'
     },
     tl: {
         _name_: 'Tagalog',
@@ -345,7 +536,12 @@ var i18n = {
         course: 'Course',
         address: 'Address',
         follow: 'Sundin',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     sv_SE: {
         _name_: 'Svenska',
@@ -374,6 +570,11 @@ var i18n = {
         course: 'Kurs',
         address: 'Adress',
         follow: 'F\u00f6lj',
-        stop_following: 'Stop following'
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     }
 };

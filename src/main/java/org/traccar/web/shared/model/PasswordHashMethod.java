@@ -15,10 +15,12 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public enum PasswordHashMethod {
+public enum PasswordHashMethod implements IsSerializable {
     PLAIN("plain") {
         @Override
         public String doHash(String s) {

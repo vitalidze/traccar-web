@@ -166,6 +166,10 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             if (!user.getNotificationEvents().contains(event.getType())) {
                 return;
             }
+            // check whether user account is blocked or expired
+            if (user.isBlocked() || user.isExpired()) {
+                return;
+            }
             if (event.getType() == DeviceEventType.GEO_FENCE_ENTER || event.getType() == DeviceEventType.GEO_FENCE_EXIT) {
                 // check whether user has access to the geo-fence
                 if (!user.getAdmin() && !user.hasAccessTo(event.getGeoFence())) {
@@ -305,7 +309,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     public void init() throws ServletException {
         super.init();
 
-        scheduler.scheduleAtFixedRate(notificationSender, 0, 1, TimeUnit.MINUTES);
+        scheduler.scheduleWithFixedDelay(notificationSender, 0, 1, TimeUnit.MINUTES);
     }
 
     @Transactional
@@ -408,6 +412,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             testDevice = new Device();
             testDevice.setName("Test-Device");
             testDevice.setUniqueId("123");
+            testDevice.setMaintenances(new ArrayList<Maintenance>());
         } else {
             testDevice = devices.get(0);
         }
@@ -418,6 +423,12 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         } else {
             testGeoFence = geoFences.get(0);
         }
+        Maintenance testMaintenance;
+        if (testDevice.getMaintenances().isEmpty()) {
+            testMaintenance = new Maintenance("Oil change");
+        } else {
+            testMaintenance = testDevice.getMaintenances().get(0);
+        }
 
         Position testPosition = new Position();
         Calendar c = Calendar.getInstance();
@@ -426,7 +437,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         testPosition.setTime(c.getTime());
 
         Engine engine = getTemplateEngine();
-        Map<String, Object> model = getTemplateModel(new DeviceEvent(new Date(), testDevice, testPosition, testGeoFence));
+        Map<String, Object> model = getTemplateModel(new DeviceEvent(new Date(), testDevice, testPosition, testGeoFence, testMaintenance));
 
         String transformedSubject = engine.transform(template.getSubject(), model);
         String transformedBody = engine.transform(template.getBody(), model);
@@ -445,6 +456,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         model.put(MessagePlaceholder.geoFenceName.name(), event.getGeoFence() == null ? "N/A" : event.getGeoFence().getName());
         model.put(MessagePlaceholder.eventTime.name(), event.getTime());
         model.put(MessagePlaceholder.positionTime.name(), event.getPosition() == null ? null : event.getPosition().getTime());
+        model.put(MessagePlaceholder.maintenanceName.name(), event.getMaintenance() == null ? "N/A" : event.getMaintenance().getName());
         return model;
     }
 
@@ -543,6 +555,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 .replace("{1}", "${deviceName}")
                 .replace("{2}", "${geoFenceName}")
                 .replace("{3}", "${eventTime}")
-                .replace("{4}", "${positionTime}");
+                .replace("{4}", "${positionTime}")
+                .replace("{5}", "${maintenanceName}");
     }
 }

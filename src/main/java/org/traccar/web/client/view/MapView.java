@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.sencha.gxt.data.shared.ListStore;
 import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Map;
@@ -146,8 +147,9 @@ public class MapView {
         return $wnd.getTileURL;
     }-*/;
 
-    public MapView(MapHandler mapHandler) {
+    public MapView(MapHandler mapHandler, ListStore<Device> deviceStore) {
         this.mapHandler = mapHandler;
+        this.popup = new PositionInfoPopup(deviceStore);
         contentPanel = new ContentPanel();
         contentPanel.setHeadingText(i18n.map());
 
@@ -233,7 +235,7 @@ public class MapView {
     private final GeoFenceRenderer geoFenceRenderer;
 
     public void clearLatestPositions() {
-        latestPositionRenderer.clearPositionsAndTitles();
+        latestPositionRenderer.clearPositionsAndTitlesAndAlerts();
     }
 
     public void showLatestPositions(List<Position> positions) {
@@ -244,6 +246,10 @@ public class MapView {
 
     public void showDeviceName(List<Position> positions) {
         latestPositionRenderer.showDeviceName(positions);
+    }
+
+    public void showAlerts(List<Position> positions) {
+        latestPositionRenderer.showAlerts(positions);
     }
 
     public void showLatestTrackPositions(List<Position> positions) {
@@ -324,7 +330,7 @@ public class MapView {
         latestPositionRenderer.catchPosition(position);
     }
 
-    private PositionInfoPopup popup = new PositionInfoPopup();
+    private final PositionInfoPopup popup;
 
     private void showPopup(Position position) {
         popup.show(this, position);
@@ -336,6 +342,10 @@ public class MapView {
 
     public void updateIcon(Device device) {
         latestPositionRenderer.updateIcon(device);
+    }
+
+    public void updateAlert(Device device, boolean show) {
+        latestPositionRenderer.updateAlert(device, show);
     }
 
     public void drawGeoFence(GeoFence geoFence, boolean drawTitle) {

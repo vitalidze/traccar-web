@@ -74,7 +74,6 @@ public class NotificationTemplate implements IsSerializable {
 
         if (!getSettings().equals(that.getSettings())) return false;
         return getType() == that.getType();
-
     }
 
     @Override

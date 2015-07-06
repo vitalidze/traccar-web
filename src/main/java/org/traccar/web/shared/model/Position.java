@@ -214,14 +214,14 @@ public class Position implements IsSerializable, Cloneable {
     }
 
     @GwtTransient
-    private transient PositionIconType iconType;
+    private transient PositionIcon icon;
 
-    public PositionIconType getIconType() {
-        return iconType;
+    public PositionIcon getIcon() {
+        return icon;
     }
 
-    public void setIconType(PositionIconType iconType) {
-        this.iconType = iconType;
+    public void setIcon(PositionIcon icon) {
+        this.icon = icon;
     }
 
     @GwtTransient

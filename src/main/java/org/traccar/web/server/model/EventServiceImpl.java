@@ -25,12 +25,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.servlet.ServletException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -98,7 +93,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
 
             if (lastScannedPositionId == null) {
                 List<Long> latestPositionId = entityManager.get().createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class).getResultList();
-                if (latestPositionId.isEmpty()) {
+                if (latestPositionId.isEmpty() || latestPositionId.get(0) == null) {
                     return;
                 } else {
                     lastScannedPositionId = latestPositionId.get(0);
@@ -162,14 +157,122 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         }
     }
 
+    public static class OdometerUpdater extends ScheduledTask {
+        @Inject
+        Provider<EntityManager> entityManager;
+
+        Map<Long, DeviceState> deviceState = new HashMap<Long, DeviceState>();
+
+        /**
+         * Scanning is based on assumption that position identifiers are incremented sequentially
+         */
+        Long lastScannedPositionId;
+
+        @Override
+        @Transactional
+        public void doWork() throws Exception {
+            List<Device> devices = entityManager.get().createQuery("SELECT d FROM Device d WHERE d.autoUpdateOdometer=:b", Device.class)
+                    .setParameter("b", Boolean.TRUE).getResultList();
+            if (devices.isEmpty()) {
+                return;
+            }
+
+            // load maintenances
+            Map<Device, List<Maintenance>> maintenances = new HashMap<Device, List<Maintenance>>();
+            for (Maintenance maintenance : entityManager.get().createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices", Maintenance.class)
+                    .setParameter("devices", devices).getResultList()) {
+                List<Maintenance> deviceMaintenances = maintenances.get(maintenance.getDevice());
+                if (deviceMaintenances == null) {
+                    deviceMaintenances = new LinkedList<Maintenance>();
+                    maintenances.put(maintenance.getDevice(), deviceMaintenances);
+                }
+                deviceMaintenances.add(maintenance);
+            }
+
+            // find latest position id for the first scan
+            if (lastScannedPositionId == null) {
+                List<Long> latestPositionId = entityManager.get().createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class).getResultList();
+                if (latestPositionId.isEmpty() || latestPositionId.get(0) == null) {
+                    return;
+                } else {
+                    lastScannedPositionId = latestPositionId.get(0);
+                }
+            }
+
+            // load all positions since latest
+            List<Position> positions = entityManager.get().createQuery(
+                    "SELECT p FROM Position p INNER JOIN p.device d WHERE p.id >= :from AND d.autoUpdateOdometer=:b ORDER BY d.id, p.time ASC", Position.class)
+                    .setParameter("b", Boolean.TRUE)
+                    .setParameter("from", lastScannedPositionId)
+                    .getResultList();
+
+            Position prevPosition = null;
+            Device device = null;
+            DeviceState state = null;
+            for (Position position : positions) {
+                // find current device and it's state
+                if (device == null || device.getId() != position.getDevice().getId()) {
+                    device = position.getDevice();
+                    state = deviceState.get(device.getId());
+                    if (state == null) {
+                        state = new DeviceState();
+                        deviceState.put(device.getId(), state);
+                        prevPosition = null;
+                    } else {
+                        prevPosition = entityManager.get().find(Position.class, state.latestPositionId);
+                    }
+                }
+
+                // calculate
+                if (prevPosition != null) {
+                    double distance = GeoFenceCalculator.getDistance(
+                            prevPosition.getLongitude(), prevPosition.getLatitude(),
+                            position.getLongitude(), position.getLatitude());
+
+                    if (distance > 0.003) {
+                        double prevOdometer = device.getOdometer();
+                        device.setOdometer(prevOdometer + distance);
+                        // post maintenance overdue events
+                        List<Maintenance> deviceMaintenances = maintenances.get(device);
+                        if (deviceMaintenances != null) {
+                            for (Maintenance maintenance : deviceMaintenances) {
+                                double serviceThreshold = maintenance.getLastService() + maintenance.getServiceInterval();
+                                if (prevOdometer < serviceThreshold && device.getOdometer() >= serviceThreshold) {
+                                    DeviceEvent event = new DeviceEvent();
+                                    event.setTime(new Date());
+                                    event.setDevice(device);
+                                    event.setType(DeviceEventType.MAINTENANCE_REQUIRED);
+                                    event.setPosition(position);
+                                    event.setMaintenance(maintenance);
+                                    entityManager.get().persist(event);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // update prev position and state
+                state.latestPositionId = position.getId();
+                prevPosition = position;
+                // update latest position id
+                lastScannedPositionId = Math.max(lastScannedPositionId, position.getId());
+            }
+        }
+    }
+
     @Inject
     private OfflineDetector offlineDetector;
-    private ScheduledFuture<?> offlineDetectorFuture;
     @Inject
     private GeoFenceDetector geoFenceDetector;
-    private ScheduledFuture<?> geoFenceDetectorFuture;
+    @Inject
+    private OdometerUpdater odometerUpdater;
+    private Map<Class<?>, ScheduledFuture<?>> futures = new HashMap<Class<?>, ScheduledFuture<?>>();
+
     @Inject
     private Provider<ApplicationSettings> applicationSettings;
+
+    @Inject
+    private Provider<EntityManager> entityManager;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
@@ -178,35 +281,22 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         super.init();
 
         if (applicationSettings.get().isEventRecordingEnabled()) {
-            startOfflineDetector();
-            startGeoFenceDetector();
+            startTasks();
+            setUpOdometerUpdater();
         }
     }
 
-    private synchronized void startOfflineDetector() {
-        if (offlineDetectorFuture == null) {
-            offlineDetectorFuture = scheduler.scheduleAtFixedRate(offlineDetector, 0, 1, TimeUnit.MINUTES);
+    private synchronized void startTasks() {
+        for (ScheduledTask task : new ScheduledTask[] { offlineDetector, geoFenceDetector }) {
+            futures.put(task.getClass(), scheduler.scheduleWithFixedDelay(task, 0, 1, TimeUnit.MINUTES));
         }
     }
 
-    private synchronized void stopOfflineDetector() {
-        if (offlineDetectorFuture != null) {
-            offlineDetectorFuture.cancel(true);
-            offlineDetectorFuture = null;
+    private synchronized void stopTasks() {
+        for (ScheduledFuture<?> future : futures.values()) {
+            future.cancel(true);
         }
-    }
-
-    private synchronized void startGeoFenceDetector() {
-        if (geoFenceDetectorFuture == null) {
-            geoFenceDetectorFuture = scheduler.scheduleAtFixedRate(geoFenceDetector, 0, 1, TimeUnit.MINUTES);
-        }
-    }
-
-    private synchronized void stopGeoFenceDetector() {
-        if (geoFenceDetectorFuture != null) {
-            geoFenceDetectorFuture.cancel(true);
-            geoFenceDetectorFuture = null;
-        }
+        futures.clear();
     }
 
     @Transactional
@@ -214,11 +304,35 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
     @Override
     public void applicationSettingsChanged() {
         if (applicationSettings.get().isEventRecordingEnabled()) {
-            startOfflineDetector();
-            startGeoFenceDetector();
+            startTasks();
         } else {
-            stopOfflineDetector();
-            stopGeoFenceDetector();
+            stopTasks();
+        }
+    }
+
+    @RequireUser
+    @Transactional
+    @Override
+    public void devicesChanged() {
+        if (applicationSettings.get().isEventRecordingEnabled()) {
+            setUpOdometerUpdater();
+        }
+    }
+
+    private synchronized void setUpOdometerUpdater() {
+        Number count = (Number) entityManager.get().createQuery("SELECT COUNT(d.id) FROM Device d WHERE d.autoUpdateOdometer=:b")
+                .setParameter("b", Boolean.TRUE)
+                .getSingleResult();
+        ScheduledFuture<?> f = futures.get(odometerUpdater.getClass());
+        if (count.intValue() > 0) {
+            if (f == null) {
+                futures.put(odometerUpdater.getClass(), scheduler.scheduleWithFixedDelay(odometerUpdater, 0, 1, TimeUnit.MINUTES));
+            }
+        } else {
+            if (f != null) {
+                f.cancel(true);
+                futures.remove(odometerUpdater.getClass());
+            }
         }
     }
 }

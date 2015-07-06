@@ -15,8 +15,6 @@
  */
 package org.traccar.web.server.model;
 
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -92,13 +90,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser
     @Override
-    public User authenticated() throws IllegalStateException {
+    public User authenticated() {
         return fillUserSettings(new User(getSessionUser()));
     }
 
     @Transactional
+    @LogCall("Login '{0}'")
     @Override
-    public User login(String login, String password, boolean passwordHashed) {
+    public User login(String login, String password, boolean passwordHashed) throws TraccarException {
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT x FROM User x WHERE x.login = :login", User.class);
@@ -113,6 +112,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             throw new IllegalStateException();
         }
         User user = results.get(0);
+
+        if (user.isBlocked()) {
+            throw new UserBlockedException();
+        }
+
+        if (user.isExpired()) {
+            throw new UserExpiredException(user.getExpirationDate());
+        }
 
         /*
          * If hash method has changed in application settings and password parameter is not hashed, rehash user password
@@ -129,7 +136,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @Override
-    public User login(String login, String password) {
+    public User login(String login, String password) throws TraccarException {
         return this.login(login, password, false);
     }
 
@@ -141,6 +148,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     }
 
     @Transactional
+    @LogCall("Register '{0}'")
     @Override
     public User register(String login, String password) {
         if (getApplicationSettings().getRegistrationEnabled()) {
@@ -180,10 +188,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         } else {
             users.addAll(currentUser.getAllManagedUsers());
         }
+        List<User> result = new ArrayList<User>(users.size());
         for (User user : users) {
-            fillUserSettings(user);
+            result.add(fillUserSettings(unproxy(user)));
         }
-        return users;
+        return result;
     }
 
     @Transactional
@@ -244,6 +253,12 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 currentUser.setManager(user.getManager());
                 currentUser.setEmail(user.getEmail());
                 currentUser.setNotificationEvents(user.getTransferNotificationEvents());
+                currentUser.setCompanyName(user.getCompanyName());
+                currentUser.setFirstName(user.getFirstName());
+                currentUser.setLastName(user.getLastName());
+                currentUser.setPhoneNumber(user.getPhoneNumber());
+                currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
+                currentUser.setExpirationDate(user.getExpirationDate());
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
@@ -297,11 +312,50 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public List<Device> getDevices() {
+        return getDevices(true);
+    }
+
+    private List<Device> getDevices(boolean full) {
         User user = getSessionUser();
+        List<Device> devices;
         if (user.getAdmin()) {
-            return getSessionEntityManager().createQuery("SELECT x FROM Device x LEFT JOIN FETCH x.latestPosition").getResultList();
+            devices = getSessionEntityManager().createQuery("SELECT x FROM Device x LEFT JOIN FETCH x.latestPosition", Device.class).getResultList();
+        } else {
+            devices = new LinkedList<Device>(user.getAllAvailableDevices());
         }
-        return new LinkedList<Device>(user.getAllAvailableDevices());
+        if (full && !devices.isEmpty()) {
+            List<Maintenance> maintenaces = getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices ORDER BY m.indexNo ASC", Maintenance.class)
+                    .setParameter("devices", devices)
+                    .getResultList();
+            for (Maintenance maintenance : maintenaces) {
+                Device device = maintenance.getDevice();
+                if (device.getMaintenances() == null) {
+                    device.setMaintenances(new ArrayList<Maintenance>());
+                }
+                device.getMaintenances().add(maintenance);
+            }
+
+            List<Sensor> sensors = getSessionEntityManager().createQuery("SELECT s FROM Sensor s WHERE s.device IN :devices ORDER BY s.id ASC", Sensor.class)
+                    .setParameter("devices", devices)
+                    .getResultList();
+            for (Sensor sensor : sensors) {
+                Device device = sensor.getDevice();
+                if (device.getSensors() == null) {
+                    device.setSensors(new ArrayList<Sensor>());
+                }
+                device.getSensors().add(sensor);
+            }
+
+            for (Device device : devices) {
+                if (device.getMaintenances() == null) {
+                    device.setMaintenances(Collections.<Maintenance>emptyList());
+                }
+                if (device.getSensors() == null) {
+                    device.setSensors(Collections.<Sensor>emptyList());
+                }
+            }
+        }
+        return devices;
     }
 
     @Transactional
@@ -315,17 +369,33 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             throw new ValidationException();
         }
 
+        User user = getSessionUser();
+
+        if (!user.getAdmin() &&
+            user.getMaxNumOfDevices() != null &&
+            getDevices(false).size() >= user.getMaxNumOfDevices()) {
+            throw new MaxDeviceNumberReachedException(user.getMaxNumOfDevices());
+        }
+
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<Device> query = entityManager.createQuery("SELECT x FROM Device x WHERE x.uniqueId = :id", Device.class);
         query.setParameter("id", device.getUniqueId());
         List<Device> results = query.getResultList();
 
-        User user = getSessionUser();
-
         if (results.isEmpty()) {
             device.setUsers(new HashSet<User>(1));
             device.getUsers().add(user);
             entityManager.persist(device);
+            for (Maintenance maintenance : device.getMaintenances()) {
+                maintenance.setDevice(device);
+                entityManager.persist(maintenance);
+            }
+            for (Sensor sensor : device.getSensors()) {
+                sensor.setDevice(device);
+                sensor.setId(0);
+                entityManager.persist(sensor);
+            }
+            eventService.devicesChanged();
             return device;
         } else {
             throw new DeviceExistsException();
@@ -353,9 +423,100 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             Device tmp_device = entityManager.find(Device.class, device.getId());
             tmp_device.setName(device.getName());
             tmp_device.setUniqueId(device.getUniqueId());
+            tmp_device.setDescription(device.getDescription());
+            tmp_device.setPhoneNumber(device.getPhoneNumber());
+            tmp_device.setPlateNumber(device.getPlateNumber());
+            tmp_device.setVehicleInfo(device.getVehicleInfo());
             tmp_device.setTimeout(device.getTimeout());
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
             tmp_device.setIconType(device.getIconType());
+            tmp_device.setIcon(device.getIcon() == null ? null : entityManager.find(DeviceIcon.class, device.getIcon().getId()));
+            tmp_device.setPhoto(device.getPhoto() == null ? null : entityManager.find(Picture.class, device.getPhoto().getId()));
+
+            double prevOdometer = tmp_device.getOdometer();
+            tmp_device.setOdometer(device.getOdometer());
+            tmp_device.setAutoUpdateOdometer(device.isAutoUpdateOdometer());
+
+            // process maintenances
+            tmp_device.setMaintenances(new ArrayList<Maintenance>(device.getMaintenances()));
+            List<Maintenance> currentMaintenances = new LinkedList<Maintenance>(getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device = :device", Maintenance.class)
+                    .setParameter("device", device)
+                    .getResultList());
+            // update and delete existing
+            for (Iterator<Maintenance> it = currentMaintenances.iterator(); it.hasNext(); ) {
+                Maintenance existingMaintenance = it.next();
+                boolean contains = false;
+                for (int index = 0; index < device.getMaintenances().size(); index++) {
+                    Maintenance updatedMaintenance = device.getMaintenances().get(index);
+                    if (updatedMaintenance.getId() == existingMaintenance.getId()) {
+                        existingMaintenance.copyFrom(updatedMaintenance);
+                        updatedMaintenance.setDevice(tmp_device);
+                        device.getMaintenances().remove(index);
+                        contains = true;
+                        break;
+                    }
+                }
+                if (!contains) {
+                    getSessionEntityManager().remove(existingMaintenance);
+                    it.remove();
+                }
+            }
+            // add new
+            for (Maintenance maintenance : device.getMaintenances()) {
+                maintenance.setDevice(tmp_device);
+                getSessionEntityManager().persist(maintenance);
+                currentMaintenances.add(maintenance);
+            }
+            // post events if odometer changed
+            if (Math.abs(prevOdometer - device.getOdometer()) >= 0.000001) {
+                for (Maintenance maintenance : currentMaintenances) {
+                    double serviceThreshold = maintenance.getLastService() + maintenance.getServiceInterval();
+                    if (prevOdometer < serviceThreshold && device.getOdometer() >= serviceThreshold) {
+                        DeviceEvent event = new DeviceEvent();
+                        event.setTime(new Date());
+                        event.setDevice(device);
+                        event.setType(DeviceEventType.MAINTENANCE_REQUIRED);
+                        event.setPosition(tmp_device.getLatestPosition());
+                        event.setMaintenance(maintenance);
+                        getSessionEntityManager().persist(event);
+                    }
+                }
+            }
+
+            // process sensors
+            tmp_device.setSensors(new ArrayList<Sensor>(device.getSensors()));
+            List<Sensor> currentSensors = new LinkedList<Sensor>(getSessionEntityManager().createQuery("SELECT s FROM Sensor s WHERE s.device = :device", Sensor.class)
+                    .setParameter("device", device)
+                    .getResultList());
+            // update and delete existing
+            for (Iterator<Sensor> it = currentSensors.iterator(); it.hasNext(); ) {
+                Sensor existingSensor = it.next();
+                boolean contains = false;
+                for (int index = 0; index < device.getSensors().size(); index++) {
+                    Sensor updatedSensor = device.getSensors().get(index);
+                    if (updatedSensor.getId() == existingSensor.getId()) {
+                        existingSensor.copyFrom(updatedSensor);
+                        updatedSensor.setDevice(tmp_device);
+                        device.getSensors().remove(index);
+                        contains = true;
+                        break;
+                    }
+                }
+                if (!contains) {
+                    getSessionEntityManager().remove(existingSensor);
+                    it.remove();
+                }
+            }
+            // add new
+            for (Sensor sensor : device.getSensors()) {
+                sensor.setId(0);
+                sensor.setDevice(tmp_device);
+                getSessionEntityManager().persist(sensor);
+            }
+
+            // notify event service about updated device
+            eventService.devicesChanged();
+
             return tmp_device;
         } else {
             throw new DeviceExistsException();
@@ -396,7 +557,16 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 geoFence.getDevices().remove(device);
             }
 
+            query = entityManager.createQuery("DELETE FROM Maintenance x WHERE x.device = :device");
+            query.setParameter("device", device);
+            query.executeUpdate();
+
+            query = entityManager.createQuery("DELETE FROM Sensor x WHERE x.device = :device");
+            query.setParameter("device", device);
+            query.executeUpdate();
+
             entityManager.remove(device);
+            eventService.devicesChanged();
         }
         return device;
     }
@@ -463,7 +633,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Override
     public List<Position> getLatestPositions() {
         List<Position> positions = new LinkedList<Position>();
-        List<Device> devices = getDevices();
+        List<Device> devices = getDevices(false);
         List<GeoFence> geoFences = getGeoFences(false);
         GeoFenceCalculator geoFenceCalculator = new GeoFenceCalculator(getGeoFences());
         if (devices != null && !devices.isEmpty()) {
@@ -480,6 +650,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                         }
                     }
 
+                    position.setDistance(device.getOdometer());
                     positions.add(position);
                 }
             }
@@ -492,7 +663,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Override
     public List<Position> getLatestNonIdlePositions() {
         List<Position> positions = new LinkedList<Position>();
-        List<Device> devices = getDevices();
+        List<Device> devices = getDevices(false);
         if (devices != null && !devices.isEmpty()) {
             EntityManager entityManager = getSessionEntityManager();
 
@@ -601,6 +772,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             user.setManager(_user.getManager());
             user.setReadOnly(_user.getReadOnly());
+            user.setExpirationDate(_user.getExpirationDate());
+            user.setBlocked(_user.isBlocked());
+            user.setMaxNumOfDevices(_user.getMaxNumOfDevices());
         }
     }
 
@@ -639,10 +813,16 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     private User fillUserSettings(User user) {
         if (user.getUserSettings() instanceof HibernateProxy) {
-            UserSettings settings = (UserSettings) ((HibernateProxy) user.getUserSettings()).getHibernateLazyInitializer().getImplementation();
-            user.setUserSettings(settings);
+            user.setUserSettings(unproxy(user.getUserSettings()));
         }
         return user;
+    }
+
+    private <T> T unproxy(T entity) {
+        if (entity instanceof HibernateProxy) {
+            return (T) ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();
+        }
+        return entity;
     }
 
     @Transactional
@@ -700,7 +880,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         geoFence.copyFrom(updatedGeoFence);
 
         // used to check access to the device
-        List<Device> devices = getDevices();
+        List<Device> devices = getDevices(false);
 
         // process devices
         for (Iterator<Device> it = geoFence.getDevices().iterator(); it.hasNext(); ) {
