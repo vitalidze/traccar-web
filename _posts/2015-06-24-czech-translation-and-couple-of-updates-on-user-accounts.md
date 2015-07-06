@@ -14,6 +14,7 @@ Today's release contains new translation to [Czech language](/features/czech.htm
 Please note that I will be on vacation since 25.06.2015 to 06.07.2015 so:
 
 1) before upgarding to this build take a backup of the current version (as I always recommend to do just in case)
+
 2) if you experience any issues with latest build please submit them to the [issue tracker](https://github.com/vitalidze/traccar-web/issues) and if they are critical then just roll back to the previous version.
 
 For the brave ones that want to contribute their translations here is the list of strings that were added since previous release (on 14th June 2015, lines starting with '+' were added):
