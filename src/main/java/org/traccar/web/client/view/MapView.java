@@ -38,6 +38,7 @@ import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
+import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
@@ -72,6 +73,7 @@ public class MapView {
     private Vector vectorLayer;
     private Markers markerLayer;
     private Vector geofenceLayer;
+    private TMS seamarkLayer;
 
     private Messages i18n = GWT.create(Messages.class);
 
@@ -179,9 +181,15 @@ public class MapView {
 
         initMapLayers(map);
 
+        List<UserSettings.OverlayType> userOverlays = ApplicationContext.getInstance().getUserSettings().overlays();
+
         map.addLayer(geofenceLayer);
         map.addLayer(vectorLayer);
         map.addLayer(markerLayer);
+
+        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.GEO_FENCES));
+        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.VECTOR));
+        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.MARKERS));
 
         TMSOptions seamarkOptions = new TMSOptions();
         seamarkOptions.setType("png");
@@ -189,7 +197,9 @@ public class MapView {
         seamarkOptions.setNumZoomLevels(20);
         seamarkOptions.setIsBaseLayer(false);
         seamarkOptions.setDisplayOutsideMaxExtent(true);
-        map.addLayer(new TMS(i18n.seamark(), "http://t1.openseamap.org/seamark/", seamarkOptions));
+        seamarkLayer = new TMS(i18n.seamark(), "http://t1.openseamap.org/seamark/", seamarkOptions);
+        map.addLayer(seamarkLayer);
+        seamarkLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.SEAMARK));
 
         map.addControl(new LayerSwitcher());
         map.addControl(new ScaleLine());
