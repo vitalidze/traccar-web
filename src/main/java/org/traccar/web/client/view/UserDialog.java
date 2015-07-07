@@ -117,19 +117,6 @@ public class UserDialog implements Editor<User> {
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    static class NoScrollbarGridView<M> extends GridView<M> {
-        public NoScrollbarGridView() {
-            this.scrollOffset = 1;
-            this.vbar = false;
-            this.setAdjustForHScroll(false);
-        }
-
-        @Override
-        protected int getScrollAdjust() {
-            return 0;
-        }
-    }
-
     public UserDialog(User user, UserHandler userHandler) {
         this.userHandler = userHandler;
 

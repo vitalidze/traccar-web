@@ -168,16 +168,16 @@ public class MapView {
 
         VectorOptions vectorOptions = new VectorOptions();
         vectorOptions.setStyle(style);
-        vectorLayer = new Vector("Vector", vectorOptions);
+        vectorLayer = new Vector(i18n.overlayType(UserSettings.OverlayType.VECTOR), vectorOptions);
 
         MarkersOptions markersOptions = new MarkersOptions();
-        markerLayer = new Markers(i18n.markers(), markersOptions);
+        markerLayer = new Markers(i18n.overlayType(UserSettings.OverlayType.MARKERS), markersOptions);
 
         vectorOptions = new VectorOptions();
         OpenLayersStyle defaultStyle = new OpenLayersStyle(new StyleRules(), new StyleOptions());
         defaultStyle.setJSObject(getGeoFenceLineStyle(map.getJSObject()));
         vectorOptions.setStyleMap(new StyleMap(defaultStyle, defaultStyle, null));
-        geofenceLayer = new Vector(i18n.geoFences(), vectorOptions);
+        geofenceLayer = new Vector(i18n.overlayType(UserSettings.OverlayType.GEO_FENCES), vectorOptions);
 
         initMapLayers(map);
 
@@ -197,7 +197,7 @@ public class MapView {
         seamarkOptions.setNumZoomLevels(20);
         seamarkOptions.setIsBaseLayer(false);
         seamarkOptions.setDisplayOutsideMaxExtent(true);
-        seamarkLayer = new TMS(i18n.seamark(), "http://t1.openseamap.org/seamark/", seamarkOptions);
+        seamarkLayer = new TMS(i18n.overlayType(UserSettings.OverlayType.SEAMARK), "http://t1.openseamap.org/seamark/", seamarkOptions);
         map.addLayer(seamarkLayer);
         seamarkLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.SEAMARK));
 

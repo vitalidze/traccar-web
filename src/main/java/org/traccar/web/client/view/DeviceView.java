@@ -27,6 +27,7 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
+import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
 import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.ListView;
@@ -67,6 +68,7 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.UserSettings;
 
 public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDoubleClickEvent.CellDoubleClickHandler {
 
@@ -139,6 +141,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @UiField
     Grid<Device> grid;
+
+    @UiField(provided = true)
+    TabItemConfig geoFencesTabConfig;
 
     @UiField(provided = true)
     ListStore<GeoFence> geoFenceStore;
@@ -227,6 +232,8 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         columnModel = new ColumnModel<Device>(columnConfigList);
 
         // geo-fences
+        geoFencesTabConfig = new TabItemConfig(i18n.overlayType(UserSettings.OverlayType.GEO_FENCES));
+        
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
 
         geoFenceList = new ListView<GeoFence, String>(geoFenceStore, geoFenceProperties.name()) {

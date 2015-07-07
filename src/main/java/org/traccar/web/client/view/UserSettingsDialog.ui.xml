@@ -1,11 +1,11 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder
     xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
   	xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
   	xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
-  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
+  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+    xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid">
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
     <ui:attributes width="1" height="-1" />
@@ -23,7 +23,11 @@
 
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="doublePropertyEditor" />
 
-  <gxt:Window ui:field="window" pixelSize="300, 280" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view" />
+  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="overlayTypeStore" />
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
+
+  <gxt:Window ui:field="window" pixelSize="300, 400" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.speedUnits}" labelWidth="160">
@@ -84,6 +88,13 @@
                                                 allowNegative="false"
                                                 allowDecimals="false"
                                                 allowBlank="false" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.overlays}" labelWidth="160">
+                          <form:widget>
+                              <grid:Grid ui:field="grid" store="{overlayTypeStore}" cm="{columnModel}" view="{view}" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>

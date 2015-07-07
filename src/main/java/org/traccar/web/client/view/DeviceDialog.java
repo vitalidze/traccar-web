@@ -25,6 +25,7 @@ import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
@@ -90,6 +91,9 @@ public class DeviceDialog implements Editor<Device> {
     NumberField<Double> idleSpeedThreshold;
 
     @UiField
+    FieldLabel labelMarkers;
+
+    @UiField
     HorizontalLayoutContainer panelMarkers;
 
     @UiField
@@ -110,6 +114,9 @@ public class DeviceDialog implements Editor<Device> {
     final MaintenanceEditor maintenanceEditor;
 
     MarkerIcon selectedIcon;
+
+    @UiField
+    Messages i18n;
 
     final Device device;
 
@@ -136,6 +143,8 @@ public class DeviceDialog implements Editor<Device> {
 
         maintenanceEditor = new MaintenanceEditor(device, deviceStore);
         maintenanceTab.add(maintenanceEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));
+
+        labelMarkers.setText(i18n.overlayType(UserSettings.OverlayType.MARKERS));
     }
 
     public void show() {
