@@ -121,6 +121,32 @@ curl -v --cookie "JSESSIONID=xxxxxxxxx" -X POST --data "[{\"id\":3,\"uniqueId\":
 
 In this concrete example there are no positions in reply.
 
+* Add new device (`addDevice` method)
+
+{% highlight bash %}
+curl -v --cookie "JSESSIONID=xxxxxxxxx" -X POST --data "[{\"uniqueId\":\"112223\",\"name\":\"Added from REST\",\"maintenances\":[],\"sensors\":[]}]" https://d.traccar.litvak.su/traccar/rest/addDevice
+* Hostname was NOT found in DNS cache
+*   Trying 188.166.50.6...
+* Connected to d.traccar.litvak.su (188.166.50.6) port 80 (#0)
+> POST /traccar/rest/addDevice HTTP/1.1
+> User-Agent: curl/7.37.1
+> Host: d.traccar.litvak.su
+> Accept: */*
+> Cookie: JSESSIONID=xxxxxxx
+> Content-Length: 81
+> Content-Type: application/x-www-form-urlencoded
+> 
+* upload completely sent off: 81 out of 81 bytes
+< HTTP/1.1 200 OK
+< Content-Type: application/json;charset=UTF-8
+< Content-Length: 481
+* Server Jetty(8.y.z-SNAPSHOT) is not blacklisted
+< Server: Jetty(8.y.z-SNAPSHOT)
+< 
+* Connection #0 to host d.traccar.litvak.su left intact
+{"id":59,"uniqueId":"112223","name":"Added from REST","timeout":300,"idleSpeedThreshold":0.0,"iconType":{"OFFLINE":{"width":21,"height":25,"urls":["/img/marker-white.png","http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker-green.png"]},"LATEST":{"width":21,"height":25,"urls":["http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker.png","http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker-green.png"]}},"maintenances":[],"sensors":[]}
+{% endhighlight %}
+
 * log out (`logout` method)
 
 {% highlight bash %}
