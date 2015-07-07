@@ -95,7 +95,7 @@ public class RESTApiServlet extends HttpServlet {
                                         args[i] = gson.fromJson("\"" + args[i].toString() + "\"", expectedType);
                                     }
                                 } else {
-                                    args[i] = gson.fromJson(args[i].toString(), expectedType);
+                                    args[i] = gson.fromJson(gson.toJson(args[i]), expectedType);
                                 }
                             }
                         }
