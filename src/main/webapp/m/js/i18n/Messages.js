@@ -33,7 +33,7 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
-    rs: {
+    sr: {
         _name_: 'Српски',
         // login screen
         language: 'Језик',
