@@ -70,8 +70,6 @@ public class DataServiceTest {
 
     @BeforeClass
     public static void init() throws Exception {
-        new File("target/testdatabase.mv.db").delete();
-        new File("target/testdatabase.trace.db").delete();
         injector.getInstance(PersistService.class).start();
         dataService = injector.getInstance(DataService.class);
 
