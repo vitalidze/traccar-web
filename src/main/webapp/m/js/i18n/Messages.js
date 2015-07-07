@@ -33,6 +33,40 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
+    rs: {
+        _name_: 'Српски',
+        // login screen
+        language: 'Језик',
+        username: 'Корисничко име',
+        password: 'Лозинка',
+        your_username: 'Ваше корисничко име',
+        your_password: 'Ваша лозинка',
+        sign_in: 'Пријава',
+        user_name_and_password_must_not_be_empty: 'Корисничко име и лозинка морају бити унети',
+        user_name_or_password_is_invalid: 'Корисничко име или лозинка су погрешни',
+        unexpected_error: 'Unexpected error',
+        open_desktop_version: 'Open Desktop version',
+        // sidebar
+        devices: 'Уређаји',
+        logout: 'Одјави се',
+        // device details
+        select_on_map: 'Изабери на мапи',
+        no_data_available: 'No data available',
+        time: 'Време',
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        altitude: 'Висина',
+        speed: 'Брзина',
+        course: 'Правац',
+        address: 'Адреса',
+        follow: 'Прати',
+        stop_following: 'Престани са прађењем',
+        geo_fence: 'Геозона',
+        send_location_by_email: 'Пошаљи локацију преко Email',
+        send_location_url_by_email: 'Пошаљи линк локације преко Email',
+        send_location_by_sms: 'Пошаљи локцију преко SMSа',
+        send_location_url_by_sms: 'Пошаљи линк локације преко SMSа'
+    },
     bg: {
         _name_: 'Български',
         // login screen
