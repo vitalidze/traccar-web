@@ -51,7 +51,7 @@
                                 <menu:Menu ui:field="menu1">
                                     <menu:CheckMenuItem ui:field="zoomToTrackMenu" text="{i18n.zoomToTrack}" />
                                     <menu:SeparatorMenuItem />
-                                    <menu:MenuItem ui:field="markersMenu" text="{i18n.markers}">
+                                    <menu:MenuItem ui:field="markersMenu">
                                         <menu:submenu>
                                             <menu:Menu ui:field="routeMarkersType" />
                                         </menu:submenu>

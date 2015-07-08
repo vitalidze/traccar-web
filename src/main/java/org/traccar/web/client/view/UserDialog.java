@@ -18,6 +18,7 @@ package org.traccar.web.client.view;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
 import com.sencha.gxt.widget.core.client.grid.*;
 import org.traccar.web.client.ApplicationContext;
@@ -35,9 +36,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.form.CheckBox;
-import com.sencha.gxt.widget.core.client.form.PasswordField;
-import com.sencha.gxt.widget.core.client.form.TextField;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,10 +70,34 @@ public class UserDialog implements Editor<User> {
     PasswordField password;
 
     @UiField
+    TextField firstName;
+
+    @UiField
+    TextField lastName;
+
+    @UiField
+    TextField companyName;
+
+    @UiField
+    TextField phoneNumber;
+
+    @UiField
     CheckBox admin;
 
     @UiField
     CheckBox manager;
+
+    @UiField
+    CheckBox readOnly;
+
+    @UiField
+    DateField expirationDate;
+
+    @UiField(provided = true)
+    NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
+
+    @UiField
+    NumberField<Integer> maxNumOfDevices;
 
     @UiField
     TextField email;
@@ -94,19 +116,6 @@ public class UserDialog implements Editor<User> {
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
-
-    static class NoScrollbarGridView<M> extends GridView<M> {
-        public NoScrollbarGridView() {
-            this.scrollOffset = 1;
-            this.vbar = false;
-            this.setAdjustForHScroll(false);
-        }
-
-        @Override
-        protected int getScrollAdjust() {
-            return 0;
-        }
-    }
 
     public UserDialog(User user, UserHandler userHandler) {
         this.userHandler = userHandler;

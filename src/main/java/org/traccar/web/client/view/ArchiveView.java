@@ -52,6 +52,7 @@ import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.shared.model.PositionIconType;
+import org.traccar.web.shared.model.UserSettings;
 
 public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandler<Position> {
 
@@ -110,6 +111,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiField(provided = true)
     ColorMenu fullColorMenu;
+
+    @UiField
+    MenuItem markersMenu;
 
     @UiField(provided = true)
     Menu routeMarkersType;
@@ -183,6 +187,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         archivePanels = new HashMap<Long, ArchivePanel>();
 
         uiBinder.createAndBindUi(this);
+
+        markersMenu.setText(i18n.overlayType(UserSettings.OverlayType.MARKERS));
 
         // Initialize with current time
         long min = 60 * 1000;

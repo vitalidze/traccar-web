@@ -237,6 +237,8 @@ public class DeviceMarkersDialog {
 
         uiBinder.createAndBindUi(this);
 
+        window.setHeadingText(i18n.overlayType(UserSettings.OverlayType.MARKERS));
+
         selected = selectedIcon;
         store.addStoreHandlers(new BaseStoreHandlers<MarkerIcon>() {
             @Override

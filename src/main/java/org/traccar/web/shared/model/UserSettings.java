@@ -11,6 +11,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.LinkedList;
+import java.util.List;
 
 @Entity
 @Table(name = "user_settings")
@@ -35,6 +37,7 @@ public class UserSettings implements IsSerializable {
         centerLongitude = DEFAULT_CENTER_LONGITUDE;
         centerLatitude = DEFAULT_CENTER_LATITUDE;
         mapType = MapType.OSM;
+        overlays = "GEO_FENCES,VECTOR,MARKERS";
     }
 
     public enum SpeedUnit implements IsSerializable {
@@ -94,6 +97,10 @@ public class UserSettings implements IsSerializable {
         }
     }
 
+    public enum OverlayType implements IsSerializable {
+        GEO_FENCES, VECTOR, MARKERS, SEAMARK
+    }
+
     public enum DistanceUnit implements IsSerializable {
         km("km", 1d),
         mile("mi", 0.621371192);
@@ -151,6 +158,8 @@ public class UserSettings implements IsSerializable {
     @Expose
     private MapType mapType;
 
+    private String overlays;
+
     public Integer getZoomLevel() {
         return zoomLevel;
     }
@@ -181,6 +190,14 @@ public class UserSettings implements IsSerializable {
 
     public void setMapType(MapType mapType) {
         this.mapType = mapType;
+    }
+
+    public String getOverlays() {
+        return overlays;
+    }
+
+    public void setOverlays(String overlays) {
+        this.overlays = overlays;
     }
 
     @Column(nullable = true)
@@ -275,5 +292,13 @@ public class UserSettings implements IsSerializable {
         UserSettings other = (UserSettings) object;
 
         return this.id == other.id;
+    }
+
+    public List<OverlayType> overlays() {
+        List<OverlayType> overlays = new LinkedList<OverlayType>();
+        for (String s : getOverlays().split(",")) {
+            overlays.add(OverlayType.valueOf(s));
+        }
+        return overlays;
     }
 }

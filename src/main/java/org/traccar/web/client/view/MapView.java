@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
+import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
@@ -37,6 +38,7 @@ import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
+import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
@@ -71,6 +73,7 @@ public class MapView {
     private Vector vectorLayer;
     private Markers markerLayer;
     private Vector geofenceLayer;
+    private TMS seamarkLayer;
 
     private Messages i18n = GWT.create(Messages.class);
 
@@ -142,6 +145,10 @@ public class MapView {
         throw new IllegalArgumentException("Unsupported map type: " + mapType);
     }
 
+    public static native JSObject getTileURL() /*-{
+        return $wnd.getTileURL;
+    }-*/;
+
     public MapView(MapHandler mapHandler, ListStore<Device> deviceStore) {
         this.mapHandler = mapHandler;
         this.popup = new PositionInfoPopup(deviceStore);
@@ -149,6 +156,7 @@ public class MapView {
         contentPanel.setHeadingText(i18n.map());
 
         MapOptions defaultMapOptions = new MapOptions();
+        defaultMapOptions.setMaxExtent(new Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34));
 
         mapWidget = new MapWidget("100%", "100%", defaultMapOptions);
         map = mapWidget.getMap();
@@ -160,22 +168,38 @@ public class MapView {
 
         VectorOptions vectorOptions = new VectorOptions();
         vectorOptions.setStyle(style);
-        vectorLayer = new Vector("Vector", vectorOptions);
+        vectorLayer = new Vector(i18n.overlayType(UserSettings.OverlayType.VECTOR), vectorOptions);
 
         MarkersOptions markersOptions = new MarkersOptions();
-        markerLayer = new Markers(i18n.markers(), markersOptions);
+        markerLayer = new Markers(i18n.overlayType(UserSettings.OverlayType.MARKERS), markersOptions);
 
         vectorOptions = new VectorOptions();
         OpenLayersStyle defaultStyle = new OpenLayersStyle(new StyleRules(), new StyleOptions());
         defaultStyle.setJSObject(getGeoFenceLineStyle(map.getJSObject()));
         vectorOptions.setStyleMap(new StyleMap(defaultStyle, defaultStyle, null));
-        geofenceLayer = new Vector(i18n.geoFences(), vectorOptions);
+        geofenceLayer = new Vector(i18n.overlayType(UserSettings.OverlayType.GEO_FENCES), vectorOptions);
 
         initMapLayers(map);
+
+        List<UserSettings.OverlayType> userOverlays = ApplicationContext.getInstance().getUserSettings().overlays();
 
         map.addLayer(geofenceLayer);
         map.addLayer(vectorLayer);
         map.addLayer(markerLayer);
+
+        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.GEO_FENCES));
+        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.VECTOR));
+        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.MARKERS));
+
+        TMSOptions seamarkOptions = new TMSOptions();
+        seamarkOptions.setType("png");
+        seamarkOptions.setGetURL(getTileURL());
+        seamarkOptions.setNumZoomLevels(20);
+        seamarkOptions.setIsBaseLayer(false);
+        seamarkOptions.setDisplayOutsideMaxExtent(true);
+        seamarkLayer = new TMS(i18n.overlayType(UserSettings.OverlayType.SEAMARK), "http://t1.openseamap.org/seamark/", seamarkOptions);
+        map.addLayer(seamarkLayer);
+        seamarkLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.SEAMARK));
 
         map.addControl(new LayerSwitcher());
         map.addControl(new ScaleLine());

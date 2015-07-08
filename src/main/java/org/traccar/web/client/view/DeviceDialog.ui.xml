@@ -122,7 +122,7 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutDataWithButtons}">
-                      <form:FieldLabel text="{i18n.markers}" labelWidth="160">
+                      <form:FieldLabel ui:field="labelMarkers" labelWidth="160">
                           <form:widget>
                               <container:HorizontalLayoutContainer ui:field="panelMarkers">
                                   <container:child layoutData="{horizontalLayoutData}">

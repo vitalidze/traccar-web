@@ -15,12 +15,18 @@
  */
 package org.traccar.web.client.view;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
+import com.sencha.gxt.widget.core.client.grid.*;
+import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.UserSettingsProperties;
@@ -56,7 +62,8 @@ public class UserSettingsDialog implements Editor<UserSettings> {
         void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
                                           NumberField<Double> centerLongitude,
                                           NumberField<Double> centerLatitude,
-                                          NumberField<Integer> zoomLevel);
+                                          NumberField<Integer> zoomLevel,
+                                          GridSelectionModel<UserSettings.OverlayType> overlays);
     }
 
     private UserSettingsHandler userSettingsHandler;
@@ -91,6 +98,18 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     @UiField(provided = true)
     ComboBox<UserSettings.MapType> mapType;
 
+    @UiField
+    Grid<UserSettings.OverlayType> grid;
+
+    @UiField(provided = true)
+    GridView<UserSettings.OverlayType> view;
+
+    @UiField(provided = true)
+    ColumnModel<UserSettings.OverlayType> columnModel;
+
+    @UiField(provided = true)
+    ListStore<UserSettings.OverlayType> overlayTypeStore;
+
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
@@ -115,7 +134,38 @@ public class UserSettingsDialog implements Editor<UserSettings> {
         mapType.setForceSelection(true);
         mapType.setTriggerAction(TriggerAction.ALL);
 
+        // overlay types grid
+        IdentityValueProvider<UserSettings.OverlayType> identity = new IdentityValueProvider<UserSettings.OverlayType>();
+        final CheckBoxSelectionModel<UserSettings.OverlayType> selectionModel = new CheckBoxSelectionModel<UserSettings.OverlayType>(identity);
+
+        ColumnConfig<UserSettings.OverlayType, String> nameCol = new ColumnConfig<UserSettings.OverlayType, String>(new ToStringValueProvider<UserSettings.OverlayType>() {
+            @Override
+            public String getValue(UserSettings.OverlayType object) {
+                return i18n.overlayType(object);
+            }
+        }, 200, i18n.overlay());
+        List<ColumnConfig<UserSettings.OverlayType, ?>> columns = new ArrayList<ColumnConfig<UserSettings.OverlayType, ?>>();
+        columns.add(selectionModel.getColumn());
+        columns.add(nameCol);
+
+        columnModel = new ColumnModel<UserSettings.OverlayType>(columns);
+
+        view = new NoScrollbarGridView<UserSettings.OverlayType>();
+        view.setAutoFill(true);
+        view.setStripeRows(true);
+
+        overlayTypeStore = new ListStore<UserSettings.OverlayType>(new EnumKeyProvider<UserSettings.OverlayType>());
+        overlayTypeStore.addAll(Arrays.asList(UserSettings.OverlayType.values()));
+
         uiBinder.createAndBindUi(this);
+
+        grid.setSelectionModel(selectionModel);
+        grid.getView().setForceFit(true);
+        grid.getView().setAutoFill(true);
+
+        for (UserSettings.OverlayType overlayType : ApplicationContext.getInstance().getUserSettings().overlays()) {
+            grid.getSelectionModel().select(overlayType, true);
+        }
 
         timePrintInterval.addValidator(new MinNumberValidator<Short>(Short.valueOf((short) 1)));
         timePrintInterval.addValidator(new MaxNumberValidator<Short>(Short.valueOf((short) 512)));
@@ -133,18 +183,24 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     }
 
     @UiHandler("saveButton")
-    public void onLoginClicked(SelectEvent event) {
+    public void onSaveClicked(SelectEvent event) {
         window.hide();
-        userSettingsHandler.onSave(driver.flush());
+        UserSettings settings = driver.flush();
+        String overlayTypes = "";
+        for (UserSettings.OverlayType overlayType : grid.getSelectionModel().getSelectedItems()) {
+            overlayTypes += (overlayTypes.isEmpty() ? "" : ",") + overlayType.name();
+        }
+        settings.setOverlays(overlayTypes);
+        userSettingsHandler.onSave(settings);
     }
 
     @UiHandler("cancelButton")
-    public void onRegisterClicked(SelectEvent event) {
+    public void onCancelClicked(SelectEvent event) {
         window.hide();
     }
 
     @UiHandler("takeFromMapButton")
     public void onSaveDefaultMapSateClicked(SelectEvent event) {
-        userSettingsHandler.onTakeCurrentMapState(mapType, centerLongitude, centerLatitude, zoomLevel);
+        userSettingsHandler.onTakeCurrentMapState(mapType, centerLongitude, centerLatitude, zoomLevel, grid.getSelectionModel());
     }
 }
