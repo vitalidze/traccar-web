@@ -298,6 +298,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             throw new SecurityException();
         }
         entityManager.createQuery("DELETE FROM UIStateEntry s WHERE s.user=:user").setParameter("user", user).executeUpdate();
+        entityManager.createQuery("DELETE FROM NotificationSettings s WHERE s.user=:user").setParameter("user", user).executeUpdate();
         for (Device device : user.getDevices()) {
             device.getUsers().remove(user);
         }

@@ -22,10 +22,12 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
 import com.google.inject.persist.jpa.JpaPersistModule;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
+import org.traccar.web.client.model.NotificationService;
 import org.traccar.web.shared.model.*;
 
 import javax.inject.Inject;
@@ -39,13 +41,19 @@ import java.util.HashSet;
 import java.util.List;
 
 public class DataServiceTest {
+    static Long currentUserId;
+
     public static class TestUserProvider implements Provider<User> {
         @Inject
         Provider<EntityManager> entityManager;
 
         @Override
         public User get() {
-            return entityManager.get().createQuery("SELECT u FROM User u", User.class).getResultList().get(0);
+            if (currentUserId == null) {
+                return entityManager.get().createQuery("SELECT u FROM User u", User.class).getResultList().get(0);
+            } else {
+                return entityManager.get().find(User.class, currentUserId);
+            }
         }
     }
 
@@ -54,6 +62,7 @@ public class DataServiceTest {
         protected void configure() {
             install(new JpaPersistModule("test"));
             bind(DataService.class).to(DataServiceImpl.class);
+            bind(NotificationService.class).to(NotificationServiceImpl.class);
             bind(EventService.class).to(EventServiceImpl.class);
             bind(HttpServletRequest.class).toProvider(new com.google.inject.Provider<HttpServletRequest>() {
                 @Override
@@ -79,6 +88,11 @@ public class DataServiceTest {
         entityManager.getTransaction().commit();
     }
 
+    @After
+    public void cleanup() {
+        currentUserId = null;
+    }
+
     @Test
     public void testDeleteDeviceWithSpecificGeoFence() throws TraccarException {
         Device device = new Device();
@@ -90,7 +104,7 @@ public class DataServiceTest {
 
         GeoFence geoFence = new GeoFence();
         geoFence.setName("GF1");
-        geoFence.setTransferDevices(new HashSet<Device>(Arrays.asList(device)));
+        geoFence.setTransferDevices(new HashSet<Device>(Collections.singleton(device)));
         dataService.addGeoFence(geoFence);
 
         dataService.removeDevice(device);
@@ -100,5 +114,24 @@ public class DataServiceTest {
         assertEquals(1, geoFences.size());
         assertTrue(geoFences.get(0).getTransferDevices().isEmpty());
         assertTrue(geoFences.get(0).getDevices().isEmpty());
+    }
+
+    @Test
+    public void testDeleteUserWithNotificationSettings() {
+        Long originalUserId = injector.getProvider(User.class).get().getId();
+
+        User user = new User("test", "test");
+        user.setManager(true);
+        user = dataService.addUser(user);
+
+        NotificationService notificationService = injector.getInstance(NotificationService.class);
+        currentUserId = user.getId();
+        notificationService.saveSettings(new NotificationSettings());
+
+        currentUserId = originalUserId;
+        dataService.removeUser(user);
+
+        assertEquals(1, dataService.getUsers().size());
+        assertEquals(originalUserId.longValue(), dataService.getUsers().get(0).getId());
     }
 }
