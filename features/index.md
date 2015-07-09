@@ -55,7 +55,7 @@ This project has following features, which don't exist in original `traccar-web`
 * [possibility to change device marker icon](change-device-icon.html)
 * put selected device to the center of map every time it's row is clicked by user
 * [possibility to change password hashing function to store passwords in database passwords as hash sums instead of plain text](password-hashing.html)
-* [notification when device/vehicle goes offline](notifications.html)
+* [notifications via email/pushbullet](notifications.html)
 * [archive line and markers style customization](archive-styling.html)
 * disable login dialog moving and resizing
 * prohibit empty device name and id
