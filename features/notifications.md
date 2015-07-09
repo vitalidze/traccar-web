@@ -8,7 +8,7 @@ Simple Email notifications system that sends messages when devices goes offline.
 Setup
 -----
 
-First of all, all users that want to receive notifications must have email field filled and at least one notification event type selected in profile. This is done in Settings >> Account menu.
+First of all, each user that wants to receive notifications must have email field filled and at least one notification event type selected in profile. This is done in Settings >> Account menu.
 
 ![Account settings menu](http://i60.tinypic.com/14kaam1.png)
 
@@ -18,11 +18,11 @@ Then user with either 'administrator' or 'manager' role in Settings >> Notificat
  
 ![Notification settings menu](http://i62.tinypic.com/w6tklu.png)
 
-* SMTP server settings Access Token
+* SMTP server settings
 
 ![Notification settings dialog - Email](http://i58.tinypic.com/16kas5d.png)
 
-* [Pushbullet](https://www.pushbullet.com/)
+* [Pushbullet](https://www.pushbullet.com/) Access Token
 
 ![Notification settings dialog - Pushbullet](http://i61.tinypic.com/2di15pd.png)
 
@@ -35,7 +35,7 @@ In Settings >> Notifications menu it is also possible to customize notification 
 
 ![Notification settings dialog - Message templates](http://i57.tinypic.com/o88fhe.png)
 
-There are placeholders, which are replaced during message generation with actual values. Full list of placeholders. Placeholders may be used both in subject and body of message. Full list of available placeholders is shown at bottom of this dialog window. There is an option to apply custom formatting to the date and time fields using rules from [SimpleDateFormat](https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) and following notation:
+There are placeholders, which are replaced during message generation with actual values. Placeholders may be used both in subject and body of message. Full list of available placeholders is shown at bottom of this dialog window. There is an option to apply custom formatting to the date and time fields using rules from [SimpleDateFormat](https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) and following notation:
 
     ${dateField;date(FORMAT)}
     
@@ -54,9 +54,10 @@ Also there are two [geo-fence](geofences.html) events: on enter and on exit.
 
 All new events are always put into a single message with title `[traccar-web] Notification`.
 
-Important notes:
+Important notes
+---------------
 
- * Administrators receives notifications for all devices.
+ * Administrators receive notifications for all devices.
  * Notification settings are taken first from current user and then from all managers hierarchy. If none of managers have notification settings then they are taken from some administrator. If no notification settings found then no email will be sent.
  * Once any notification for event is sent it will NEVER be sent again. This also means that until ANY notification is sent event is in 'pending' outbox.
  * User receives only events of types selected in his account profile.
