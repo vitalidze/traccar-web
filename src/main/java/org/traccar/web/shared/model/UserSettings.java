@@ -80,7 +80,9 @@ public class UserSettings implements IsSerializable {
         GOOGLE_TERRAIN("Google Terrain"),
         BING_ROAD("Bing Road"),
         BING_HYBRID("Bing Hybrid"),
-        BING_AERIAL("Bing Aerial");
+        BING_AERIAL("Bing Aerial"),
+        MAPQUEST_ROAD("MapQuest Road"),
+        MAPQUEST_AERIAL("MapQuest Aerial");
 
         final String name;
 

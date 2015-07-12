@@ -279,6 +279,14 @@ myApp.onPageInit('map-screen', function(page) {
         view.on('change:resolution', function() {
             gmap.setZoom(view.getZoom());
         });
+    } else if (appState.userSettings.mapType.indexOf("MAPQUEST_") == 0) {
+        var tiles = 'osm';
+        if (appState.userSettings.mapType == "MAPQUEST_AERIAL") {
+            tiles = 'sat';
+        }
+        layers.push(new ol.layer.Tile({
+            source: new ol.source.MapQuest({layer: tiles})
+        }));
     }
     layers.push(vectorLayer);
 
