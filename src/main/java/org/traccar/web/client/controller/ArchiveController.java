@@ -74,9 +74,9 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     }
 
     @Override
-    public void onLoad(final Device device, Date from, Date to, boolean filter, final ArchiveStyle style) {
+    public void onLoad(final Device device, Date from, Date to, boolean filter, boolean snapToRoads, final ArchiveStyle style) {
         if (device != null && from != null && to != null) {
-            Application.getDataService().getPositions(device, from, to, filter, new BaseAsyncCallback<List<Position>>(i18n) {
+            Application.getDataService().getPositions(device, from, to, filter, snapToRoads, new BaseAsyncCallback<List<Position>>(i18n) {
                 @Override
                 public void onSuccess(List<Position> result) {
                     archiveHandler.onClear(device);

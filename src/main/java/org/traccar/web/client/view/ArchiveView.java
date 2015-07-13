@@ -65,7 +65,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     public interface ArchiveHandler {
         void onSelected(Position position);
-        void onLoad(Device device, Date from, Date to, boolean filter, ArchiveStyle style);
+        void onLoad(Device device, Date from, Date to, boolean filter, boolean snapToRoads, ArchiveStyle style);
         void onFilterSettings();
         void onClear(Device device);
         void onChangeArchiveMarkerType(PositionIconType newMarkerType);
@@ -99,6 +99,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiField
     CheckBox disableFilter;
+
+    @UiField
+    CheckBox snapToRoads;
 
     @UiField(provided = true)
     TextButton styleButtonTrackColor;
@@ -235,6 +238,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
                 !disableFilter.getValue(),
+                snapToRoads.getValue(),
                 new ArchiveStyle(style)
         );
     }
@@ -260,7 +264,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue(),
+                            "&filter=" + !disableFilter.getValue() +
+                            "&snapToRoads=" + snapToRoads.getValue(),
                     "_blank", null);
         }
     }
@@ -276,7 +281,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue(),
+                            "&filter=" + !disableFilter.getValue() +
+                            "&snapToRoads=" + snapToRoads.getValue(),
                     "_blank", null);
         }
     }

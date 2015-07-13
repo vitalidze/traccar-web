@@ -16,6 +16,10 @@
 package org.traccar.web.server.model;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
@@ -29,9 +33,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 
+import org.apache.commons.io.IOUtils;
 import org.hibernate.proxy.HibernateProxy;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
@@ -575,7 +584,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser
     @Override
-    public List<Position> getPositions(Device device, Date from, Date to, boolean filter) {
+    public List<Position> getPositions(Device device, Date from, Date to, boolean filter, boolean snapToRoads) {
         EntityManager entityManager = getSessionEntityManager();
         UserSettings filters = getSessionUser().getUserSettings();
 
@@ -626,7 +635,62 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             if (add) positions.add(queryResult.get(i));
         }
-        return new ArrayList<Position>(positions);
+
+        positions = new ArrayList<Position>(positions);
+        if (snapToRoads && !queryResult.isEmpty()) {
+            NumberFormat lonLatFormat = NumberFormat.getNumberInstance(Locale.US);
+            lonLatFormat.setMinimumFractionDigits(6);
+            lonLatFormat.setMaximumFractionDigits(6);
+
+            StringBuilder matchURL = new StringBuilder("http://router.project-osrm.org/match?geometry=false");
+            for (Position position : positions) {
+                matchURL.append("&loc=").append(lonLatFormat.format(position.getLatitude()))
+                        .append(',').append(lonLatFormat.format(position.getLongitude()))
+                        .append("&t=").append(position.getTime().getTime() / 1000);
+            }
+
+            InputStream is = null;
+            URLConnection conn = null;
+            try {
+                URL url = new URL(matchURL.toString());
+                conn = url.openConnection();
+                conn.setRequestProperty("User-Agent", "Traccar Web UI Mod (java)");
+                is = conn.getInputStream();
+
+                JsonReader reader = new JsonReader(new InputStreamReader(is, "UTF-8"));
+                Gson gson = new Gson();
+                reader.beginObject();
+
+                String name = reader.nextName();
+                if (name.equals("matchings")) {
+                    reader.beginArray();
+                    while (reader.hasNext()) {
+                        JsonObject matching = gson.fromJson(reader, JsonObject.class);
+                        JsonArray indices = matching.getAsJsonArray("indices");
+                        JsonArray matched_points = matching.getAsJsonArray("matched_points");
+                        for (int i = 0; i < indices.size(); i++) {
+                            JsonArray latLon = matched_points.get(i).getAsJsonArray();
+                            int index = indices.get(i).getAsInt();
+                            Position snapped = new Position(positions.get(index));
+                            snapped.setLatitude(latLon.get(0).getAsDouble());
+                            snapped.setLongitude(latLon.get(1).getAsDouble());
+                            positions.set(index, snapped);
+                        }
+                    }
+                    reader.endArray();
+                }
+                reader.endObject();
+                reader.close();
+            } catch (MalformedURLException mfe) {
+                log("Incorrect URL", mfe);
+            } catch (IOException ioex) {
+                log("I/O error", ioex);
+            } finally {
+                IOUtils.closeQuietly(is);
+            }
+        }
+
+        return positions;
     }
 
     @RequireUser

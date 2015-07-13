@@ -391,4 +391,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String overlay();
 
     String overlayType(@Select UserSettings.OverlayType type);
+
+    String snapToRoads();
 }
