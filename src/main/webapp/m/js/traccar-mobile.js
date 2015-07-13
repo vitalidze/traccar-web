@@ -287,6 +287,12 @@ myApp.onPageInit('map-screen', function(page) {
         layers.push(new ol.layer.Tile({
             source: new ol.source.MapQuest({layer: tiles})
         }));
+    } else if (appState.userSettings.mapType == 'STAMEN_TONER') {
+        layers.push(new ol.layer.Tile({
+            source: new ol.source.Stamen({
+                layer: 'toner'
+            })
+        }));
     }
     layers.push(vectorLayer);
 

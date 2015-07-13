@@ -169,6 +169,10 @@ public class MapView {
                         "http://otile2.mqcdn.com/tiles/1.0.0/" + tiles + "/${z}/${x}/${y}.png",
                         "http://otile3.mqcdn.com/tiles/1.0.0/" + tiles + "/${z}/${x}/${y}.png",
                         "http://otile4.mqcdn.com/tiles/1.0.0/" + tiles + "/${z}/${x}/${y}.png"}, mqOptions);
+            case STAMEN_TONER:
+                Layer stamenLayer = Layer.narrowToLayer(createStamenLayer("toner"));
+                stamenLayer.setName(mapType.getName());
+                return stamenLayer;
         }
         throw new IllegalArgumentException("Unsupported map type: " + mapType);
     }
@@ -446,5 +450,9 @@ public class MapView {
         {
             context: context
         });
+    }-*/;
+
+    private static native JSObject createStamenLayer(String type) /*-{
+        return new $wnd.OpenLayers.Layer.Stamen(type);
     }-*/;
 }

@@ -82,7 +82,8 @@ public class UserSettings implements IsSerializable {
         BING_HYBRID("Bing Hybrid"),
         BING_AERIAL("Bing Aerial"),
         MAPQUEST_ROAD("MapQuest Road"),
-        MAPQUEST_AERIAL("MapQuest Aerial");
+        MAPQUEST_AERIAL("MapQuest Aerial"),
+        STAMEN_TONER("Stamen Toner");
 
         final String name;
 
