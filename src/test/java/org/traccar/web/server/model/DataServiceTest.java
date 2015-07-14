@@ -21,6 +21,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.persist.PersistService;
+import com.google.inject.persist.Transactional;
+import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.jpa.JpaPersistModule;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -34,8 +36,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +47,7 @@ public class DataServiceTest {
         @Inject
         Provider<EntityManager> entityManager;
 
+        @Transactional
         @Override
         public User get() {
             if (currentUserId == null) {
@@ -61,6 +62,7 @@ public class DataServiceTest {
         @Override
         protected void configure() {
             install(new JpaPersistModule("test"));
+
             bind(DataService.class).to(DataServiceImpl.class);
             bind(NotificationService.class).to(NotificationServiceImpl.class);
             bind(EventService.class).to(EventServiceImpl.class);
@@ -82,10 +84,13 @@ public class DataServiceTest {
         injector.getInstance(PersistService.class).start();
         dataService = injector.getInstance(DataService.class);
 
+        UnitOfWork unitOfWork = injector.getInstance(UnitOfWork.class);
+        unitOfWork.begin();
         EntityManager entityManager = injector.getInstance(EntityManager.class);
         entityManager.getTransaction().begin();
         injector.getInstance(DBMigrations.CreateAdmin.class).migrate(entityManager);
         entityManager.getTransaction().commit();
+        unitOfWork.end();
     }
 
     @After
@@ -133,5 +138,39 @@ public class DataServiceTest {
 
         assertEquals(1, dataService.getUsers().size());
         assertEquals(originalUserId.longValue(), dataService.getUsers().get(0).getId());
+    }
+
+    @Test
+    public void testResetPasswordByAdmin() {
+        User user = new User("test", "test");
+        user = dataService.addUser(user);
+
+        user.setPassword("test1");
+        user = dataService.updateUser(user);
+
+        dataService.removeUser(user);
+
+        assertEquals("test1", user.getPassword());
+    }
+
+    @Test
+    public void testResetPasswordByManager() {
+        User manager = new User("manager", "manager");
+        manager.setManager(Boolean.TRUE);
+        manager = dataService.addUser(manager);
+
+        currentUserId = manager.getId();
+
+        User user = new User("test", "test");
+        user = dataService.addUser(user);
+
+        user.setPassword("test1");
+        user = dataService.updateUser(user);
+
+        currentUserId = null;
+        dataService.removeUser(user);
+        dataService.removeUser(manager);
+
+        assertEquals("test1", user.getPassword());
     }
 }

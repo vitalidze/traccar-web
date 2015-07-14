@@ -247,7 +247,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         if (user.getLogin().isEmpty() || user.getPassword().isEmpty()) {
             throw new IllegalArgumentException();
         }
-        if (currentUser.getAdmin() || (currentUser.getId() == user.getId() && !user.getAdmin())) {
+        if (currentUser.getAdmin()
+            || (currentUser.getManager() && currentUser.getAllManagedUsers().contains(user))
+            || (currentUser.getId() == user.getId() && !user.getAdmin())) {
             EntityManager entityManager = getSessionEntityManager();
             // TODO: better solution?
             if (currentUser.getId() == user.getId()) {

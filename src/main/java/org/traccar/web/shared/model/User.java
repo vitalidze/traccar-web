@@ -46,6 +46,7 @@ public class User implements IsSerializable, Cloneable {
         this(login);
         this.password = password;
         this.geoFences = new HashSet<GeoFence>();
+        this.managedUsers = new HashSet<User>();
     }
 
     public User(User user) {
