@@ -27,6 +27,8 @@ This project has following features, which don't exist in original `traccar-web`
     * [portuguese brazilian language](portuguese-brazilian.html) (available via ?locale=pt_BR URL parameter)
     * [danish language](danish.html) (available via ?locale=da URL parameter)
     * [czech language](czech.html) (available via ?locale=cs URL parameter)
+    * [serbian language](serbian.html) (available via ?locale=sr URL parameter)
+    * [hebrew language](hebrew.html) (available via ?locale=he URL parameter)
 * 'show server log' menu for viewing tracker-server.log file on Web
 * [archive filtering](archive-filtering.html)
 * change default map center position, zoom, provider (Google, OSM, Bing) (in Settings >> Preferences)
@@ -66,3 +68,6 @@ This project has following features, which don't exist in original `traccar-web`
 * [possibility to upload photo of device/vehicle](upload-device-photo.html)
 * [device sensors](sensors.html)
 * [device/vehicle maintenance](maintenance.html)
+* [snap to roads](snap-to-roads.html)
+* added [MapQuest](http://www.mapquest.com/) and [Stamen toner](http://maps.stamen.com/toner/) mapping providers
+* added [OpenSeaMap](http://openseamap.org/) seamarks layer
