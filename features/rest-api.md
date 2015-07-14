@@ -94,7 +94,7 @@ Take full JSON of device and put it to `getPositions` method.
 * Load archived positions (`getPositions` method)
 
 {% highlight bash %}
-curl -v --cookie "JSESSIONID=xxxxxxxxx" -X POST --data "[{\"id\":3,\"uniqueId\":\"123\",\"name\":\"Phone\"},\"2015-01-01 00:00:00 GMT\",\"2015-01-01 23:59:59 GMT\",false]" https://d.traccar.litvak.su/traccar/rest/getPositions
+curl -v --cookie "JSESSIONID=xxxxxxxxx" -X POST --data "[{\"id\":3,\"uniqueId\":\"123\",\"name\":\"Phone\"},\"2015-01-01 00:00:00 GMT\",\"2015-01-01 23:59:59 GMT\",false,false]" https://d.traccar.litvak.su/traccar/rest/getPositions
 * Hostname was NOT found in DNS cache
 *   Trying 188.166.50.6...
 * Connected to d.traccar.litvak.su (188.166.50.6) port 80 (#0)
