@@ -68,14 +68,16 @@ public class ExportServlet extends HttpServlet {
             Date to = requestDateFormat.parse(req.getParameter("to"));
             String strFilter = req.getParameter("filter");
             boolean filter = strFilter != null && strFilter.equalsIgnoreCase("true");
+            String strSnapToRoads = req.getParameter("snapToRoads");
+            boolean snapToRoads = strSnapToRoads != null && strSnapToRoads.equalsIgnoreCase("true");
 
             Device device = entityManager.get().find(Device.class, deviceId);
             checkAccess(device);
 
             if (exportType.equals("csv")) {
-                csv(resp, device, from, to, filter);
+                csv(resp, device, from, to, filter, snapToRoads);
             } else if (exportType.equals("gpx")) {
-                gpx(resp, device, from, to, filter);
+                gpx(resp, device, from, to, filter, snapToRoads);
             } else {
                 throw new ServletException("Unsupported export type: " + exportType);
             }
@@ -98,7 +100,7 @@ public class ExportServlet extends HttpServlet {
         }
     }
 
-    void csv(HttpServletResponse response, Device device, Date from, Date to, boolean filter) throws IOException {
+    void csv(HttpServletResponse response, Device device, Date from, Date to, boolean filter, boolean snapToRoads) throws IOException {
         response.setContentType("text/csv;charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=traccar-positions.csv");
 
@@ -108,7 +110,7 @@ public class ExportServlet extends HttpServlet {
 
         writer.println(line(SEPARATOR, "time", "valid", "latitude", "longitude", "altitude", "speed", "distance", "course", "power", "address", "other"));
 
-        for (Position p : dataService.getPositions(device, from, to, filter)) {
+        for (Position p : dataService.getPositions(device, from, to, filter, snapToRoads)) {
             writer.println(line(SEPARATOR, p.getTime(), p.getValid(), p.getLatitude(), p.getLongitude(), p.getAltitude(), p.getSpeed(), p.getDistance(), p.getCourse(), p.getPower(), p.getAddress(), p.getOther()));
         }
     }
@@ -125,7 +127,7 @@ public class ExportServlet extends HttpServlet {
         return result.toString();
     }
 
-    void gpx(HttpServletResponse response, Device device, Date from, Date to, boolean filter) throws IOException, XMLStreamException {
+    void gpx(HttpServletResponse response, Device device, Date from, Date to, boolean filter, boolean snapToRoads) throws IOException, XMLStreamException {
         response.setContentType("application/gpx+xml;charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=traccar-positions.gpx");
 
@@ -169,7 +171,7 @@ public class ExportServlet extends HttpServlet {
         xsw.writeCharacters("Traccar archive");
         xsw.writeEndElement();
         xsw.writeStartElement("trkseg");
-        for (Position p : dataService.getPositions(device, from, to, filter)) {
+        for (Position p : dataService.getPositions(device, from, to, filter, snapToRoads)) {
             xsw.writeStartElement("trkpt");
             xsw.writeAttribute("lat", p.getLatitude().toString());
             xsw.writeAttribute("lon", p.getLongitude().toString());

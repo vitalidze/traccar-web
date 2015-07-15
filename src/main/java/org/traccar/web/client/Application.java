@@ -20,7 +20,9 @@ import java.util.logging.Logger;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
+import com.sencha.gxt.widget.core.client.grid.GridSelectionModel;
 import org.gwtopenmaps.openlayers.client.LonLat;
+import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.traccar.web.client.controller.*;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.*;
@@ -170,7 +172,8 @@ public class Application {
         public void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
                                           NumberField<Double> centerLongitude,
                                           NumberField<Double> centerLatitude,
-                                          NumberField<Integer> zoomLevel) {
+                                          NumberField<Integer> zoomLevel,
+                                          GridSelectionModel<UserSettings.OverlayType> overlays) {
             String layerName = mapController.getMap().getBaseLayer().getName();
             for (UserSettings.MapType mapTypeXX : UserSettings.MapType.values()) {
                 if (layerName.equals(mapTypeXX.getName())) {
@@ -183,6 +186,15 @@ public class Application {
             centerLongitude.setValue(center.lon());
             centerLatitude.setValue(center.lat());
             zoomLevel.setValue(mapController.getMap().getZoom());
+
+            overlays.deselectAll();
+            for (UserSettings.OverlayType overlayType : UserSettings.OverlayType.values()) {
+                Layer[] mapLayer = mapController.getMap().getLayersByName(i18n.overlayType(overlayType));
+                GWT.log(i18n.overlayType(overlayType) + ":: " + mapLayer.length);
+                if (mapLayer != null && mapLayer.length == 1 && mapLayer[0].isVisible()) {
+                    overlays.select(overlayType, true);
+                }
+            }
         }
     }
 

@@ -55,6 +55,7 @@ public class PicturesServlet  extends HttpServlet {
 
     @Transactional(rollbackOn = { IOException.class, RuntimeException.class })
     @RequireUser
+    @RequireWrite
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PictureType pictureType;

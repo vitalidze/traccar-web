@@ -11,6 +11,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.LinkedList;
+import java.util.List;
 
 @Entity
 @Table(name = "user_settings")
@@ -35,6 +37,7 @@ public class UserSettings implements IsSerializable {
         centerLongitude = DEFAULT_CENTER_LONGITUDE;
         centerLatitude = DEFAULT_CENTER_LATITUDE;
         mapType = MapType.OSM;
+        overlays = "GEO_FENCES,VECTOR,MARKERS";
     }
 
     public enum SpeedUnit implements IsSerializable {
@@ -77,7 +80,10 @@ public class UserSettings implements IsSerializable {
         GOOGLE_TERRAIN("Google Terrain"),
         BING_ROAD("Bing Road"),
         BING_HYBRID("Bing Hybrid"),
-        BING_AERIAL("Bing Aerial");
+        BING_AERIAL("Bing Aerial"),
+        MAPQUEST_ROAD("MapQuest Road"),
+        MAPQUEST_AERIAL("MapQuest Aerial"),
+        STAMEN_TONER("Stamen Toner");
 
         final String name;
 
@@ -92,6 +98,10 @@ public class UserSettings implements IsSerializable {
         public String getBingKey() {
             return "AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F";
         }
+    }
+
+    public enum OverlayType implements IsSerializable {
+        GEO_FENCES, VECTOR, MARKERS, SEAMARK
     }
 
     public enum DistanceUnit implements IsSerializable {
@@ -151,6 +161,8 @@ public class UserSettings implements IsSerializable {
     @Expose
     private MapType mapType;
 
+    private String overlays;
+
     public Integer getZoomLevel() {
         return zoomLevel;
     }
@@ -181,6 +193,14 @@ public class UserSettings implements IsSerializable {
 
     public void setMapType(MapType mapType) {
         this.mapType = mapType;
+    }
+
+    public String getOverlays() {
+        return overlays;
+    }
+
+    public void setOverlays(String overlays) {
+        this.overlays = overlays;
     }
 
     @Column(nullable = true)
@@ -275,5 +295,13 @@ public class UserSettings implements IsSerializable {
         UserSettings other = (UserSettings) object;
 
         return this.id == other.id;
+    }
+
+    public List<OverlayType> overlays() {
+        List<OverlayType> overlays = new LinkedList<OverlayType>();
+        for (String s : getOverlays().split(",")) {
+            overlays.add(OverlayType.valueOf(s));
+        }
+        return overlays;
     }
 }

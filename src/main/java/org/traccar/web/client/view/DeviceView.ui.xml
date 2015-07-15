@@ -26,9 +26,7 @@
     <ui:attributes stripeRows="true" autoFill="true" />
   </ui:with>
 
-  <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="geoFencesTabConfig">
-    <ui:attributes text="{i18n.geoFences}" />
-  </ui:with>
+  <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="geoFencesTabConfig" />
 
   <ui:with type="com.sencha.gxt.data.shared.ListStore" field="geoFenceStore" />
 

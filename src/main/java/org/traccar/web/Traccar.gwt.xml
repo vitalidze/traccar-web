@@ -36,4 +36,7 @@
     <extend-property name="locale" values="fr" />
     <extend-property name="locale" values="pt_BR" />
     <extend-property name="locale" values="da" />
+    <extend-property name="locale" values="cs" />
+    <extend-property name="locale" values="sr" />
+    <extend-property name="locale" values="he" />
 </module>

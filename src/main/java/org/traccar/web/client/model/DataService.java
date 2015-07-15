@@ -58,7 +58,7 @@ public interface DataService extends RemoteService {
 
     void saveDeviceShare(Device device, Map<User, Boolean> share);
 
-    List<Position> getPositions(Device device, Date from, Date to, boolean filter);
+    List<Position> getPositions(Device device, Date from, Date to, boolean filter, boolean snapToRoads);
 
     List<Position> getLatestPositions();
 

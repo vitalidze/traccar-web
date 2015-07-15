@@ -28,6 +28,7 @@ public class DBMigrations {
                 new SetTimePrintInterval(),
                 new SetDefaultFilteringSettings(),
                 new SetDefaultMapViewSettings(),
+                new SetDefaultMapOverlays(),
                 new SetManagerFlag(),
                 new SetNotificationsFlag(),
                 new SetReadOnlyFlag(),
@@ -115,6 +116,15 @@ public class DBMigrations {
                     .setParameter("zl", UserSettings.DEFAULT_ZOOM_LEVEL)
                     .setParameter("lon", UserSettings.DEFAULT_CENTER_LONGITUDE)
                     .setParameter("lat", UserSettings.DEFAULT_CENTER_LATITUDE)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultMapOverlays implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + UserSettings.class.getSimpleName() + " S SET S.overlays = :overlays WHERE S.overlays IS NULL")
+                    .setParameter("overlays", "GEO_FENCES,VECTOR,MARKERS")
                     .executeUpdate();
         }
     }

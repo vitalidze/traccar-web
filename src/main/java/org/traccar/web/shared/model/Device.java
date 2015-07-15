@@ -278,6 +278,7 @@ public class Device implements IsSerializable {
         this.autoUpdateOdometer = autoUpdateOdometer;
     }
 
+    @Expose
     @Transient
     private List<Maintenance> maintenances;
 

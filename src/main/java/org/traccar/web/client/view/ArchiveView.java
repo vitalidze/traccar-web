@@ -52,6 +52,7 @@ import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.shared.model.PositionIconType;
+import org.traccar.web.shared.model.UserSettings;
 
 public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandler<Position> {
 
@@ -64,7 +65,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     public interface ArchiveHandler {
         void onSelected(Position position);
-        void onLoad(Device device, Date from, Date to, boolean filter, ArchiveStyle style);
+        void onLoad(Device device, Date from, Date to, boolean filter, boolean snapToRoads, ArchiveStyle style);
         void onFilterSettings();
         void onClear(Device device);
         void onChangeArchiveMarkerType(PositionIconType newMarkerType);
@@ -99,6 +100,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiField
     CheckBox disableFilter;
 
+    @UiField
+    CheckBox snapToRoads;
+
     @UiField(provided = true)
     TextButton styleButtonTrackColor;
 
@@ -110,6 +114,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiField(provided = true)
     ColorMenu fullColorMenu;
+
+    @UiField
+    MenuItem markersMenu;
 
     @UiField(provided = true)
     Menu routeMarkersType;
@@ -184,6 +191,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         uiBinder.createAndBindUi(this);
 
+        markersMenu.setText(i18n.overlayType(UserSettings.OverlayType.MARKERS));
+
         // Initialize with current time
         long min = 60 * 1000;
         Date now = new Date();
@@ -229,6 +238,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
                 !disableFilter.getValue(),
+                snapToRoads.getValue(),
                 new ArchiveStyle(style)
         );
     }
@@ -254,7 +264,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue(),
+                            "&filter=" + !disableFilter.getValue() +
+                            "&snapToRoads=" + snapToRoads.getValue(),
                     "_blank", null);
         }
     }
@@ -270,7 +281,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue(),
+                            "&filter=" + !disableFilter.getValue() +
+                            "&snapToRoads=" + snapToRoads.getValue(),
                     "_blank", null);
         }
     }

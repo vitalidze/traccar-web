@@ -22,7 +22,7 @@
   <persistence-unit name="test">
     <properties>
       <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
-      <property name="hibernate.connection.url" value="jdbc:h2:./target/testdatabase"/>
+      <property name="hibernate.connection.url" value="jdbc:h2:mem:"/>
       <property name="hibernate.connection.username" value="sa"/>
       <property name="hibernate.connection.password" value=""/>
       <property name="hibernate.show_sql" value="true"/>

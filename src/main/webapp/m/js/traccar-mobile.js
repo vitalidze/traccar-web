@@ -279,6 +279,20 @@ myApp.onPageInit('map-screen', function(page) {
         view.on('change:resolution', function() {
             gmap.setZoom(view.getZoom());
         });
+    } else if (appState.userSettings.mapType.indexOf("MAPQUEST_") == 0) {
+        var tiles = 'osm';
+        if (appState.userSettings.mapType == "MAPQUEST_AERIAL") {
+            tiles = 'sat';
+        }
+        layers.push(new ol.layer.Tile({
+            source: new ol.source.MapQuest({layer: tiles})
+        }));
+    } else if (appState.userSettings.mapType == 'STAMEN_TONER') {
+        layers.push(new ol.layer.Tile({
+            source: new ol.source.Stamen({
+                layer: 'toner'
+            })
+        }));
     }
     layers.push(vectorLayer);
 

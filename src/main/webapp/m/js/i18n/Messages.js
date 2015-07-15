@@ -33,6 +33,40 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
+    sr: {
+        _name_: 'Српски',
+        // login screen
+        language: 'Језик',
+        username: 'Корисничко име',
+        password: 'Лозинка',
+        your_username: 'Ваше корисничко име',
+        your_password: 'Ваша лозинка',
+        sign_in: 'Пријава',
+        user_name_and_password_must_not_be_empty: 'Корисничко име и лозинка морају бити унети',
+        user_name_or_password_is_invalid: 'Корисничко име или лозинка су погрешни',
+        unexpected_error: 'Unexpected error',
+        open_desktop_version: 'Open Desktop version',
+        // sidebar
+        devices: 'Уређаји',
+        logout: 'Одјави се',
+        // device details
+        select_on_map: 'Изабери на мапи',
+        no_data_available: 'No data available',
+        time: 'Време',
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        altitude: 'Висина',
+        speed: 'Брзина',
+        course: 'Правац',
+        address: 'Адреса',
+        follow: 'Прати',
+        stop_following: 'Престани са прађењем',
+        geo_fence: 'Геозона',
+        send_location_by_email: 'Пошаљи локацију преко Email',
+        send_location_url_by_email: 'Пошаљи линк локације преко Email',
+        send_location_by_sms: 'Пошаљи локцију преко SMSа',
+        send_location_url_by_sms: 'Пошаљи линк локације преко SMSа'
+    },
     bg: {
         _name_: 'Български',
         // login screen
@@ -66,6 +100,40 @@ var i18n = {
         send_location_url_by_email: 'Send location URL by Email',
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
+    },
+    cs: {
+        _name_: 'Česky',
+        // login screen
+        language: 'Jazyk',
+        username: 'Uživatel',
+        password: 'Heslo',
+        your_username: 'Vaše uživatelské jméno',
+        your_password: 'Vaše heslo',
+        sign_in: 'Přihlásit',
+        user_name_and_password_must_not_be_empty: 'Uživatelské jméno a heslo nesmí být prázdné',
+        user_name_or_password_is_invalid: 'Uživatelské jméno, nebo heslo je chybné',
+        unexpected_error: 'Neznámá chyba',
+        open_desktop_version: 'Přepnout na verzi pro PC',
+        // sidebar
+        devices: 'Zařízení',
+        logout: 'Odhlásit',
+        // device details
+        select_on_map: 'Najít na mapě',
+        no_data_available: 'Data nejsou dostupná',
+        time: 'Čas',
+        latitude: 'Z. šířka',
+        longitude: 'Z. délka',
+        altitude: 'V/n.m.',
+        speed: 'Rychlost',
+        course: 'Směr',
+        address: 'Adresa',
+        follow: 'Sledovat',
+        stop_following: 'Zastavit sledování',
+        geo_fence: 'Zóny',
+        send_location_by_email: 'Odeslat polohu emailem',
+        send_location_url_by_email: 'Odeslat URL polohy emailem',
+        send_location_by_sms: 'Odeslat polohu přes SMS',
+        send_location_url_by_sms: 'Odeslat URL polohy přes SMS'
     },
     da: {
         _name_: 'Dansk',
@@ -202,6 +270,40 @@ var i18n = {
         send_location_url_by_email: 'Envoyer l\'URL de la position par Email',
         send_location_by_sms: 'Envoyer position par SMS',
         send_location_url_by_sms: 'Envoyer l\'URL de la position par SMS'
+    },
+    he: {
+        _name_: 'עברית',
+        // login screen
+        language: 'שפה',
+        username: 'שם משתמש',
+        password: 'סיסמה',
+        your_username: 'שם המשתמש',
+        your_password: 'סיסמה',
+        sign_in: 'התחבר',
+        user_name_and_password_must_not_be_empty: 'שם משתמש וסיסמה חייבים להיות מלאים',
+        user_name_or_password_is_invalid: 'שם משתמש וסיסמה לא תקינים,',
+        unexpected_error: 'Unexpected error',
+        open_desktop_version: 'Open Desktop version',
+        // sidebar
+        devices: 'Devices',
+        logout: 'התנתק',
+        // device details
+        select_on_map: 'Select on map',
+        no_data_available: 'אין נתונים',
+        time: 'זמן',
+        latitude: 'קו רוחב',
+        longitude: 'קו אורך',
+        altitude: 'גובה',
+        speed: 'מהירות',
+        course: 'כיוון',
+        address: 'כתובת',
+        follow: 'Follow',
+        stop_following: 'Stop following',
+        geo_fence: 'Geo-fence',
+        send_location_by_email: 'Send location by Email',
+        send_location_url_by_email: 'Send location URL by Email',
+        send_location_by_sms: 'Send location by SMS',
+        send_location_url_by_sms: 'Send location URL by SMS'
     },
     hu: {
         _name_: 'Hungarian',

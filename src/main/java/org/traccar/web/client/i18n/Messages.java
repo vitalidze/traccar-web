@@ -18,6 +18,7 @@ package org.traccar.web.client.i18n;
 import org.traccar.web.shared.model.DeviceEventType;
 import org.traccar.web.shared.model.GeoFenceType;
 import org.traccar.web.shared.model.MessagePlaceholder;
+import org.traccar.web.shared.model.UserSettings;
 
 public interface Messages extends com.google.gwt.i18n.client.Messages {
     String authentication();
@@ -238,8 +239,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
 
     String smallPalette();
 
-    String markers();
-
     String standardMarkers();
 
     String reducedMarkers();
@@ -257,8 +256,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String readOnly();
 
     String protocol();
-
-    String geoFences();
 
     String objects();
 
@@ -376,4 +373,24 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String errUserSessionExpired();
 
     String errUserDisconnected();
+
+    String firstName();
+
+    String lastName();
+
+    String companyName();
+
+    String expirationDate();
+
+    String maxNumOfDevices();
+
+    String blocked();
+
+    String overlays();
+
+    String overlay();
+
+    String overlayType(@Select UserSettings.OverlayType type);
+
+    String snapToRoads();
 }

@@ -43,6 +43,8 @@
                     <button:TextButton ui:field="filterButton" text="{i18n.filter}..." />
                     <toolbar:LabelToolItem width="2" />
                     <form:CheckBox ui:field="disableFilter" boxLabel="{i18n.disableFilter}" />
+                    <toolbar:LabelToolItem width="2" />
+                    <form:CheckBox ui:field="snapToRoads" boxLabel="{i18n.snapToRoads}" />
 
                     <toolbar:ToolBar ui:field="styleToolbar">
                         <button:TextButton ui:field="styleButtonTrackColor" text=" " height="80%"/>
@@ -51,7 +53,7 @@
                                 <menu:Menu ui:field="menu1">
                                     <menu:CheckMenuItem ui:field="zoomToTrackMenu" text="{i18n.zoomToTrack}" />
                                     <menu:SeparatorMenuItem />
-                                    <menu:MenuItem ui:field="markersMenu" text="{i18n.markers}">
+                                    <menu:MenuItem ui:field="markersMenu">
                                         <menu:submenu>
                                             <menu:Menu ui:field="routeMarkersType" />
                                         </menu:submenu>
