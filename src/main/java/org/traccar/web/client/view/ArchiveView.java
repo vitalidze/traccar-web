@@ -32,12 +32,14 @@ import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import com.sencha.gxt.widget.core.client.form.*;
+import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.*;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.ArchiveStyle;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
+import org.traccar.web.client.widget.PeriodComboBox;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -97,6 +99,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiField(provided = true)
     ComboBox<Device> deviceCombo;
 
+	@UiField(provided = true)
+	ComboBox<String> periodCombo;
+
     @UiField
     CheckBox disableFilter;
 
@@ -136,6 +141,10 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
+
+		periodCombo = new PeriodComboBox();
+		periodCombo.select(1);
+		addHandlersForEventObservation(periodCombo);
 
         // Element that displays the current track color
         styleButtonTrackColor = new TextButton();
@@ -234,13 +243,13 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiHandler("loadButton")
     public void onLoadClicked(SelectEvent event) {
         archiveHandler.onLoad(
-                deviceCombo.getValue(),
-                getCombineDate(fromDate, fromTime),
-                getCombineDate(toDate, toTime),
-                !disableFilter.getValue(),
-                snapToRoads.getValue(),
-                new ArchiveStyle(style)
-        );
+				deviceCombo.getValue(),
+				getCombineDate(fromDate, fromTime),
+				getCombineDate(toDate, toTime),
+				!disableFilter.getValue(),
+				snapToRoads.getValue(),
+				new ArchiveStyle(style)
+		);
     }
 
     @UiHandler("clearButton")
@@ -364,4 +373,37 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
             }
         }
     }
+
+	/**
+	 * Helper to add handlers to observe events that occur on each combobox
+	 */
+	private <T> void addHandlersForEventObservation(final ComboBox<T> combo) {
+		combo.addValueChangeHandler(new ValueChangeHandler<T>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<T> event) {
+				String selected = "New value: "
+						+ (event.getValue() == null ? "nothing" :  "!");
+				Info.display("Value Changed", selected);
+			}
+		});
+
+		combo.addSelectionHandler(new SelectionHandler<T>() {
+			@Override
+			public void onSelection(SelectionEvent<T> event) {
+				String selected = "You selected "
+						+ (event.getSelectedItem() == null ? "nothing" : combo.getLabelProvider().getLabel(event.getSelectedItem()) + "!");
+				Info.display("selected", selected);
+				setDateTimefd((PeriodComboBox) combo, combo.getStore().indexOf(event.getSelectedItem()));
+			}
+		});
+	}
+
+	private void setDateTimefd(PeriodComboBox combo,int index){
+		if(index != 6){
+			fromTime.setValue(combo.getStartPeriod(index));
+			fromDate.setValue(combo.getStartPeriod(index));
+			toDate.setValue(combo.getEndOfPeriod(index));
+			toTime.setValue(combo.getEndOfPeriod(index));
+		}
+	}
 }
