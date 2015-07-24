@@ -32,12 +32,14 @@ import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import com.sencha.gxt.widget.core.client.form.*;
+import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.*;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.ArchiveStyle;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
+import org.traccar.web.client.widget.PeriodComboBox;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -56,312 +58,394 @@ import org.traccar.web.shared.model.UserSettings;
 
 public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandler<Position> {
 
-    private static ArchiveViewUiBinder uiBinder = GWT.create(ArchiveViewUiBinder.class);
+	private static ArchiveViewUiBinder uiBinder = GWT.create(ArchiveViewUiBinder.class);
 
-    public ArchiveStyle style = new ArchiveStyle();
+	public ArchiveStyle style = new ArchiveStyle();
 
-    interface ArchiveViewUiBinder extends UiBinder<Widget, ArchiveView> {
-    }
+	interface ArchiveViewUiBinder extends UiBinder<Widget, ArchiveView> {
+	}
 
-    public interface ArchiveHandler {
-        void onSelected(Position position);
-        void onLoad(Device device, Date from, Date to, boolean filter, boolean snapToRoads, ArchiveStyle style);
-        void onFilterSettings();
-        void onClear(Device device);
-        void onChangeArchiveMarkerType(PositionIconType newMarkerType);
-    }
+	public interface ArchiveHandler {
+		void onSelected(Position position);
+		void onLoad(Device device, Date from, Date to, boolean filter, boolean snapToRoads, ArchiveStyle style);
+		void onFilterSettings();
+		void onClear(Device device);
+		void onChangeArchiveMarkerType(PositionIconType newMarkerType);
+	}
 
-    private ArchiveHandler archiveHandler;
+	private ArchiveHandler archiveHandler;
 
-    @UiField
-    ContentPanel contentPanel;
+	@UiField
+	ContentPanel contentPanel;
 
-    public ContentPanel getView() {
-        return contentPanel;
-    }
+	public ContentPanel getView() {
+		return contentPanel;
+	}
 
-    ListStore<Device> deviceStore;
+	ListStore<Device> deviceStore;
 
-    @UiField
-    DateField fromDate;
+	@UiField
+	DateField fromDate;
 
-    @UiField
-    TimeField fromTime;
+	@UiField
+	TimeField fromTime;
 
-    @UiField
-    DateField toDate;
+	@UiField
+	DateField toDate;
 
-    @UiField
-    TimeField toTime;
+	@UiField
+	TimeField toTime;
 
-    @UiField(provided = true)
-    ComboBox<Device> deviceCombo;
+	@UiField(provided = true)
+	ComboBox<Device> deviceCombo;
 
-    @UiField
-    CheckBox disableFilter;
+	@UiField(provided = true)
+	ComboBox<String> periodCombo;
 
-    @UiField
-    CheckBox snapToRoads;
+	@UiField
+	CheckBox disableFilter;
 
-    @UiField(provided = true)
-    TextButton styleButtonTrackColor;
+	@UiField
+	CheckBox snapToRoads;
 
-    @UiField
-    TextButton styleButton;
+	@UiField(provided = true)
+	TextButton styleButtonTrackColor;
 
-    @UiField(provided = true)
-    ColorMenu smallColorMenu;
+	@UiField
+	TextButton styleButton;
 
-    @UiField(provided = true)
-    ColorMenu fullColorMenu;
+	@UiField(provided = true)
+	ColorMenu smallColorMenu;
 
-    @UiField
-    MenuItem markersMenu;
+	@UiField(provided = true)
+	ColorMenu fullColorMenu;
 
-    @UiField(provided = true)
-    Menu routeMarkersType;
+	@UiField
+	MenuItem markersMenu;
 
-    @UiField(provided = true)
-    TabPanel devicesTabs;
+	@UiField(provided = true)
+	Menu routeMarkersType;
 
-    final Map<Long, ArchivePanel> archivePanels;
+	@UiField(provided = true)
+	TabPanel devicesTabs;
 
-    @UiField(provided = true)
-    Messages i18n = GWT.create(Messages.class);
+	final Map<Long, ArchivePanel> archivePanels;
 
-    public ArchiveView(final ArchiveHandler archiveHandler, ListStore<Device> deviceStore) {
-        this.archiveHandler = archiveHandler;
-        deviceStore.addStoreHandlers(deviceStoreHandlers);
-        this.deviceStore = deviceStore;
+	@UiField(provided = true)
+	Messages i18n = GWT.create(Messages.class);
 
-        DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
-        deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
+	public ArchiveView(final ArchiveHandler archiveHandler, ListStore<Device> deviceStore) {
+		this.archiveHandler = archiveHandler;
+		deviceStore.addStoreHandlers(deviceStoreHandlers);
+		this.deviceStore = deviceStore;
 
-        // Element that displays the current track color
-        styleButtonTrackColor = new TextButton();
-        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor", "#".concat(style.DEFAULT_COLOR));
-        styleButtonTrackColor.getElement().getStyle().setCursor(Style.Cursor.TEXT);
-        // Menu with the small palette
-        smallColorMenu = new ExtColorMenu(ArchiveStyle.COLORS, ArchiveStyle.COLORS);
-        smallColorMenu.setColor(ArchiveStyle.DEFAULT_COLOR);
-        smallColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                style.setTrackColor(event.getValue());
-                smallColorMenu.hide(true);
-                fullColorMenu.getPalette().setValue("", false);
-                styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(style.getTrackColor()));
-            }
-        });
-        // Menu with the complete palette
-        fullColorMenu = new ColorMenu();
-        fullColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                style.setTrackColor(event.getValue());
-                fullColorMenu.hide(true);
-                smallColorMenu.getPalette().setValue("", false);
-                styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor", "#".concat(style.getTrackColor()));
-            }
-        });
-        // Markers
-        routeMarkersType = new Menu();
-        for (Object[] obj : new Object[][] { { i18n.noMarkers(), null },
-                                             { i18n.standardMarkers(), PositionIconType.iconArchive },
-                                             { i18n.reducedMarkers(), PositionIconType.dotArchive } }) {
-            CheckMenuItem item = new CheckMenuItem((String) obj[0]);
-            final PositionIconType iconType = (PositionIconType) obj[1];
-            item.setGroup("markers");
-            item.setChecked(iconType == ApplicationContext.getInstance().getUserSettings().getArchiveMarkerType());
-            if (item.isChecked()) {
-                style.setIconType(iconType);
-            }
-            item.addSelectionHandler(new SelectionHandler<Item>() {
-                @Override
-                public void onSelection(SelectionEvent<Item> event) {
-                    style.setIconType(iconType);
-                    archiveHandler.onChangeArchiveMarkerType(iconType);
-                }
-            });
-            routeMarkersType.add(item);
-        }
+		DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
+		deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
 
-        devicesTabs = new TabPanel(GWT.<TabPanel.TabPanelAppearance>create(BlueTabPanelBottomAppearance.class));
-        archivePanels = new HashMap<Long, ArchivePanel>();
+		periodCombo = new PeriodComboBox();
+		periodCombo.select(1);
+		addHandlersForEventObservation(periodCombo);
 
-        uiBinder.createAndBindUi(this);
+		// Element that displays the current track color
+		styleButtonTrackColor = new TextButton();
+		styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor", "#".concat(style.DEFAULT_COLOR));
+		styleButtonTrackColor.getElement().getStyle().setCursor(Style.Cursor.TEXT);
+		// Menu with the small palette
+		smallColorMenu = new ExtColorMenu(ArchiveStyle.COLORS, ArchiveStyle.COLORS);
+		smallColorMenu.setColor(ArchiveStyle.DEFAULT_COLOR);
+		smallColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				style.setTrackColor(event.getValue());
+				smallColorMenu.hide(true);
+				fullColorMenu.getPalette().setValue("", false);
+				styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor","#".concat(style.getTrackColor()));
+			}
+		});
+		// Menu with the complete palette
+		fullColorMenu = new ColorMenu();
+		fullColorMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				style.setTrackColor(event.getValue());
+				fullColorMenu.hide(true);
+				smallColorMenu.getPalette().setValue("", false);
+				styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor", "#".concat(style.getTrackColor()));
+			}
+		});
+		// Markers
+		routeMarkersType = new Menu();
+		for (Object[] obj : new Object[][] { { i18n.noMarkers(), null },
+			{ i18n.standardMarkers(), PositionIconType.iconArchive },
+			{ i18n.reducedMarkers(), PositionIconType.dotArchive } }) {
+			CheckMenuItem item = new CheckMenuItem((String) obj[0]);
+			final PositionIconType iconType = (PositionIconType) obj[1];
+			item.setGroup("markers");
+			item.setChecked(iconType == ApplicationContext.getInstance().getUserSettings().getArchiveMarkerType());
+			if (item.isChecked()) {
+				style.setIconType(iconType);
+			}
+			item.addSelectionHandler(new SelectionHandler<Item>() {
+				@Override
+				public void onSelection(SelectionEvent<Item> event) {
+					style.setIconType(iconType);
+					archiveHandler.onChangeArchiveMarkerType(iconType);
+				}
+			});
+			routeMarkersType.add(item);
+		}
 
-        markersMenu.setText(i18n.overlayType(UserSettings.OverlayType.MARKERS));
+		devicesTabs = new TabPanel(GWT.<TabPanel.TabPanelAppearance>create(BlueTabPanelBottomAppearance.class));
+		archivePanels = new HashMap<Long, ArchivePanel>();
 
-        // Initialize with current time
-        long min = 60 * 1000;
-        Date now = new Date();
-        Date to = new Date(((now.getTime() + 15 * min) / (15 * min)) * 15 * min);
-        Date from = new Date(to.getTime() - 60 * min);
-        fromDate.setValue(from);
-        fromTime.setValue(from);
-        toDate.setValue(to);
-        toTime.setValue(to);
-    }
+		uiBinder.createAndBindUi(this);
 
-    @Override
-    public void onSelectionChanged(SelectionChangedEvent<Position> event) {
-        if (event.getSelection().isEmpty()) {
-            archiveHandler.onSelected(null);
-        } else {
-            archiveHandler.onSelected(event.getSelection().get(0));
-        }
-    }
+		markersMenu.setText(i18n.overlayType(UserSettings.OverlayType.MARKERS));
 
-    @UiHandler("zoomToTrackMenu")
-    public void onMenuSelection(SelectionEvent<Item> event) {
-        style.setZoomToTrack(((CheckMenuItem) event.getSelectedItem()).isChecked());
-    }
+		// Initialize with current time
+		long min = 60 * 1000;
+		Date now = new Date();
+		Date to = new Date(((now.getTime() + 15 * min) / (15 * min)) * 15 * min);
+		Date from = new Date(to.getTime() - 60 * min);
+		fromDate.setValue(from);
+		fromTime.setValue(from);
+		toDate.setValue(to);
+		toTime.setValue(to);
+	}
 
-    @SuppressWarnings("deprecation")
-    private static Date getCombineDate(DateField dateField, TimeField timeField) {
-        Date result = null;
-        Date date = dateField.getValue();
-        Date time = timeField.getValue();
-        if (date != null && time != null) {
-            result = new Date(
-                    date.getYear(), date.getMonth(), date.getDate(),
-                    time.getHours(), time.getMinutes(), time.getSeconds());
-        }
-        return result;
-    }
+	@Override
+	public void onSelectionChanged(SelectionChangedEvent<Position> event) {
+		if (event.getSelection().isEmpty()) {
+			archiveHandler.onSelected(null);
+		} else {
+			archiveHandler.onSelected(event.getSelection().get(0));
+		}
+	}
 
-    @UiHandler("loadButton")
-    public void onLoadClicked(SelectEvent event) {
-        archiveHandler.onLoad(
-                deviceCombo.getValue(),
-                getCombineDate(fromDate, fromTime),
-                getCombineDate(toDate, toTime),
-                !disableFilter.getValue(),
-                snapToRoads.getValue(),
-                new ArchiveStyle(style)
-        );
-    }
+	@UiHandler("zoomToTrackMenu")
+	public void onMenuSelection(SelectionEvent<Item> event) {
+		style.setZoomToTrack(((CheckMenuItem) event.getSelectedItem()).isChecked());
+	}
 
-    @UiHandler("clearButton")
-    public void onClearClicked(SelectEvent event) {
-        for (Map.Entry<Long, ArchivePanel> entry : archivePanels.entrySet()) {
-            Device device = deviceStore.findModelWithKey(entry.getKey().toString());
-            archiveHandler.onClear(device);
-            devicesTabs.remove(entry.getValue().getContentPanel());
-        }
-        archivePanels.clear();
-    }
+	@SuppressWarnings("deprecation")
+	private static Date getCombineDate(DateField dateField, TimeField timeField) {
+		Date result = null;
+		Date date = dateField.getValue();
+		Date time = timeField.getValue();
+		if (date != null && time != null) {
+			result = new Date(
+					date.getYear(), date.getMonth(), date.getDate(),
+					time.getHours(), time.getMinutes(), time.getSeconds());
+		}
+		return result;
+	}
 
-    @UiHandler("csvButton")
-    public void onCSVClicked(SelectionEvent<Item> event) {
-        if (deviceCombo.getValue() == null) {
-            new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
-        } else {
-            DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-            Window.open("/traccar/export/csv" +
-                            "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
-                            "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
-                            "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue() +
-                            "&snapToRoads=" + snapToRoads.getValue(),
-                    "_blank", null);
-        }
-    }
+	@UiHandler("loadButton")
+	public void onLoadClicked(SelectEvent event) {
+		archiveHandler.onLoad(
+				deviceCombo.getValue(),
+				getCombineDate(fromDate, fromTime),
+				getCombineDate(toDate, toTime),
+				!disableFilter.getValue(),
+				snapToRoads.getValue(),
+				new ArchiveStyle(style)
+				);
+	}
 
-    @UiHandler("gpxButton")
-    public void onGPXClicked(SelectionEvent<Item> event) {
-        if (deviceCombo.getValue() == null) {
-            new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
-        } else {
-            DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
+	@UiHandler("clearButton")
+	public void onClearClicked(SelectEvent event) {
+		for (Map.Entry<Long, ArchivePanel> entry : archivePanels.entrySet()) {
+			Device device = deviceStore.findModelWithKey(entry.getKey().toString());
+			archiveHandler.onClear(device);
+			devicesTabs.remove(entry.getValue().getContentPanel());
+		}
+		archivePanels.clear();
+	}
 
-            Window.open("/traccar/export/gpx" +
-                            "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
-                            "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
-                            "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue() +
-                            "&snapToRoads=" + snapToRoads.getValue(),
-                    "_blank", null);
-        }
-    }
+	@UiHandler("csvButton")
+	public void onCSVClicked(SelectionEvent<Item> event) {
+		if (deviceCombo.getValue() == null) {
+			new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
+		} else {
+			DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-    @UiHandler("importButton")
-    public void onImportClicked(SelectionEvent<Item> event) {
-        if (deviceCombo.getValue() == null) {
-            new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
-        } else {
-            new ImportDialog(deviceCombo.getValue()).show();
-        }
-    }
+			Window.open("/traccar/export/csv" +
+					"?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
+					"&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
+					"&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+					"&filter=" + !disableFilter.getValue() +
+					"&snapToRoads=" + snapToRoads.getValue(),
+					"_blank", null);
+		}
+	}
 
-    @UiHandler("filterButton")
-    public void onFilterClicked(SelectEvent event) {
-        archiveHandler.onFilterSettings();
-    }
+	@UiHandler("gpxButton")
+	public void onGPXClicked(SelectionEvent<Item> event) {
+		if (deviceCombo.getValue() == null) {
+			new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
+		} else {
+			DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-    private StoreHandlers<Device> deviceStoreHandlers = new BaseStoreHandlers<Device>() {
+			Window.open("/traccar/export/gpx" +
+					"?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
+					"&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
+					"&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+					"&filter=" + !disableFilter.getValue() +
+					"&snapToRoads=" + snapToRoads.getValue(),
+					"_blank", null);
+		}
+	}
 
-        @Override
-        public void onAnything() {
-            Device oldDevice = deviceCombo.getValue();
-            if (oldDevice != null) {
-                deviceCombo.setValue(deviceStore.findModel(oldDevice));
-            } else if (deviceStore.size() == 1) {
-                deviceCombo.setValue(deviceStore.get(0));
-            }
-        }
+	@UiHandler("importButton")
+	public void onImportClicked(SelectionEvent<Item> event) {
+		if (deviceCombo.getValue() == null) {
+			new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
+		} else {
+			new ImportDialog(deviceCombo.getValue()).show();
+		}
+	}
 
-        @Override
-        public void onUpdate(StoreUpdateEvent<Device> event) {
-            super.onUpdate(event);
-            if (event.getItems() != null) {
-                for (Device device : event.getItems()) {
-                    ArchivePanel panel = archivePanels.get(device.getId());
-                    if (panel != null) {
-                        TabItemConfig config = devicesTabs.getConfig(panel.getContentPanel());
-                        config.setText(device.getName());
-                        devicesTabs.update(panel.getContentPanel(), config);
-                    }
-                }
-            }
-        }
-    };
 
-    public void selectPosition(Position position) {
-        getArchivePanel(position.getDevice()).selectPosition(position);
-    }
 
-    public void selectDevice(Device device) {
-        deviceCombo.setValue(device, false);
-    }
+	@UiHandler("reportButton")
+	public void oncurrentSituationClicked(SelectionEvent<Item> event) {
+		Window.open("/traccar/report/currentSituation", "_blank", null);
+	}
 
-    public void showPositions(Device device, List<Position> positions) {
-        ArchivePanel panel = getArchivePanel(device);
-        devicesTabs.setActiveWidget(panel.getContentPanel());
-        panel.setPositions(positions);
-    }
 
-    private ArchivePanel getArchivePanel(Device device) {
-        ArchivePanel panel = archivePanels.get(device.getId());
-        if (panel == null) {
-            panel = new ArchivePanel(archiveHandler);
-            archivePanels.put(device.getId(), panel);
-            devicesTabs.add(panel.getContentPanel(), new TabItemConfig(device.getName(), true));
-        }
-        return panel;
-    }
+	@UiHandler("reportButton")
+	public void onReportClicked(SelectionEvent<Item> event) {
+		if (deviceCombo.getValue() == null) {
+			new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
+		} else {
+			DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-    @UiHandler("devicesTabs")
-    public void onDeviceTabClosed(CloseEvent<Widget> event) {
-        for (Map.Entry<Long, ArchivePanel> entry : archivePanels.entrySet()) {
-            if (entry.getValue().getContentPanel().equals(event.getItem())) {
-                Device device = deviceStore.findModelWithKey(entry.getKey().toString());
-                archiveHandler.onClear(device);
-                archivePanels.remove(entry.getKey());
-                break;
-            }
-        }
-    }
+			Window.open("/traccar/report/detailedReport" +
+					"?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
+					"&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
+					"&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
+					"&filter=" + !disableFilter.getValue(),
+					"_blank", null);
+		}
+	}
+
+	@UiHandler("filterButton")
+	public void onFilterClicked(SelectEvent event) {
+		archiveHandler.onFilterSettings();
+	}
+
+	private StoreHandlers<Device> deviceStoreHandlers = new BaseStoreHandlers<Device>() {
+
+		@Override
+		public void onAnything() {
+			Device oldDevice = deviceCombo.getValue();
+			if (oldDevice != null) {
+				deviceCombo.setValue(deviceStore.findModel(oldDevice));
+			} else if (deviceStore.size() == 1) {
+				deviceCombo.setValue(deviceStore.get(0));
+			}
+		}
+
+		@Override
+		public void onUpdate(StoreUpdateEvent<Device> event) {
+			super.onUpdate(event);
+			if (event.getItems() != null) {
+				for (Device device : event.getItems()) {
+					ArchivePanel panel = archivePanels.get(device.getId());
+					if (panel != null) {
+						TabItemConfig config = devicesTabs.getConfig(panel.getContentPanel());
+						config.setText(device.getName());
+						devicesTabs.update(panel.getContentPanel(), config);
+					}
+				}
+			}
+		}
+	};
+
+	public void selectPosition(Position position) {
+		getArchivePanel(position.getDevice()).selectPosition(position);
+	}
+
+	public void selectDevice(Device device) {
+		deviceCombo.setValue(device, false);
+	}
+
+	public void showPositions(Device device, List<Position> positions) {
+		ArchivePanel panel = getArchivePanel(device);
+		devicesTabs.setActiveWidget(panel.getContentPanel());
+		panel.setPositions(positions);
+	}
+
+	private ArchivePanel getArchivePanel(Device device) {
+		ArchivePanel panel = archivePanels.get(device.getId());
+		if (panel == null) {
+			panel = new ArchivePanel(archiveHandler);
+			archivePanels.put(device.getId(), panel);
+			devicesTabs.add(panel.getContentPanel(), new TabItemConfig(device.getName(), true));
+		}
+		return panel;
+	}
+
+	@UiHandler("devicesTabs")
+	public void onDeviceTabClosed(CloseEvent<Widget> event) {
+		for (Map.Entry<Long, ArchivePanel> entry : archivePanels.entrySet()) {
+			if (entry.getValue().getContentPanel().equals(event.getItem())) {
+				Device device = deviceStore.findModelWithKey(entry.getKey().toString());
+				archiveHandler.onClear(device);
+				archivePanels.remove(entry.getKey());
+				break;
+			}
+		}
+	}
+
+
+	/**
+	 * Helper to add handlers to observe events that occur on each combobox
+	 */
+	private <T> void addHandlersForEventObservation(final ComboBox<T> combo) {
+		combo.addValueChangeHandler(new ValueChangeHandler<T>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<T> event) {
+				String selected = "New value: "
+						+ (event.getValue() == null ? "nothing" :  "!");
+				Info.display("Value Changed", selected);
+			}
+		});
+
+		combo.addSelectionHandler(new SelectionHandler<T>() {
+			@Override
+			public void onSelection(SelectionEvent<T> event) {
+				String selected = "You selected "
+						+ (event.getSelectedItem() == null ? "nothing" : combo.getLabelProvider().getLabel(event.getSelectedItem()) + "!");
+		Info.display("selected", selected);
+				setDateTimefd((PeriodComboBox) combo, combo.getStore().indexOf(event.getSelectedItem()));
+			}
+		});
+		
+
+	}
+	private void setDateTimefd(PeriodComboBox combo,int index){
+//		Info.display("Od",  ((PeriodComboBox) combo).getStartPeriod(combo.getStore().indexOf(event.getSelectedItem())).toString());
+//		Info.display("Do",  ((PeriodComboBox) combo).getEndOfPeriod(combo.getStore().indexOf(event.getSelectedItem())).toString());
+//		Info.display("getSelectedItem", String.valueOf(event.getSelectedItem()));
+//		Info.display("tmp", String.valueOf(combo.getStore().indexOf(event.getSelectedItem()) + "!"));
+
+
+		if(index != 6){
+			fromTime.setValue(combo.getStartPeriod(index));
+			fromDate.setValue(combo.getStartPeriod(index));
+			toDate.setValue(combo.getEndOfPeriod(index));
+			toTime.setValue(combo.getEndOfPeriod(index));
+//			fromDate.hide();
+//			fromTime.hide();
+//			toDate.hide();
+//			toTime.hide();
+		}
+		else{
+//			fromDate.show();
+//			toDate.show();
+		}
+			
+		}
 }

@@ -27,6 +27,7 @@
 
                     <toolbar:LabelToolItem label="{i18n.device}:" />
                     <form:ComboBox ui:field="deviceCombo" editable="false" triggerAction="ALL" />
+                    <form:ComboBox ui:field="periodCombo" editable="false" triggerAction="ALL" />
                     <toolbar:SeparatorToolItem />
 
                     <toolbar:LabelToolItem label="{i18n.from}:" />
@@ -86,6 +87,8 @@
                                 <menu:MenuItem ui:field="csvButton" text="{i18n.exportToCSV}"/>
                                 <menu:MenuItem ui:field="gpxButton" text="{i18n.exportToGPX}"/>
                                 <menu:MenuItem ui:field="importButton" text="{i18n.importData}"/>
+                                <menu:MenuItem ui:field="currentStatusButton" text="currentStatus"/>
+                                <menu:MenuItem ui:field="reportButton" text="report"/>
                             </menu:Menu>
                         </button:menu>
                     </button:TextButton>
