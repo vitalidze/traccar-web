@@ -54,6 +54,20 @@ New:
         VALUES (:deviceId, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
     </entry>
 
+  - SQL query to select latest positions
+  
+Old:
+
+    <entry key='database.selectLatestPositions'>
+        SELECT * FROM position WHERE id IN (SELECT positionId FROM device);
+    </entry>
+    
+New:
+    
+    <entry key='database.selectLatestPositions'>
+        SELECT * FROM positions WHERE id IN (SELECT latestPosition_id FROM devices);
+    </entry>
+
   - SQL query to update database with latest info from device
 
 Old:
