@@ -62,14 +62,18 @@ public class PeriodComboBox extends ComboBox<String> {
 				CalendarUtil.addDaysToDate(date, -1);
 				return date;
 			case 2: //This week
-// TODO
+			    while(date.getDay() != CalendarUtil.getStartingDayOfWeek()){
+			    	CalendarUtil.addDaysToDate(date, -1);
+			    }
 				return date;
 			case 3: //Previous week
-// TODO			
+			    while(date.getDay() != CalendarUtil.getStartingDayOfWeek()){
+			    	CalendarUtil.addDaysToDate(date, -1);
+			    }
+				CalendarUtil.addDaysToDate(date, -7);
 				return date;
 			case 4: //This month
 				CalendarUtil.setToFirstDayOfMonth(date);
-
 				return date;
 			case 5: //Previous month
 				CalendarUtil.addMonthsToDate(date, -1);
@@ -95,10 +99,15 @@ public class PeriodComboBox extends ComboBox<String> {
 			case 1: //Yesterday
 				return date;
 			case 2: //This week
-// TODO
+			    while(date.getDay() != CalendarUtil.getStartingDayOfWeek()){
+			    	CalendarUtil.addDaysToDate(date, -1);
+			    }
+				CalendarUtil.addDaysToDate(date, 7);
 				return date;
 			case 3: //Last week
-// TODO
+			    while(date.getDay() != CalendarUtil.getStartingDayOfWeek()){
+			    	CalendarUtil.addDaysToDate(date, -1);
+			    }
 				return date;
 			case 4: //This month
 				CalendarUtil.setToFirstDayOfMonth(date);
