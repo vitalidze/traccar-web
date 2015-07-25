@@ -16,6 +16,9 @@ package org.traccar.web.client.widget;
 
 import java.util.Date;
 
+import org.traccar.web.client.i18n.Messages;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.data.shared.LabelProvider;
@@ -38,15 +41,18 @@ public class PeriodComboBox extends ComboBox<String> {
 			}
 		});
 
-		getStore().add(0, "Today");
-		getStore().add(1, "Yesterday");
-		getStore().add(2, "This week");
-		getStore().add(3, "Previous week");
-		getStore().add(4, "This month");
-		getStore().add(5, "Previous month");
-		getStore().add(6, "Custom");
+		Messages i18n = GWT.create(Messages.class);
+		getStore().add(0, i18n.periodComboBox_today());
+		getStore().add(1, i18n.periodComboBox_Yesterday());
+		getStore().add(2, i18n.periodComboBox_ThisWeek());
+		getStore().add(3, i18n.periodComboBox_PreviousWeek());
+		getStore().add(4, i18n.periodComboBox_ThisMonth());
+		getStore().add(5, i18n.periodComboBox_PreviousMonth());
+		getStore().add(6, i18n.periodComboBox_Custom());
 		setForceSelection(true);
+		setEmptyText(i18n.periodComboBox_SelectPeriod());
 		setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+		
 	}
 
 	
