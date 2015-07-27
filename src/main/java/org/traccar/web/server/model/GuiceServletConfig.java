@@ -15,6 +15,8 @@
  */
 package org.traccar.web.server.model;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.matcher.Matchers;
@@ -87,6 +89,9 @@ public class GuiceServletConfig extends GuiceServletContextListener {
                 bind(ApplicationSettings.class).toProvider(ApplicationSettingsProvider.class);
                 bind(DataService.class).to(DataServiceImpl.class);
                 bind(EventService.class).to(EventServiceImpl.class);
+
+                bindInterceptor(Matchers.subclassesOf(RemoteServiceServlet.class),
+                        Matchers.returns(Matchers.only(SerializationPolicy.class)), new FixSerializationPolicy());
             }
         };
     }
