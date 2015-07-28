@@ -269,7 +269,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         } else {
             DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-            Window.open("/traccar/export/csv" +
+            Window.open("traccar/export/csv" +
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
@@ -286,7 +286,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         } else {
             DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-            Window.open("/traccar/export/gpx" +
+            Window.open("traccar/export/gpx" +
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +

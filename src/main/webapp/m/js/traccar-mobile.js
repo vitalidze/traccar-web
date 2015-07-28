@@ -131,7 +131,7 @@ myApp.onPageInit('login-screen', function (page) {
 
     // set up open desktop version action
     pageContainer.find('.open-desktop-version').on('click', function() {
-        window.location = '/?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
+        window.location = '../?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
     });
 
     pageContainer.find('#form-login').on('submit', function(e) {
@@ -420,7 +420,7 @@ function loadDevices() {
 
             // set up open desktop version action
             $$('.open-desktop-version').on('click', function() {
-                window.location = '/?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
+                window.location = '../?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
             });
         },
         error: function() {
@@ -677,8 +677,12 @@ function drawMarker(position) {
 
 function getIconURL(position) {
     if (position.device.icon == null) {
-        return position.offline ? position.device.iconType.OFFLINE.urls[position.selected ? 1 : 0] :
-                                  position.device.iconType.LATEST.urls[position.selected ? 1 : 0];
+        var iconURL = position.offline ? position.device.iconType.OFFLINE.urls[position.selected ? 1 : 0] :
+                                         position.device.iconType.LATEST.urls[position.selected ? 1 : 0];
+        if (iconURL.indexOf('img/') == 0) {
+            iconURL = '../' + iconURL;
+        }
+        return iconURL;
     } else {
         var pictureId;
         if (position.selected) {
@@ -686,7 +690,7 @@ function getIconURL(position) {
         } else {
             pictureId = position.offline ? position.device.icon.offlineIcon.id : position.device.icon.defaultIcon.id;
         }
-        return '/traccar/p/' + pictureId;
+        return '../traccar/p/' + pictureId;
     }
 }
 
@@ -702,7 +706,7 @@ function callPost(options) {
 
 function invoke(options) {
     $$.ajax({
-        url: '/traccar/rest/' + options.method,
+        url: '../traccar/rest/' + options.method,
         method: options.httpMethod,
         dataType: 'json',
         data: JSON.stringify(options.data),
