@@ -144,7 +144,12 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
 		periodCombo = new PeriodComboBox();
 		periodCombo.select(1);
-		addHandlersForEventObservation(periodCombo);
+        periodCombo.addSelectionHandler(new SelectionHandler<String>() {
+            @Override
+            public void onSelection(SelectionEvent<String> event) {
+                setDateTimefd(periodCombo.getStore().indexOf(event.getSelectedItem()));
+            }
+        });
 
         // Element that displays the current track color
         styleButtonTrackColor = new TextButton();
@@ -243,13 +248,13 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiHandler("loadButton")
     public void onLoadClicked(SelectEvent event) {
         archiveHandler.onLoad(
-				deviceCombo.getValue(),
-				getCombineDate(fromDate, fromTime),
-				getCombineDate(toDate, toTime),
-				!disableFilter.getValue(),
-				snapToRoads.getValue(),
-				new ArchiveStyle(style)
-		);
+                deviceCombo.getValue(),
+                getCombineDate(fromDate, fromTime),
+                getCombineDate(toDate, toTime),
+                !disableFilter.getValue(),
+                snapToRoads.getValue(),
+                new ArchiveStyle(style)
+        );
     }
 
     @UiHandler("clearButton")
@@ -374,32 +379,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         }
     }
 
-	/**
-	 * Helper to add handlers to observe events that occur on each combobox
-	 */
-	private <T> void addHandlersForEventObservation(final ComboBox<T> combo) {
-		combo.addValueChangeHandler(new ValueChangeHandler<T>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<T> event) {
-				String selected = "New value: "
-						+ (event.getValue() == null ? "nothing" :  "!");
-				Info.display("Value Changed", selected);
-			}
-		});
-
-		combo.addSelectionHandler(new SelectionHandler<T>() {
-			@Override
-			public void onSelection(SelectionEvent<T> event) {
-				String selected = "You selected "
-						+ (event.getSelectedItem() == null ? "nothing" : combo.getLabelProvider().getLabel(event.getSelectedItem()) + "!");
-				Info.display("selected", selected);
-				setDateTimefd((PeriodComboBox) combo, combo.getStore().indexOf(event.getSelectedItem()));
-			}
-		});
-	}
-
-	private void setDateTimefd(PeriodComboBox combo,int index){
-		if(index != 6){
+	private void setDateTimefd(int index){
+		if (index != 6){
+            PeriodComboBox combo = (PeriodComboBox) periodCombo;
 			fromTime.setValue(combo.getStartPeriod(index));
 			fromDate.setValue(combo.getStartPeriod(index));
 			toDate.setValue(combo.getEndOfPeriod(index));
