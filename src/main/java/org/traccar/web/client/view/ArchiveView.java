@@ -18,6 +18,7 @@ package org.traccar.web.client.view;
 import java.util.*;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -67,7 +68,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     public interface ArchiveHandler {
         void onSelected(Position position);
-        void onLoad(Device device, Date from, Date to, boolean filter, boolean snapToRoads, ArchiveStyle style);
+        void onLoad(Device device, Date from, Date to, boolean filter, ArchiveStyle style);
+        void onSnapToRoads(boolean snapToRoads);
         void onFilterSettings();
         void onClear(Device device);
         void onChangeArchiveMarkerType(PositionIconType newMarkerType);
@@ -252,7 +254,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
                 !disableFilter.getValue(),
-                snapToRoads.getValue(),
                 new ArchiveStyle(style)
         );
     }
@@ -278,8 +279,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue() +
-                            "&snapToRoads=" + snapToRoads.getValue(),
+                            "&filter=" + !disableFilter.getValue(),
                     "_blank", null);
         }
     }
@@ -295,8 +295,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue() +
-                            "&snapToRoads=" + snapToRoads.getValue(),
+                            "&filter=" + !disableFilter.getValue(),
                     "_blank", null);
         }
     }
@@ -377,6 +376,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 break;
             }
         }
+    }
+
+    @UiHandler("snapToRoads")
+    public void onSnapToRoadsClicked(ValueChangeEvent<Boolean> event) {
+        archiveHandler.onSnapToRoads(snapToRoads.getValue());
     }
 
 	private void setDateTimefd(int index){

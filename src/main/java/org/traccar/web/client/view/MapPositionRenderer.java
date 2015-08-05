@@ -34,6 +34,7 @@ import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.client.Track;
+import org.traccar.web.client.TrackSegment;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -387,25 +388,37 @@ public class MapPositionRenderer {
     }
 
     public void showTrack(Track track) {
-        List<Position> positions = track.getPositions();
-        if (!positions.isEmpty()) {
-            DeviceData deviceData = getDeviceData(positions);
-            Point[] linePoints = new Point[positions.size()];
+        List<TrackSegment> segments = track.getSegments();
+        if (!segments.isEmpty()) {
+            DeviceData deviceData = getDeviceData(segments.get(0).getPositions());
+            List<Point> linePoints = new ArrayList<Point>();
 
-            int i = 0;
-            for (Position position : positions) {
-                linePoints[i++] = mapView.createPoint(position.getLongitude(), position.getLatitude());
+            for (TrackSegment segment : segments) {
+                if (segment.getGeometry() == null) {
+                    for (Position position : segment.getPositions()) {
+                        linePoints.add(mapView.createPoint(position.getLongitude(), position.getLatitude()));
+                    }
+                } else {
+                    for (VectorFeature feature : segment.getGeometry()) {
+                        LineString lineString = LineString.narrowToLineString(feature.getJSObject().getProperty("geometry"));
+                        for (int i = 0; i < lineString.getNumberOfComponents(); i++) {
+                            Point point = Point.narrowToPoint(lineString.getComponent(i));
+                            linePoints.add(mapView.createPoint(point.getX() / 10, point.getY() / 10));
+                        }
+                    }
+                }
             }
+
             // Assigns color to style
             Style style = mapView.getVectorLayer().getStyle();
             style.setStrokeColor("#" + track.getStyle().getTrackColor());
 
-            final LineString lineString = new LineString(linePoints);
+            final LineString lineString = new LineString(linePoints.toArray(new Point[linePoints.size()]));
             VectorFeature mapTrack = new VectorFeature(lineString, style);
             getVectorLayer().addFeature(mapTrack);
             deviceData.track = mapTrack;
             deviceData.trackLine = lineString;
-            deviceData.positions = positions;
+            deviceData.positions = track.getPositions();
             if (track.getStyle().getZoomToTrack())
                 mapView.getMap().zoomToExtent(lineString.getBounds());
         }
