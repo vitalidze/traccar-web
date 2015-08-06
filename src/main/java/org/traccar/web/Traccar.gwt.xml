@@ -40,4 +40,5 @@
     <extend-property name="locale" values="cs" />
     <extend-property name="locale" values="sr" />
     <extend-property name="locale" values="he" />
+    <extend-property name="locale" values="fa" />
 </module>
