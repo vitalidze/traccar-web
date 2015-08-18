@@ -587,6 +587,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public List<Position> getPositions(Device device, Date from, Date to, boolean filter) {
+        if (!getSessionUser().isArchive()) {
+            throw new SecurityException();
+        }
+
         EntityManager entityManager = getSessionEntityManager();
         UserSettings filters = getSessionUser().getUserSettings();
 
@@ -785,6 +789,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             user.setManager(_user.getManager());
             user.setReadOnly(_user.getReadOnly());
+            user.setArchive(_user.isArchive());
             user.setExpirationDate(_user.getExpirationDate());
             user.setBlocked(_user.isBlocked());
             user.setMaxNumOfDevices(_user.getMaxNumOfDevices());

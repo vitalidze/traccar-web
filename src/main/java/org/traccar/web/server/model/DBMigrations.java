@@ -33,6 +33,7 @@ public class DBMigrations {
                 new SetNotificationsFlag(),
                 new SetReadOnlyFlag(),
                 new SetBlockedFlag(),
+                new SetArchiveFlag(),
                 new AddDefaultNotifications(),
                 new SetDefaultDeviceTimeout(),
                 new SetDefaultDeviceOdometer(),
@@ -280,6 +281,15 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + User.class.getSimpleName() + " U SET U.blocked = :b WHERE U.blocked IS NULL")
                     .setParameter("b", Boolean.FALSE)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetArchiveFlag implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + User.class.getSimpleName() + " U SET U.archive = :b WHERE U.archive IS NULL")
+                    .setParameter("b", Boolean.TRUE)
                     .executeUpdate();
         }
     }
