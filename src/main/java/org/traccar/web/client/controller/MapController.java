@@ -165,6 +165,10 @@ public class MapController implements ContentController, MapView.MapHandler {
                         if (ApplicationContext.getInstance().isRecordingTrace(device)) {
                             mapView.showLatestTrackPositions(Arrays.asList(prevPosition));
                             mapView.showLatestTrack(new Track(Arrays.asList(prevPosition, position)));
+                            Short traceInterval = ApplicationContext.getInstance().getUserSettings().getTraceInterval();
+                            if (traceInterval != null) {
+                                mapView.clearLatestTrackPositions(device, new Date(position.getTime().getTime() - traceInterval * 60 * 1000));
+                            }
                         }
                     }
                     if (ApplicationContext.getInstance().isRecordingTrace(device)) {

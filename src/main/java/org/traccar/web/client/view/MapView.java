@@ -16,6 +16,7 @@
 package org.traccar.web.client.view;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -292,6 +293,10 @@ public class MapView {
 
     public void showAlerts(List<Position> positions) {
         latestPositionRenderer.showAlerts(positions);
+    }
+
+    public void clearLatestTrackPositions(Device device, Date before) {
+        latestPositionTrackRenderer.clearTrackPositions(device, before);
     }
 
     public void showLatestTrackPositions(List<Position> positions) {

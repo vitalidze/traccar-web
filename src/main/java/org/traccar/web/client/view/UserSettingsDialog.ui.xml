@@ -27,7 +27,7 @@
   <ui:with type="com.sencha.gxt.data.shared.ListStore" field="overlayTypeStore" />
   <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
 
-  <gxt:Window ui:field="window" pixelSize="300, 400" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="300, 440" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.speedUnits}" labelWidth="160">
@@ -48,6 +48,18 @@
           </form:widget>
         </form:FieldLabel>
       </container:child>
+        <container:child layoutData="{verticalLayoutData}">
+            <form:FieldLabel text="{i18n.traceInterval}" labelWidth="160">
+                <form:widget>
+                    <form:NumberField editor="{shortPropertyEditor}"
+                                      ui:field="traceInterval"
+                                      allowNegative="false"
+                                      allowDecimals="false"
+                                      allowBlank="true"
+                                      width="4" />
+                </form:widget>
+            </form:FieldLabel>
+        </container:child>
       <container:child layoutData="{verticalLayoutData}">
           <gxt:FramedPanel headingText="{i18n.defaultMapState}">
               <container:VerticalLayoutContainer>

@@ -151,6 +151,20 @@ public class UserSettings implements IsSerializable {
         this.timePrintInterval = timePrintInterval;
     }
 
+    /**
+     * Interval to record latest trace (in minutes)
+     */
+    @Expose
+    private Short traceInterval;
+
+    public Short getTraceInterval() {
+        return traceInterval;
+    }
+
+    public void setTraceInterval(Short traceInterval) {
+        this.traceInterval = traceInterval;
+    }
+
     @Expose
     private Integer zoomLevel;
     @Expose

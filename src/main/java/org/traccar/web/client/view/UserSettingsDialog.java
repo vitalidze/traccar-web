@@ -77,6 +77,9 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     @UiField
     NumberField<Short> timePrintInterval;
 
+    @UiField
+    NumberField<Short> traceInterval;
+
     @UiField(provided = true)
     NumberPropertyEditor<Short> shortPropertyEditor = new NumberPropertyEditor.ShortPropertyEditor();
 
@@ -167,8 +170,11 @@ public class UserSettingsDialog implements Editor<UserSettings> {
             grid.getSelectionModel().select(overlayType, true);
         }
 
-        timePrintInterval.addValidator(new MinNumberValidator<Short>(Short.valueOf((short) 1)));
-        timePrintInterval.addValidator(new MaxNumberValidator<Short>(Short.valueOf((short) 512)));
+        timePrintInterval.addValidator(new MinNumberValidator<Short>((short) 1));
+        timePrintInterval.addValidator(new MaxNumberValidator<Short>((short) 512));
+
+        traceInterval.addValidator(new MinNumberValidator<Short>((short) 1));
+        traceInterval.addValidator(new MaxNumberValidator<Short>((short) (60 * 48)));
 
         driver.initialize(this);
         driver.edit(userSettings);
