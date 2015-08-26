@@ -82,9 +82,24 @@ New:
         UPDATE devices SET latestPosition_id = :id WHERE id = :deviceId;
     </entry>
     
-4) Start Traccar service
+4.1) **Specific to v3.1 of traccar**
 
-5) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
+* download [jetty-jndi-9.2.13.v20150730.jar](https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-jndi/9.2.13.v20150730/jetty-jndi-9.2.13.v20150730.jar) and put it to the `libs` folder in traccar installation folder
+
+* Add following line to the service configuration file (located in `conf\wrapper.conf` of traccar installation folder):
+
+Right after:
+
+    # Java Classpath (include wrapper.jar)  Add class path elements as
+    #  needed starting from 1
+
+add line:
+
+    wrapper.java.classpath.3=../lib/jetty-jndi-9.2.13.v20150730.jar 
+    
+5) Start Traccar service
+
+6) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
 
 **IMPORTANT NOTE**: existing data of original web interface will not be accessible because it is stored in other tables. It can be copied manually with SQL queries.
 
