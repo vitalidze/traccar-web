@@ -79,7 +79,7 @@ public class UserShareDialog {
     }
 
     public interface UserShareHandler {
-        public void onSaveShares(Map<User, Boolean> shares);
+        void onSaveShares(Map<User, Boolean> shares, Window window);
     }
 
     private UserShareHandler shareHandler;
@@ -150,8 +150,7 @@ public class UserShareDialog {
             }
             updatedShare.put(updated.user, updated.shared);
         }
-        shareHandler.onSaveShares(updatedShare);
-        shareStore.commitChanges();
+        shareHandler.onSaveShares(updatedShare, window);
     }
 
     @UiHandler("cancelButton")

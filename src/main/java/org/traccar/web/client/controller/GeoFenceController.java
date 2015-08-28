@@ -22,6 +22,7 @@ import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.ListView;
+import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
@@ -235,8 +236,13 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
             public void onSuccess(final Map<User, Boolean> share) {
                 new UserShareDialog(share, new UserShareDialog.UserShareHandler() {
                     @Override
-                    public void onSaveShares(Map<User, Boolean> shares) {
-                        Application.getDataService().saveGeoFenceShare(geoFence, shares, new BaseAsyncCallback<Void>(i18n));
+                    public void onSaveShares(Map<User, Boolean> shares, final Window window) {
+                        Application.getDataService().saveGeoFenceShare(geoFence, shares, new BaseAsyncCallback<Void>(i18n) {
+                            @Override
+                            public void onSuccess(Void result) {
+                                window.hide();
+                            }
+                        });
                     }
                 }).show();
             }
