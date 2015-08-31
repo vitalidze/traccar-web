@@ -259,17 +259,21 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     currentUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
                     currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword()));
                 }
+                if(currentUser.getAdmin() || currentUser.getManager())
+                {
+                    currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
+                    currentUser.setExpirationDate(user.getExpirationDate());
+                    currentUser.setAdmin(user.getAdmin());
+                    currentUser.setManager(user.getManager());
+                }
                 currentUser.setUserSettings(user.getUserSettings());
-                currentUser.setAdmin(user.getAdmin());
-                currentUser.setManager(user.getManager());
                 currentUser.setEmail(user.getEmail());
                 currentUser.setNotificationEvents(user.getTransferNotificationEvents());
                 currentUser.setCompanyName(user.getCompanyName());
                 currentUser.setFirstName(user.getFirstName());
                 currentUser.setLastName(user.getLastName());
                 currentUser.setPhoneNumber(user.getPhoneNumber());
-                currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
-                currentUser.setExpirationDate(user.getExpirationDate());
+
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
@@ -780,14 +784,16 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         User currentUser = getSessionUser();
         for (User _user : users) {
             User user = entityManager.find(User.class, _user.getId());
-            if (currentUser.getAdmin()) {
+            if (currentUser.getAdmin() || currentUser.getManager()) {
                 user.setAdmin(_user.getAdmin());
+                user.setExpirationDate(_user.getExpirationDate());
+                user.setBlocked(_user.isBlocked());
+                user.setMaxNumOfDevices(_user.getMaxNumOfDevices());
+                user.setReadOnly(_user.getReadOnly());
             }
-            user.setManager(_user.getManager());
-            user.setReadOnly(_user.getReadOnly());
-            user.setExpirationDate(_user.getExpirationDate());
-            user.setBlocked(_user.isBlocked());
-            user.setMaxNumOfDevices(_user.getMaxNumOfDevices());
+
+
+
         }
     }
 
