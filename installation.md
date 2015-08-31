@@ -84,9 +84,9 @@ New:
     
 4.1) **Specific to v3.1 of traccar**
 
-* download [jetty-jndi-9.2.13.v20150730.jar](https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-jndi/9.2.13.v20150730/jetty-jndi-9.2.13.v20150730.jar) and put it to the `libs` folder in traccar installation folder
+* download [jetty-jndi-9.2.13.v20150730.jar](https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-jndi/9.2.13.v20150730/jetty-jndi-9.2.13.v20150730.jar) and put it to the `lib` folder in traccar installation folder
 
-* Add following line to the service configuration file (located in `conf\wrapper.conf` of traccar installation folder):
+* Add following line to the service configuration file (located in `conf/wrapper.conf` of traccar installation folder):
 
 Right after:
 
@@ -95,7 +95,18 @@ Right after:
 
 add line:
 
-    wrapper.java.classpath.3=../lib/jetty-jndi-9.2.13.v20150730.jar 
+    wrapper.java.classpath.3=../lib/jetty-jndi-9.2.13.v20150730.jar
+     
+* For the first time there will be warnings similar to:
+
+    2015-08-31 17:03:44  WARN: Table 'traccar.positions' doesn't exist - MySQLSyntaxErrorException (... < QueryBuilder.java:289 < DataManager.java:349 < ConnectionManager.java:41 < ...)
+
+or
+
+    2015-08-31 16:48:10  WARN: Table "POSITIONS" not found; SQL statement:
+    SELECT * FROM positions WHERE id IN (SELECT latestPosition_id FROM devices); [42102-187] - JdbcSQLException (... < QueryBuilder.java:62 < *:132 < DataManager.java:349 < ConnectionManager.java:41 < ...)
+    
+This is because necessary tables will be created after the initialisation of `ConnectionManager` on Traccar's backend. To solve it please **restart the Traccar service twice**. 
     
 5) Start Traccar service
 
