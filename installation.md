@@ -99,6 +99,7 @@ add line:
      
 * For the first time there will be warnings similar to:
 
+
     2015-08-31 17:03:44  WARN: Table 'traccar.positions' doesn't exist - MySQLSyntaxErrorException (... < QueryBuilder.java:289 < DataManager.java:349 < ConnectionManager.java:41 < ...)
 
 or
