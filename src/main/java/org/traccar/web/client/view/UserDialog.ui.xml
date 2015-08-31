@@ -80,14 +80,14 @@
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.readOnly}" labelWidth="160">
           <form:widget>
-            <form:CheckBox ui:field="readOnly" />
+            <form:CheckBox ui:field="readOnly" enabled="false"/>
           </form:widget>
         </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.expirationDate}" labelWidth="160">
           <form:widget>
-            <form:DateField ui:field="expirationDate" />
+            <form:DateField ui:field="expirationDate" enabled="false"/>
           </form:widget>
         </form:FieldLabel>
       </container:child>
@@ -97,7 +97,7 @@
             <form:NumberField editor="{integerPropertyEditor}"
                               ui:field="maxNumOfDevices"
                               allowNegative="false"
-                              allowDecimals="false" />
+                              allowDecimals="false" enabled="false"/>
           </form:widget>
         </form:FieldLabel>
       </container:child>
