@@ -1,0 +1,84 @@
+/*
+ * Button for opening side bar
+ */
+.button-open-side-menu {
+    position: absolute;
+    top: 65px;
+    left: 8px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 4px;
+    padding: 2px;
+}
+.ol-touch .button-open-side-menu {
+    top: 80px;
+}
+.button-open-side-menu a {
+    display: block;
+    color: white;
+    font-size: 16px;
+    font-family: 'Lucida Grande',Verdana,Geneva,Lucida,Arial,Helvetica,sans-serif;
+    font-weight: bold;
+    margin: 1px;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 2px;
+    height: 22px;
+    width: 22px;
+    background: rgba(0,60,136,0.5);
+}
+.ol-touch .button-open-side-menu a {
+    font-size: 20px;
+    height: 30px;
+    width: 30px;
+    line-height: 26px;
+}
+.button-open-side-menu a:hover {
+    background: rgba(0,60,136,0.7);
+}
+
+/*
+ * sidebar
+ */
+.panel {
+    background: #7a9dbb;
+}
+.panel ul {
+    border-bottom: 0px;
+    border-top: 1px solid #8ba9c4;
+}
+.panel .list-block .item-content {
+    background: #7a9dbb;
+    border-bottom: 1px solid #8ba9c4;
+}
+.panel .list-block .item-link:active {
+    background-color: #5884aa;
+}
+.panel .list-block .item-link .item-inner {
+    background: none;
+    border-bottom: 0px;
+}
+.panel .list-block .item-title {
+    color: #fafafa;
+}
+.panel .list-block i {
+    color: #fafafa;
+    font-size: 25px;
+    font-weight: 100;
+}
+
+.panel .content-block-title  {
+    color: #eafac9;
+}
+
+#devicesList li {
+    -webkit-transform-style: preserve-3d;
+}
+
+.geofence-color-box {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border: 1px solid;
+    left: 5px;
+    top: 5px;
+}

@@ -1,0 +1,109 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+  	xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+  	xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+    xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid">
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
+    <ui:attributes width="1" height="-1" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="floatPropertyEditor" />
+
+  <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
+
+  <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="settingsTabConfig">
+    <ui:attributes text="{i18n.settings}" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="devicesTabConfig">
+    <ui:attributes text="{i18n.devices}" />
+  </ui:with>
+
+  <ui:style>
+      .tabBody {
+          padding: 5px;
+      }
+  </ui:style>
+
+  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="deviceSelectionStore" />
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
+
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view">
+    <ui:attributes stripeRows="true" autoFill="true" />
+  </ui:with>
+
+  <gxt:Window ui:field="window" pixelSize="274, 344" position="6, 60" modal="false" closable="false" headingText="{i18n.geoFence}" focusWidget="{saveButton}">
+      <gxt:PlainTabPanel ui:field="tabs">
+          <gxt:child config="{settingsTabConfig}">
+            <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.name}" labelWidth="74">
+                  <form:widget>
+                    <form:TextField ui:field="name" allowBlank="false" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.description}" labelWidth="74">
+                  <form:widget>
+                    <form:TextArea ui:field="description" allowBlank="true" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.type}" labelWidth="124">
+                    <form:widget>
+                        <form:ComboBox ui:field="type" />
+                    </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.width}/{i18n.radius} ({i18n.meter})" labelWidth="124">
+                    <form:widget>
+                        <form:NumberField editor="{floatPropertyEditor}"
+                                          ui:field="radius"
+                                          allowNegative="false"
+                                          allowDecimals="true"
+                                          allowBlank="true"/>
+                    </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.color}" labelWidth="80">
+                    <form:widget>
+                        <gxt:ColorPalette ui:field="color" />
+                    </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.applyToAllDevices}" labelWidth="110">
+                    <form:widget>
+                        <form:CheckBox ui:field="allDevices" />
+                    </form:widget>
+                </form:FieldLabel>
+              </container:child>
+            </container:VerticalLayoutContainer>
+          </gxt:child>
+
+          <gxt:child config="{devicesTabConfig}">
+              <grid:Grid ui:field="grid" store="{deviceSelectionStore}" cm="{columnModel}" view="{view}" />
+          </gxt:child>
+      </gxt:PlainTabPanel>
+
+      <gxt:button>
+          <button:TextButton ui:field="saveButton" text="{i18n.save}" />
+      </gxt:button>
+      <gxt:button>
+          <button:TextButton ui:field="clearButton" text="{i18n.clear}" />
+      </gxt:button>
+      <gxt:button>
+          <button:TextButton ui:field="cancelButton" text="{i18n.cancel}" />
+      </gxt:button>
+  </gxt:Window>
+
+</ui:UiBinder>

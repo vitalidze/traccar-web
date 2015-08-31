@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2014 Anton Tananaev (anton.tananaev@gmail.com), Vitaly Litvak (vitavaque@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,34 +18,20 @@ package org.traccar.web.client.view;
 import org.gwtopenmaps.openlayers.client.Icon;
 import org.gwtopenmaps.openlayers.client.Pixel;
 import org.gwtopenmaps.openlayers.client.Size;
+import org.traccar.web.shared.model.PositionIcon;
+import org.traccar.web.shared.model.PositionIconType;
 
-class MarkerIconFactory {
+import java.util.HashMap;
+import java.util.Map;
 
-    private static final Size iconSize = new Size(21, 25);
-    private static final Pixel iconOffset = new Pixel(-10.5f, -25.0f);
-
-    private static final String iconUrl = "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/";
-    private static final String iconRed = iconUrl + "marker.png";
-    private static final String iconBlue = iconUrl + "marker-blue.png";
-    private static final String iconGreen = iconUrl + "marker-green.png";
-    private static final String iconGold = iconUrl + "marker-gold.png";
-
-    public static enum IconType {
-        iconLatest,
-        iconArchive
-    };
-
-    public static String getIconUrl(IconType type, boolean selected) {
-        if (type == IconType.iconLatest) {
-            return selected ? iconGreen : iconRed;
-        } else if (type == IconType.iconArchive) {
-            return selected ? iconGold : iconBlue;
+public class MarkerIconFactory {
+    public static Icon getIcon(PositionIcon icon, boolean selected) {
+        if (icon == null) {
+            return null;
         }
-        return null;
+        Size size = new Size(selected ? icon.getSelectedWidth() : icon.getWidth(),
+                             selected ? icon.getSelectedHeight() : icon.getHeight());
+        Pixel offset = new Pixel(-size.getWidth() / 2f, -size.getHeight());
+        return new Icon(selected ? icon.getSelectedURL() : icon.getURL(), size, offset);
     }
-
-    public static Icon getIcon(IconType type, boolean selected) {
-        return new Icon(getIconUrl(type, selected), iconSize, iconOffset);
-    }
-
 }

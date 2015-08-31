@@ -1,0 +1,165 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+    xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+  	xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+  	xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+    xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid">
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
+    <ui:attributes width="1" height="-1" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="horizontalLayoutData">
+    <ui:attributes width="-1" height="-1" />
+  </ui:with>
+
+  <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
+
+  <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="integerPropertyEditor" />
+
+  <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="emailTabConfig">
+    <ui:attributes text="{i18n.email}" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="pushbulletTabConfig">
+    <ui:attributes text="Pushbullet" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="templateTabConfig">
+    <ui:attributes text="{i18n.messageTemplates}" />
+  </ui:with>
+
+  <ui:style>
+    .tabBody {
+        padding: 5px;
+    }
+  </ui:style>
+
+  <gxt:Window ui:field="window" pixelSize="368, 426" modal="true" headingText="{i18n.notificationSettings}" focusWidget="{saveButton}">
+    <container:VerticalLayoutContainer>
+        <container:child layoutData="{verticalLayoutData}">
+          <gxt:PlainTabPanel>
+            <gxt:child config="{emailTabConfig}">
+            <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.fromAddress}" labelWidth="130">
+                  <form:widget>
+                    <form:TextField ui:field="fromAddress" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.server}" labelWidth="130">
+                  <form:widget>
+                    <form:TextField ui:field="server" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.port}" labelWidth="130">
+                  <form:widget>
+                    <form:NumberField editor="{integerPropertyEditor}"
+                                      ui:field="port"
+                                      allowNegative="false"
+                                      allowDecimals="false"
+                                      width="4" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.secureConnectionType}" labelWidth="180">
+                  <form:widget>
+                    <form:ComboBox ui:field="secureConnectionType" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.useAuthorization}" labelWidth="130">
+                  <form:widget>
+                    <form:CheckBox ui:field="useAuthorization"/>
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.user}" labelWidth="130">
+                  <form:widget>
+                    <form:TextField ui:field="username"/>
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.password}" labelWidth="130">
+                  <form:widget>
+                    <form:PasswordField ui:field="password"/>
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{horizontalLayoutData}">
+                  <button:TextButton ui:field="testEmailButton" text="{i18n.test}" width="96" />
+              </container:child>
+            </container:VerticalLayoutContainer>
+
+          </gxt:child>
+            <gxt:child config="{pushbulletTabConfig}">
+                <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
+                    <container:child layoutData="{verticalLayoutData}">
+                        <form:FieldLabel text="{i18n.accessToken}" labelWidth="86">
+                            <form:widget>
+                                <form:TextField ui:field="pushbulletAccessToken" />
+                            </form:widget>
+                        </form:FieldLabel>
+                    </container:child>
+                    <container:child layoutData="{horizontalLayoutData}">
+                        <button:TextButton ui:field="testPushbulletButton" text="{i18n.test}" width="96" />
+                    </container:child>
+                </container:VerticalLayoutContainer>
+            </gxt:child>
+            <gxt:child config="{templateTabConfig}">
+                <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
+                    <container:child layoutData="{verticalLayoutData}">
+                        <form:FieldLabel text="{i18n.event}" labelWidth="86">
+                            <form:widget>
+                                <form:ComboBox ui:field="eventType" />
+                            </form:widget>
+                        </form:FieldLabel>
+                    </container:child>
+                    <container:child layoutData="{verticalLayoutData}">
+                        <form:FieldLabel text="{i18n.subject}" labelWidth="86">
+                            <form:widget>
+                                <form:TextField ui:field="messageSubject" />
+                            </form:widget>
+                        </form:FieldLabel>
+                    </container:child>
+                    <container:child layoutData="{verticalLayoutData}">
+                        <form:TextArea ui:field="messageBody" height="96" />
+                    </container:child>
+                    <container:child layoutData="{verticalLayoutData}">
+                        <form:FieldLabel text="{i18n.contentType}" labelWidth="86">
+                            <form:widget>
+                                <form:TextField ui:field="messageContentType" />
+                            </form:widget>
+                        </form:FieldLabel>
+                    </container:child>
+                    <container:child layoutData="{verticalLayoutData}">
+                        <grid:Grid ui:field="placeholderGrid" />
+                    </container:child>
+                    <container:child layoutData="{horizontalLayoutData}">
+                        <button:TextButton ui:field="testTemplateButton" text="{i18n.test}" width="96" />
+                    </container:child>
+                </container:VerticalLayoutContainer>
+            </gxt:child>
+          </gxt:PlainTabPanel>
+        </container:child>
+    </container:VerticalLayoutContainer>
+
+    <gxt:button>
+      <button:TextButton ui:field="saveButton" text="{i18n.save}" />
+    </gxt:button>
+    <gxt:button>
+      <button:TextButton ui:field="cancelButton" text="{i18n.cancel}" />
+    </gxt:button>
+  </gxt:Window>
+
+</ui:UiBinder>

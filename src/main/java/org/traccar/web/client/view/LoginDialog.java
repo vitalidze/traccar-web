@@ -15,6 +15,15 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
+import com.sencha.gxt.data.shared.LabelProvider;
+import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.widget.core.client.form.ComboBox;
 import org.traccar.web.client.ApplicationContext;
 
 import com.google.gwt.core.client.GWT;
@@ -27,6 +36,11 @@ import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.PasswordField;
 import com.sencha.gxt.widget.core.client.form.TextField;
+import org.traccar.web.client.widget.LanguageComboBox;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class LoginDialog {
 
@@ -45,6 +59,9 @@ public class LoginDialog {
     @UiField
     Window window;
 
+    @UiField(provided = true)
+    ComboBox<String> language;
+
     @UiField
     TextField login;
 
@@ -56,6 +73,10 @@ public class LoginDialog {
 
     public LoginDialog(LoginHandler loginHandler) {
         this.loginHandler = loginHandler;
+        // language selector
+        language = new LanguageComboBox();
+        language.setValue(LocaleInfo.getCurrentLocale().getLocaleName());
+
         uiBinder.createAndBindUi(this);
 
         if (ApplicationContext.getInstance().getApplicationSettings().getRegistrationEnabled()) {
@@ -71,9 +92,13 @@ public class LoginDialog {
         window.hide();
     }
 
+    private void login() {
+        loginHandler.onLogin(login.getText(), password.getText());
+    }
+
     @UiHandler("loginButton")
     public void onLoginClicked(SelectEvent event) {
-        loginHandler.onLogin(login.getText(), password.getText());
+        login();
     }
 
     @UiHandler("registerButton")
@@ -81,4 +106,23 @@ public class LoginDialog {
         loginHandler.onRegister(login.getText(), password.getText());
     }
 
+    @UiHandler({ "login", "password" })
+    public void onKeyDown(KeyDownEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+            login();
+        }
+    }
+
+    @UiHandler("language")
+    public void onLanguageChanged(SelectionEvent<String> event) {
+        Map<String, List<String>> params = com.google.gwt.user.client.Window.Location.getParameterMap();
+        String queryString = "?locale=" + event.getSelectedItem();
+        for (String paramName : params.keySet()) {
+            if (paramName.equals("locale")) continue;
+            for (String paramValue : params.get(paramName)) {
+                queryString += "&" + paramName + "=" + paramValue;
+            }
+        }
+        com.google.gwt.user.client.Window.Location.assign(queryString);
+    }
 }

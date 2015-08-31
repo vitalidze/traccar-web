@@ -1,0 +1,94 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+    xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+  	xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+  	xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
+    <ui:attributes width="1" height="24" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutData">
+    <ui:attributes width="-1" height="1" />
+  </ui:with>
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="leftLabelMargins">
+    <ui:attributes top="4" right="4" bottom="0" left="0" />
+  </ui:with>
+  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="leftLabelLayoutData">
+    <ui:attributes width="-1" height="1" margins="{leftLabelMargins}"/>
+  </ui:with>
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="rightLabelMargins">
+    <ui:attributes top="4" right="0" bottom="0" left="4" />
+  </ui:with>
+  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="rightLabelLayoutData">
+    <ui:attributes width="-1" height="1" margins="{rightLabelMargins}"/>
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="doublePropertyEditor" />
+
+  <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
+
+    <gxt:Window ui:field="window" pixelSize="475, 180" modal="true" headingText="{i18n.filter}" focusWidget="{saveButton}">
+    <container:VerticalLayoutContainer>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:CheckBox ui:field="hideZeroCoordinates" boxLabel="{i18n.hideZeroCoordinates}" />
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:CheckBox ui:field="hideInvalidLocations" boxLabel="{i18n.hideInvalidLocations}" />
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:CheckBox ui:field="hideDuplicates" boxLabel="{i18n.hideDuplicates}" />
+      </container:child>
+        <container:child layoutData="{verticalLayoutData}">
+            <container:HorizontalLayoutContainer>
+                <container:child layoutData="{leftLabelLayoutData}">
+                    <g:Label text="{i18n.ignoreLocationsWithDistanceFromPreviousLT}"/>
+                </container:child>
+                <container:child layoutData="{horizontalLayoutData}">
+                    <form:NumberField editor="{doublePropertyEditor}"
+                                      ui:field="minDistance"
+                                      allowNegative="false"
+                                      allowDecimals="true"
+                                      allowBlank="true"
+                                      width="64" />
+                </container:child>
+                <container:child layoutData="{rightLabelLayoutData}">
+                    <g:Label ui:field="distanceUnits"/>
+                </container:child>
+            </container:HorizontalLayoutContainer>
+        </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <container:HorizontalLayoutContainer>
+            <container:child layoutData="{leftLabelLayoutData}">
+              <g:Label text="{i18n.speed}" width="100" />
+            </container:child>
+            <container:child layoutData="{horizontalLayoutData}">
+              <form:ComboBox ui:field="speedModifier" editable="false" allowTextSelection="false" allowBlank="false" width="46" triggerAction="ALL" />
+            </container:child>
+            <container:child layoutData="{horizontalLayoutData}">
+              <form:NumberField editor="{doublePropertyEditor}"
+                              ui:field="speedForFilter"
+                              allowNegative="false"
+                              allowDecimals="true"
+                              allowBlank="true"
+                              width="64" />
+            </container:child>
+            <container:child layoutData="{rightLabelLayoutData}">
+              <g:Label ui:field="speedUnits"/>
+            </container:child>
+          </container:HorizontalLayoutContainer>
+      </container:child>
+    </container:VerticalLayoutContainer>
+      
+    <gxt:button>
+      <button:TextButton ui:field="saveButton" text="{i18n.save}" />
+    </gxt:button>
+    <gxt:button>
+      <button:TextButton ui:field="cancelButton" text="{i18n.cancel}" />
+    </gxt:button>
+  </gxt:Window>
+
+</ui:UiBinder>

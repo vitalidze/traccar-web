@@ -10,23 +10,67 @@
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
     <ui:attributes width="1" height="-1" />
   </ui:with>
- 
-  <gxt:Window ui:field="window" pixelSize="300, 110" modal="true" headingText="Global Settings" focusWidget="{saveButton}">
+
+  <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="shortPropertyEditor" />
+
+  <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
+
+    <gxt:Window ui:field="window" pixelSize="340, 220" modal="true" headingText="{i18n.globalSettings}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="Registration">
+        <form:FieldLabel text="{i18n.registration}" labelWidth="210">
           <form:widget>
             <form:CheckBox ui:field="registrationEnabled" />
           </form:widget>
         </form:FieldLabel>
       </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:FieldLabel text="{i18n.disallowDeviceManagementByUsers}" labelWidth="210">
+            <form:widget>
+                <form:CheckBox ui:field="disallowDeviceManagementByUsers" />
+            </form:widget>
+        </form:FieldLabel>
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:FieldLabel text="{i18n.eventRecordingEnabled}" labelWidth="210">
+            <form:widget>
+                <form:CheckBox ui:field="eventRecordingEnabled" />
+            </form:widget>
+        </form:FieldLabel>
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+          <form:FieldLabel text="{i18n.updateInterval}" labelWidth="210">
+              <form:widget>
+                  <form:NumberField editor="{shortPropertyEditor}"
+                                    ui:field="updateInterval"
+                                    allowNegative="false"
+                                    allowDecimals="false"
+                                    allowBlank="false"
+                                    width="4" />
+              </form:widget>
+          </form:FieldLabel>
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+          <form:FieldLabel text="{i18n.defaultHashImplementation}" labelWidth="210">
+              <form:widget>
+                  <form:ComboBox ui:field="defaultHashImplementation" />
+              </form:widget>
+          </form:FieldLabel>
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:FieldLabel text="{i18n.language}" labelWidth="210">
+            <form:widget>
+                <form:ComboBox ui:field="language" />
+            </form:widget>
+        </form:FieldLabel>
+      </container:child>
     </container:VerticalLayoutContainer>
       
     <gxt:button>
-      <button:TextButton ui:field="saveButton" text="Save" />
+      <button:TextButton ui:field="saveButton" text="{i18n.save}" />
     </gxt:button>
     <gxt:button>
-      <button:TextButton ui:field="cancelButton" text="Cancel" />
+      <button:TextButton ui:field="cancelButton" text="{i18n.cancel}" />
     </gxt:button>
   </gxt:Window>
 

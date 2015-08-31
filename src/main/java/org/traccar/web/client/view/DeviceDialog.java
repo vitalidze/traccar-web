@@ -15,7 +15,18 @@
  */
 package org.traccar.web.client.view;
 
-import org.traccar.web.shared.model.Device;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
+import com.sencha.gxt.widget.core.client.form.*;
+import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
+import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
+import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
+import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -41,7 +52,7 @@ public class DeviceDialog implements Editor<Device> {
     }
 
     public interface DeviceHandler {
-        public void onSave(Device device);
+        void onSave(Device device);
     }
 
     private DeviceHandler deviceHandler;
@@ -55,11 +66,85 @@ public class DeviceDialog implements Editor<Device> {
     @UiField
     TextField uniqueId;
 
-    public DeviceDialog(Device device, DeviceHandler deviceHandler) {
+    @UiField
+    TextField description;
+
+    @UiField
+    TextField phoneNumber;
+
+    @UiField
+    TextField plateNumber;
+
+    @UiField
+    TextField vehicleInfo;
+
+    @UiField(provided = true)
+    NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
+
+    @UiField
+    NumberField<Integer> timeout;
+
+    @UiField(provided = true)
+    NumberPropertyEditor<Double> doublePropertyEditor = new NumberPropertyEditor.DoublePropertyEditor();
+
+    @UiField
+    NumberField<Double> idleSpeedThreshold;
+
+    @UiField
+    FieldLabel labelMarkers;
+
+    @UiField
+    HorizontalLayoutContainer panelMarkers;
+
+    @UiField
+    Image markerImage;
+
+    @UiField
+    ScrollPanel panelPhoto;
+
+    @UiField
+    Image photo;
+
+    @UiField
+    VerticalLayoutContainer sensorsTab;
+    final SensorsEditor sensorsEditor;
+
+    @UiField
+    VerticalLayoutContainer maintenanceTab;
+    final MaintenanceEditor maintenanceEditor;
+
+    MarkerIcon selectedIcon;
+
+    @UiField
+    Messages i18n;
+
+    final Device device;
+
+    public DeviceDialog(Device device, ListStore<Device> deviceStore, DeviceHandler deviceHandler) {
+        this.device = device;
         this.deviceHandler = deviceHandler;
+        this.selectedIcon = MarkerIcon.create(device);
+
         uiBinder.createAndBindUi(this);
+
+        timeout.addValidator(new MinNumberValidator<Integer>(1));
+        timeout.addValidator(new MaxNumberValidator<Integer>(7 * 24 * 60 * 60));
+
         driver.initialize(this);
         driver.edit(device);
+
+        idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
+        updateIcon();
+
+        updatePhoto();
+
+        sensorsEditor = new SensorsEditor(device, deviceStore);
+        sensorsTab.add(sensorsEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));
+
+        maintenanceEditor = new MaintenanceEditor(device, deviceStore);
+        maintenanceTab.add(maintenanceEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));
+
+        labelMarkers.setText(i18n.overlayType(UserSettings.OverlayType.MARKERS));
     }
 
     public void show() {
@@ -71,14 +156,63 @@ public class DeviceDialog implements Editor<Device> {
     }
 
     @UiHandler("saveButton")
-    public void onLoginClicked(SelectEvent event) {
+    public void onSaveClicked(SelectEvent event) {
         window.hide();
-        deviceHandler.onSave(driver.flush());
+        Device device = driver.flush();
+        device.setIdleSpeedThreshold(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getIdleSpeedThreshold()));
+        device.setIconType(selectedIcon.getBuiltInIcon());
+        device.setIcon(selectedIcon.getDatabaseIcon());
+        maintenanceEditor.flush();
+        sensorsEditor.flush();
+        deviceHandler.onSave(device);
     }
 
     @UiHandler("cancelButton")
-    public void onRegisterClicked(SelectEvent event) {
+    public void onCancelClicked(SelectEvent event) {
         window.hide();
     }
 
+    @UiHandler("selectButton")
+    public void onSelectMarkerIconClicked(SelectEvent event) {
+        new DeviceMarkersDialog(selectedIcon, new DeviceMarkersDialog.DeviceMarkerHandler() {
+            @Override
+            public void onSave(MarkerIcon icon) {
+                if (icon != null) {
+                    selectedIcon = icon;
+                    updateIcon();
+                }
+            }
+        }).show();
+    }
+
+    private void updateIcon() {
+        markerImage.setUrl(selectedIcon.getOfflineURL());
+        panelMarkers.forceLayout();
+    }
+
+    @UiHandler("editPhotoButton")
+    public void onEditPhoto(SelectEvent event) {
+        new DevicePhotoDialog(new DevicePhotoDialog.DevicePhotoHandler() {
+            @Override
+            public void uploaded(Picture photo) {
+                device.setPhoto(photo);
+                updatePhoto();
+            }
+        }).show();
+    }
+
+    @UiHandler("removePhotoButton")
+    public void onRemovePhoto(SelectEvent event) {
+        device.setPhoto(null);
+        updatePhoto();
+    }
+
+    private void updatePhoto() {
+        if (device.getPhoto() == null) {
+            photo.setVisible(false);
+        } else {
+            photo.setUrl(Picture.URL_PREFIX + device.getPhoto().getId());
+            photo.setVisible(true);
+        }
+    }
 }

@@ -21,6 +21,8 @@ import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 
+import java.util.Date;
+
 public interface UserProperties extends PropertyAccess<User> {
 
     ModelKeyProvider<User> id();
@@ -31,4 +33,25 @@ public interface UserProperties extends PropertyAccess<User> {
 
     ValueProvider<User, Boolean> admin();
 
+    ValueProvider<User, Boolean> manager();
+
+    ValueProvider<User, String> email();
+
+    ValueProvider<User, Boolean> notifications();
+
+    ValueProvider<User, Boolean> readOnly();
+
+    ValueProvider<User, String> companyName();
+
+    ValueProvider<User, String> firstName();
+
+    ValueProvider<User, String> lastName();
+
+    ValueProvider<User, String> phoneNumber();
+
+    ValueProvider<User, Boolean> blocked();
+
+    ValueProvider<User, Date> expirationDate();
+
+    ValueProvider<User, Integer> maxNumOfDevices();
 }

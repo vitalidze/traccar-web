@@ -17,17 +17,17 @@ package org.traccar.web.client.model;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface DataServiceAsync {
 
     void authenticated(AsyncCallback<User> callback);
+
+    void login(String login, String password, boolean passwordHashed, AsyncCallback<User> callback);
 
     void login(String login, String password, AsyncCallback<User> callback);
 
@@ -53,8 +53,31 @@ public interface DataServiceAsync {
 
     void getLatestPositions(AsyncCallback<List<Position>> callback);
 
-    void getPositions(Device device, Date from, Date to, AsyncCallback<List<Position>> callback);
+    void getPositions(Device device, Date from, Date to, boolean filter, AsyncCallback<List<Position>> callback);
 
-    void updateApplicationSettings(ApplicationSettings applicationSettings, AsyncCallback<ApplicationSettings> callback);
+    void updateApplicationSettings(ApplicationSettings applicationSettings, AsyncCallback<Void> callback);
 
+    void getApplicationSettings(AsyncCallback<ApplicationSettings> async);
+
+    void getTrackerServerLog(short sizeKB, AsyncCallback<String> async);
+
+    void saveRoles(List<User> users, AsyncCallback<Void> async);
+
+    void getDeviceShare(Device device, AsyncCallback<Map<User, Boolean>> async);
+
+    void saveDeviceShare(Device device, Map<User, Boolean> share, AsyncCallback<Void> async);
+
+    void getLatestNonIdlePositions(AsyncCallback<List<Position>> async);
+
+    void getGeoFences(AsyncCallback<List<GeoFence>> async);
+
+    void updateGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
+
+    void addGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
+
+    void removeGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
+
+    void getGeoFenceShare(GeoFence geoFence, AsyncCallback<Map<User, Boolean>> async);
+
+    void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share, AsyncCallback<Void> async);
 }

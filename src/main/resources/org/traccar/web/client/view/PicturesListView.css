@@ -1,0 +1,36 @@
+.thumb {
+    padding: 3px;
+    height: 40px;
+    width: 70px;
+}
+
+.thumbWrap {
+    border: 1px solid white;
+    float: left;
+    display: block;
+    margin: 4px 0 4px 4px;
+    padding: 5px;
+    font: 11px Arial, Helvetica, sans-serif;
+}
+
+.thumbWrap span {
+    display: block;
+    overflow: hidden;
+    text-align: center;
+}
+
+.over {
+    background: repeat-x scroll left top #EFEFEF;
+    border: 1px solid #ddd !important;
+    padding: 5px;
+}
+
+.select {
+    background: none repeat scroll 0 50% #DFE8F6;
+    border: 1px dotted #A3BAE9 !important;
+    cursor: pointer;
+}
+
+.select .thumb {
+    background: none repeat scroll 0 0 transparent;
+}

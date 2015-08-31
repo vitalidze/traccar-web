@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags-->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>Traccar mobile</title>
+    <!-- Path to Framework7 Library CSS-->
+    <link rel="stylesheet" href="css/framework7.min.css">
+    <!-- Path to your custom app styles-->
+    <link rel="stylesheet" href="css/traccar-mobile.css">
+    <!-- OpenLayers -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ol3/3.7.0/ol.min.css" type="text/css">
+    <!-- i18n -->
+    <script type="text/javascript" src="js/i18n/Messages.js"></script>
+</head>
+<body>
+<!-- Status bar overlay for full screen mode (PhoneGap) -->
+<div class="statusbar-overlay"></div>
+<!-- Panels overlay-->
+<div class="panel-overlay"></div>
+<!-- Left panel with reveal effect-->
+<div class="panel panel-left panel-cover">
+    <div id="devicesList"></div>
+</div>
+<!-- Views -->
+<div class="views">
+    <!-- Your main view, should have "view-main" class -->
+    <div class="view view-main">
+        <div class="pages">
+        </div>
+    </div>
+</div>
+<!-- Path to Framework7 Library JS-->
+<script type="text/javascript" src="js/framework7.min.js"></script>
+<!-- OpenLayers 3 -->
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/ol3/3.5.0/ol.min.js"></script>
+<!-- Google maps -->
+<script type="text/javascript" src="//maps.google.com/maps/api/js?v=3&sensor=false"></script>
+<!-- template7 templates -->
+<script id="devices-list-template" type="text/template7">
+    <div class="content-block-title">{{i18n.devices}}</div>
+    <div class="list-block accordion-list">
+        <ul>
+            {{#each devices}}
+            <li id="device-{{id}}-list-item">
+                <a href="" class="item-link item-content device-details-link" id="device-{{id}}-link">
+                    <div class="item-inner">
+                        <div class="item-title">{{name}}</div>
+                    </div>
+                </a>
+                <div class="accordion-item-content" id="device-{{id}}-details"></div>
+            </li>
+            {{/each}}
+        </ul>
+    </div>
+    <div class="content-block">
+        <p><a href="#" class="button button-fill open-desktop-version">{{i18n.open_desktop_version}}</a></p>
+        <p><a href="#" id="logout" class="button button-fill color-red">{{i18n.logout}}</a></p>
+    </div>
+</script>
+<script id="device-details-template" type="text/template7">
+    <div class="content-block">
+        <div class="row">
+            <div class="col-100">
+                <a href="#" class="button button-fill color-green" id="device-{{device.id}}-select-on-map">{{i18n.select_on_map}}</a>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 10px;">
+            <div class="col-100">
+                {{#if follow}}
+                <a href="#" class="button color-blue active" id="device-{{device.id}}-unfollow">{{i18n.stop_following}}</a>
+                {{else}}
+                <a href="#" class="button color-blue" id="device-{{device.id}}-follow">{{i18n.follow}}</a>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+    <div class="content-block">
+        <div class="row">
+            <div class="col-33">{{i18n.time}}</div>
+            <div class="col-66" style="white-space: nowrap;">{{formatDate time}}</div>
+        </div>
+        <div class="row">
+            <div class="col-33">{{i18n.latitude}}</div>
+            <div class="col-66">{{formatDouble latitude n="4"}}</div>
+        </div>
+        <div class="row">
+            <div class="col-33">{{i18n.longitude}}</div>
+            <div class="col-66">{{formatDouble longitude n="4"}}</div>
+        </div>
+        {{#if altitude}}
+        <div class="row">
+            <div class="col-33">{{i18n.altitude}}</div>
+            <div class="col-66">{{formatDouble altitude n="4"}}</div>
+        </div>
+        {{/if}}
+        <div class="row">
+            <div class="col-33">{{i18n.speed}}</div>
+            <div class="col-66">{{formatSpeed speed}}</div>
+        </div>
+        <div class="row">
+            <div class="col-33">{{i18n.course}}</div>
+            <div class="col-66">{{formatDouble course n="2"}}</div>
+        </div>
+        {{#if address}}
+        <div class="row">
+            <div class="col-33">{{i18n.address}}</div>
+            <div class="col-66">{{address}}</div>
+        </div>
+        {{/if}}
+        {{#if other}}
+            {{#each other}}
+        <div class="row">
+            <div class="col-33">{{@key}}</div>
+            <div class="col-66">{{this}}</div>
+        </div>
+            {{/each}}
+        {{/if}}
+        {{#each geoFences}}
+        <div class="row">
+            <div class="col-100">
+                <div class="geofence-color-box" style="background-color: #{{color}};"></div> {{name}}
+            </div>
+        </div>
+        {{/each}}
+    </div>
+    <div class="content-block">
+        <a href="#" class="link" id="device-{{device.id}}-send-email"><i class="icon icon-form-email"></i></a>
+        <a href="#" class="link" id="device-{{device.id}}-send-sms"><i class="icon icon-form-comment"></i></a>
+    </div>
+</script>
+<!-- Path to your app js-->
+<script type="text/javascript" src="js/traccar-mobile.js"></script>
+</body>
+</html>
