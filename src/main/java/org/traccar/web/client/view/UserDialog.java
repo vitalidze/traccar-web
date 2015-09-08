@@ -119,7 +119,6 @@ public class UserDialog implements Editor<User> {
 
     public UserDialog(User user, UserHandler userHandler) {
         this.userHandler = userHandler;
-
         // notification types grid
         IdentityValueProvider<DeviceEventType> identity = new IdentityValueProvider<DeviceEventType>();
         final CheckBoxSelectionModel<DeviceEventType> selectionModel = new CheckBoxSelectionModel<DeviceEventType>(identity);
@@ -152,15 +151,20 @@ public class UserDialog implements Editor<User> {
             grid.getSelectionModel().select(deviceEventType, true);
         }
 
-        if (ApplicationContext.getInstance().getUser().getAdmin()) {
+        if (ApplicationContext.getInstance().getUser().getAdmin() || ApplicationContext.getInstance().getUser().getManager()) {
             admin.setEnabled(true);
-        }
-
-        if (ApplicationContext.getInstance().getUser().getAdmin() ||
-            ApplicationContext.getInstance().getUser().getManager()) {
             manager.setEnabled(true);
+            readOnly.setEnabled(true);
+            expirationDate.setEnabled(true);
+            maxNumOfDevices.setEnabled(true);
         }
-
+        else {
+            manager.setEnabled(false);
+            admin.setEnabled(false);
+            readOnly.setEnabled(false);
+            expirationDate.setEnabled(false);
+            maxNumOfDevices.setEnabled(false);
+        }
         email.addValidator(new RegExValidator(".+@.+\\.[a-z]+", i18n.invalidEmail()));
 
         driver.initialize(this);

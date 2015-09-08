@@ -259,17 +259,21 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     currentUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
                     currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword()));
                 }
+                if(currentUser.getAdmin() || currentUser.getManager())
+                {
+                    currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
+                    currentUser.setExpirationDate(user.getExpirationDate());
+                    currentUser.setAdmin(user.getAdmin());
+                    currentUser.setManager(user.getManager());
+                }
                 currentUser.setUserSettings(user.getUserSettings());
-                currentUser.setAdmin(user.getAdmin());
-                currentUser.setManager(user.getManager());
                 currentUser.setEmail(user.getEmail());
                 currentUser.setNotificationEvents(user.getTransferNotificationEvents());
                 currentUser.setCompanyName(user.getCompanyName());
                 currentUser.setFirstName(user.getFirstName());
                 currentUser.setLastName(user.getLastName());
                 currentUser.setPhoneNumber(user.getPhoneNumber());
-                currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
-                currentUser.setExpirationDate(user.getExpirationDate());
+
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
