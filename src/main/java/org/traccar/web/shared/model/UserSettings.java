@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -312,6 +313,9 @@ public class UserSettings implements IsSerializable {
     }
 
     public List<OverlayType> overlays() {
+        if (getOverlays() == null) {
+            return Collections.emptyList();
+        }
         List<OverlayType> overlays = new LinkedList<OverlayType>();
         for (String s : getOverlays().split(",")) {
             overlays.add(OverlayType.valueOf(s));
