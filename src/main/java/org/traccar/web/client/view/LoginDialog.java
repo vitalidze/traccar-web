@@ -19,10 +19,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.i18n.client.LocaleInfo;
-import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
-import com.sencha.gxt.data.shared.LabelProvider;
-import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.ModelKeyProvider;
+
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import org.traccar.web.client.ApplicationContext;
 
@@ -38,7 +35,6 @@ import com.sencha.gxt.widget.core.client.form.PasswordField;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import org.traccar.web.client.widget.LanguageComboBox;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
