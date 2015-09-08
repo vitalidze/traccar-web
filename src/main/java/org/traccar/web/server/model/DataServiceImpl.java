@@ -263,7 +263,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 {
                     currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
                     currentUser.setExpirationDate(user.getExpirationDate());
-                    currentUser.setAdmin(user.getAdmin());
+                    if (currentUser.getAdmin()) {
+                        currentUser.setAdmin(user.getAdmin());
+                    }
                     currentUser.setManager(user.getManager());
                 }
                 currentUser.setUserSettings(user.getUserSettings());

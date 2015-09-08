@@ -151,8 +151,9 @@ public class UserDialog implements Editor<User> {
             grid.getSelectionModel().select(deviceEventType, true);
         }
 
-        if (ApplicationContext.getInstance().getUser().getAdmin() || ApplicationContext.getInstance().getUser().getManager()) {
-            admin.setEnabled(true);
+        User currentUser = ApplicationContext.getInstance().getUser();
+        if (currentUser.getAdmin() || currentUser.getManager()) {
+            admin.setEnabled(currentUser.getAdmin());
             manager.setEnabled(true);
             readOnly.setEnabled(true);
             expirationDate.setEnabled(true);
