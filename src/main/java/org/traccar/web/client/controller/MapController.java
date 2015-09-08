@@ -102,6 +102,8 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     private Map<Long, Position> timestampMap = new HashMap<Long, Position>();
 
+    private Device selectedDevice;
+
     private int updateFailureCount = 0;
 
     private final Messages i18n = GWT.create(Messages.class);
@@ -117,8 +119,14 @@ public class MapController implements ContentController, MapView.MapHandler {
                  */
                 List<Position> alerts = null;
                 long currentTime = System.currentTimeMillis();
-                for (Position position : result) {
+                int selectedIndex = -1;
+                for (int i = 0; i < result.size(); i++) {
+                    Position position = result.get(i);
                     Device device = position.getDevice();
+                    if (device.equals(selectedDevice)) {
+                        selectedIndex = i;
+                    }
+
                     // update status and icon
                     boolean isOffline = currentTime - position.getTime().getTime() > position.getDevice().getTimeout() * 1000;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
@@ -144,6 +152,12 @@ public class MapController implements ContentController, MapView.MapHandler {
                             break;
                         }
                     }
+                }
+                /**
+                 * Put position of selected device to the end of list so it will be drawn after all other positions
+                 */
+                if (selectedIndex >= 0) {
+                    result.add(result.remove(selectedIndex));
                 }
                 /**
                  * Draw positions
@@ -229,6 +243,7 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public void selectDevice(Device device) {
         mapView.selectDevice(device);
+        this.selectedDevice = device;
     }
 
     public void showArchivePositions(Track track) {

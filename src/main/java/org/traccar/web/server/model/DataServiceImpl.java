@@ -655,7 +655,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @Override
     public List<Position> getLatestPositions() {
-        List<Position> positions = new LinkedList<Position>();
+        List<Position> positions = new ArrayList<Position>();
         List<Device> devices = getDevices(false);
         List<GeoFence> geoFences = getGeoFences(false);
         GeoFenceCalculator geoFenceCalculator = new GeoFenceCalculator(getGeoFences());
