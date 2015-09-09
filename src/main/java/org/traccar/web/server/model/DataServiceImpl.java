@@ -593,7 +593,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @Override
     public List<Position> getPositions(Device device, Date from, Date to, boolean filter) {
-        if (!getSessionUser().isArchive()) {
+        if (!getSessionUser().isArchive() || !getSessionUser().hasAccessTo(device)) {
             throw new SecurityException();
         }
 

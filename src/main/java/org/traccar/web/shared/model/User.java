@@ -231,6 +231,14 @@ public class User implements IsSerializable, Cloneable {
         return false;
     }
 
+    public boolean hasAccessTo(Device device) {
+        if (getAdmin()) {
+            return true;
+        }
+
+        return getAllAvailableDevices().contains(device);
+    }
+
     @Expose
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))
