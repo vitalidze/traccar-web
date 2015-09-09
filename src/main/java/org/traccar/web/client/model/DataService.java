@@ -15,7 +15,6 @@
  */
 package org.traccar.web.client.model;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -36,15 +35,15 @@ public interface DataService extends RemoteService {
 
     boolean logout();
 
-    User register(String login, String password);
+    User register(String login, String password) throws AccessDeniedException;
 
     List<User> getUsers();
 
     User addUser(User user);
 
-    User updateUser(User user);
+    User updateUser(User user) throws AccessDeniedException;
 
-    User removeUser(User user);
+    User removeUser(User user) throws AccessDeniedException;
 
     List<Device> getDevices();
 
@@ -58,7 +57,7 @@ public interface DataService extends RemoteService {
 
     void saveDeviceShare(Device device, Map<User, Boolean> share);
 
-    List<Position> getPositions(Device device, Date from, Date to, boolean filter);
+    List<Position> getPositions(Device device, Date from, Date to, boolean filter) throws AccessDeniedException;
 
     List<Position> getLatestPositions();
 

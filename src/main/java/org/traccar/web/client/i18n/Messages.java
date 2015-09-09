@@ -404,4 +404,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String periodComboBox_SelectPeriod();
 
     String traceInterval();
+
+    String errAccessDenied();
 }

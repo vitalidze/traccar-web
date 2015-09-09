@@ -18,6 +18,7 @@ package org.traccar.web.server.model;
 import com.google.inject.persist.Transactional;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.traccar.web.client.model.DataService;
+import org.traccar.web.shared.model.AccessDeniedException;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.User;
@@ -88,6 +89,8 @@ public class ExportServlet extends HttpServlet {
         } catch (IOException ioex) {
             logger.log(Level.WARNING, ioex.getLocalizedMessage(), ioex);
             throw ioex;
+        } catch (AccessDeniedException ade) {
+            throw new ServletException(ade);
         }
     }
 
@@ -98,7 +101,7 @@ public class ExportServlet extends HttpServlet {
         }
     }
 
-    void csv(HttpServletResponse response, Device device, Date from, Date to, boolean filter) throws IOException {
+    void csv(HttpServletResponse response, Device device, Date from, Date to, boolean filter) throws IOException, AccessDeniedException {
         response.setContentType("text/csv;charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=traccar-positions.csv");
 
@@ -125,7 +128,7 @@ public class ExportServlet extends HttpServlet {
         return result.toString();
     }
 
-    void gpx(HttpServletResponse response, Device device, Date from, Date to, boolean filter) throws IOException, XMLStreamException {
+    void gpx(HttpServletResponse response, Device device, Date from, Date to, boolean filter) throws IOException, XMLStreamException, AccessDeniedException {
         response.setContentType("application/gpx+xml;charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=traccar-positions.gpx");
 

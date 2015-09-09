@@ -16,10 +16,6 @@
 package org.traccar.web.server.model;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
@@ -33,14 +29,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 
-import org.apache.commons.io.IOUtils;
 import org.hibernate.proxy.HibernateProxy;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
@@ -159,7 +150,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @LogCall("Register '{0}'")
     @Override
-    public User register(String login, String password) {
+    public User register(String login, String password) throws AccessDeniedException {
         if (getApplicationSettings().getRegistrationEnabled()) {
             TypedQuery<User> query = getSessionEntityManager().createQuery(
                     "SELECT x FROM User x WHERE x.login = :login", User.class);
@@ -182,7 +173,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 throw new IllegalStateException();
             }
         } else {
-            throw new SecurityException();
+            throw new AccessDeniedException();
         }
     }
 
@@ -242,7 +233,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @RequireWrite
     @Override
-    public User updateUser(User user) {
+    public User updateUser(User user) throws AccessDeniedException {
         User currentUser = getSessionUser();
         if (user.getLogin().isEmpty() || user.getPassword().isEmpty()) {
             throw new IllegalArgumentException();
@@ -289,13 +280,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     }
                     entityManager.merge(existingUser);
                 } else {
-                    throw new SecurityException();
+                    throw new AccessDeniedException();
                 }
             }
 
             return fillUserSettings(new User(user));
         } else {
-            throw new SecurityException();
+            throw new AccessDeniedException();
         }
     }
 
@@ -303,7 +294,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public User removeUser(User user) {
+    public User removeUser(User user) throws AccessDeniedException {
         EntityManager entityManager = getSessionEntityManager();
         user = entityManager.find(User.class, user.getId());
         // Don't allow user to delete himself
@@ -312,7 +303,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
         // Allow manager to remove users only managed by himself
         if (!getSessionUser().getAdmin() && !getSessionUser().getAllManagedUsers().contains(user)) {
-            throw new SecurityException();
+            throw new AccessDeniedException();
         }
         entityManager.createQuery("DELETE FROM UIStateEntry s WHERE s.user=:user").setParameter("user", user).executeUpdate();
         entityManager.createQuery("DELETE FROM NotificationSettings s WHERE s.user=:user").setParameter("user", user).executeUpdate();
@@ -592,9 +583,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser
     @Override
-    public List<Position> getPositions(Device device, Date from, Date to, boolean filter) {
+    public List<Position> getPositions(Device device, Date from, Date to, boolean filter) throws AccessDeniedException {
         if (!getSessionUser().isArchive() || !getSessionUser().hasAccessTo(device)) {
-            throw new SecurityException();
+            throw new AccessDeniedException();
         }
 
         EntityManager entityManager = getSessionEntityManager();

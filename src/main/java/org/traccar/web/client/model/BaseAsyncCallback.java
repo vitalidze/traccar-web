@@ -18,6 +18,7 @@ package org.traccar.web.client.model;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.shared.model.AccessDeniedException;
 
 public class BaseAsyncCallback<T> implements AsyncCallback<T> {
 
@@ -29,7 +30,11 @@ public class BaseAsyncCallback<T> implements AsyncCallback<T> {
 
     @Override
     public void onFailure(Throwable caught) {
-        new AlertMessageBox(i18n.error(), i18n.errRemoteCall()).show();
+        if (caught instanceof AccessDeniedException) {
+            new AlertMessageBox(i18n.error(), i18n.errAccessDenied()).show();
+        } else {
+            new AlertMessageBox(i18n.error(), i18n.errRemoteCall()).show();
+        }
     }
 
     @Override
