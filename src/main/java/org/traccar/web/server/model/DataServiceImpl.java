@@ -16,6 +16,8 @@
 package org.traccar.web.server.model;
 
 import java.io.*;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
@@ -768,6 +770,58 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 ", " + logFile3.getAbsolutePath());
     }
 
+
+    @Transactional
+    @RequireUser(roles = { Role.ADMIN })
+    @Override
+    public String getTrackerServerLogWrapper(short sizeKB) {
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd");;
+        Date date = new Date();
+        String s = formatter.format(date);
+        System.out.println(s);
+        
+        File workingFolder = new File(System.getProperty("user.dir"));
+        File logFile1 = new File(workingFolder, "logs" + File.separatorChar + "wrapper.log."+s);
+        File logFile2 = new File(workingFolder.getParentFile(), "logs" + File.separatorChar + "wrapper.log."+s);
+        File logFile3 = new File(workingFolder, "wrapper.log."+s);
+
+        File logFile = logFile1.exists() ? logFile1 :
+                logFile2.exists() ? logFile2 :
+                        logFile3.exists() ? logFile3 : null;
+
+        if (logFile != null) {
+            RandomAccessFile raf = null;
+            try {
+                raf = new RandomAccessFile(logFile, "r");
+                int length = 0;
+                if (raf.length() > Integer.MAX_VALUE) {
+                    length = Integer.MAX_VALUE;
+                } else {
+                    length = (int) raf.length();
+                }
+                /**
+                 * Read last 5 megabytes from file
+                 */
+                raf.seek(Math.max(0, raf.length() - sizeKB * 1024));
+                byte[] result = new byte[Math.min(length, sizeKB * 1024)];
+                raf.read(result);
+                return new String(result);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                try {
+                    raf.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+
+        return ("Tracker wrapper log is not available. Looked at " + logFile1.getAbsolutePath() +
+                ", " + logFile2.getAbsolutePath() +
+                ", " + logFile3.getAbsolutePath());
+    }
+    
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite

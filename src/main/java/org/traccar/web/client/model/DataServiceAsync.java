@@ -60,6 +60,8 @@ public interface DataServiceAsync {
     void getApplicationSettings(AsyncCallback<ApplicationSettings> async);
 
     void getTrackerServerLog(short sizeKB, AsyncCallback<String> async);
+    
+    void getTrackerServerLogWrapper(short sizeKB, AsyncCallback<String> async); 
 
     void saveRoles(List<User> users, AsyncCallback<Void> async);
 

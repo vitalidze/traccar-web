@@ -171,6 +171,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @UiField
     MenuItem showTrackerServerLog;
+    
+    @UiField
+    MenuItem showTrackerServerLogWrapper;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
@@ -281,6 +284,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         settingsGlobal.setVisible(!readOnly && admin);
         showTrackerServerLog.setVisible(admin);
+        showTrackerServerLogWrapper.setVisible(admin);
         settingsUsers.setVisible(!readOnly && (admin || manager));
         settingsNotifications.setVisible(!readOnly && (admin || manager));
         shareButton.setVisible(!readOnly && (admin || manager));
@@ -414,6 +418,11 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         new TrackerServerLogViewDialog().show();
     }
 
+    @UiHandler("showTrackerServerLogWrapper")
+    public void onShowTrackerServerLogWrapper(SelectionEvent<Item> event) {
+        new TrackerServerLogWrapperViewDialog().show();
+    }
+    
     @UiHandler("objectsTabs")
     public void onTabSelected(SelectionEvent<Widget> event) {
         if (event.getSelectedItem() == geoFenceList) {

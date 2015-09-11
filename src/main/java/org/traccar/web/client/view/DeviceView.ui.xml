@@ -52,6 +52,7 @@
                 <menu:MenuItem text="{i18n.global}" ui:field="settingsGlobal" visible="false" />
                 <menu:MenuItem text="{i18n.notifications}" ui:field="settingsNotifications" visible="false" />
                 <menu:MenuItem text="{i18n.trackerServerLog}" ui:field="showTrackerServerLog" visible="false" />
+                <menu:MenuItem text="{i18n.trackerServerLogWrapper}" ui:field="showTrackerServerLogWrapper" visible="false" />
               </menu:Menu>
             </button:menu>
           </button:TextButton>

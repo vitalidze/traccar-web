@@ -68,6 +68,8 @@ public interface DataService extends RemoteService {
     void updateApplicationSettings(ApplicationSettings applicationSettings);
 
     String getTrackerServerLog(short sizeKb);
+    
+    String getTrackerServerLogWrapper(short sizeKb);
 
     void saveRoles(List<User> users);
 
