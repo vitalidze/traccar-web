@@ -775,7 +775,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser(roles = { Role.ADMIN })
     @Override
     public String getTrackerServerLogWrapper(short sizeKB) {
-        Format formatter = new SimpleDateFormat("yyyy-MM-dd");;
+        Format formatter = new SimpleDateFormat("yyyyMMdd");;
         Date date = new Date();
         String s = formatter.format(date);
         System.out.println(s);
