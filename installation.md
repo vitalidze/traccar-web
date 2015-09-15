@@ -81,6 +81,15 @@ New:
     <entry key='database.updateLatestPosition'>
         UPDATE devices SET latestPosition_id = :id WHERE id = :deviceId;
     </entry>
+
+Old:
+
+
+    <entry key='database.xml'>false</entry>
+
+New:
+
+    <entry key='database.xml'>true</entry>
     
 4.1) **Specific to v3.1 of traccar**
 
