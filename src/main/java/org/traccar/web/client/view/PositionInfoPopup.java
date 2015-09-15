@@ -16,6 +16,7 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.xml.client.Node;
@@ -68,33 +69,69 @@ public class PositionInfoPopup {
                 sensors.put(sensor.getParameterName(), sensor);
             }
 
-            try {
-                NodeList nodes = XMLParser.parse(other).getFirstChild().getChildNodes();
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    Node node = nodes.item(i);
-                    String parameterName = node.getNodeName();
-                    String valueText = node.getFirstChild().getNodeValue();
-                    Sensor sensor = sensors.get(parameterName);
-                    if (sensor != null) {
-                        if (!sensor.isVisible()) {
-                            continue;
-                        }
-                        parameterName = sensor.getName();
-                        if (valueText.matches("^[-+]?\\d+(\\.\\d+)?$")) {
-                            double value = Double.parseDouble(valueText);
-                            List<SensorInterval> intervals = SensorsEditor.intervals(sensor);
-                            if (!intervals.isEmpty()) {
-                                valueText = intervalText(value, intervals);
+            Map<String, Object> sensorData = new HashMap<String, Object>();
+
+            // XML
+            if (other.trim().startsWith("<")) {
+                try {
+                    NodeList nodes = XMLParser.parse(other).getFirstChild().getChildNodes();
+                    for (int i = 0; i < nodes.getLength(); i++) {
+                        Node node = nodes.item(i);
+                        String parameterName = node.getNodeName();
+                        String valueText = node.getFirstChild().getNodeValue();
+                        sensorData.put(parameterName, valueText);
+                    }
+                } catch (Exception error) {
+                }
+            } else { // JSON
+                try {
+                    JSONValue parsed = JSONParser.parseStrict(other);
+                    JSONObject object = parsed.isObject();
+                    if (object != null) {
+                        for (String parameterName : object.keySet()) {
+                            JSONValue value = object.get(parameterName);
+                            if (value.isNumber() != null) {
+                                sensorData.put(parameterName, value.isNumber().doubleValue());
+                            } else if (value.isBoolean() != null) {
+                                sensorData.put(parameterName, value.isBoolean().booleanValue());
+                            } else if (value.isString() != null) {
+                                sensorData.put(parameterName, value.isString().stringValue());
                             }
                         }
-                    } else if (parameterName.equals("protocol")) {
-                        parameterName = i18n.protocol();
                     }
-                    if (!valueText.isEmpty()) {
-                        body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + parameterName + "</td><td>" + valueText + "</td></tr>";
-                    }
+                } catch (Exception error) {
                 }
-            } catch (Exception error) {
+            }
+
+            // write values
+            for (Map.Entry<String, Object> entry : sensorData.entrySet()) {
+                String parameterName = entry.getKey();
+                Object value = entry.getValue();
+                String valueText = value.toString();
+                Sensor sensor = sensors.get(parameterName);
+                if (sensor != null) {
+                    if (!sensor.isVisible()) {
+                        continue;
+                    }
+                    parameterName = sensor.getName();
+                    if (value instanceof Number || value.toString().matches("^[-+]?\\d+(\\.\\d+)?$")) {
+                        double doubleValue;
+                        if (value instanceof Number) {
+                            doubleValue = ((Number) value).doubleValue();
+                        } else {
+                            doubleValue = Double.parseDouble(valueText);
+                        }
+                        List<SensorInterval> intervals = SensorsEditor.intervals(sensor);
+                        if (!intervals.isEmpty()) {
+                            valueText = intervalText(doubleValue, intervals);
+                        }
+                    }
+                } else if (parameterName.equals("protocol")) {
+                    parameterName = i18n.protocol();
+                }
+                if (!valueText.isEmpty()) {
+                    body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + parameterName + "</td><td>" + valueText + "</td></tr>";
+                }
             }
         }
 

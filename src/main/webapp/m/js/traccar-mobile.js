@@ -430,70 +430,87 @@ function loadDevices() {
 }
 
 function parseOther(position) {
-    // parse 'other' field
-    var xmlDoc;
-    if (window.DOMParser)  {
-        parser = new DOMParser();
-        xmlDoc = parser.parseFromString(position.other, "text/xml");
-        // Internet Explorer
-    } else {
-        xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-        xmlDoc.async = false;
-        xmlDoc.loadXML(position.other);
+    if (position.other == null) {
+        return null;
     }
 
+    // parse 'other' field
     var result;
-    if (xmlDoc.documentElement == null) {
-        result = null;
+    if (position.other.indexOf("<") == 0) {
+        var xmlDoc;
+        if (window.DOMParser) {
+            parser = new DOMParser();
+            xmlDoc = parser.parseFromString(position.other, "text/xml");
+            // Internet Explorer
+        } else {
+            xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+            xmlDoc.async = false;
+            xmlDoc.loadXML(position.other);
+        }
+
+        if (xmlDoc.documentElement == null) {
+            return null;
+        } else {
+            result = {};
+            var nodes = xmlDoc.documentElement.childNodes;
+            for (var i = 0; i < nodes.length; i++) {
+                var name = nodes[i].nodeName;
+                var valueText = nodes[i].textContent;
+                if (valueText == null) {
+                    valueText = nodes[i].nodeValue;
+                }
+                result[name] = valueText;
+            }
+        }
     } else {
-        var device;
-        for (var i = 0; i < appState.devices.length; i++) {
-            if (appState.devices[i].id == position.device.id) {
-                device = appState.devices[i];
+        result = JSON.parse(position.other);
+    }
+
+    var device;
+    for (var i = 0; i < appState.devices.length; i++) {
+        if (appState.devices[i].id == position.device.id) {
+            device = appState.devices[i];
+            break;
+        }
+    }
+
+    for (var originalName in result) {
+        var name = originalName;
+        var valueText = result[originalName];
+        var visible = true;
+        var changed = false;
+        for (var s = 0; s < device.sensors.length; s++) {
+            var sensor = device.sensors[s];
+            if (sensor.parameterName == name) {
+                visible = sensor.visible;
+                name = sensor.name;
+                changed = true;
+                if (sensor.intervals != null && !isNaN(valueText)) {
+                    var intervals = JSON.parse(sensor.intervals);
+                    if (intervals.length > 0) {
+                        var value = valueText;
+                        var valueText = null;
+                        for (var j = 0; j < intervals.length; j++) {
+                            if (valueText == null) {
+                                valueText = intervals[j].text;
+                            }
+                            if (value < intervals[j].value) {
+                                break;
+                            }
+                            valueText = intervals[j].text;
+                        }
+                    }
+                }
                 break;
             }
         }
-
-        result = {};
-        var nodes = xmlDoc.documentElement.childNodes;
-        for (var i = 0; i < nodes.length; i++) {
-            var name = nodes[i].nodeName;
-            var valueText = nodes[i].textContent;
-            if (valueText == null) {
-                valueText = nodes[i].nodeValue;
-            }
-            var visible = true;
-            for (var s = 0; s < device.sensors.length; s++) {
-                var sensor = device.sensors[s];
-                if (sensor.parameterName == name) {
-                    visible = sensor.visible;
-                    name = sensor.name;
-                    if (sensor.intervals != null && !isNaN(valueText)) {
-                        var intervals = JSON.parse(sensor.intervals);
-                        if (intervals.length > 0) {
-                            var value = valueText;
-                            var valueText = null;
-                            for (var j = 0; j < intervals.length; j++) {
-                                if (valueText == null) {
-                                    valueText = intervals[j].text;
-                                }
-                                if (value < intervals[j].value) {
-                                    break;
-                                }
-                                valueText = intervals[j].text;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-            if (!visible) {
-                continue;
-            }
+        if (!visible || changed) {
+            delete result[originalName];
+        }
+        if (visible) {
             result[name] = valueText;
         }
     }
-
     return result;
 }
 
