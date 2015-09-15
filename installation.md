@@ -82,12 +82,12 @@ New:
         UPDATE devices SET latestPosition_id = :id WHERE id = :deviceId;
     </entry>
 
-Old:
+Old (may be missing):
 
 
     <entry key='database.xml'>false</entry>
 
-New:
+New (add after `<entry key='database.password'></entry>` if it is not present):
 
     <entry key='database.xml'>true</entry>
     
