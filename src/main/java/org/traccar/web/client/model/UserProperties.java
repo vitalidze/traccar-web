@@ -51,6 +51,8 @@ public interface UserProperties extends PropertyAccess<User> {
 
     ValueProvider<User, Boolean> blocked();
 
+    ValueProvider<User, Boolean> archive();
+
     ValueProvider<User, Date> expirationDate();
 
     ValueProvider<User, Integer> maxNumOfDevices();

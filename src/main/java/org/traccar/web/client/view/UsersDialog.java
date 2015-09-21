@@ -118,6 +118,12 @@ public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandle
         colReadOnly.setResizable(false);
         columnConfigList.add(colReadOnly);
 
+        ColumnConfig<User, Boolean> colArchive = new ColumnConfig<User, Boolean>(userProperties.archive(), 50, i18n.archive());
+        colArchive.setCell(new CheckBoxCell());
+        colArchive.setFixed(true);
+        colArchive.setResizable(false);
+        columnConfigList.add(colArchive);
+
         ColumnConfig<User, Boolean> colBlocked = new ColumnConfig<User, Boolean>(userProperties.blocked(), 50, i18n.blocked());
         colBlocked.setCell(new CheckBoxCell());
         colBlocked.setFixed(true);

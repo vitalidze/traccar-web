@@ -64,6 +64,7 @@ public class User implements IsSerializable, Cloneable {
         }
         maxNumOfDevices = user.maxNumOfDevices;
         readOnly = user.readOnly;
+        archive = user.archive;
         companyName = user.companyName;
         firstName = user.firstName;
         lastName = user.lastName;
@@ -230,6 +231,14 @@ public class User implements IsSerializable, Cloneable {
         return false;
     }
 
+    public boolean hasAccessTo(Device device) {
+        if (getAdmin()) {
+            return true;
+        }
+
+        return getAllAvailableDevices().contains(device);
+    }
+
     @Expose
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))
@@ -340,6 +349,18 @@ public class User implements IsSerializable, Cloneable {
 
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
+    }
+
+    @Expose
+    @Column(nullable = true)
+    private boolean archive = true;
+
+    public boolean isArchive() {
+        return archive;
+    }
+
+    public void setArchive(boolean archive) {
+        this.archive = archive;
     }
 
     @Column(nullable = true)

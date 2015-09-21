@@ -131,7 +131,7 @@ myApp.onPageInit('login-screen', function (page) {
 
     // set up open desktop version action
     pageContainer.find('.open-desktop-version').on('click', function() {
-        window.location = '/?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
+        window.location = '../?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
     });
 
     pageContainer.find('#form-login').on('submit', function(e) {
@@ -420,7 +420,7 @@ function loadDevices() {
 
             // set up open desktop version action
             $$('.open-desktop-version').on('click', function() {
-                window.location = '/?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
+                window.location = '../?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
             });
         },
         error: function() {
@@ -430,70 +430,87 @@ function loadDevices() {
 }
 
 function parseOther(position) {
-    // parse 'other' field
-    var xmlDoc;
-    if (window.DOMParser)  {
-        parser = new DOMParser();
-        xmlDoc = parser.parseFromString(position.other, "text/xml");
-        // Internet Explorer
-    } else {
-        xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
-        xmlDoc.async = false;
-        xmlDoc.loadXML(position.other);
+    if (position.other == null) {
+        return null;
     }
 
+    // parse 'other' field
     var result;
-    if (xmlDoc.documentElement == null) {
-        result = null;
+    if (position.other.indexOf("<") == 0) {
+        var xmlDoc;
+        if (window.DOMParser) {
+            parser = new DOMParser();
+            xmlDoc = parser.parseFromString(position.other, "text/xml");
+            // Internet Explorer
+        } else {
+            xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+            xmlDoc.async = false;
+            xmlDoc.loadXML(position.other);
+        }
+
+        if (xmlDoc.documentElement == null) {
+            return null;
+        } else {
+            result = {};
+            var nodes = xmlDoc.documentElement.childNodes;
+            for (var i = 0; i < nodes.length; i++) {
+                var name = nodes[i].nodeName;
+                var valueText = nodes[i].textContent;
+                if (valueText == null) {
+                    valueText = nodes[i].nodeValue;
+                }
+                result[name] = valueText;
+            }
+        }
     } else {
-        var device;
-        for (var i = 0; i < appState.devices.length; i++) {
-            if (appState.devices[i].id == position.device.id) {
-                device = appState.devices[i];
+        result = JSON.parse(position.other);
+    }
+
+    var device;
+    for (var i = 0; i < appState.devices.length; i++) {
+        if (appState.devices[i].id == position.device.id) {
+            device = appState.devices[i];
+            break;
+        }
+    }
+
+    for (var originalName in result) {
+        var name = originalName;
+        var valueText = result[originalName];
+        var visible = true;
+        var changed = false;
+        for (var s = 0; s < device.sensors.length; s++) {
+            var sensor = device.sensors[s];
+            if (sensor.parameterName == name) {
+                visible = sensor.visible;
+                name = sensor.name;
+                changed = true;
+                if (sensor.intervals != null && !isNaN(valueText)) {
+                    var intervals = JSON.parse(sensor.intervals);
+                    if (intervals.length > 0) {
+                        var value = valueText;
+                        var valueText = null;
+                        for (var j = 0; j < intervals.length; j++) {
+                            if (valueText == null) {
+                                valueText = intervals[j].text;
+                            }
+                            if (value < intervals[j].value) {
+                                break;
+                            }
+                            valueText = intervals[j].text;
+                        }
+                    }
+                }
                 break;
             }
         }
-
-        result = {};
-        var nodes = xmlDoc.documentElement.childNodes;
-        for (var i = 0; i < nodes.length; i++) {
-            var name = nodes[i].nodeName;
-            var valueText = nodes[i].textContent;
-            if (valueText == null) {
-                valueText = nodes[i].nodeValue;
-            }
-            var visible = true;
-            for (var s = 0; s < device.sensors.length; s++) {
-                var sensor = device.sensors[s];
-                if (sensor.parameterName == name) {
-                    visible = sensor.visible;
-                    name = sensor.name;
-                    if (sensor.intervals != null && !isNaN(valueText)) {
-                        var intervals = JSON.parse(sensor.intervals);
-                        if (intervals.length > 0) {
-                            var value = valueText;
-                            var valueText = null;
-                            for (var j = 0; j < intervals.length; j++) {
-                                if (valueText == null) {
-                                    valueText = intervals[j].text;
-                                }
-                                if (value < intervals[j].value) {
-                                    break;
-                                }
-                                valueText = intervals[j].text;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-            if (!visible) {
-                continue;
-            }
+        if (!visible || changed) {
+            delete result[originalName];
+        }
+        if (visible) {
             result[name] = valueText;
         }
     }
-
     return result;
 }
 
@@ -677,8 +694,12 @@ function drawMarker(position) {
 
 function getIconURL(position) {
     if (position.device.icon == null) {
-        return position.offline ? position.device.iconType.OFFLINE.urls[position.selected ? 1 : 0] :
-                                  position.device.iconType.LATEST.urls[position.selected ? 1 : 0];
+        var iconURL = position.offline ? position.device.iconType.OFFLINE.urls[position.selected ? 1 : 0] :
+                                         position.device.iconType.LATEST.urls[position.selected ? 1 : 0];
+        if (iconURL.indexOf('img/') == 0) {
+            iconURL = '../' + iconURL;
+        }
+        return iconURL;
     } else {
         var pictureId;
         if (position.selected) {
@@ -686,7 +707,7 @@ function getIconURL(position) {
         } else {
             pictureId = position.offline ? position.device.icon.offlineIcon.id : position.device.icon.defaultIcon.id;
         }
-        return '/traccar/p/' + pictureId;
+        return '../traccar/p/' + pictureId;
     }
 }
 
@@ -702,7 +723,7 @@ function callPost(options) {
 
 function invoke(options) {
     $$.ajax({
-        url: '/traccar/rest/' + options.method,
+        url: '../traccar/rest/' + options.method,
         method: options.httpMethod,
         dataType: 'json',
         data: JSON.stringify(options.data),

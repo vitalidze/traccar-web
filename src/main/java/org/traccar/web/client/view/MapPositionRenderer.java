@@ -34,6 +34,7 @@ import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.client.Track;
+import org.traccar.web.client.TrackSegment;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -229,6 +230,7 @@ public class MapPositionRenderer {
         LineString trackLine;
         List<VectorFeature> trackPoints = new ArrayList<VectorFeature>();
         List<VectorFeature> labels = new ArrayList<VectorFeature>();
+        Map<Position, VectorFeature> timeLabels = new HashMap<Position, VectorFeature>();
 
         SnappingHandler snappingHandler;
 
@@ -294,6 +296,12 @@ public class MapPositionRenderer {
             label.destroy();
         }
         deviceData.labels.clear();
+        // clear time labels
+        for (VectorFeature label : deviceData.timeLabels.values()) {
+            getVectorLayer().removeFeature(label);
+            label.destroy();
+        }
+        deviceData.timeLabels.clear();
         // clear tracks
         if (deviceData.track != null) {
             getVectorLayer().removeFeature(deviceData.track);
@@ -382,30 +390,65 @@ public class MapPositionRenderer {
 
             final VectorFeature point = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), st);
             getVectorLayer().addFeature(point);
-            deviceData.labels.add(point);
+            deviceData.timeLabels.put(position, point);
         }
     }
 
     public void showTrack(Track track) {
-        List<Position> positions = track.getPositions();
-        if (!positions.isEmpty()) {
-            DeviceData deviceData = getDeviceData(positions);
-            Point[] linePoints = new Point[positions.size()];
+        List<TrackSegment> segments = track.getSegments();
+        if (!segments.isEmpty()) {
+            DeviceData deviceData = getDeviceData(segments.get(0).getPositions());
+            List<Point> linePoints = new ArrayList<Point>();
 
-            int i = 0;
-            for (Position position : positions) {
-                linePoints[i++] = mapView.createPoint(position.getLongitude(), position.getLatitude());
+            for (TrackSegment segment : segments) {
+                if (segment.getGeometry() == null) {
+                    for (Position position : segment.getPositions()) {
+                        linePoints.add(mapView.createPoint(position.getLongitude(), position.getLatitude()));
+                    }
+                } else {
+                    for (VectorFeature feature : segment.getGeometry()) {
+                        LineString lineString = LineString.narrowToLineString(feature.getJSObject().getProperty("geometry"));
+                        for (int i = 0; i < lineString.getNumberOfComponents(); i++) {
+                            Point point = Point.narrowToPoint(lineString.getComponent(i));
+                            linePoints.add(mapView.createPoint(point.getX() / 10, point.getY() / 10));
+                        }
+                    }
+                }
             }
+
+            LineString lineString;
+
+            if (deviceData.track == null) {
+                lineString = new LineString(linePoints.toArray(new Point[linePoints.size()]));
+                deviceData.positions = track.getPositions();
+            } else {
+                lineString = deviceData.trackLine;
+                getVectorLayer().removeFeature(deviceData.track);
+                deviceData.track.destroy();
+                deviceData.positions = new ArrayList<Position>(deviceData.positions);
+                List<Position> trackPositions = track.getPositions();
+                if (deviceData.positions.get(deviceData.positions.size() - 1).equals(trackPositions.get(0))) {
+                    for (int i = 1; i < linePoints.size(); i++) {
+                        lineString.addPoint(linePoints.get(i), lineString.getNumberOfComponents());
+                        deviceData.positions.add(trackPositions.get(i));
+                    }
+                } else {
+                    for (Point point : linePoints) {
+                        lineString.addPoint(point, lineString.getNumberOfComponents());
+                    }
+                    deviceData.positions.addAll(trackPositions);
+                }
+            }
+
             // Assigns color to style
             Style style = mapView.getVectorLayer().getStyle();
             style.setStrokeColor("#" + track.getStyle().getTrackColor());
 
-            final LineString lineString = new LineString(linePoints);
             VectorFeature mapTrack = new VectorFeature(lineString, style);
             getVectorLayer().addFeature(mapTrack);
             deviceData.track = mapTrack;
             deviceData.trackLine = lineString;
-            deviceData.positions = positions;
+
             if (track.getStyle().getZoomToTrack())
                 mapView.getMap().zoomToExtent(lineString.getBounds());
         }
@@ -472,6 +515,38 @@ public class MapPositionRenderer {
     public void catchPosition(Position position) {
         if (!mapView.getMap().getExtent().containsLonLat(mapView.createLonLat(position.getLongitude(), position.getLatitude()), true)) {
             selectPosition(position, true);
+        }
+    }
+
+    public void clearTrackPositions(Device device, Date before) {
+        DeviceData deviceData = getDeviceData(device);
+        if (deviceData.track != null) {
+            boolean updated = false;
+            LineString trackLine = deviceData.trackLine;
+            for (Iterator<VectorFeature> it = deviceData.trackPoints.iterator(); it.hasNext(); ) {
+                Position position = deviceData.positions.get(0);
+                if (position.getTime().after(before)) {
+                    break;
+                }
+                updated = true;
+                trackLine.removePoint(Point.narrowToPoint(trackLine.getComponent(0)));
+                getVectorLayer().removeFeature(it.next());
+                it.remove();
+                deviceData.positions.remove(0);
+
+                VectorFeature timeLabel = deviceData.timeLabels.remove(position);
+                if (timeLabel != null) {
+                    getVectorLayer().removeFeature(timeLabel);
+                    timeLabel.destroy();
+                }
+            }
+            if (updated) {
+                getVectorLayer().removeFeature(deviceData.track);
+                VectorFeature track = new VectorFeature(trackLine, deviceData.track.getStyle());
+                deviceData.track.destroy();
+                getVectorLayer().addFeature(track);
+                deviceData.track = track;
+            }
         }
     }
 

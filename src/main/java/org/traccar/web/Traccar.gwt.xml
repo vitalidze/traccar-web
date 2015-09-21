@@ -5,6 +5,7 @@
 
 <module rename-to='traccar'>
 
+    <inherits name="com.google.gwt.http.HTTP" />
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="com.google.gwt.logging.Logging"/>
     <inherits name="com.google.gwt.xml.XML"/>
@@ -39,4 +40,5 @@
     <extend-property name="locale" values="cs" />
     <extend-property name="locale" values="sr" />
     <extend-property name="locale" values="he" />
+    <extend-property name="locale" values="fa" />
 </module>

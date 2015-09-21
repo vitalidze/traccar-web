@@ -19,6 +19,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.PicturesService;
 import org.traccar.web.shared.model.DeviceIcon;
+import org.traccar.web.shared.model.DeviceIconType;
 import org.traccar.web.shared.model.Picture;
 
 import javax.inject.Inject;
@@ -73,6 +74,10 @@ public class PicturesServiceImpl extends RemoteServiceServlet implements Picture
     @Override
     public void removeMarkerPicture(DeviceIcon marker) {
         DeviceIcon icon = entityManager.get().find(DeviceIcon.class, marker.getId());
+        entityManager.get().createQuery("UPDATE Device d SET d.icon=null, d.iconType=:defaultIcon WHERE d.icon=:icon")
+                .setParameter("icon", icon)
+                .setParameter("defaultIcon", DeviceIconType.DEFAULT)
+                .executeUpdate();
         entityManager.get().remove(icon);
         for (Picture picture : new Picture[] { icon.getOfflineIcon(), icon.getSelectedIcon(), icon.getOfflineIcon() }) {
             if (picture == null) {

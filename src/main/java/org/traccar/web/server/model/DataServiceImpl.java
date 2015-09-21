@@ -16,10 +16,6 @@
 package org.traccar.web.server.model;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
@@ -33,14 +29,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 
-import org.apache.commons.io.IOUtils;
 import org.hibernate.proxy.HibernateProxy;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
@@ -159,7 +150,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @LogCall("Register '{0}'")
     @Override
-    public User register(String login, String password) {
+    public User register(String login, String password) throws AccessDeniedException {
         if (getApplicationSettings().getRegistrationEnabled()) {
             TypedQuery<User> query = getSessionEntityManager().createQuery(
                     "SELECT x FROM User x WHERE x.login = :login", User.class);
@@ -182,7 +173,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 throw new IllegalStateException();
             }
         } else {
-            throw new SecurityException();
+            throw new AccessDeniedException();
         }
     }
 
@@ -242,7 +233,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @RequireWrite
     @Override
-    public User updateUser(User user) {
+    public User updateUser(User user) throws AccessDeniedException {
         User currentUser = getSessionUser();
         if (user.getLogin().isEmpty() || user.getPassword().isEmpty()) {
             throw new IllegalArgumentException();
@@ -259,17 +250,23 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     currentUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
                     currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword()));
                 }
+                if(currentUser.getAdmin() || currentUser.getManager())
+                {
+                    currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
+                    currentUser.setExpirationDate(user.getExpirationDate());
+                    if (currentUser.getAdmin()) {
+                        currentUser.setAdmin(user.getAdmin());
+                    }
+                    currentUser.setManager(user.getManager());
+                }
                 currentUser.setUserSettings(user.getUserSettings());
-                currentUser.setAdmin(user.getAdmin());
-                currentUser.setManager(user.getManager());
                 currentUser.setEmail(user.getEmail());
                 currentUser.setNotificationEvents(user.getTransferNotificationEvents());
                 currentUser.setCompanyName(user.getCompanyName());
                 currentUser.setFirstName(user.getFirstName());
                 currentUser.setLastName(user.getLastName());
                 currentUser.setPhoneNumber(user.getPhoneNumber());
-                currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
-                currentUser.setExpirationDate(user.getExpirationDate());
+
                 entityManager.merge(currentUser);
                 user = currentUser;
             } else {
@@ -283,13 +280,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     }
                     entityManager.merge(existingUser);
                 } else {
-                    throw new SecurityException();
+                    throw new AccessDeniedException();
                 }
             }
 
             return fillUserSettings(new User(user));
         } else {
-            throw new SecurityException();
+            throw new AccessDeniedException();
         }
     }
 
@@ -297,7 +294,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public User removeUser(User user) {
+    public User removeUser(User user) throws AccessDeniedException {
         EntityManager entityManager = getSessionEntityManager();
         user = entityManager.find(User.class, user.getId());
         // Don't allow user to delete himself
@@ -306,7 +303,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
         // Allow manager to remove users only managed by himself
         if (!getSessionUser().getAdmin() && !getSessionUser().getAllManagedUsers().contains(user)) {
-            throw new SecurityException();
+            throw new AccessDeniedException();
         }
         entityManager.createQuery("DELETE FROM UIStateEntry s WHERE s.user=:user").setParameter("user", user).executeUpdate();
         entityManager.createQuery("DELETE FROM NotificationSettings s WHERE s.user=:user").setParameter("user", user).executeUpdate();
@@ -586,7 +583,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser
     @Override
-    public List<Position> getPositions(Device device, Date from, Date to, boolean filter, boolean snapToRoads) {
+    public List<Position> getPositions(Device device, Date from, Date to, boolean filter) throws AccessDeniedException {
+        if (!getSessionUser().isArchive() || !getSessionUser().hasAccessTo(device)) {
+            throw new AccessDeniedException();
+        }
+
         EntityManager entityManager = getSessionEntityManager();
         UserSettings filters = getSessionUser().getUserSettings();
 
@@ -638,68 +639,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             if (add) positions.add(queryResult.get(i));
         }
 
-        positions = new ArrayList<Position>(positions);
-        if (snapToRoads && !queryResult.isEmpty()) {
-            NumberFormat lonLatFormat = NumberFormat.getNumberInstance(Locale.US);
-            lonLatFormat.setMinimumFractionDigits(6);
-            lonLatFormat.setMaximumFractionDigits(6);
-
-            StringBuilder matchURL = new StringBuilder("http://router.project-osrm.org/match?geometry=false");
-            for (Position position : positions) {
-                matchURL.append("&loc=").append(lonLatFormat.format(position.getLatitude()))
-                        .append(',').append(lonLatFormat.format(position.getLongitude()))
-                        .append("&t=").append(position.getTime().getTime() / 1000);
-            }
-
-            InputStream is = null;
-            URLConnection conn = null;
-            try {
-                URL url = new URL(matchURL.toString());
-                conn = url.openConnection();
-                conn.setRequestProperty("User-Agent", "Traccar Web UI Mod (java)");
-                is = conn.getInputStream();
-
-                JsonReader reader = new JsonReader(new InputStreamReader(is, "UTF-8"));
-                Gson gson = new Gson();
-                reader.beginObject();
-
-                String name = reader.nextName();
-                if (name.equals("matchings")) {
-                    reader.beginArray();
-                    while (reader.hasNext()) {
-                        JsonObject matching = gson.fromJson(reader, JsonObject.class);
-                        JsonArray indices = matching.getAsJsonArray("indices");
-                        JsonArray matched_points = matching.getAsJsonArray("matched_points");
-                        for (int i = 0; i < indices.size(); i++) {
-                            JsonArray latLon = matched_points.get(i).getAsJsonArray();
-                            int index = indices.get(i).getAsInt();
-                            Position snapped = new Position(positions.get(index));
-                            snapped.setLatitude(latLon.get(0).getAsDouble());
-                            snapped.setLongitude(latLon.get(1).getAsDouble());
-                            positions.set(index, snapped);
-                        }
-                    }
-                    reader.endArray();
-                }
-                reader.endObject();
-                reader.close();
-            } catch (MalformedURLException mfe) {
-                log("Incorrect URL", mfe);
-            } catch (IOException ioex) {
-                log("I/O error", ioex);
-            } finally {
-                IOUtils.closeQuietly(is);
-            }
-        }
-
-        return positions;
+        return new ArrayList<Position>(positions);
     }
 
     @RequireUser
     @Transactional
     @Override
     public List<Position> getLatestPositions() {
-        List<Position> positions = new LinkedList<Position>();
+        List<Position> positions = new ArrayList<Position>();
         List<Device> devices = getDevices(false);
         List<GeoFence> geoFences = getGeoFences(false);
         GeoFenceCalculator geoFenceCalculator = new GeoFenceCalculator(getGeoFences());
@@ -839,6 +786,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             user.setManager(_user.getManager());
             user.setReadOnly(_user.getReadOnly());
+            user.setArchive(_user.isArchive());
             user.setExpirationDate(_user.getExpirationDate());
             user.setBlocked(_user.isBlocked());
             user.setMaxNumOfDevices(_user.getMaxNumOfDevices());

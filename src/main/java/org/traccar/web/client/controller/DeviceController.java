@@ -22,6 +22,7 @@ import java.util.Set;
 
 import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
+import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
@@ -234,8 +235,13 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
             public void onSuccess(final Map<User, Boolean> share) {
                 new UserShareDialog(share, new UserShareDialog.UserShareHandler() {
                     @Override
-                    public void onSaveShares(Map<User, Boolean> shares) {
-                        Application.getDataService().saveDeviceShare(device, shares, new BaseAsyncCallback<Void>(i18n));
+                    public void onSaveShares(Map<User, Boolean> shares, final Window window) {
+                        Application.getDataService().saveDeviceShare(device, shares, new BaseAsyncCallback<Void>(i18n) {
+                            @Override
+                            public void onSuccess(Void result) {
+                                window.hide();
+                            }
+                        });
                     }
                 }).show();
             }
@@ -246,18 +252,18 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     public void onRemove(final Device device) {
         final ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmDeviceRemoval());
         dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
-			@Override
-			public void onDialogHide(DialogHideEvent event) {
-				if (event.getHideButton() == PredefinedButton.YES) {
+            @Override
+            public void onDialogHide(DialogHideEvent event) {
+                if (event.getHideButton() == PredefinedButton.YES) {
                     Application.getDataService().removeDevice(device, new BaseAsyncCallback<Device>(i18n) {
                         @Override
                         public void onSuccess(Device result) {
                             deviceStore.remove(device);
                         }
                     });
-				}
-			}
-		});
+                }
+            }
+        });
         dialog.show();
     }
 

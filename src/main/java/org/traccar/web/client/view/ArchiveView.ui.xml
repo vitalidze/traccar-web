@@ -27,6 +27,7 @@
 
                     <toolbar:LabelToolItem label="{i18n.device}:" />
                     <form:ComboBox ui:field="deviceCombo" editable="false" triggerAction="ALL" />
+                    <form:ComboBox ui:field="periodCombo" editable="false" triggerAction="ALL" />
                     <toolbar:SeparatorToolItem />
 
                     <toolbar:LabelToolItem label="{i18n.from}:" />

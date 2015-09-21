@@ -18,6 +18,7 @@ package org.traccar.web.client.view;
 import java.util.*;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -32,12 +33,14 @@ import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import com.sencha.gxt.widget.core.client.form.*;
+import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.*;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.ArchiveStyle;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
+import org.traccar.web.client.widget.PeriodComboBox;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -65,7 +68,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     public interface ArchiveHandler {
         void onSelected(Position position);
-        void onLoad(Device device, Date from, Date to, boolean filter, boolean snapToRoads, ArchiveStyle style);
+        void onLoad(Device device, Date from, Date to, boolean filter, ArchiveStyle style);
+        void onSnapToRoads(boolean snapToRoads);
         void onFilterSettings();
         void onClear(Device device);
         void onChangeArchiveMarkerType(PositionIconType newMarkerType);
@@ -96,6 +100,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
     @UiField(provided = true)
     ComboBox<Device> deviceCombo;
+
+	@UiField(provided = true)
+	ComboBox<String> periodCombo;
 
     @UiField
     CheckBox disableFilter;
@@ -136,6 +143,15 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
+
+		periodCombo = new PeriodComboBox();
+		periodCombo.select(1);
+        periodCombo.addSelectionHandler(new SelectionHandler<String>() {
+            @Override
+            public void onSelection(SelectionEvent<String> event) {
+                setDateTimefd(periodCombo.getStore().indexOf(event.getSelectedItem()));
+            }
+        });
 
         // Element that displays the current track color
         styleButtonTrackColor = new TextButton();
@@ -238,7 +254,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 getCombineDate(fromDate, fromTime),
                 getCombineDate(toDate, toTime),
                 !disableFilter.getValue(),
-                snapToRoads.getValue(),
                 new ArchiveStyle(style)
         );
     }
@@ -260,12 +275,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         } else {
             DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-            Window.open("/traccar/export/csv" +
+            Window.open("traccar/export/csv" +
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue() +
-                            "&snapToRoads=" + snapToRoads.getValue(),
+                            "&filter=" + !disableFilter.getValue(),
                     "_blank", null);
         }
     }
@@ -277,12 +291,11 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         } else {
             DateTimeFormat jsonTimeFormat = ApplicationContext.getInstance().getFormatterUtil().getRequestTimeFormat();
 
-            Window.open("/traccar/export/gpx" +
+            Window.open("traccar/export/gpx" +
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue() +
-                            "&snapToRoads=" + snapToRoads.getValue(),
+                            "&filter=" + !disableFilter.getValue(),
                     "_blank", null);
         }
     }
@@ -364,4 +377,19 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
             }
         }
     }
+
+    @UiHandler("snapToRoads")
+    public void onSnapToRoadsClicked(ValueChangeEvent<Boolean> event) {
+        archiveHandler.onSnapToRoads(snapToRoads.getValue());
+    }
+
+	private void setDateTimefd(int index){
+		if (index != 6){
+            PeriodComboBox combo = (PeriodComboBox) periodCombo;
+			fromTime.setValue(combo.getStartPeriod(index));
+			fromDate.setValue(combo.getStartPeriod(index));
+			toDate.setValue(combo.getEndOfPeriod(index));
+			toTime.setValue(combo.getEndOfPeriod(index));
+		}
+	}
 }

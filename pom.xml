@@ -9,7 +9,7 @@
   <groupId>org.traccar</groupId>
   <artifactId>traccar-web</artifactId>
   <packaging>war</packaging>
-  <version>2.12-SNAPSHOT</version>
+  <version>0.8.1-SNAPSHOT</version>
   <name>Traccar Web UI</name>
 
   <properties>

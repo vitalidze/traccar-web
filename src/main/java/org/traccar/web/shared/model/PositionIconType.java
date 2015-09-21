@@ -72,8 +72,8 @@ public enum PositionIconType implements IsSerializable {
     PositionIconType(String selectedURL, boolean selectedFromCloudFlare,
                      String notSelectedURL, boolean notSelectedFromCloudFlare,
                      int width, int height) {
-        this.selectedURL = (selectedFromCloudFlare ? "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/" : "/img/") + selectedURL;
-        this.notSelectedURL = (notSelectedFromCloudFlare ? "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/" : "/img/") + notSelectedURL;
+        this.selectedURL = (selectedFromCloudFlare ? "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/" : "img/") + selectedURL;
+        this.notSelectedURL = (notSelectedFromCloudFlare ? "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/" : "img/") + notSelectedURL;
         this.width = width;
         this.height = height;
     }

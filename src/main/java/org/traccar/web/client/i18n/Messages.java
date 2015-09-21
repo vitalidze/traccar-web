@@ -393,4 +393,17 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String overlayType(@Select UserSettings.OverlayType type);
 
     String snapToRoads();
+    
+    String periodComboBox_today();
+    String periodComboBox_Yesterday();
+    String periodComboBox_ThisWeek();
+    String periodComboBox_PreviousWeek();
+    String periodComboBox_ThisMonth();
+    String periodComboBox_PreviousMonth();
+    String periodComboBox_Custom();
+    String periodComboBox_SelectPeriod();
+
+    String traceInterval();
+
+    String errAccessDenied();
 }

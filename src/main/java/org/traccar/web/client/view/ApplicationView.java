@@ -27,6 +27,7 @@ import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.shared.model.Position;
 
 public class ApplicationView extends Composite {
@@ -109,6 +110,10 @@ public class ApplicationView extends Composite {
         archivePanel = archiveView;
 
         initWidget(uiBinder.createAndBindUi(this));
+
+        if (!ApplicationContext.getInstance().getUser().isArchive()) {
+            archivePanel.removeFromParent();
+        }
 
         new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 52);
     }
