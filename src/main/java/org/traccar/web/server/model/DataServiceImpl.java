@@ -106,12 +106,25 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         if (results.isEmpty() || password.equals("")) throw new IllegalStateException();
 
-        if (!results.get(0).getPassword().equals(
-                (passwordHashed ? password : results.get(0).getPasswordHashMethod().doHash(password))
-        )) {
-            throw new IllegalStateException();
-        }
         User user = results.get(0);
+
+        String storedPassword = user.getPassword();
+        // login by password 'hash'
+        if (passwordHashed) {
+            if (!storedPassword.equals(password)) {
+                throw new IllegalStateException();
+            }
+        } else {
+            if (!storedPassword.equals(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()))) {
+                // check for the old implementation without salt
+                // if it matches then update password with new salt
+                if (storedPassword.equals(user.getPasswordHashMethod().doHash(password, ""))) {
+                    user.setPassword(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()));
+                } else {
+                    throw new IllegalStateException();
+                }
+            }
+        }
 
         if (user.isBlocked()) {
             throw new UserBlockedException();
@@ -126,8 +139,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
          */
         if (!user.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation()) && !passwordHashed) {
             user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-            user.setPassword(user.getPasswordHashMethod().doHash(password));
-            getSessionEntityManager().persist(user);
+            user.setPassword(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()));
         }
 
         setSessionUser(user);
@@ -160,7 +172,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     User user = new User();
                     user.setLogin(login);
                     user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                    user.setPassword(user.getPasswordHashMethod().doHash(password));
+                    user.setPassword(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()));
                     user.setManager(Boolean.TRUE); // registered users are always managers
                     user.setUserSettings(new UserSettings());
                     getSessionEntityManager().persist(user);
@@ -216,7 +228,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
             user.setManagedBy(currentUser);
             user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-            user.setPassword(user.getPasswordHashMethod().doHash(user.getPassword()));
+            user.setPassword(user.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()));
             if (user.getUserSettings() == null) {
                 user.setUserSettings(new UserSettings());
             }
@@ -246,9 +258,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             if (currentUser.getId() == user.getId()) {
                 currentUser.setLogin(user.getLogin());
                 // Password is different or hash method has changed since login
-                if (!currentUser.getPassword().equals(user.getPassword()) || currentUser.getPasswordHashMethod().equals(PasswordHashMethod.PLAIN) && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
+                if (!currentUser.getPassword().equals(user.getPassword())
+                        || currentUser.getPasswordHashMethod().equals(PasswordHashMethod.PLAIN)
+                        && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
                     currentUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                    currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword()));
+                    currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()));
                 }
                 if(currentUser.getAdmin() || currentUser.getManager())
                 {
@@ -274,9 +288,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 if (currentUser.getAdmin() || currentUser.getManager()) {
                     User existingUser = entityManager.find(User.class, user.getId());
                     // Checks if password has changed or default hash method not equal to current user hash method
-                    if (!existingUser.getPassword().equals(user.getPassword()) && !existingUser.getPassword().equals(existingUser.getPasswordHashMethod().doHash(user.getPassword())) || !existingUser.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation())) {
+                    if (!existingUser.getPassword().equals(user.getPassword())
+                            && !existingUser.getPassword().equals(existingUser.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()))
+                            || !existingUser.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation())) {
                         existingUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                        existingUser.setPassword(existingUser.getPasswordHashMethod().doHash(user.getPassword()));
+                        existingUser.setPassword(existingUser.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()));
                     }
                     entityManager.merge(existingUser);
                 } else {
@@ -705,12 +721,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @Override
     public ApplicationSettings getApplicationSettings() {
-        ApplicationSettings appSettings = applicationSettings.get();
-        if (appSettings == null) {
-            appSettings = new ApplicationSettings();
-            entityManager.get().persist(appSettings);
-        }
-        return appSettings;
+        return applicationSettings.get();
     }
 
     @Transactional

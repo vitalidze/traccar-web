@@ -19,24 +19,30 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Random;
 
 public enum PasswordHashMethod implements IsSerializable {
     PLAIN("plain") {
         @Override
-        public String doHash(String s) {
+        public String doHash(String s, String salt) {
             return s;
         }
     },
     SHA512("sha512") {
         @Override
-        public String doHash(String s) {
+        public String doHash(String s, String salt) {
             try {
                 final MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
-                sha512.update(s.getBytes());
-                byte data[] = sha512.digest();
+                sha512.reset();
+                if (salt != null && !salt.isEmpty()) {
+                    sha512.update(salt.getBytes());
+                }
+                byte[] data = sha512.digest(s.getBytes());
                 StringBuffer hexData = new StringBuffer();
-                for (int byteIndex = 0; byteIndex < data.length; byteIndex++)
+                for (int byteIndex = 0; byteIndex < data.length; byteIndex++) {
                     hexData.append(Integer.toString((data[byteIndex] & 0xff) + 0x100, 16).substring(1));
+                }
                 return hexData.toString();
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
@@ -45,14 +51,17 @@ public enum PasswordHashMethod implements IsSerializable {
     },
     MD5("md5") {
         @Override
-        public String doHash(String s) {
+        public String doHash(String s, String salt) {
             try {
                 final MessageDigest md5 = MessageDigest.getInstance("MD5");
-                md5.update(s.getBytes());
-                byte[] array = md5.digest();
+                md5.reset();
+                if (salt != null && !salt.isEmpty()) {
+                    md5.update(salt.getBytes());
+                }
+                byte[] array = md5.digest(s.getBytes());
                 StringBuffer hexData = new StringBuffer();
                 for (int i = 0; i < array.length; ++i) {
-                    hexData.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
+                    hexData.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
                 }
                 return hexData.toString();
             } catch (NoSuchAlgorithmException e) {
@@ -71,5 +80,5 @@ public enum PasswordHashMethod implements IsSerializable {
         return method;
     }
 
-    public abstract String doHash(String s);
+    public abstract String doHash(String s, String salt);
 }
