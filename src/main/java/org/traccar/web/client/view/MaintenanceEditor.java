@@ -137,13 +137,13 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
         rowNumberer.setResizable(false);
         nameColumn = new ColumnConfig<Maintenance, String>(maintenanceProperties.name(), 25, i18n.serviceName());
         columnConfigList.add(nameColumn);
-        serviceIntervalColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.serviceInterval(), 140, i18n.mileageInterval() + " (" + i18n.km() + ")");
+        serviceIntervalColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.serviceInterval(), 150, i18n.mileageInterval() + " (" + i18n.km() + ")");
         columnConfigList.add(serviceIntervalColumn);
         serviceIntervalColumn.setFixed(true);
         serviceIntervalColumn.setResizable(false);
         serviceIntervalColumn.setHidden(true);
         serviceIntervalColumn.setCell(new NumberCell<Double>(odometerFormat));
-        lastServiceColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 110, i18n.lastServiceMileage() + " (" + i18n.km() + ")");
+        lastServiceColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 130, i18n.lastServiceMileage() + " (" + i18n.km() + ")");
         columnConfigList.add(lastServiceColumn);
         lastServiceColumn.setFixed(true);
         lastServiceColumn.setResizable(false);

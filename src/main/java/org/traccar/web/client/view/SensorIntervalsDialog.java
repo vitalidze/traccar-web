@@ -92,7 +92,7 @@ public class SensorIntervalsDialog implements SelectionChangedEvent.SelectionCha
 
         List<ColumnConfig<SensorInterval, ?>> columnConfigList = new LinkedList<ColumnConfig<SensorInterval, ?>>();
 
-        ColumnConfig<SensorInterval, Double> valueColumn = new ColumnConfig<SensorInterval, Double>(sensorProperties.value(), 80, i18n.intervalFrom());
+        ColumnConfig<SensorInterval, Double> valueColumn = new ColumnConfig<SensorInterval, Double>(sensorProperties.value(), 100, i18n.intervalFrom());
         valueColumn.setFixed(true);
         valueColumn.setResizable(false);
         columnConfigList.add(valueColumn);
