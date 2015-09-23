@@ -18,19 +18,17 @@ package org.traccar.web.client.view;
 import java.util.*;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
-import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
+import com.sencha.gxt.theme.neptune.client.base.tabs.Css3TabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import com.sencha.gxt.widget.core.client.form.*;
-import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.*;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.ArchiveStyle;
@@ -199,7 +197,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
             routeMarkersType.add(item);
         }
 
-        devicesTabs = new TabPanel(GWT.<TabPanel.TabPanelAppearance>create(BlueTabPanelBottomAppearance.class));
+        devicesTabs = new TabPanel(GWT.<TabPanel.TabPanelAppearance>create(Css3TabPanelBottomAppearance.class));
         archivePanels = new HashMap<Long, ArchivePanel>();
 
         uiBinder.createAndBindUi(this);
