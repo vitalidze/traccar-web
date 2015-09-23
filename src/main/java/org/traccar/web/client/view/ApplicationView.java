@@ -52,6 +52,9 @@ public class ApplicationView extends Composite {
     @UiField
     BorderLayoutContainer.BorderLayoutData southData;
 
+    @UiField
+    BorderLayoutContainer.BorderLayoutData westData;
+
     class ExpandCollapseHandler implements ResizeHandler, SelectEvent.SelectHandler {
         final int toolbarSize;
         final BorderLayoutContainer.BorderLayoutData layoutData;
@@ -113,6 +116,10 @@ public class ApplicationView extends Composite {
 
         if (!ApplicationContext.getInstance().getUser().isArchive()) {
             archivePanel.removeFromParent();
+        }
+
+        if (devicePanel.getElement().getSize().getWidth() < 260) {
+            westData.setSize(260);
         }
 
         new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 84);

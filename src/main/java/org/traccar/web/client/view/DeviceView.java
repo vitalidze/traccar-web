@@ -24,12 +24,17 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
+import com.sencha.gxt.core.client.XTemplates;
+import com.sencha.gxt.theme.neptune.client.base.tabs.Css3TabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
-import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
@@ -217,16 +222,23 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         });
         columnConfigList.add(colName);
 
-        ColumnConfig<Device, Boolean> colFollow = new ColumnConfig<Device, Boolean>(deviceProperties.follow(), 50, i18n.follow());
+        Resources resources = GWT.create(Resources.class);
+        HeaderIconTemplate headerTemplate = GWT.create(HeaderIconTemplate.class);
+
+        ColumnConfig<Device, Boolean> colFollow = new ColumnConfig<Device, Boolean>(deviceProperties.follow(), 50,
+                headerTemplate.render(AbstractImagePrototype.create(resources.follow()).getSafeHtml()));
         colFollow.setCell(new CheckBoxCell());
         colFollow.setFixed(true);
         colFollow.setResizable(false);
+        colFollow.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.follow()).toSafeHtml());
         columnConfigList.add(colFollow);
 
-        ColumnConfig<Device, Boolean> colRecordTrace = new ColumnConfig<Device, Boolean>(deviceProperties.recordTrace(), 60, i18n.recordTrace());
+        ColumnConfig<Device, Boolean> colRecordTrace = new ColumnConfig<Device, Boolean>(deviceProperties.recordTrace(), 50,
+                headerTemplate.render(AbstractImagePrototype.create(resources.footprints()).getSafeHtml()));
         colRecordTrace.setCell(new CheckBoxCell());
         colRecordTrace.setFixed(true);
         colRecordTrace.setResizable(false);
+        colRecordTrace.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.recordTrace()).toSafeHtml());
         columnConfigList.add(colRecordTrace);
 
         columnModel = new ColumnModel<Device>(columnConfigList);
@@ -252,7 +264,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         geoFenceHandler.setGeoFenceListView(geoFenceList);
 
         // tab panel
-        objectsTabs = new TabPanel(GWT.<TabPanelAppearance>create(BlueTabPanelBottomAppearance.class));
+        objectsTabs = new TabPanel(GWT.<TabPanelAppearance>create(Css3TabPanelBottomAppearance.class));
 
         uiBinder.createAndBindUi(this);
 
@@ -441,5 +453,18 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     public ListView<GeoFence, String> getGeoFenceList() {
         return geoFenceList;
+    }
+
+    interface HeaderIconTemplate extends XTemplates {
+        @XTemplate("<div style=\"text-align:center;\">{img}</div>")
+        SafeHtml render(SafeHtml img);
+    }
+
+    interface Resources extends ClientBundle {
+        @Source("org/traccar/web/client/theme/icon/follow.png")
+        ImageResource follow();
+
+        @Source("org/traccar/web/client/theme/icon/footprints.png")
+        ImageResource footprints();
     }
 }
