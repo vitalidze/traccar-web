@@ -29,6 +29,7 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
+import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.shared.model.UserSettings;
 
@@ -66,7 +67,7 @@ public class FilterDialog implements Editor<UserSettings> {
 
     @UiField
     @Ignore
-    Label distanceUnits;
+    LabelToolItem distanceUnits;
 
     @UiField(provided = true)
     SimpleComboBox<String> speedModifier;
@@ -76,7 +77,7 @@ public class FilterDialog implements Editor<UserSettings> {
 
     @UiField
     @Ignore
-    Label speedUnits;
+    LabelToolItem speedUnits;
 
     public FilterDialog(UserSettings filterSettings, UserSettingsDialog.UserSettingsHandler userSettingsHandler) {
         this.userSettingsHandler = userSettingsHandler;
@@ -91,8 +92,8 @@ public class FilterDialog implements Editor<UserSettings> {
 
         uiBinder.createAndBindUi(this);
 
-        speedUnits.setText(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getUnit());
-        distanceUnits.setText(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getDistanceUnit().getUnit());
+        speedUnits.setLabel(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getUnit());
+        distanceUnits.setLabel(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getDistanceUnit().getUnit());
 
         speedForFilter.addValidator(new MinNumberValidator<Double>(0d));
         speedForFilter.addValidator(new MaxNumberValidator<Double>(30000d));
