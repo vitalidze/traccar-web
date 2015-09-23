@@ -152,7 +152,7 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
             public String getValue(MessagePlaceholder ph) {
                 return "${" + ph.name() + "}";
             }
-        }, 118));
+        }, 150));
         placeholderColumns.get(placeholderColumns.size() - 1).setFixed(true);
         placeholderColumns.add(new ColumnConfig<MessagePlaceholder, String>(new ToStringValueProvider<MessagePlaceholder>() {
             @Override
