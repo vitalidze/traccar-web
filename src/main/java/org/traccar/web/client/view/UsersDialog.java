@@ -99,14 +99,14 @@ public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandle
         columnConfigList.add(new ColumnConfig<User, String>(userProperties.login(), 25, i18n.name()));
 
         if (ApplicationContext.getInstance().getUser().getAdmin()) {
-            ColumnConfig<User, Boolean> colAdmin = new ColumnConfig<User, Boolean>(userProperties.admin(), 100, i18n.administrator());
+            ColumnConfig<User, Boolean> colAdmin = new ColumnConfig<User, Boolean>(userProperties.admin(), 110, i18n.administrator());
             colAdmin.setCell(new CheckBoxCell());
             colAdmin.setFixed(true);
             colAdmin.setResizable(false);
             columnConfigList.add(colAdmin);
         }
 
-        ColumnConfig<User, Boolean> colManager = new ColumnConfig<User, Boolean>(userProperties.manager(), 70, i18n.manager());
+        ColumnConfig<User, Boolean> colManager = new ColumnConfig<User, Boolean>(userProperties.manager(), 80, i18n.manager());
         colManager.setCell(new CheckBoxCell());
         colManager.setFixed(true);
         colManager.setResizable(false);
@@ -118,25 +118,25 @@ public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandle
         colReadOnly.setResizable(false);
         columnConfigList.add(colReadOnly);
 
-        ColumnConfig<User, Boolean> colArchive = new ColumnConfig<User, Boolean>(userProperties.archive(), 50, i18n.archive());
+        ColumnConfig<User, Boolean> colArchive = new ColumnConfig<User, Boolean>(userProperties.archive(), 70, i18n.archive());
         colArchive.setCell(new CheckBoxCell());
         colArchive.setFixed(true);
         colArchive.setResizable(false);
         columnConfigList.add(colArchive);
 
-        ColumnConfig<User, Boolean> colBlocked = new ColumnConfig<User, Boolean>(userProperties.blocked(), 50, i18n.blocked());
+        ColumnConfig<User, Boolean> colBlocked = new ColumnConfig<User, Boolean>(userProperties.blocked(), 75, i18n.blocked());
         colBlocked.setCell(new CheckBoxCell());
         colBlocked.setFixed(true);
         colBlocked.setResizable(false);
         columnConfigList.add(colBlocked);
 
-        ColumnConfig<User, Date> colExpirationDate = new ColumnConfig<User, Date>(userProperties.expirationDate(), 156, i18n.expirationDate());
+        ColumnConfig<User, Date> colExpirationDate = new ColumnConfig<User, Date>(userProperties.expirationDate(), 165, i18n.expirationDate());
         colExpirationDate.setCell(new DateCell());
         colExpirationDate.setFixed(true);
         colExpirationDate.setResizable(false);
         columnConfigList.add(colExpirationDate);
 
-        ColumnConfig<User, Integer> colMaxNumOfDevices = new ColumnConfig<User, Integer>(userProperties.maxNumOfDevices(), 156, i18n.maxNumOfDevices());
+        ColumnConfig<User, Integer> colMaxNumOfDevices = new ColumnConfig<User, Integer>(userProperties.maxNumOfDevices(), 200, i18n.maxNumOfDevices());
         colMaxNumOfDevices.setCell(new NumberCell<Integer>());
         colMaxNumOfDevices.setFixed(true);
         colMaxNumOfDevices.setResizable(false);
