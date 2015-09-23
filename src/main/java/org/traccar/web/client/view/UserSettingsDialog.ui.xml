@@ -27,6 +27,12 @@
   <ui:with type="com.sencha.gxt.data.shared.ListStore" field="overlayTypeStore" />
   <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
 
+  <ui:style>
+    .pad3 {
+        padding: 3px 3px 0px 3px;
+    }
+  </ui:style>
+
   <gxt:Window ui:field="window" pixelSize="345, 500" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
@@ -61,7 +67,7 @@
             </form:FieldLabel>
         </container:child>
       <container:child layoutData="{verticalLayoutData}">
-          <gxt:FramedPanel headingText="{i18n.defaultMapState}">
+          <gxt:FramedPanel headingText="{i18n.defaultMapState}" bodyStyleName="{style.pad3}">
               <container:VerticalLayoutContainer>
                   <container:child layoutData="{verticalLayoutData}">
                       <form:FieldLabel text="{i18n.map}">
