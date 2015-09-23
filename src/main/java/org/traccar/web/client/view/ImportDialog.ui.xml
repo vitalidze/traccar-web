@@ -15,7 +15,7 @@
 
     <ui:with field='device' type='org.traccar.web.shared.model.Device' />
 
-    <gxt:Window ui:field="window" pixelSize="300, 70" modal="true" headingText="{device.getName} {i18n.importData}" focusWidget="{saveButton}">
+    <gxt:Window ui:field="window" pixelSize="300, -1" modal="true" headingText="{device.getName} {i18n.importData}" focusWidget="{saveButton}">
         <form:FormPanel action="traccar/import/gpx" method="POST" encoding="MULTIPART" ui:field="form">
             <container:VerticalLayoutContainer>
                 <container:child layoutData="{verticalLayoutData}">

@@ -12,7 +12,7 @@
 
     <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <gxt:Window ui:field="window" pixelSize="360, 145" modal="true">
+    <gxt:Window ui:field="window" pixelSize="360, -1" modal="true">
         <form:FormPanel method="POST" encoding="MULTIPART" ui:field="form">
             <container:VerticalLayoutContainer>
                 <container:child layoutData="{verticalLayoutData}">

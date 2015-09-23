@@ -115,6 +115,6 @@ public class ApplicationView extends Composite {
             archivePanel.removeFromParent();
         }
 
-        new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 75);
+        new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 84);
     }
 }

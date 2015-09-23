@@ -25,7 +25,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="494, 340" modal="true" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="494, 370" modal="true" focusWidget="{saveButton}">
     <container:BorderLayoutContainer ui:field="con" borders="true">
       <container:north layoutData="{northData}">
           <toolbar:ToolBar>
