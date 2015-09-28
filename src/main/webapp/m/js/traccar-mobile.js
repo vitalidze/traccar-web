@@ -341,6 +341,18 @@ function loadPositions() {
 
             currentTime = new Date().getTime();
 
+            // push 'selected' position to last place so it will be drawn over other markers
+            for (var i = 0; i < positions.length; i++) {
+                var position = positions[i];
+                prevPosition = appState.latestPositions[position.device.id];
+                if (prevPosition != undefined && prevPosition.selected) {
+                    positions[i] = positions[positions.length - 1];
+                    positions[positions.length - 1] = position;
+                    break;
+                }
+            }
+
+            // draw markers and device details
             for (var i = 0; i < positions.length; i++) {
                 var position = positions[i];
 
