@@ -169,7 +169,9 @@ public class Position implements IsSerializable, Cloneable {
         this.course = course;
     }
 
-    @Expose
+    /**
+     * @deprecated not used anymore by the traccar backend, left for backwards compatibility
+     */
     private Double power;
 
     public Double getPower() {
@@ -200,6 +202,28 @@ public class Position implements IsSerializable, Cloneable {
 
     public void setOther(String other) {
         this.other = other;
+    }
+
+    @Expose
+    private String protocol;
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    @Expose
+    private Date serverTime;
+
+    public Date getServerTime() {
+        return serverTime;
+    }
+
+    public void setServerTime(Date serverTime) {
+        this.serverTime = serverTime;
     }
 
     @GwtTransient
@@ -257,6 +281,7 @@ public class Position implements IsSerializable, Cloneable {
     public void setGeoFences(List<GeoFence> geoFences) {
         this.geoFences = geoFences;
     }
+
 
     @Override
     public int hashCode() {

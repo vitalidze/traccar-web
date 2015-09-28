@@ -61,6 +61,9 @@ public class PositionInfoPopup {
         if (position.getDevice().getOdometer() > 0) {
             body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + i18n.odometer() + "</td><td>" + ApplicationContext.getInstance().getFormatterUtil().getDistanceFormat().format(position.getDevice().getOdometer()) + "</td></tr>";
         }
+        if (position.getProtocol() != null) {
+            body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + i18n.protocol() + "</td><td>" + position.getProtocol() + "</td></tr>";
+        }
         String other = position.getOther();
         if (other != null) {
             Device device = deviceStore.findModelWithKey(Long.toString(position.getDevice().getId()));
