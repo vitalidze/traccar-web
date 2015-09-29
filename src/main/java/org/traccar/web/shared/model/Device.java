@@ -166,7 +166,20 @@ public class Device implements IsSerializable {
         this.idleSpeedThreshold = idleSpeedThreshold;
     }
 
-    // Hibernate bug HHH-8783: (http://hibernate.atlassian.net/browse/HHH-8783)
+
+    @Expose
+    @Column(nullable = true)
+    private String powerConditions;
+
+    public String getPowerConditions() {
+        return powerConditions;
+    }
+
+    public void setPowerConditions(String powerConditions) {
+        this.powerConditions = powerConditions;
+    }
+
+     // Hibernate bug HHH-8783: (http://hibernate.atlassian.net/browse/HHH-8783)
     //     ForeignKey(name) has no effect in JoinTable (and others).  It is
     //     reported as closed but the comments indicate it is still not fixed
     //     for @JoinTable() and targeted to be fixed in 5.x :-(.
