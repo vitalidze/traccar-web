@@ -396,10 +396,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         User user = getSessionUser();
 
-        if (!user.getAdmin() &&
-            user.getMaxNumOfDevices() != null &&
-            getDevices(false).size() >= user.getMaxNumOfDevices()) {
-            throw new MaxDeviceNumberReachedException(user.getMaxNumOfDevices());
+        if (!user.getAdmin() && user.getNumberOfDevicesToAdd() <= 0) {
+            throw new MaxDeviceNumberReachedException(fillUserSettings(new User(user.getUserWhoReachedLimitOnDevicesNumber())));
         }
 
         EntityManager entityManager = getSessionEntityManager();

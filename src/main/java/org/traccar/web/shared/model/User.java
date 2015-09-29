@@ -435,6 +435,29 @@ public class User implements IsSerializable, Cloneable {
         this.phoneNumber = phoneNumber;
     }
 
+    public int getNumberOfDevicesToAdd() {
+        int myNumber;
+        if (getMaxNumOfDevices() == null) {
+            myNumber = Integer.MAX_VALUE;
+        } else {
+            myNumber = getMaxNumOfDevices() - getAllAvailableDevices().size();
+        }
+
+        int managerNumber = getManagedBy() == null ? Integer.MAX_VALUE : getManagedBy().getNumberOfDevicesToAdd();
+        return Math.min(myNumber, managerNumber);
+    }
+
+    public User getUserWhoReachedLimitOnDevicesNumber() {
+        User user = this;
+        while (user != null && user.getNumberOfDevicesToAdd() == 0) {
+            if (user.getManagedBy() != null && user.getManagedBy().getNumberOfDevicesToAdd() > 0) {
+                return user;
+            }
+            user = user.getManagedBy();
+        }
+        return null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

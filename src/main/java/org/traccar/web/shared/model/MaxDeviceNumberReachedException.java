@@ -16,16 +16,16 @@
 package org.traccar.web.shared.model;
 
 public class MaxDeviceNumberReachedException extends TraccarException {
-    private int limit;
+    private User reachedLimit;
 
     public MaxDeviceNumberReachedException() {
     }
 
-    public MaxDeviceNumberReachedException(int limit) {
-        this.limit = limit;
+    public MaxDeviceNumberReachedException(User reachedLimit) {
+        this.reachedLimit = reachedLimit;
     }
 
-    public int getLimit() {
-        return limit;
+    public User getReachedLimit() {
+        return reachedLimit;
     }
 }

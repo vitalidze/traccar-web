@@ -152,7 +152,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             msg = new AlertMessageBox(i18n.error(), i18n.errNoDeviceNameOrId());
                         } else if (caught instanceof MaxDeviceNumberReachedException) {
                             MaxDeviceNumberReachedException e = (MaxDeviceNumberReachedException) caught;
-                            msg = new AlertMessageBox(i18n.error(), i18n.errMaxNumberDevicesReached(Integer.toString(e.getLimit())));
+                            msg = new AlertMessageBox(i18n.error(), i18n.errMaxNumberDevicesReached(e.getReachedLimit().getMaxNumOfDevices().toString()));
                         } else {
                             msg = new AlertMessageBox(i18n.error(), i18n.errDeviceExists());
                         }
