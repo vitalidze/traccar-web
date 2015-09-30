@@ -29,6 +29,7 @@ This project has following features, which don't exist in original `traccar-web`
     * [czech language](czech.html) (available via ?locale=cs URL parameter)
     * [serbian language](serbian.html) (available via ?locale=sr URL parameter)
     * [hebrew language](hebrew.html) (available via ?locale=he URL parameter)
+    * [persian language](persian.html) (available via ?locale=fa URL parameter)
 * 'show server log' menu for viewing tracker-server.log file on Web
 * [archive filtering](archive-filtering.html)
 * change default map center position, zoom, provider (Google, OSM, Bing) (in Settings >> Preferences)
