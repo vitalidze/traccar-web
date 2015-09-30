@@ -43,15 +43,15 @@ New:
 Old:
 
     <entry key='database.insertPosition'>
-        INSERT INTO position (deviceId, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, other)
-        VALUES (:deviceId, NOW(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
+        INSERT INTO position (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, attributes)
+        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
     </entry>
     
 New:
 
     <entry key='database.insertPosition'>
-        INSERT INTO positions (device_id, time, valid, latitude, longitude, altitude, speed, course, address, other)
-        VALUES (:deviceId, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
+        INSERT INTO positions (device_id, protocol, serverTime, time, valid, latitude, longitude, altitude, speed, course, address, other)
+        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
     </entry>
 
   - SQL query to select latest positions
@@ -81,15 +81,6 @@ New:
     <entry key='database.updateLatestPosition'>
         UPDATE devices SET latestPosition_id = :id WHERE id = :deviceId;
     </entry>
-
-Old (may be missing):
-
-
-    <entry key='database.xml'>false</entry>
-
-New (add after `<entry key='database.password'></entry>` if it is not present):
-
-    <entry key='database.xml'>true</entry>
     
 4.1) **Specific to v3.1 of traccar**
 
