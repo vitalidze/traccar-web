@@ -121,6 +121,13 @@
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.powerConditions}" labelWidth="160">
+                          <form:widget>
+                              <form:TextField ui:field="powerConditions" allowBlank="true" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
                   <container:child layoutData="{verticalLayoutDataWithButtons}">
                       <form:FieldLabel ui:field="labelMarkers" labelWidth="160">
                           <form:widget>

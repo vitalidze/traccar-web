@@ -42,6 +42,8 @@ public interface DeviceProperties extends PropertyAccess<Device> {
     ValueProvider<Device, Integer> timeout();
 
     ValueProvider<Device, Double> idleSpeedThreshold();
+    
+    ValueProvider<Device, String> powerConditions();
 
     @Path("name")
     LabelProvider<Device> label();
