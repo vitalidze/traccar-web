@@ -463,7 +463,9 @@ public class User implements IsSerializable, Cloneable {
         User manager = this;
         while (maxNumberOfDevices == null && manager != null) {
             maxNumberOfDevices = manager.getMaxNumOfDevices();
-            manager = manager.getManagedBy();
+            if (maxNumberOfDevices == null) {
+                manager = manager.getManagedBy();
+            }
         }
         if (maxNumberOfDevices == null) {
             return Integer.MAX_VALUE;
