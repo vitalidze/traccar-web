@@ -458,6 +458,32 @@ public class User implements IsSerializable, Cloneable {
         return null;
     }
 
+    public int getNumberOfDevicesToDistribute() {
+        Integer maxNumberOfDevices = getMaxNumOfDevices();
+        User manager = this;
+        while (maxNumberOfDevices == null && manager != null) {
+            maxNumberOfDevices = manager.getMaxNumOfDevices();
+            manager = manager.getManagedBy();
+        }
+        if (maxNumberOfDevices == null) {
+            return Integer.MAX_VALUE;
+        }
+        int alreadyDistributedNumberOfDevices = 0;
+        Set<User> users = manager.getManagedUsers();
+        while (!users.isEmpty()) {
+            Set<User> nextLevelUsers = new HashSet<User>();
+            for (User user : users) {
+                if (user.getMaxNumOfDevices() == null) {
+                    nextLevelUsers.addAll(user.getManagedUsers());
+                } else {
+                    alreadyDistributedNumberOfDevices += user.getMaxNumOfDevices();
+                }
+            }
+            users = nextLevelUsers;
+        }
+        return Math.max(0, maxNumberOfDevices - alreadyDistributedNumberOfDevices);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

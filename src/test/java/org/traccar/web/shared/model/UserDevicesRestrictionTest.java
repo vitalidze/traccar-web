@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 public class UserDevicesRestrictionTest {
@@ -89,6 +90,19 @@ public class UserDevicesRestrictionTest {
         testStrictHierarchy(0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
+    @Test
+    public void testStrictNumberOfDevicesToDistribute() {
+        assertEquals(20, m1.getNumberOfDevicesToDistribute());
+        assertEquals(20, m2.getNumberOfDevicesToDistribute());
+        assertEquals(40, m3.getNumberOfDevicesToDistribute());
+        assertEquals(40, m4.getNumberOfDevicesToDistribute());
+        assertEquals(10, u1.getNumberOfDevicesToDistribute());
+        assertEquals(20, u2.getNumberOfDevicesToDistribute());
+        assertEquals(40, u3.getNumberOfDevicesToDistribute());
+        assertEquals(10, u4.getNumberOfDevicesToDistribute());
+        assertEquals(40, u5.getNumberOfDevicesToDistribute());
+    }
+
     private void testStrictHierarchy(int dm1,
                                      int dm2,
                                      int dm3,
@@ -150,6 +164,15 @@ public class UserDevicesRestrictionTest {
     }
 
     @Test
+    public void testWeirdHierarchyNumberOfDevicesToDistribute() {
+        assertEquals(50, m5.getNumberOfDevicesToDistribute());
+        assertEquals(0, m6.getNumberOfDevicesToDistribute());
+        assertEquals(0, m7.getNumberOfDevicesToDistribute());
+        assertEquals(90, m8.getNumberOfDevicesToDistribute());
+        assertEquals(90, m9.getNumberOfDevicesToDistribute());
+    }
+
+    @Test
     public void testWeirdHierarchyInitial() {
         testWeirdHierarchy(100, 50, 50, 50, 50, 50, 50, 50, 50);
     }
@@ -198,6 +221,7 @@ public class UserDevicesRestrictionTest {
     private User u(String name, Integer maxNumOfDevices) {
         User user = new User(name);
         user.setMaxNumOfDevices(maxNumOfDevices);
+        user.setManagedUsers(Collections.<User>emptySet());
         return user;
     }
 

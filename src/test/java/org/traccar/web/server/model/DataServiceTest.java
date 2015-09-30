@@ -134,7 +134,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void testDeleteUserWithNotificationSettings() throws AccessDeniedException {
+    public void testDeleteUserWithNotificationSettings() throws TraccarException {
         Long originalUserId = injector.getProvider(User.class).get().getId();
 
         User user = new User("test", "test");
@@ -153,7 +153,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void testResetPasswordByAdmin() throws AccessDeniedException {
+    public void testResetPasswordByAdmin() throws TraccarException {
         User user = new User("test", "test");
         user = dataService.addUser(user);
 
@@ -166,7 +166,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void testResetPasswordByManager() throws AccessDeniedException {
+    public void testResetPasswordByManager() throws TraccarException {
         User manager = new User("manager", "manager");
         manager.setManager(Boolean.TRUE);
         manager = dataService.addUser(manager);

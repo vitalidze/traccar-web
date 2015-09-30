@@ -39,7 +39,7 @@ public interface DataService extends RemoteService {
 
     List<User> getUsers();
 
-    User addUser(User user);
+    User addUser(User user) throws InvalidMaxDeviceNumberForUserException;
 
     User updateUser(User user) throws AccessDeniedException;
 
@@ -69,7 +69,7 @@ public interface DataService extends RemoteService {
 
     String getTrackerServerLog(short sizeKb);
 
-    void saveRoles(List<User> users);
+    void saveRoles(List<User> users) throws InvalidMaxDeviceNumberForUserException;
 
     List<GeoFence> getGeoFences();
 
