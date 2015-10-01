@@ -72,6 +72,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String name();
 
     String uniqueIdentifier();
+    
+    String powerConditions();
 
     String devices();
 
