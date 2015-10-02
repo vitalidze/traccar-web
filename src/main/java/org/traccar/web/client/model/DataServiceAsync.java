@@ -41,6 +41,8 @@ public interface DataServiceAsync {
 
     void updateUser(User user, AsyncCallback<User> callback);
 
+    void updateUserSettings(UserSettings userSettings, AsyncCallback<UserSettings> callback);
+
     void removeUser(User user, AsyncCallback<User> callback);
 
     void getDevices(AsyncCallback<List<Device>> callback);

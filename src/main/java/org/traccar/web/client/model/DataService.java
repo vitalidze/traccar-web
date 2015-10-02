@@ -43,6 +43,8 @@ public interface DataService extends RemoteService {
 
     User updateUser(User user) throws AccessDeniedException;
 
+    UserSettings updateUserSettings(UserSettings userSettings) throws AccessDeniedException;
+
     User removeUser(User user) throws AccessDeniedException;
 
     List<Device> getDevices();

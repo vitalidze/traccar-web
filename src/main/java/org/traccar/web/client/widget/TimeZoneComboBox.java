@@ -898,4 +898,25 @@ public class TimeZoneComboBox extends ComboBox<TimeZoneInfo> {
 
         return result;
     }
+
+    public static TimeZoneInfo getByID(String id) {
+        if (id == null) {
+            return null;
+        }
+        for (TimeZoneInfo zoneInfo : getAllTimeZones()) {
+            if (zoneInfo.getID().equals(id)) {
+                return zoneInfo;
+            }
+        }
+        return null;
+    }
+
+    public static TimeZoneInfo getByOffset(int offset) {
+        for (TimeZoneInfo zoneInfo : getAllTimeZones()) {
+            if (zoneInfo.getStandardOffset() == offset) {
+                return zoneInfo;
+            }
+        }
+        return null;
+    }
 }

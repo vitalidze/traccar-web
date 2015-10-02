@@ -17,6 +17,7 @@ package org.traccar.web.client;
 
 import java.util.logging.Logger;
 
+import com.google.gwt.i18n.client.TimeZoneInfo;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
@@ -27,8 +28,8 @@ import org.traccar.web.client.controller.*;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.*;
 import org.traccar.web.client.view.ApplicationView;
-import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.client.view.UserSettingsDialog;
+import org.traccar.web.client.widget.TimeZoneComboBox;
 import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
@@ -88,7 +89,47 @@ public class Application {
         mapController.run();
         archiveController.run();
         geoFenceController.run();
+        setupTimeZone();
     }
+
+    private void setupTimeZone() {
+        UserSettings userSettings = ApplicationContext.getInstance().getUserSettings();
+        if (userSettings.getTimeZoneId() == null) {
+            String timeZoneID = getTimeZoneFromIntlApi();
+            if (timeZoneID == null) {
+                TimeZoneInfo detectedZone = TimeZoneComboBox.getByOffset(-getClientOffsetTimeZone());
+                timeZoneID = detectedZone == null ? null : detectedZone.getID();
+            }
+            if (timeZoneID != null) {
+                userSettings.setTimeZoneId(timeZoneID);
+                userSettingsHandler.onSave(userSettings);
+            }
+        }
+    }
+
+    private native String getTimeZoneFromIntlApi() /*-{
+        if (typeof Intl === "undefined" || typeof Intl.DateTimeFormat === "undefined") {
+            return null;
+        }
+
+        format = Intl.DateTimeFormat();
+
+        if (typeof format === "undefined" || typeof format.resolvedOptions === "undefined") {
+            return null;
+        }
+
+        timezone = format.resolvedOptions().timeZone;
+
+        if (timezone && (timezone.indexOf("/") > -1 || timezone === 'UTC')) {
+            return timezone;
+        }
+
+        return null;
+    }-*/;
+
+    private native int getClientOffsetTimeZone() /*-{
+        return new Date().getTimezoneOffset();
+    }-*/;
 
     private MapController.MapHandler mapHandler = new MapController.MapHandler() {
 
@@ -158,12 +199,10 @@ public class Application {
     private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler {
         @Override
         public void onSave(UserSettings userSettings) {
-            ApplicationContext.getInstance().setUserSettings(userSettings);
-            User user = ApplicationContext.getInstance().getUser();
-            Application.getDataService().updateUser(user, new BaseAsyncCallback<User>(i18n) {
+            Application.getDataService().updateUserSettings(userSettings, new BaseAsyncCallback<UserSettings>(i18n) {
                 @Override
-                public void onSuccess(User result) {
-                    ApplicationContext.getInstance().setUser(result);
+                public void onSuccess(UserSettings result) {
+                    ApplicationContext.getInstance().setUserSettings(result);
                 }
             });
         }

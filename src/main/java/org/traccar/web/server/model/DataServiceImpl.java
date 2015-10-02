@@ -315,6 +315,18 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     }
 
     @Transactional
+    @RequireUser
+    @Override
+    public UserSettings updateUserSettings(UserSettings userSettings) throws AccessDeniedException {
+        User user = getSessionUser();
+        if (!user.getUserSettings().equals(userSettings)) {
+            throw new AccessDeniedException();
+        }
+        user.getUserSettings().copyFrom(userSettings);
+        return unproxy(user.getUserSettings());
+    }
+
+    @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override

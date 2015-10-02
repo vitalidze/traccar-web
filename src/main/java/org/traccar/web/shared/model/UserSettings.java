@@ -166,6 +166,16 @@ public class UserSettings implements IsSerializable {
         this.traceInterval = traceInterval;
     }
 
+    private String timeZoneId;
+
+    public String getTimeZoneId() {
+        return timeZoneId;
+    }
+
+    public void setTimeZoneId(String timeZoneId) {
+        this.timeZoneId = timeZoneId;
+    }
+
     @Expose
     private Integer zoomLevel;
     @Expose
@@ -321,5 +331,25 @@ public class UserSettings implements IsSerializable {
             overlays.add(OverlayType.valueOf(s));
         }
         return overlays;
+    }
+
+    public void copyFrom(UserSettings userSettings) {
+        id = userSettings.id;
+        speedUnit = userSettings.speedUnit;
+        timePrintInterval = userSettings.timePrintInterval;
+        traceInterval = userSettings.traceInterval;
+        timeZoneId = userSettings.timeZoneId;
+        zoomLevel = userSettings.zoomLevel;
+        centerLongitude = userSettings.centerLongitude;
+        centerLatitude = userSettings.centerLatitude;
+        mapType = userSettings.mapType;
+        overlays = userSettings.overlays;
+        hideZeroCoordinates = userSettings.hideZeroCoordinates;
+        hideInvalidLocations = userSettings.hideInvalidLocations;
+        hideDuplicates = userSettings.hideDuplicates;
+        minDistance = userSettings.minDistance;
+        speedModifier = userSettings.speedModifier;
+        speedForFilter = userSettings.speedForFilter;
+        archiveMarkerType = userSettings.archiveMarkerType;
     }
 }
