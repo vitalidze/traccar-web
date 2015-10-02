@@ -53,7 +53,8 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                 }
 
                 // check that device is offline
-                if (currentTime.getTime() - device.getLatestPosition().getTime().getTime() >= device.getTimeout() * 1000) {
+                if (currentTime.getTime() - device.getLatestPosition().getTime().getTime() >= device.getTimeout() * 1000
+                        && (device.getLatestPosition().getServerTime() == null || device.getLatestPosition().getServerTime().getTime() >= device.getTimeout() * 1000)) {
                     List<DeviceEvent> offlineEvents = entityManager.get().createQuery("SELECT e FROM DeviceEvent e WHERE e.position=:position AND e.type=:offline")
                             .setParameter("position", device.getLatestPosition())
                             .setParameter("offline", DeviceEventType.OFFLINE)

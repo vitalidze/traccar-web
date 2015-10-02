@@ -18,6 +18,7 @@ package org.traccar.web.server.model;
 import com.floreysoft.jmte.Engine;
 import com.floreysoft.jmte.NamedRenderer;
 import com.floreysoft.jmte.RenderFormatInfo;
+import com.floreysoft.jmte.Renderer;
 import com.google.gson.stream.JsonWriter;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
@@ -147,7 +148,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                         template.setBody(defaultBody(deviceEvent.getType(), applicationSettings.get().getLanguage()));
                     }
 
-                    Engine engine = getTemplateEngine();
+                    Engine engine = getTemplateEngine(getTimeZone(user));
                     Map<String, Object> model = getTemplateModel(deviceEvent);
                     String subject = engine.transform(template.getSubject(), model);
                     String body = engine.transform(template.getBody(), model);
@@ -436,7 +437,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         c.set(Calendar.MINUTE, c.get(Calendar.MINUTE) - 15);
         testPosition.setTime(c.getTime());
 
-        Engine engine = getTemplateEngine();
+        Engine engine = getTemplateEngine(getTimeZone(sessionUser.get()));
         Map<String, Object> model = getTemplateModel(new DeviceEvent(new Date(), testDevice, testPosition, testGeoFence, testMaintenance));
 
         String transformedSubject = engine.transform(template.getSubject(), model);
@@ -460,12 +461,24 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         return model;
     }
 
-    private static Engine getTemplateEngine() {
+    private static TimeZone getTimeZone(User user) {
+        if (user == null || user.getUserSettings() == null || user.getUserSettings().getTimeZoneId() == null) {
+            return TimeZone.getDefault();
+        }
+        String timeZoneId = user.getUserSettings().getTimeZoneId();
+        TimeZone timeZone = TimeZone.getTimeZone(timeZoneId);
+        // TimeZone.getTimeZone will fall back to GMT if no zone found with such ID
+        // Instead of this we will fall back to the server time zone in such case
+        return timeZone.getID().equals(timeZoneId) ? timeZone : TimeZone.getDefault();
+    }
+
+    private static Engine getTemplateEngine(final TimeZone timeZone) {
         Engine engine = new Engine();
         engine.registerNamedRenderer(new NamedRenderer() {
             @Override
             public String render(Object o, String format, Locale locale) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat(format, locale);
+                dateFormat.setTimeZone(timeZone);
                 return dateFormat.format((Date) o);
             }
 
@@ -481,7 +494,18 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
             @Override
             public Class<?>[] getSupportedClasses() {
-                return new Class<?>[] { Date.class };
+                return new Class<?>[]{Date.class};
+            }
+        });
+        engine.registerRenderer(Date.class, new Renderer<Date>() {
+            @Override
+            public String render(Date o, Locale locale) {
+                if (o == null) {
+                    return "";
+                }
+                SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", locale);
+                dateFormat.setTimeZone(timeZone);
+                return dateFormat.format(o);
             }
         });
         return engine;

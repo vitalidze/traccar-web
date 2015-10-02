@@ -134,7 +134,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void testDeleteUserWithNotificationSettings() throws AccessDeniedException {
+    public void testDeleteUserWithNotificationSettings() throws TraccarException {
         Long originalUserId = injector.getProvider(User.class).get().getId();
 
         User user = new User("test", "test");
@@ -153,7 +153,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void testResetPasswordByAdmin() throws AccessDeniedException {
+    public void testResetPasswordByAdmin() throws TraccarException {
         User user = new User("test", "test");
         user = dataService.addUser(user);
 
@@ -166,7 +166,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void testResetPasswordByManager() throws AccessDeniedException {
+    public void testResetPasswordByManager() throws TraccarException {
         User manager = new User("manager", "manager");
         manager.setManager(Boolean.TRUE);
         manager = dataService.addUser(manager);
@@ -220,15 +220,49 @@ public class DataServiceTest {
         assertEquals(MD5.doHash("admin", salt), admin.getPassword());
     }
 
+    @Test
+    public void testDeviceOwner() throws Exception {
+        Long originalUserId = injector.getProvider(User.class).get().getId();
+
+        User user = new User("test", "test");
+        user = dataService.addUser(user);
+
+        Device device = new Device();
+        device.setUniqueId("1");
+        device.setName("D1");
+        device.setMaintenances(Collections.<Maintenance>emptyList());
+        device.setSensors(Collections.<Sensor>emptyList());
+        currentUserId = user.getId();
+        device = dataService.addDevice(device);
+        currentUserId = originalUserId;
+
+        assertEquals(user, device.getOwner());
+        dataService.removeUser(user);
+        runInTransaction(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                Device device = dataService.getDevices().get(0);
+                assertTrue(device.getUsers().isEmpty());
+                assertNull(device.getOwner());
+                return null;
+            }
+        });
+
+    }
+
     private static <V> V runInTransaction(Callable<V> c) throws Exception {
         UnitOfWork unitOfWork = injector.getInstance(UnitOfWork.class);
         unitOfWork.begin();
         EntityManager entityManager = injector.getInstance(EntityManager.class);
         entityManager.getTransaction().begin();
         try {
-            return c.call();
-        } finally {
+            V result = c.call();
             entityManager.getTransaction().commit();
+            return result;
+        } catch (Exception ex) {
+            entityManager.getTransaction().rollback();
+            throw ex;
+        } finally {
             unitOfWork.end();
         }
     }

@@ -187,6 +187,19 @@ public class Device implements IsSerializable {
         this.users = users;
     }
 
+    @GwtTransient
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_owner_id"))
+    private User owner;
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
     @Expose
     @Enumerated(EnumType.STRING)
     private DeviceIconType iconType;

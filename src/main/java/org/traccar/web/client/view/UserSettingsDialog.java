@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.gwt.i18n.client.TimeZoneInfo;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.widget.core.client.form.NumberField;
@@ -30,6 +31,7 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.UserSettingsProperties;
+import org.traccar.web.client.widget.TimeZoneComboBox;
 import org.traccar.web.shared.model.UserSettings;
 
 import com.google.gwt.core.client.GWT;
@@ -73,6 +75,10 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
     @UiField(provided = true)
     ComboBox<UserSettings.SpeedUnit> speedUnit;
+
+    @Ignore
+    @UiField(provided = true)
+    ComboBox<TimeZoneInfo> timeZone;
 
     @UiField
     NumberField<Short> timePrintInterval;
@@ -160,6 +166,8 @@ public class UserSettingsDialog implements Editor<UserSettings> {
         overlayTypeStore = new ListStore<UserSettings.OverlayType>(new EnumKeyProvider<UserSettings.OverlayType>());
         overlayTypeStore.addAll(Arrays.asList(UserSettings.OverlayType.values()));
 
+        timeZone = new TimeZoneComboBox();
+
         uiBinder.createAndBindUi(this);
 
         grid.setSelectionModel(selectionModel);
@@ -178,6 +186,7 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
         driver.initialize(this);
         driver.edit(userSettings);
+        timeZone.setValue(TimeZoneComboBox.getByID(userSettings.getTimeZoneId()));
     }
 
     public void show() {
@@ -197,6 +206,7 @@ public class UserSettingsDialog implements Editor<UserSettings> {
             overlayTypes += (overlayTypes.isEmpty() ? "" : ",") + overlayType.name();
         }
         settings.setOverlays(overlayTypes);
+        settings.setTimeZoneId(timeZone.getValue() == null ? null : timeZone.getValue().getID());
         userSettingsHandler.onSave(settings);
     }
 

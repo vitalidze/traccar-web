@@ -112,6 +112,14 @@ myApp.onPageInit('login-screen', function (page) {
         pageContainer.find('#form-login').trigger('submit');
     });
 
+    if (appState.settings.registrationEnabled) {
+        pageContainer.find('#register').on('click', function () {
+            signIn(pageContainer, true);
+        });
+    } else {
+        pageContainer.find('#register').remove();
+    }
+
     var language = pageContainer.find('#language');
     var sel = language[0];
     var opts = sel.options;
@@ -137,32 +145,36 @@ myApp.onPageInit('login-screen', function (page) {
     pageContainer.find('#form-login').on('submit', function(e) {
         e.preventDefault();
 
-        // removes the iOS keyboard
-        document.activeElement.blur();
-
-        var username = pageContainer.find('input[name="username"]').val();
-        var password = pageContainer.find('input[name="password"]').val();
-
-        if (username.trim().length == 0 || password.trim().length == 0) {
-            myApp.alert(i18n.user_name_and_password_must_not_be_empty);
-            return false;
-        }
-
-        callPost({ method: 'login',
-                   data: [username, password],
-                   success: function(data) {
-                       // save user and his settings to the application state
-                       appState.user = data;
-                       appState.userSettings = data.userSettings;
-
-                       mainView.loadPage('pages/map.html');
-                   },
-                   error: function() { myApp.alert(i18n.user_name_or_password_is_invalid); },
-                   showIndicator: true });
+        signIn(pageContainer, false);
 
         return false;
     });
 });
+
+function signIn(pageContainer, doRegister) {
+    // removes the iOS keyboard
+    document.activeElement.blur();
+
+    var username = pageContainer.find('input[name="username"]').val();
+    var password = pageContainer.find('input[name="password"]').val();
+
+    if (username.trim().length == 0 || password.trim().length == 0) {
+        myApp.alert(i18n.user_name_and_password_must_not_be_empty);
+        return false;
+    }
+
+    callPost({ method: doRegister ? 'register' : 'login',
+        data: [username, password],
+        success: function(data) {
+            // save user and his settings to the application state
+            appState.user = data;
+            appState.userSettings = data.userSettings;
+
+            mainView.loadPage('pages/map.html');
+        },
+        error: function() { myApp.alert(doRegister ? i18n.user_name_already_taken : i18n.user_name_or_password_is_invalid); },
+        showIndicator: true });
+}
 
 // button that opens sidebar menu
 var OpenSideMenuControl = function(opt_options) {
@@ -329,6 +341,18 @@ function loadPositions() {
 
             currentTime = new Date().getTime();
 
+            // push 'selected' position to last place so it will be drawn over other markers
+            for (var i = 0; i < positions.length; i++) {
+                var position = positions[i];
+                prevPosition = appState.latestPositions[position.device.id];
+                if (prevPosition != undefined && prevPosition.selected) {
+                    positions[i] = positions[positions.length - 1];
+                    positions[positions.length - 1] = position;
+                    break;
+                }
+            }
+
+            // draw markers and device details
             for (var i = 0; i < positions.length; i++) {
                 var position = positions[i];
 

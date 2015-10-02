@@ -435,6 +435,57 @@ public class User implements IsSerializable, Cloneable {
         this.phoneNumber = phoneNumber;
     }
 
+    public int getNumberOfDevicesToAdd() {
+        int myNumber;
+        if (getMaxNumOfDevices() == null) {
+            myNumber = Integer.MAX_VALUE;
+        } else {
+            myNumber = getMaxNumOfDevices() - getAllAvailableDevices().size();
+        }
+
+        int managerNumber = getManagedBy() == null ? Integer.MAX_VALUE : getManagedBy().getNumberOfDevicesToAdd();
+        return Math.min(myNumber, managerNumber);
+    }
+
+    public User getUserWhoReachedLimitOnDevicesNumber() {
+        User user = this;
+        while (user != null && user.getNumberOfDevicesToAdd() == 0) {
+            if (user.getManagedBy() != null && user.getManagedBy().getNumberOfDevicesToAdd() > 0) {
+                return user;
+            }
+            user = user.getManagedBy();
+        }
+        return null;
+    }
+
+    public int getNumberOfDevicesToDistribute() {
+        Integer maxNumberOfDevices = getMaxNumOfDevices();
+        User manager = this;
+        while (maxNumberOfDevices == null && manager != null) {
+            maxNumberOfDevices = manager.getMaxNumOfDevices();
+            if (maxNumberOfDevices == null) {
+                manager = manager.getManagedBy();
+            }
+        }
+        if (maxNumberOfDevices == null) {
+            return Integer.MAX_VALUE;
+        }
+        int alreadyDistributedNumberOfDevices = 0;
+        Set<User> users = manager.getManagedUsers();
+        while (!users.isEmpty()) {
+            Set<User> nextLevelUsers = new HashSet<User>();
+            for (User user : users) {
+                if (user.getMaxNumOfDevices() == null) {
+                    nextLevelUsers.addAll(user.getManagedUsers());
+                } else {
+                    alreadyDistributedNumberOfDevices += user.getMaxNumOfDevices();
+                }
+            }
+            users = nextLevelUsers;
+        }
+        return Math.max(0, maxNumberOfDevices - alreadyDistributedNumberOfDevices);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
