@@ -40,6 +40,17 @@
       }
     </style>
 
+    <!-- loading style -->
+    <style type="text/css">
+      #loading {
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        text-align: center;
+        margin-left: -100px;
+      }
+    </style>
   </head>
   <body>
     <noscript>
@@ -48,5 +59,9 @@
         in order for this application to display correctly.
       </div>
     </noscript>
+    <div id="loading">
+      <p id="loading-text">Loading application...</p>
+      <img src="img/ajax-loader.gif" />
+    </div>
   </body>
 </html>
