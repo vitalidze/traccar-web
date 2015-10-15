@@ -223,6 +223,14 @@ myApp.onPageInit('map-screen', function(page) {
 
     // set up layers
     var layers = [];
+    // fall back to 'OSM' if there are no bing key
+    if (appState.userSettings.mapType.indexOf("BING_") == 0 &&
+        (appState.settings.bingMapsKey == undefined ||
+        appState.settings.bingMapsKey == null ||
+        appState.settings.bingMapsKey.length == 0)) {
+        appState.userSettings.mapType = 'OSM';
+    }
+
     if (appState.userSettings.mapType == "OSM") {
         var attribution = new ol.control.Attribution({
             collapsible: false
@@ -243,7 +251,7 @@ myApp.onPageInit('map-screen', function(page) {
 
         layers.push(new ol.layer.Tile({
             source: new ol.source.BingMaps({
-                key: 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F',
+                key: appState.settings.bingMapsKey,
                 imagerySet: style
             })
         }));

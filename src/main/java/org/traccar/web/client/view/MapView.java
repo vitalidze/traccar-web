@@ -109,7 +109,8 @@ public class MapView {
     private void initMapLayers(Map map) {
         for (UserSettings.MapType mapType : UserSettings.MapType.values()) {
             if (mapType.isBing()
-                && ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey() == null) {
+                && (ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey() == null ||
+                    ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey().trim().isEmpty())) {
                 continue;
             }
             map.addLayer(createMap(mapType));
