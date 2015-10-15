@@ -109,6 +109,17 @@ public class ApplicationSettings implements IsSerializable {
         this.salt = salt;
     }
 
+    @Expose
+    private String bingMapsKey;
+
+    public String getBingMapsKey() {
+        return bingMapsKey;
+    }
+
+    public void setBingMapsKey(String bingMapsKey) {
+        this.bingMapsKey = bingMapsKey;
+    }
+
     @Override
     public int hashCode() {
         return (int) (id ^ (id >>> 32));

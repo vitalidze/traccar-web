@@ -79,9 +79,9 @@ public class UserSettings implements IsSerializable {
         GOOGLE_NORMAL("Google Normal"),
         GOOGLE_SATELLITE("Google Satellite"),
         GOOGLE_TERRAIN("Google Terrain"),
-        BING_ROAD("Bing Road"),
-        BING_HYBRID("Bing Hybrid"),
-        BING_AERIAL("Bing Aerial"),
+        BING_ROAD("Bing Road") { @Override public boolean isBing() { return true; } },
+        BING_HYBRID("Bing Hybrid") { @Override public boolean isBing() { return true; } },
+        BING_AERIAL("Bing Aerial") { @Override public boolean isBing() { return true; } },
         MAPQUEST_ROAD("MapQuest Road"),
         MAPQUEST_AERIAL("MapQuest Aerial"),
         STAMEN_TONER("Stamen Toner");
@@ -96,8 +96,8 @@ public class UserSettings implements IsSerializable {
             return name;
         }
 
-        public String getBingKey() {
-            return "AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F";
+        public boolean isBing() {
+            return false;
         }
     }
 

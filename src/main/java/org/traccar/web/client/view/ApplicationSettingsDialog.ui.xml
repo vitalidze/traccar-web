@@ -64,6 +64,13 @@
             </form:widget>
         </form:FieldLabel>
       </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:FieldLabel text="{i18n.bingMapsKey}" labelWidth="210">
+            <form:widget>
+                <form:TextField ui:field="bingMapsKey" />
+            </form:widget>
+        </form:FieldLabel>
+      </container:child>
     </container:VerticalLayoutContainer>
       
     <gxt:button>

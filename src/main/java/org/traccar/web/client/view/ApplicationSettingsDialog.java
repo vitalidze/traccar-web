@@ -17,9 +17,7 @@ package org.traccar.web.client.view;
 
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.widget.core.client.form.NumberField;
-import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
-import com.sencha.gxt.widget.core.client.form.ComboBox;
+import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.model.ApplicationSettingsProperties;
@@ -37,7 +35,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.form.CheckBox;
 import org.traccar.web.shared.model.PasswordHashMethod;
 import org.traccar.web.shared.model.UserSettings;
 
@@ -84,6 +81,9 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
 
     @UiField(provided = true)
     ComboBox<String> language;
+
+    @UiField
+    TextField bingMapsKey;
 
     public ApplicationSettingsDialog(ApplicationSettings applicationSettings, ApplicationSettingsHandler applicationSettingsHandler) {
         this.applicationSettingsHandler = applicationSettingsHandler;

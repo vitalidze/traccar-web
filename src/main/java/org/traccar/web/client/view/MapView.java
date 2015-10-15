@@ -108,6 +108,11 @@ public class MapView {
 
     private void initMapLayers(Map map) {
         for (UserSettings.MapType mapType : UserSettings.MapType.values()) {
+            if (mapType.isBing()
+                && (ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey() == null ||
+                    ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey().trim().isEmpty())) {
+                continue;
+            }
             map.addLayer(createMap(mapType));
         }
     }
@@ -137,11 +142,11 @@ public class MapView {
                 gTerrainOptions.setType(GoogleV3MapType.G_TERRAIN_MAP);
                 return new GoogleV3(mapType.getName(), gTerrainOptions);
             case BING_ROAD:
-                return new Bing(new BingOptions(mapType.getName(), mapType.getBingKey(), BingType.ROAD));
+                return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.ROAD));
             case BING_HYBRID:
-                return new Bing(new BingOptions(mapType.getName(), mapType.getBingKey(), BingType.HYBRID));
+                return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.HYBRID));
             case BING_AERIAL:
-                return new Bing(new BingOptions(mapType.getName(), mapType.getBingKey(), BingType.AERIAL));
+                return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.AERIAL));
             case MAPQUEST_ROAD:
             case MAPQUEST_AERIAL:
                 XYZOptions mqOptions = new XYZOptions();
