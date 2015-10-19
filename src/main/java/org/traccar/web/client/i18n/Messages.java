@@ -414,4 +414,12 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String bingMapsKey();
 
     String reports();
+
+    String report();
+
+    String timePeriod();
+
+    String generate();
+
+    String newReport();
 }

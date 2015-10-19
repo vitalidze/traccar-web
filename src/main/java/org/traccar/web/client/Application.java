@@ -58,6 +58,7 @@ public class Application {
     private final GeoFenceController geoFenceController;
     private final MapController mapController;
     private final ArchiveController archiveController;
+    private final ReportsController reportsController;
 
     private ApplicationView view;
 
@@ -76,7 +77,8 @@ public class Application {
                 geoFenceController.getGeoFenceStore(),
                 geoFenceController.getDeviceGeoFences(),
                 this);
-        archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
+        reportsController = new ReportsController(deviceController.getDeviceStore(), geoFenceController.getGeoFenceStore());
+        archiveController = new ArchiveController(archiveHandler, userSettingsHandler, reportsController, deviceController.getDeviceStore());
 
         view = new ApplicationView(
                 deviceController.getView(), mapController.getView(), archiveController.getView());

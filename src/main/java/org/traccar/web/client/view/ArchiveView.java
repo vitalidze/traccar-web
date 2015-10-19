@@ -98,7 +98,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     ComboBox<Device> deviceCombo;
 
 	@UiField(provided = true)
-	ComboBox<String> periodCombo;
+	PeriodComboBox periodCombo;
 
     @UiField
     CheckBox disableFilter;
@@ -141,13 +141,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
 
 		periodCombo = new PeriodComboBox();
-		periodCombo.select(1);
-        periodCombo.addSelectionHandler(new SelectionHandler<String>() {
-            @Override
-            public void onSelection(SelectionEvent<String> event) {
-                setDateTimefd(periodCombo.getStore().indexOf(event.getSelectedItem()));
-            }
-        });
 
         // Element that displays the current track color
         styleButtonTrackColor = new TextButton();
@@ -214,6 +207,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         fromTime.setValue(from);
         toDate.setValue(to);
         toTime.setValue(to);
+
+        periodCombo.init(fromDate, fromTime, toDate, toTime);
     }
 
     @Override
@@ -378,16 +373,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     public void onSnapToRoadsClicked(ValueChangeEvent<Boolean> event) {
         archiveHandler.onSnapToRoads(snapToRoads.getValue());
     }
-
-	private void setDateTimefd(int index){
-		if (index != 6){
-            PeriodComboBox combo = (PeriodComboBox) periodCombo;
-			fromTime.setValue(combo.getStartPeriod(index));
-			fromDate.setValue(combo.getStartPeriod(index));
-			toDate.setValue(combo.getEndOfPeriod(index));
-			toTime.setValue(combo.getEndOfPeriod(index));
-		}
-	}
 
     @UiHandler("reportsButton")
     public void onReportsClicked(SelectEvent event) {

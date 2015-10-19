@@ -48,6 +48,10 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
         void onDrawTrack(Track track);
     }
 
+    public interface ReportsHandler {
+        void onShowReports();
+    }
+
     private final ArchiveHandler archiveHandler;
 
     private final UserSettingsDialog.UserSettingsHandler userSettingsHandler;
@@ -60,10 +64,15 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     private final Map<Long, Track> originalTracks;
     private final Map<Long, Track> snappedTracks;
     private final ListStore<Device> deviceStore;
+    private final ReportsHandler reportsHandler;
 
-    public ArchiveController(ArchiveHandler archiveHandler, UserSettingsDialog.UserSettingsHandler userSettingsHandler, ListStore<Device> deviceStore) {
+    public ArchiveController(ArchiveHandler archiveHandler,
+                             UserSettingsDialog.UserSettingsHandler userSettingsHandler,
+                             ReportsHandler reportsHandler,
+                             ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;
         this.userSettingsHandler = userSettingsHandler;
+        this.reportsHandler = reportsHandler;
         this.archiveView = new ArchiveView(this, deviceStore);
         this.originalTracks = new HashMap<Long, Track>();
         this.snappedTracks = new HashMap<Long, Track>();
@@ -252,6 +261,6 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
 
     @Override
     public void onShowReports() {
-        new ReportsDialog().show();
+        reportsHandler.onShowReports();
     }
 }
