@@ -412,4 +412,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String timeZone();
 
     String bingMapsKey();
+
+    String reports();
 }

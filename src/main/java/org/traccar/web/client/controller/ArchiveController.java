@@ -28,6 +28,7 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.view.ArchiveView;
 import org.traccar.web.client.view.FilterDialog;
+import org.traccar.web.client.view.ReportsDialog;
 import org.traccar.web.client.view.UserSettingsDialog;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -247,5 +248,10 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
         } catch (RequestException re) {
             GWT.log("Request failed", re);
         }
+    }
+
+    @Override
+    public void onShowReports() {
+        new ReportsDialog().show();
     }
 }

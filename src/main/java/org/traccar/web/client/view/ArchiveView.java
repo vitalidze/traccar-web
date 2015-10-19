@@ -68,6 +68,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         void onFilterSettings();
         void onClear(Device device);
         void onChangeArchiveMarkerType(PositionIconType newMarkerType);
+        void onShowReports();
     }
 
     private ArchiveHandler archiveHandler;
@@ -387,4 +388,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 			toTime.setValue(combo.getEndOfPeriod(index));
 		}
 	}
+
+    @UiHandler("reportsButton")
+    public void onReportsClicked(SelectEvent event) {
+        archiveHandler.onShowReports();
+    }
 }
