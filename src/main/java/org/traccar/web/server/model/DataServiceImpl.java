@@ -88,10 +88,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     }
 
     @Transactional
-    @RequireUser
     @Override
     public User authenticated() {
-        return fillUserSettings(new User(getSessionUser()));
+        return getSessionUser() == null ? null : fillUserSettings(new User(getSessionUser()));
     }
 
     @Transactional
