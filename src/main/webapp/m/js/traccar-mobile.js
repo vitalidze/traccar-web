@@ -94,10 +94,14 @@ callGet({ method: 'getApplicationSettings', success: function(appSettings) { app
 // check authentication
 callGet({ method: 'authenticated',
           success: function(data) {
-              // save user and his settings to the application state
-              appState.user = data;
-              appState.userSettings = data.userSettings;
-              mainView.loadPage({url: 'pages/map.html', animatePages: false});
+              if (data == null) {
+                  mainView.loadPage({url: 'pages/login.html', animatePages: false});
+              } else {
+                  // save user and his settings to the application state
+                  appState.user = data;
+                  appState.userSettings = data.userSettings;
+                  mainView.loadPage({url: 'pages/map.html', animatePages: false});
+              }
           },
           error: function() { mainView.loadPage({url: 'pages/login.html', animatePages: false}); }
         });
@@ -440,7 +444,9 @@ function loadDevices() {
                     success: function() {
                         myApp.closePanel();
                         mainView.loadPage('pages/login.html');
+                        var appSettings = appState.settings;
                         appState = {};
+                        appState.settings = appSettings;
                         $$('#map').html('');
                     },
                     error: function() {
