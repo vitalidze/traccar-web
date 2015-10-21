@@ -66,6 +66,7 @@ public class Position implements IsSerializable, Cloneable {
         power = position.power;
         address = position.address;
         other = position.other;
+        distance = position.distance;
     }
 
     @Expose

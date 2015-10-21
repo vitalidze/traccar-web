@@ -195,16 +195,14 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     private void loadSnappedPointsAndShowTrack(final Device device) {
         final Track track = originalTracks.get(device.getId());
 
-        final NumberFormat lonLatFormat = NumberFormat.getFormat("0.000000");
-
         final List<Position> originalPositions = track.getPositions();
         StringBuilder body = new StringBuilder("");
         for (Position position : originalPositions) {
             if (body.length() > 0) {
                 body.append('&');
             }
-            body.append("loc=").append(lonLatFormat.format(position.getLatitude()))
-                    .append(',').append(lonLatFormat.format(position.getLongitude()))
+            body.append("loc=").append(formatLonLat(position.getLatitude()))
+                    .append(',').append(formatLonLat(position.getLongitude()))
                     .append("&t=").append(position.getTime().getTime() / 1000);
         }
 
@@ -258,6 +256,10 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
             GWT.log("Request failed", re);
         }
     }
+
+    static native String formatLonLat(double lonLat) /*-{
+        return lonLat.toFixed(6);
+    }-*/;
 
     @Override
     public void onShowReports() {
