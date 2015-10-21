@@ -21,12 +21,30 @@
   </ui:with>
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="timePeriodLayoutData">
-    <ui:attributes width="-1" height="80" />
+    <ui:attributes width="1" height="80" />
   </ui:with>
 
-  <!-- ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
-    <ui:attributes width="1" height="-1" />
-  </ui:with -->
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="margins0">
+    <ui:attributes top="0" right="0" bottom="0" left="0" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="margins0500">
+    <ui:attributes top="0" right="5" bottom="0" left="0" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.core.client.util.Padding" field="padding5">
+    <ui:attributes top="5" right="5" bottom="5" left="5" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData" field="boxLayoutDataMargins0500Flex1">
+    <ui:attributes margins="{margins0500}" flex="1" />
+  </ui:with>
+  <ui:with type="com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData" field="boxLayoutDataMargins0Flex3">
+    <ui:attributes margins="{margins0}" flex="3" />
+  </ui:with>
+  <ui:with type="com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData" field="boxLayoutDataMargins0500Flex3">
+    <ui:attributes margins="{margins0500}" flex="3" />
+  </ui:with>
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutData">
     <ui:attributes width="-1" height="220" />
@@ -36,25 +54,20 @@
     <ui:attributes width="-1" height="220" />
   </ui:with>
 
-  <!-- ui:with type="com.sencha.gxt.data.shared.ListStore" field="sensorStore" />
-  <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
+  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="geoFenceStore" />
 
-  <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view">
-    <ui:attributes stripeRows="true" autoFill="true" />
-  </ui:with -->
-
-    <ui:with type="com.sencha.gxt.data.shared.ListStore" field="geoFenceStore" />
-
-    <ui:with type="com.sencha.gxt.data.shared.ListStore" field="deviceStore" />
-
+  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="deviceStore" />
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <ui:style>
-        .pad3 {
-            padding: 3px 3px 0px 3px;
-        }
-    </ui:style>
+  <ui:style>
+    .pad3 {
+        padding: 3px 3px 0px 3px;
+    }
+    .pad5 {
+        padding: 5px 5px 0px 5px;
+    }
+  </ui:style>
 
   <gxt:Window ui:field="window" pixelSize="700, 500" modal="true" headingText="{i18n.reports}">
     <container:VerticalLayoutContainer>
@@ -66,8 +79,8 @@
             </toolbar:ToolBar>
         </container:child>
         <container:child layoutData="{reportParamsLayoutData}">
-            <container:HorizontalLayoutContainer>
-                <container:child layoutData="{horizontalLayoutData}">
+            <container:HBoxLayoutContainer padding="{padding5}" hBoxLayoutAlign="STRETCH">
+                <container:child layoutData="{boxLayoutDataMargins0500Flex1}">
                     <gxt:ContentPanel headingText="{i18n.report}" bodyStyleName="{style.pad3}">
                         <container:VerticalLayoutContainer>
                             <container:child layoutData="{verticalLayoutData}">
@@ -87,24 +100,20 @@
                         </container:VerticalLayoutContainer>
                     </gxt:ContentPanel>
                 </container:child>
-                <container:child layoutData="{horizontalLayoutData}">
+                <container:child layoutData="{boxLayoutDataMargins0500Flex3}">
                     <gxt:ContentPanel headingText="{i18n.devices}" bodyStyleName="{style.pad3}">
-                        <container:VerticalLayoutContainer>
-                            <gxt:ListView ui:field="deviceList" store="{deviceStore}" />
-                        </container:VerticalLayoutContainer>
+                        <gxt:ListView ui:field="deviceList" store="{deviceStore}" />
                     </gxt:ContentPanel>
                 </container:child>
-                <container:child layoutData="{horizontalLayoutData}">
+                <container:child layoutData="{boxLayoutDataMargins0Flex3}">
                     <gxt:ContentPanel headingText="{i18n.geoFence}" bodyStyleName="{style.pad3}">
-                        <container:VerticalLayoutContainer>
-                            <gxt:ListView ui:field="geoFenceList" store="{geoFenceStore}" />
-                        </container:VerticalLayoutContainer>
+                        <gxt:ListView ui:field="geoFenceList" store="{geoFenceStore}" />
                     </gxt:ContentPanel>
                 </container:child>
-            </container:HorizontalLayoutContainer>
+            </container:HBoxLayoutContainer>
         </container:child>
         <container:child layoutData="{timePeriodLayoutData}">
-            <gxt:FramedPanel headingText="{i18n.timePeriod}" bodyStyleName="{style.pad3}">
+            <gxt:ContentPanel headingText="{i18n.timePeriod}" bodyStyleName="{style.pad3}" styleName="{style.pad5}">
                 <container:VerticalLayoutContainer layoutData="{toolBarRowData}">
                     <toolbar:ToolBar>
                         <form:ComboBox ui:field="periodCombo" editable="false" triggerAction="ALL" />
@@ -121,7 +130,7 @@
                         <form:TimeField width="75" ui:field="toTime" triggerAction="ALL" />
                     </toolbar:ToolBar>
                 </container:VerticalLayoutContainer>
-            </gxt:FramedPanel>
+            </gxt:ContentPanel>
         </container:child>
       <!-- container:child layoutData="{verticalLayoutData}">
         <gxt:ContentPanel ui:field="contentPanel" headerVisible="false">
