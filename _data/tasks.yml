@@ -1,0 +1,43 @@
+- id: reports
+  description: Possibility to generate reports.
+  tickets: [146, 158, 210, 276]
+
+- id: neptune_theme
+  description: Switch interface to neptune theme so it will look very close to the original traccar v3.0
+  tickets: []
+
+- id: icons_and_text_color_for_custom_interval
+  description: Add an option for the sensors custom intervals to define icon and/or text color.
+  tickets: [207, 291]
+
+- id: direction_on_map
+  description: Display direction of device on map. This should work both in archive and in live data.
+  tickets: [159]
+
+- id: events_and_notifications_on_overspeed_idle_and_movement
+  description: "Add new event types: 'overspeed', 'idle' and 'movement'. Activity of device can be detected based on many factors, such as sensors, coordinates change and speed."
+  tickets: [25, 95]
+
+- id: remember_me
+  description: Add check box 'Remember me', which will allow to save session for mobile devices and survive application server restarts
+  tickets: [174]
+
+- id: hide_inactive_offline_devices
+  description: Create an option to hide inactive and/or offline devices from map.
+  tickets: [118, 205]
+
+- id: remove_label_from_marker
+  description: Add a new setting to the device (or all devices) - 'hide label from marker on map'.
+  tickets: [209]
+
+- id: measurement_tools
+  description: Add a way to measure distance with tools on map.
+  tickets: [151]
+
+- id: auto_color_for_archive
+  description: Choose color for tracks in archive automatically. This should ne optional and must choose unique color that is not yet used for already drawn tracks.
+  tickets: [179]
+
+- id: send_commands
+  description: Version 3.1 of traccar support sending of commands. But it is not working from this mod. The support will be added after v3.2 of traccar is released.
+  tickets: []

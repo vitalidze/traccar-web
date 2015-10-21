@@ -1,0 +1,47 @@
+---
+layout: default
+title: Roadmap
+---
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<div class="container">
+    <h3>Tasks</h3>
+    <p>Below is the list of the planned tasks. You can vote for the tasks using facebook.</p>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Description</th>
+            <th>Ticket(s)</th>
+            <th>Vote</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for task in site.data.tasks %}
+        <tr>
+            <td>{{task.description}}</td>
+            <td>
+                {% for ticketid in task.tickets %}
+                <a href="https://github.com/vitalidze/traccar-web/issues/{{ticketid}}">{{ticketid}}</a>
+                {% endfor %}
+            </td>
+            <td>
+                <div class="fb-like"
+                     data-href="http://traccar.litvak.su/roadmap/{{task.id}}.html"
+                     data-layout="button_count"
+                     data-action="like"
+                     data-show-faces="false"
+                     data-share="false"></div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
