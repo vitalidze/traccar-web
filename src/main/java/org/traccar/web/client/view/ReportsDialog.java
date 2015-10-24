@@ -26,17 +26,20 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.form.*;
+import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
+import com.sencha.gxt.widget.core.client.grid.ColumnModel;
+import com.sencha.gxt.widget.core.client.grid.Grid;
+import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.GeoFenceProperties;
 import org.traccar.web.client.model.ReportProperties;
 import org.traccar.web.client.widget.PeriodComboBox;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.GeoFence;
-import org.traccar.web.shared.model.GeoFenceType;
-import org.traccar.web.shared.model.ReportType;
+import org.traccar.web.shared.model.*;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ReportsDialog {
     private static ReportsDialogDialogUiBinder uiBinder = GWT.create(ReportsDialogDialogUiBinder.class);
@@ -46,6 +49,15 @@ public class ReportsDialog {
 
     @UiField
     Window window;
+
+    @UiField
+    Grid<Report> grid;
+
+    @UiField(provided = true)
+    ColumnModel<Report> columnModel;
+
+    @UiField(provided = true)
+    ListStore<Report> reportStore;
 
     @UiField
     TextField name;
@@ -80,7 +92,17 @@ public class ReportsDialog {
     @UiField
     TimeField toTime;
 
+    @UiField(provided = true)
+    Messages i18n = GWT.create(Messages.class);
+
     public ReportsDialog(ListStore<Device> deviceStore, ListStore<GeoFence> geoFenceStore) {
+        ReportProperties reportProperties = GWT.create(ReportProperties.class);
+
+        List<ColumnConfig<Report, ?>> columnConfigList = new LinkedList<ColumnConfig<Report, ?>>();
+        columnConfigList.add(new ColumnConfig<Report, String>(reportProperties.name(), 25, i18n.name()));
+        columnConfigList.add(new ColumnConfig<Report, ReportType>(reportProperties.type(), 25, i18n.type()));
+        columnModel = new ColumnModel<Report>(columnConfigList);
+
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         this.deviceStore = deviceStore;
         this.deviceList = new ListView<Device, String>(deviceStore, deviceProperties.name());

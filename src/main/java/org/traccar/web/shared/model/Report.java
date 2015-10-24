@@ -17,6 +17,7 @@ package org.traccar.web.shared.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gwt.user.client.rpc.GwtTransient;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -25,7 +26,7 @@ import java.util.Set;
 @Entity
 @Table(name = "reports",
         indexes = { @Index(name = "reports_pkey", columnList = "id") })
-public class Report {
+public class Report implements IsSerializable {
     @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -16,6 +16,10 @@
     <ui:attributes width="1" height="-1" />
   </ui:with>
 
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="reportsGridLayoutData">
+    <ui:attributes width="1" height="225" />
+  </ui:with>
+
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="reportParamsLayoutData">
     <ui:attributes width="1" height="225" />
   </ui:with>
@@ -54,6 +58,13 @@
     <ui:attributes width="-1" height="220" />
   </ui:with>
 
+  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="reportStore" />
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
+
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view">
+    <ui:attributes stripeRows="true" autoFill="true" />
+  </ui:with>
+
   <ui:with type="com.sencha.gxt.data.shared.ListStore" field="geoFenceStore" />
 
   <ui:with type="com.sencha.gxt.data.shared.ListStore" field="deviceStore" />
@@ -77,6 +88,9 @@
                 <button:TextButton ui:field="saveButton" text="{i18n.save}" />
                 <button:TextButton ui:field="generateButton" text="{i18n.generate}" />
             </toolbar:ToolBar>
+        </container:child>
+        <container:child layoutData="{reportsGridLayoutData}">
+            <grid:Grid ui:field="grid" store="{reportStore}" cm="{columnModel}" view="{view}" />
         </container:child>
         <container:child layoutData="{reportParamsLayoutData}">
             <container:HBoxLayoutContainer padding="{padding5}" hBoxLayoutAlign="STRETCH">
@@ -132,22 +146,7 @@
                 </container:VerticalLayoutContainer>
             </gxt:ContentPanel>
         </container:child>
-      <!-- container:child layoutData="{verticalLayoutData}">
-        <gxt:ContentPanel ui:field="contentPanel" headerVisible="false">
-          <container:VerticalLayoutContainer>
-            <container:child layoutData="{verticalLayoutData}">
-              <grid:Grid ui:field="grid" store="{sensorStore}" cm="{columnModel}" view="{view}" />
-            </container:child>
-          </container:VerticalLayoutContainer>
-        </gxt:ContentPanel>
-      </container:child -->
     </container:VerticalLayoutContainer>
-      <!-- gxt:button>
-          <button:TextButton ui:field="saveButton" text="{i18n.save}" />
-      </gxt:button>
-      <gxt:button>
-          <button:TextButton ui:field="cancelButton" text="{i18n.cancel}" />
-      </gxt:button -->
   </gxt:Window>
 
 </ui:UiBinder>

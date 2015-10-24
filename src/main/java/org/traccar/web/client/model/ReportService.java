@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.shared.model;
+package org.traccar.web.client.model;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.google.gwt.user.client.rpc.RemoteService;
+import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import org.traccar.web.shared.model.Report;
 
-public enum ReportType implements IsSerializable {
-    GENERAL_INFORMATION,
-    DRIVES_AND_STOPS,
-    OVERSPEEDS,
-    GEO_FENCE_IN_OUT;
+import java.util.List;
+
+@RemoteServiceRelativePath("reportService")
+public interface ReportService extends RemoteService {
+    List<Report> getReports();
+    Report addReport(Report report);
+    Report updateReport(Report report);
+    void removeReport(Report report);
 }
