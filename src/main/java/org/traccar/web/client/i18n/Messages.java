@@ -15,10 +15,7 @@
  */
 package org.traccar.web.client.i18n;
 
-import org.traccar.web.shared.model.DeviceEventType;
-import org.traccar.web.shared.model.GeoFenceType;
-import org.traccar.web.shared.model.MessagePlaceholder;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
 public interface Messages extends com.google.gwt.i18n.client.Messages {
     String authentication();
@@ -422,4 +419,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String generate();
 
     String newReport();
+
+    String reportType(@Select ReportType type);
 }

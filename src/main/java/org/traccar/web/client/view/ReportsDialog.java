@@ -21,15 +21,20 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.form.*;
 import org.traccar.web.client.model.DeviceProperties;
+import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.GeoFenceProperties;
+import org.traccar.web.client.model.ReportProperties;
 import org.traccar.web.client.widget.PeriodComboBox;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.GeoFenceType;
+import org.traccar.web.shared.model.ReportType;
 
 import java.util.Arrays;
 
@@ -46,7 +51,7 @@ public class ReportsDialog {
     TextField name;
 
     @UiField(provided = true)
-    ComboBox<String> type;
+    ComboBox<ReportType> type;
 
     @UiField(provided = true)
     final ListStore<Device> deviceStore;
@@ -84,7 +89,13 @@ public class ReportsDialog {
         this.geoFenceStore = geoFenceStore;
         this.geoFenceList = new ListView<GeoFence, String>(geoFenceStore, geoFenceProperties.name());
 
-        type = new StringComboBox(Arrays.asList("General information"));
+        ListStore<ReportType> geoFenceTypeStore = new ListStore<ReportType>(
+                new EnumKeyProvider<ReportType>());
+        geoFenceTypeStore.addAll(Arrays.asList(ReportType.values()));
+        type = new ComboBox<ReportType>(
+                geoFenceTypeStore, new ReportProperties.ReportTypeLabelProvider());
+        type.setForceSelection(true);
+        type.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
 
         periodCombo = new PeriodComboBox();
 
