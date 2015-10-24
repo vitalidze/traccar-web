@@ -106,6 +106,17 @@ public class Report {
         this.geoFences = geoFences;
     }
 
+    @Enumerated(EnumType.STRING)
+    private Period period;
+
+    public Period getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(Period period) {
+        this.period = period;
+    }
+
     @Expose
     @Temporal(TemporalType.TIMESTAMP)
     private Date fromDate;
