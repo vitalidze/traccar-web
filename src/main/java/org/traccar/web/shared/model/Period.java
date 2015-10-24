@@ -15,11 +15,12 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
 
 import java.util.Date;
 
-public enum Period {
+public enum Period implements IsSerializable {
     TODAY {
         @Override
         public Date getStartDate() {
@@ -118,7 +119,7 @@ public enum Period {
     }
 
     static Date addMonths(Date date, int months) {
-        CalendarUtil.addMonthsToDate(date, 1);
+        CalendarUtil.addMonthsToDate(date, months);
         return date;
     }
 
