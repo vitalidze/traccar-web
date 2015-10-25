@@ -16,8 +16,10 @@
 package org.traccar.web.client.model;
 
 import org.traccar.web.shared.model.ApplicationSettings;
+import org.traccar.web.shared.model.PasswordHashMethod;
 
 import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 
@@ -27,4 +29,18 @@ public interface ApplicationSettingsProperties extends PropertyAccess<Applicatio
 
     ValueProvider<ApplicationSettings, Boolean> registrationEnabled();
 
+    ValueProvider<ApplicationSettings, Short> updateInterval();
+
+    ValueProvider<ApplicationSettings, Boolean> disallowDeviceManagementByUsers();
+
+    ValueProvider<ApplicationSettings, Boolean> eventRecordingEnabled();
+
+    ValueProvider<ApplicationSettings, String> bingMapsKey();
+
+    class PasswordHashMethodLabelProvider implements LabelProvider<PasswordHashMethod> {
+        @Override
+        public String getLabel(PasswordHashMethod item) {
+            return item.getName();
+        }
+    }
 }

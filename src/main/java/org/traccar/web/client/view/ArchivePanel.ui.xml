@@ -1,0 +1,43 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+        xmlns:ui="urn:ui:com.google.gwt.uibinder"
+        xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+        xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+        xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
+        xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
+        xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+        xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+        xmlns:menu="urn:import:com.sencha.gxt.widget.core.client.menu">
+
+    <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="toolBarRowData">
+        <ui:attributes width="1" height="-1" />
+    </ui:with>
+    <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="layoutData">
+        <ui:attributes width="1" height="1" />
+    </ui:with>
+
+    <ui:with type="com.sencha.gxt.data.shared.ListStore" field="positionStore" />
+    <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
+
+    <ui:with type="com.sencha.gxt.widget.core.client.grid.LiveGridView" field="view">
+        <ui:attributes stripeRows="true" autoFill="true" />
+    </ui:with>
+
+    <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
+
+    <container:VerticalLayoutContainer ui:field="contentPanel">
+        <container:child layoutData="{layoutData}">
+            <grid:Grid ui:field="grid" store="{positionStore}" cm="{columnModel}" view="{view}" stateful="true" stateId="archiveGrid" />
+        </container:child>
+        <container:child layoutData="{toolBarRowData}">
+            <toolbar:ToolBar>
+                <toolbar:FillToolItem />
+                <toolbar:LabelToolItem label="{i18n.distance}:" />
+                <toolbar:LabelToolItem ui:field="totalDistance" label="0" width="80" />
+                <toolbar:LabelToolItem label="{i18n.speed}:" />
+                <toolbar:LabelToolItem ui:field="averageSpeed" label="0" width="80" />
+            </toolbar:ToolBar>
+        </container:child>
+    </container:VerticalLayoutContainer>
+</ui:UiBinder>

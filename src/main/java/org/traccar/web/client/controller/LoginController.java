@@ -15,17 +15,25 @@
  */
 package org.traccar.web.client.controller;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.RootPanel;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.view.LoginDialog;
 import org.traccar.web.shared.model.User;
 
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import org.traccar.web.shared.model.UserBlockedException;
+import org.traccar.web.shared.model.UserExpiredException;
 
 public class LoginController implements LoginDialog.LoginHandler {
 
     private LoginDialog dialog;
+
+    private Messages i18n = GWT.create(Messages.class);
 
     public interface LoginHandler {
         public void onLogin();
@@ -36,23 +44,29 @@ public class LoginController implements LoginDialog.LoginHandler {
     public void login(final LoginHandler loginHandler) {
         this.loginHandler = loginHandler;
 
-        Application.getDataService().authenticated(new BaseAsyncCallback<User>() {
+        Application.getDataService().authenticated(new BaseAsyncCallback<User>(i18n) {
             @Override
             public void onSuccess(User result) {
-                ApplicationContext.getInstance().setUser(result);
-                loginHandler.onLogin();
+                if (result == null) {
+                    dialog = new LoginDialog(LoginController.this);
+                    hideLoadingDiv();
+                    dialog.show();
+                } else {
+                    ApplicationContext.getInstance().setUser(result);
+                    hideLoadingDiv();
+                    loginHandler.onLogin();
+                }
             }
-            @Override
-            public void onFailure(Throwable caught) {
-                dialog = new LoginDialog(LoginController.this);
-                dialog.show();
+
+            void hideLoadingDiv() {
+                RootPanel.getBodyElement().removeChild(DOM.getElementById("loading"));
             }
         });
     }
 
     private boolean validate(String login, String password) {
         if (login == null || login.isEmpty() || password == null || password.isEmpty()) {
-            new AlertMessageBox("Error", "User name and password must not be empty").show();
+            new AlertMessageBox(i18n.error(), i18n.errUsernameOrPasswordEmpty()).show();
             return false;
         }
         return true;
@@ -61,7 +75,7 @@ public class LoginController implements LoginDialog.LoginHandler {
     @Override
     public void onLogin(String login, String password) {
         if (validate(login, password)) {
-            Application.getDataService().login(login, password, new BaseAsyncCallback<User>() {
+            Application.getDataService().login(login, password, new BaseAsyncCallback<User>(i18n) {
                 @Override
                 public void onSuccess(User result) {
                     ApplicationContext.getInstance().setUser(result);
@@ -72,7 +86,13 @@ public class LoginController implements LoginDialog.LoginHandler {
                 }
                 @Override
                 public void onFailure(Throwable caught) {
-                    new AlertMessageBox("Error", "User name or password is invalid").show();
+                    if (caught instanceof UserBlockedException) {
+                        new AlertMessageBox(i18n.error(), i18n.errUserAccountBlocked()).show();
+                    } else if (caught instanceof UserExpiredException) {
+                        new AlertMessageBox(i18n.error(), i18n.errUserAccountExpired()).show();
+                    } else {
+                        new AlertMessageBox(i18n.error(), i18n.errInvalidUsernameOrPassword()).show();
+                    }
                 }
             });
         }
@@ -81,7 +101,7 @@ public class LoginController implements LoginDialog.LoginHandler {
     @Override
     public void onRegister(String login, String password) {
         if (validate(login, password)) {
-            Application.getDataService().register(login, password, new BaseAsyncCallback<User>() {
+            Application.getDataService().register(login, password, new BaseAsyncCallback<User>(i18n) {
                 @Override
                 public void onSuccess(User result) {
                     ApplicationContext.getInstance().setUser(result);
@@ -92,7 +112,7 @@ public class LoginController implements LoginDialog.LoginHandler {
                 }
                 @Override
                 public void onFailure(Throwable caught) {
-                    new AlertMessageBox("Error", "Username is already taken").show();
+                    new AlertMessageBox(i18n.error(), i18n.errUsernameTaken()).show();
                 }
             });
         }

@@ -1,62 +1,102 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder
-    xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
-    xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
-    xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
-    xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
-    xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
-    xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form">
+        xmlns:ui="urn:ui:com.google.gwt.uibinder"
+        xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+        xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+        xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
+        xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
+        xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+        xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+        xmlns:menu="urn:import:com.sencha.gxt.widget.core.client.menu">
 
-  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="toolBarRowData">
-    <ui:attributes width="1" height="-1" />
-  </ui:with>
-  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="layoutData">
-    <ui:attributes width="1" height="1" />
-  </ui:with>
+    <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="toolBarRowData">
+        <ui:attributes width="1" height="-1" />
+    </ui:with>
+    <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="layoutData">
+        <ui:attributes width="1" height="1" />
+    </ui:with>
 
-  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="positionStore" />
-  <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
+    <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view">
-    <ui:attributes stripeRows="true" autoFill="true" />
-  </ui:with>
+    <gxt:ContentPanel ui:field="contentPanel" headingText="{i18n.archive}">
+        <container:VerticalLayoutContainer>
 
-  <gxt:ContentPanel ui:field="contentPanel" headingText="Archive">
-    <container:VerticalLayoutContainer>
+            <container:child layoutData="{toolBarRowData}">
+                <toolbar:ToolBar>
 
-      <container:child layoutData="{toolBarRowData}">
-        <toolbar:ToolBar>
+                    <toolbar:LabelToolItem label="{i18n.device}:" />
+                    <form:ComboBox ui:field="deviceCombo" editable="false" triggerAction="ALL" />
+                    <form:ComboBox ui:field="periodCombo" editable="false" triggerAction="ALL" />
+                    <toolbar:SeparatorToolItem />
 
-          <toolbar:LabelToolItem label="Device:" />
-          <form:ComboBox ui:field="deviceCombo" editable="false" triggerAction="ALL" />
-          <toolbar:SeparatorToolItem />
+                    <toolbar:LabelToolItem label="{i18n.from}:" />
+                    <form:DateField width="125" ui:field="fromDate" />
+                    <toolbar:LabelToolItem width="5" />
+                    <form:TimeField width="75" ui:field="fromTime" triggerAction="ALL" />
+                    <toolbar:SeparatorToolItem />
 
-          <toolbar:LabelToolItem label="From:" />
-          <form:DateField width="125" ui:field="fromDate" />
-          <toolbar:LabelToolItem width="5" />
-          <form:TimeField width="75" ui:field="fromTime" triggerAction="ALL" />
-          <toolbar:SeparatorToolItem />
+                    <toolbar:LabelToolItem label="{i18n.to}:" />
+                    <form:DateField width="125" ui:field="toDate" />
+                    <toolbar:LabelToolItem width="5" />
+                    <form:TimeField width="75" ui:field="toTime" triggerAction="ALL" />
+                    <toolbar:LabelToolItem width="5" />
+                    <button:TextButton ui:field="filterButton" text="{i18n.filter}..." />
+                    <toolbar:LabelToolItem width="2" />
+                    <form:CheckBox ui:field="disableFilter" boxLabel="{i18n.disableFilter}" />
+                    <toolbar:LabelToolItem width="2" />
+                    <form:CheckBox ui:field="snapToRoads" boxLabel="{i18n.snapToRoads}" />
 
-          <toolbar:LabelToolItem label="To:" />
-          <form:DateField width="125" ui:field="toDate" />
-          <toolbar:LabelToolItem width="5" />
-          <form:TimeField width="75" ui:field="toTime" triggerAction="ALL" />
-          <toolbar:SeparatorToolItem />
+                    <toolbar:ToolBar ui:field="styleToolbar">
+                        <button:TextButton ui:field="styleButtonTrackColor" text=" " height="80%"/>
+                        <button:TextButton ui:field="styleButton" text="{i18n.style}">
+                            <button:menu>
+                                <menu:Menu ui:field="menu1">
+                                    <menu:CheckMenuItem ui:field="zoomToTrackMenu" text="{i18n.zoomToTrack}" />
+                                    <menu:SeparatorMenuItem />
+                                    <menu:MenuItem ui:field="markersMenu">
+                                        <menu:submenu>
+                                            <menu:Menu ui:field="routeMarkersType" />
+                                        </menu:submenu>
+                                    </menu:MenuItem>
+                                    <menu:SeparatorMenuItem />
+                                    <menu:MenuItem ui:field="fullPaletteMenu" text="{i18n.fullPalette}">
+                                        <menu:submenu>
+                                            <menu:ColorMenu ui:field="fullColorMenu" />
+                                        </menu:submenu>
+                                    </menu:MenuItem>
+                                    <menu:MenuItem ui:field="smallPaletteMenu" text="{i18n.smallPalette}">
+                                        <menu:submenu>
+                                            <menu:ColorMenu ui:field="smallColorMenu" />
+                                        </menu:submenu>
+                                    </menu:MenuItem>
+                                </menu:Menu>
+                            </button:menu>
+                        </button:TextButton>
+                    </toolbar:ToolBar>
 
-          <button:TextButton ui:field="loadButton" text="Load" />
-          <toolbar:FillToolItem />
-          <button:TextButton ui:field="clearButton" text="Clear" />
+                    <toolbar:SeparatorToolItem />
 
-        </toolbar:ToolBar>
-      </container:child>
-      
-      <container:child layoutData="{layoutData}">
-        <grid:Grid ui:field="grid" store="{positionStore}" cm="{columnModel}" view="{view}" />
-      </container:child>
-
-    </container:VerticalLayoutContainer>
-  </gxt:ContentPanel>
+                    <button:TextButton ui:field="loadButton" text="{i18n.load}" />
+                    <toolbar:SeparatorToolItem />
+                    <button:TextButton ui:field="clearButton" text="{i18n.clear}" />
+                    <toolbar:FillToolItem />
+                    <button:TextButton text="{i18n.importData} / {i18n.exportData}">
+                        <button:menu>
+                            <menu:Menu>
+                                <menu:MenuItem ui:field="csvButton" text="{i18n.exportToCSV}"/>
+                                <menu:MenuItem ui:field="gpxButton" text="{i18n.exportToGPX}"/>
+                                <menu:MenuItem ui:field="importButton" text="{i18n.importData}"/>
+                            </menu:Menu>
+                        </button:menu>
+                    </button:TextButton>
+                </toolbar:ToolBar>
+            </container:child>
+            <container:child layoutData="{layoutData}">
+                <gxt:TabPanel ui:field="devicesTabs">
+                </gxt:TabPanel>
+            </container:child>
+        </container:VerticalLayoutContainer>
+    </gxt:ContentPanel>
 
 </ui:UiBinder>

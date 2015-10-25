@@ -15,6 +15,15 @@
  */
 package org.traccar.web.client.view;
 
+import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
+import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.form.*;
+import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
+import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
+import org.traccar.web.client.model.ApplicationSettingsProperties;
+import org.traccar.web.client.model.EnumKeyProvider;
+import org.traccar.web.client.model.UserSettingsProperties;
+import org.traccar.web.client.widget.LanguageComboBox;
 import org.traccar.web.shared.model.ApplicationSettings;
 
 import com.google.gwt.core.client.GWT;
@@ -26,7 +35,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.form.CheckBox;
+import org.traccar.web.shared.model.PasswordHashMethod;
+import org.traccar.web.shared.model.UserSettings;
+
+import java.util.Arrays;
 
 public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
 
@@ -52,9 +64,46 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     @UiField
     CheckBox registrationEnabled;
 
+    @UiField
+    CheckBox disallowDeviceManagementByUsers;
+
+    @UiField
+    CheckBox eventRecordingEnabled;
+
+    @UiField(provided = true)
+    NumberPropertyEditor<Short> shortPropertyEditor = new NumberPropertyEditor.ShortPropertyEditor();
+
+    @UiField
+    NumberField<Short> updateInterval;
+
+    @UiField(provided = true)
+    ComboBox<PasswordHashMethod> defaultHashImplementation;
+
+    @UiField(provided = true)
+    ComboBox<String> language;
+
+    @UiField
+    TextField bingMapsKey;
+
     public ApplicationSettingsDialog(ApplicationSettings applicationSettings, ApplicationSettingsHandler applicationSettingsHandler) {
         this.applicationSettingsHandler = applicationSettingsHandler;
+
+        ListStore<PasswordHashMethod> dhmStore = new ListStore<PasswordHashMethod>(
+                new EnumKeyProvider<PasswordHashMethod>());
+        dhmStore.addAll(Arrays.asList(PasswordHashMethod.values()));
+        defaultHashImplementation = new ComboBox<PasswordHashMethod>(
+                dhmStore, new ApplicationSettingsProperties.PasswordHashMethodLabelProvider());
+
+        defaultHashImplementation.setForceSelection(true);
+        defaultHashImplementation.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+
+        language = new LanguageComboBox();
+
         uiBinder.createAndBindUi(this);
+
+        updateInterval.addValidator(new MinNumberValidator<Short>((short) 100));
+        updateInterval.addValidator(new MaxNumberValidator<Short>((short) 30000));
+
         driver.initialize(this);
         driver.edit(applicationSettings);
     }

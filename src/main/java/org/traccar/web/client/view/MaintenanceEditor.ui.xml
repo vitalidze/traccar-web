@@ -1,0 +1,79 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+    xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+  	xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+  	xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+    xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
+    xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
+  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="toolBarRowData">
+    <ui:attributes width="1" height="-1" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
+    <ui:attributes width="1" height="1" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutData">
+    <ui:attributes width="-1" height="1" />
+  </ui:with>
+  
+  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="maintenanceStore" />
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
+  
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view">
+    <ui:attributes stripeRows="true" autoFill="true" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="doublePropertyEditor" />
+
+  <ui:with type="com.google.gwt.i18n.client.NumberFormat" field="odometerFormat" />
+
+  <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
+
+  <container:SimpleContainer ui:field="panel">
+    <container:VerticalLayoutContainer ui:field="mainContainer">
+      <container:child layoutData="{verticalLayoutData}">
+        <gxt:ContentPanel ui:field="contentPanel" headerVisible="false">
+          <container:VerticalLayoutContainer>
+            <container:child layoutData="{toolBarRowData}">
+                <toolbar:ToolBar>
+                    <form:FieldLabel text="{i18n.odometer}" labelWidth="100">
+                        <form:widget>
+                            <form:NumberField editor="{doublePropertyEditor}"
+                                              ui:field="odometer"
+                                              allowNegative="false"
+                                              allowDecimals="true"
+                                              allowBlank="false"
+                                              width="100"
+                                              format="{odometerFormat}" />
+                        </form:widget>
+                    </form:FieldLabel>
+                    <toolbar:LabelToolItem label="{i18n.km}" />
+                    <toolbar:LabelToolItem width="16" />
+                    <form:CheckBox ui:field="autoUpdateOdometer" boxLabel="{i18n.auto}" />
+                    <toolbar:FillToolItem />
+                    <button:ToggleButton ui:field="editButton" text="{i18n.edit}" />
+                </toolbar:ToolBar>
+            </container:child>
+            <container:child layoutData="{toolBarRowData}">
+                <toolbar:ToolBar ui:field="addRemoveToolbar" visible="false">
+                    <button:TextButton ui:field="addButton" text="{i18n.add}" />
+                    <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
+                    <toolbar:FillToolItem />
+                    <button:TextButton ui:field="copyFromButton" text="{i18n.copyFrom}:" enabled="false" />
+                    <form:ComboBox ui:field="deviceCombo" editable="false" triggerAction="ALL" />
+                </toolbar:ToolBar>
+            </container:child>
+            <container:child layoutData="{verticalLayoutData}">
+              <grid:Grid ui:field="grid" store="{maintenanceStore}" cm="{columnModel}" view="{view}" />
+            </container:child>
+          </container:VerticalLayoutContainer>
+        </gxt:ContentPanel>
+      </container:child>
+    </container:VerticalLayoutContainer>
+  </container:SimpleContainer>
+
+</ui:UiBinder>

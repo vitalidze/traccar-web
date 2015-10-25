@@ -15,10 +15,23 @@
  */
 package org.traccar.web.client.view;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import com.google.gwt.i18n.client.TimeZoneInfo;
+import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.ToStringValueProvider;
+import com.sencha.gxt.widget.core.client.form.NumberField;
+import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
+import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
+import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
+import com.sencha.gxt.widget.core.client.grid.*;
+import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.UserSettingsProperties;
+import org.traccar.web.client.widget.TimeZoneComboBox;
 import org.traccar.web.shared.model.UserSettings;
 
 import com.google.gwt.core.client.GWT;
@@ -47,7 +60,12 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     }
 
     public interface UserSettingsHandler {
-        public void onSave(UserSettings userSettings);
+        void onSave(UserSettings userSettings);
+        void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
+                                          NumberField<Double> centerLongitude,
+                                          NumberField<Double> centerLatitude,
+                                          NumberField<Integer> zoomLevel,
+                                          GridSelectionModel<UserSettings.OverlayType> overlays);
     }
 
     private UserSettingsHandler userSettingsHandler;
@@ -57,6 +75,52 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
     @UiField(provided = true)
     ComboBox<UserSettings.SpeedUnit> speedUnit;
+
+    @Ignore
+    @UiField(provided = true)
+    ComboBox<TimeZoneInfo> timeZone;
+
+    @UiField
+    NumberField<Short> timePrintInterval;
+
+    @UiField
+    NumberField<Short> traceInterval;
+
+    @UiField(provided = true)
+    NumberPropertyEditor<Short> shortPropertyEditor = new NumberPropertyEditor.ShortPropertyEditor();
+
+    @UiField(provided = true)
+    NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
+
+    @UiField(provided = true)
+    NumberPropertyEditor<Double> doublePropertyEditor = new NumberPropertyEditor.DoublePropertyEditor();
+
+    @UiField
+    NumberField<Double> centerLongitude;
+
+    @UiField
+    NumberField<Double> centerLatitude;
+
+    @UiField
+    NumberField<Integer> zoomLevel;
+
+    @UiField(provided = true)
+    ComboBox<UserSettings.MapType> mapType;
+
+    @UiField
+    Grid<UserSettings.OverlayType> grid;
+
+    @UiField(provided = true)
+    GridView<UserSettings.OverlayType> view;
+
+    @UiField(provided = true)
+    ColumnModel<UserSettings.OverlayType> columnModel;
+
+    @UiField(provided = true)
+    ListStore<UserSettings.OverlayType> overlayTypeStore;
+
+    @UiField(provided = true)
+    Messages i18n = GWT.create(Messages.class);
 
     public UserSettingsDialog(UserSettings userSettings, UserSettingsHandler userSettingsHandler) {
         this.userSettingsHandler = userSettingsHandler;
@@ -70,9 +134,59 @@ public class UserSettingsDialog implements Editor<UserSettings> {
         speedUnit.setForceSelection(true);
         speedUnit.setTriggerAction(TriggerAction.ALL);
 
+        ListStore<UserSettings.MapType> mapTypeStore = new ListStore<UserSettings.MapType>(
+                new EnumKeyProvider<UserSettings.MapType>());
+        mapTypeStore.addAll(Arrays.asList(UserSettings.MapType.values()));
+        mapType = new ComboBox<UserSettings.MapType>(
+                mapTypeStore, new UserSettingsProperties.MapTypeLabelProvider());
+
+        mapType.setForceSelection(true);
+        mapType.setTriggerAction(TriggerAction.ALL);
+
+        // overlay types grid
+        IdentityValueProvider<UserSettings.OverlayType> identity = new IdentityValueProvider<UserSettings.OverlayType>();
+        final CheckBoxSelectionModel<UserSettings.OverlayType> selectionModel = new CheckBoxSelectionModel<UserSettings.OverlayType>(identity);
+
+        ColumnConfig<UserSettings.OverlayType, String> nameCol = new ColumnConfig<UserSettings.OverlayType, String>(new ToStringValueProvider<UserSettings.OverlayType>() {
+            @Override
+            public String getValue(UserSettings.OverlayType object) {
+                return i18n.overlayType(object);
+            }
+        }, 200, i18n.overlay());
+        List<ColumnConfig<UserSettings.OverlayType, ?>> columns = new ArrayList<ColumnConfig<UserSettings.OverlayType, ?>>();
+        columns.add(selectionModel.getColumn());
+        columns.add(nameCol);
+
+        columnModel = new ColumnModel<UserSettings.OverlayType>(columns);
+
+        view = new NoScrollbarGridView<UserSettings.OverlayType>();
+        view.setAutoFill(true);
+        view.setStripeRows(true);
+
+        overlayTypeStore = new ListStore<UserSettings.OverlayType>(new EnumKeyProvider<UserSettings.OverlayType>());
+        overlayTypeStore.addAll(Arrays.asList(UserSettings.OverlayType.values()));
+
+        timeZone = new TimeZoneComboBox();
+
         uiBinder.createAndBindUi(this);
+
+        grid.setSelectionModel(selectionModel);
+        grid.getView().setForceFit(true);
+        grid.getView().setAutoFill(true);
+
+        for (UserSettings.OverlayType overlayType : ApplicationContext.getInstance().getUserSettings().overlays()) {
+            grid.getSelectionModel().select(overlayType, true);
+        }
+
+        timePrintInterval.addValidator(new MinNumberValidator<Short>((short) 1));
+        timePrintInterval.addValidator(new MaxNumberValidator<Short>((short) 512));
+
+        traceInterval.addValidator(new MinNumberValidator<Short>((short) 1));
+        traceInterval.addValidator(new MaxNumberValidator<Short>((short) (60 * 48)));
+
         driver.initialize(this);
         driver.edit(userSettings);
+        timeZone.setValue(TimeZoneComboBox.getByID(userSettings.getTimeZoneId()));
     }
 
     public void show() {
@@ -84,14 +198,25 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     }
 
     @UiHandler("saveButton")
-    public void onLoginClicked(SelectEvent event) {
+    public void onSaveClicked(SelectEvent event) {
         window.hide();
-        userSettingsHandler.onSave(driver.flush());
+        UserSettings settings = driver.flush();
+        String overlayTypes = "";
+        for (UserSettings.OverlayType overlayType : grid.getSelectionModel().getSelectedItems()) {
+            overlayTypes += (overlayTypes.isEmpty() ? "" : ",") + overlayType.name();
+        }
+        settings.setOverlays(overlayTypes);
+        settings.setTimeZoneId(timeZone.getValue() == null ? null : timeZone.getValue().getID());
+        userSettingsHandler.onSave(settings);
     }
 
     @UiHandler("cancelButton")
-    public void onRegisterClicked(SelectEvent event) {
+    public void onCancelClicked(SelectEvent event) {
         window.hide();
     }
 
+    @UiHandler("takeFromMapButton")
+    public void onSaveDefaultMapSateClicked(SelectEvent event) {
+        userSettingsHandler.onTakeCurrentMapState(mapType, centerLongitude, centerLatitude, zoomLevel, grid.getSelectionModel());
+    }
 }

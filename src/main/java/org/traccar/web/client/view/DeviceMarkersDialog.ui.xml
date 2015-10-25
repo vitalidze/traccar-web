@@ -1,0 +1,63 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+        xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        xmlns:ui="urn:ui:com.google.gwt.uibinder"
+        xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+        xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+        xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+        xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar">
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
+    <ui:attributes width="1" height="-1" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="imageLayoutData">
+    <ui:attributes width="-1" height="-1" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutData">
+    <ui:attributes width="-1" height="-1" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="northData" />
+  <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="centerData" />
+  <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="eastData" />
+
+  <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
+
+  <gxt:Window ui:field="window" pixelSize="494, 340" modal="true" focusWidget="{saveButton}">
+    <container:BorderLayoutContainer ui:field="con" borders="true">
+      <container:north layoutData="{northData}">
+          <toolbar:ToolBar>
+              <button:TextButton ui:field="addButton" text="{i18n.add}" />
+              <button:TextButton ui:field="editButton" text="{i18n.edit}" enabled="false" />
+              <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
+          </toolbar:ToolBar>
+      </container:north>
+      <container:center layoutData="{centerData}">
+        <gxt:ListView ui:field="view"/>
+      </container:center>
+      <container:east layoutData="{eastData}">
+        <container:VerticalLayoutContainer ui:field="panelImages">
+            <container:child layoutData="{imageLayoutData}">
+                <g:HTML ui:field="defaultImage" />
+            </container:child>
+            <container:child layoutData="{imageLayoutData}">
+                <g:HTML ui:field="selectedImage" />
+            </container:child>
+            <container:child layoutData="{imageLayoutData}">
+                <g:HTML ui:field="offlineImage" />
+            </container:child>
+        </container:VerticalLayoutContainer>
+      </container:east>
+    </container:BorderLayoutContainer>
+
+    <gxt:button>
+      <button:TextButton ui:field="saveButton" text="OK" />
+    </gxt:button>
+    <gxt:button>
+      <button:TextButton ui:field="cancelButton" text="{i18n.cancel}" />
+    </gxt:button>
+  </gxt:Window>
+
+</ui:UiBinder>
