@@ -45,6 +45,7 @@ public class DBMigrations {
                 new CreateAdmin(),
                 new SetDefaultDeviceIconType(),
                 new SetDefaultHashImplementation(),
+                new SetGlobalHashSalt(),
                 new SetDefaultUserSettings(),
                 new SetArchiveDefaultColumns(),
                 new SetGeoFenceAllDevicesFlag()
@@ -76,6 +77,7 @@ public class DBMigrations {
                 User user = new User();
                 user.setLogin("admin");
                 user.setPassword("admin");
+                user.setPasswordHashMethod(PasswordHashMethod.PLAIN);
                 user.setAdmin(true);
                 user.setManager(false);
                 em.persist(user);
@@ -201,7 +203,16 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + ApplicationSettings.class.getSimpleName() + " S SET S.defaultPasswordHash = :dh WHERE S.defaultPasswordHash IS NULL")
-                    .setParameter("dh", PasswordHashMethod.PLAIN)
+                    .setParameter("dh", PasswordHashMethod.MD5)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetGlobalHashSalt implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getSimpleName() + " S SET S.salt = :s WHERE S.salt IS NULL")
+                    .setParameter("s", PasswordUtils.generateRandomString())
                     .executeUpdate();
         }
     }

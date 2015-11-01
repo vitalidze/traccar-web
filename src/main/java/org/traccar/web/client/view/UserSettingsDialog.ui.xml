@@ -27,12 +27,19 @@
   <ui:with type="com.sencha.gxt.data.shared.ListStore" field="overlayTypeStore" />
   <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
 
-  <gxt:Window ui:field="window" pixelSize="300, 440" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="400, -1" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.speedUnits}" labelWidth="160">
           <form:widget>
             <form:ComboBox ui:field="speedUnit" />
+          </form:widget>
+        </form:FieldLabel>
+      </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+        <form:FieldLabel text="{i18n.timeZone}" labelWidth="160">
+          <form:widget>
+            <form:ComboBox ui:field="timeZone" />
           </form:widget>
         </form:FieldLabel>
       </container:child>

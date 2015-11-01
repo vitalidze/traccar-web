@@ -88,10 +88,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     }
 
     @Transactional
-    @RequireUser
     @Override
     public User authenticated() {
-        return fillUserSettings(new User(getSessionUser()));
+        return getSessionUser() == null ? null : fillUserSettings(new User(getSessionUser()));
     }
 
     @Transactional
@@ -106,12 +105,25 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         if (results.isEmpty() || password.equals("")) throw new IllegalStateException();
 
-        if (!results.get(0).getPassword().equals(
-                (passwordHashed ? password : results.get(0).getPasswordHashMethod().doHash(password))
-        )) {
-            throw new IllegalStateException();
-        }
         User user = results.get(0);
+
+        String storedPassword = user.getPassword();
+        // login by password 'hash'
+        if (passwordHashed) {
+            if (!storedPassword.equals(password)) {
+                throw new IllegalStateException();
+            }
+        } else {
+            if (!storedPassword.equals(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()))) {
+                // check for the old implementation without salt
+                // if it matches then update password with new salt
+                if (storedPassword.equals(user.getPasswordHashMethod().doHash(password, ""))) {
+                    user.setPassword(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()));
+                } else {
+                    throw new IllegalStateException();
+                }
+            }
+        }
 
         if (user.isBlocked()) {
             throw new UserBlockedException();
@@ -126,8 +138,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
          */
         if (!user.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation()) && !passwordHashed) {
             user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-            user.setPassword(user.getPasswordHashMethod().doHash(password));
-            getSessionEntityManager().persist(user);
+            user.setPassword(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()));
         }
 
         setSessionUser(user);
@@ -160,7 +171,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     User user = new User();
                     user.setLogin(login);
                     user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                    user.setPassword(user.getPasswordHashMethod().doHash(password));
+                    user.setPassword(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()));
                     user.setManager(Boolean.TRUE); // registered users are always managers
                     user.setUserSettings(new UserSettings());
                     getSessionEntityManager().persist(user);
@@ -199,7 +210,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public User addUser(User user) {
+    public User addUser(User user) throws InvalidMaxDeviceNumberForUserException {
         User currentUser = getSessionUser();
         if (user.getLogin() == null || user.getLogin().isEmpty() ||
             user.getPassword() == null || user.getPassword().isEmpty()) {
@@ -215,8 +226,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 user.setAdmin(false);
             }
             user.setManagedBy(currentUser);
+            validateMaximumNumberOfDevices(user, null, user.getMaxNumOfDevices());
             user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-            user.setPassword(user.getPasswordHashMethod().doHash(user.getPassword()));
+            user.setPassword(user.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()));
             if (user.getUserSettings() == null) {
                 user.setUserSettings(new UserSettings());
             }
@@ -226,6 +238,15 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             return fillUserSettings(user);
         } else {
             throw new IllegalStateException();
+        }
+    }
+
+    private void validateMaximumNumberOfDevices(User user, Integer originalValue, Integer newValue) throws InvalidMaxDeviceNumberForUserException {
+        if (user.getManagedBy() != null && newValue != null) {
+            int allowed = user.getManagedBy().getNumberOfDevicesToDistribute() + (originalValue == null ? 0 : originalValue);
+            if (allowed - newValue < 0) {
+                throw new InvalidMaxDeviceNumberForUserException(allowed);
+            }
         }
     }
 
@@ -246,14 +267,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             if (currentUser.getId() == user.getId()) {
                 currentUser.setLogin(user.getLogin());
                 // Password is different or hash method has changed since login
-                if (!currentUser.getPassword().equals(user.getPassword()) || currentUser.getPasswordHashMethod().equals(PasswordHashMethod.PLAIN) && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
+                if (!currentUser.getPassword().equals(user.getPassword())
+                        || currentUser.getPasswordHashMethod().equals(PasswordHashMethod.PLAIN)
+                        && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
                     currentUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                    currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword()));
+                    currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()));
                 }
-                if(currentUser.getAdmin() || currentUser.getManager())
+                if (currentUser.getAdmin() || currentUser.getManager())
                 {
-                    currentUser.setMaxNumOfDevices(user.getMaxNumOfDevices());
-                    currentUser.setExpirationDate(user.getExpirationDate());
                     if (currentUser.getAdmin()) {
                         currentUser.setAdmin(user.getAdmin());
                     }
@@ -274,9 +295,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 if (currentUser.getAdmin() || currentUser.getManager()) {
                     User existingUser = entityManager.find(User.class, user.getId());
                     // Checks if password has changed or default hash method not equal to current user hash method
-                    if (!existingUser.getPassword().equals(user.getPassword()) && !existingUser.getPassword().equals(existingUser.getPasswordHashMethod().doHash(user.getPassword())) || !existingUser.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation())) {
+                    if (!existingUser.getPassword().equals(user.getPassword())
+                            && !existingUser.getPassword().equals(existingUser.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()))
+                            || !existingUser.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation())) {
                         existingUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                        existingUser.setPassword(existingUser.getPasswordHashMethod().doHash(user.getPassword()));
+                        existingUser.setPassword(existingUser.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()));
                     }
                     entityManager.merge(existingUser);
                 } else {
@@ -288,6 +311,18 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         } else {
             throw new AccessDeniedException();
         }
+    }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public UserSettings updateUserSettings(UserSettings userSettings) throws AccessDeniedException {
+        User user = getSessionUser();
+        if (!user.getUserSettings().equals(userSettings)) {
+            throw new AccessDeniedException();
+        }
+        user.getUserSettings().copyFrom(userSettings);
+        return unproxy(user.getUserSettings());
     }
 
     @Transactional
@@ -307,6 +342,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
         entityManager.createQuery("DELETE FROM UIStateEntry s WHERE s.user=:user").setParameter("user", user).executeUpdate();
         entityManager.createQuery("DELETE FROM NotificationSettings s WHERE s.user=:user").setParameter("user", user).executeUpdate();
+        entityManager.createQuery("UPDATE Device d SET d.owner=null WHERE d.owner=:user").setParameter("user", user).executeUpdate();
         for (Device device : user.getDevices()) {
             device.getUsers().remove(user);
         }
@@ -380,10 +416,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         User user = getSessionUser();
 
-        if (!user.getAdmin() &&
-            user.getMaxNumOfDevices() != null &&
-            getDevices(false).size() >= user.getMaxNumOfDevices()) {
-            throw new MaxDeviceNumberReachedException(user.getMaxNumOfDevices());
+        if (!user.getAdmin() && user.getNumberOfDevicesToAdd() <= 0) {
+            throw new MaxDeviceNumberReachedException(fillUserSettings(new User(user.getUserWhoReachedLimitOnDevicesNumber())));
         }
 
         EntityManager entityManager = getSessionEntityManager();
@@ -394,6 +428,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         if (results.isEmpty()) {
             device.setUsers(new HashSet<User>(1));
             device.getUsers().add(user);
+            device.setOwner(user);
             entityManager.persist(device);
             for (Maintenance maintenance : device.getMaintenances()) {
                 maintenance.setDevice(device);
@@ -705,12 +740,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @Override
     public ApplicationSettings getApplicationSettings() {
-        ApplicationSettings appSettings = applicationSettings.get();
-        if (appSettings == null) {
-            appSettings = new ApplicationSettings();
-            entityManager.get().persist(appSettings);
-        }
-        return appSettings;
+        return applicationSettings.get();
     }
 
     @Transactional
@@ -772,7 +802,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override
-    public void saveRoles(List<User> users) {
+    public void saveRoles(List<User> users) throws InvalidMaxDeviceNumberForUserException {
         if (users == null || users.isEmpty()) {
             return;
         }
@@ -785,11 +815,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 user.setAdmin(_user.getAdmin());
             }
             user.setManager(_user.getManager());
-            user.setReadOnly(_user.getReadOnly());
             user.setArchive(_user.isArchive());
-            user.setExpirationDate(_user.getExpirationDate());
-            user.setBlocked(_user.isBlocked());
-            user.setMaxNumOfDevices(_user.getMaxNumOfDevices());
+            if (user.getId() != currentUser.getId()) {
+                user.setReadOnly(_user.getReadOnly());
+                user.setBlocked(_user.isBlocked());
+                validateMaximumNumberOfDevices(user, user.getMaxNumOfDevices(), _user.getMaxNumOfDevices());
+                user.setMaxNumOfDevices(_user.getMaxNumOfDevices());
+                user.setExpirationDate(_user.getExpirationDate());
+            }
         }
     }
 

@@ -27,7 +27,7 @@ public class ApplicationSettings implements IsSerializable {
     public ApplicationSettings() {
         registrationEnabled = true;
         updateInterval = DEFAULT_UPDATE_INTERVAL;
-        defaultPasswordHash = PasswordHashMethod.PLAIN;
+        defaultPasswordHash = PasswordHashMethod.MD5;
         eventRecordingEnabled = true;
         language = "default";
     }
@@ -97,6 +97,27 @@ public class ApplicationSettings implements IsSerializable {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    private String salt;
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
+    @Expose
+    private String bingMapsKey;
+
+    public String getBingMapsKey() {
+        return bingMapsKey;
+    }
+
+    public void setBingMapsKey(String bingMapsKey) {
+        this.bingMapsKey = bingMapsKey;
     }
 
     @Override

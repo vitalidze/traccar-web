@@ -16,6 +16,9 @@
 package org.traccar.web.server.model;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+import static org.traccar.web.shared.model.PasswordHashMethod.*;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -25,6 +28,7 @@ import com.google.inject.persist.Transactional;
 import com.google.inject.persist.UnitOfWork;
 import com.google.inject.persist.jpa.JpaPersistModule;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.traccar.web.client.model.DataService;
@@ -39,6 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class DataServiceTest {
     static Long currentUserId;
@@ -69,10 +74,11 @@ public class DataServiceTest {
             bind(HttpServletRequest.class).toProvider(new com.google.inject.Provider<HttpServletRequest>() {
                 @Override
                 public HttpServletRequest get() {
-                    return null;
+                    return mock(HttpServletRequest.class, RETURNS_DEEP_STUBS);
                 }
             });
             bind(User.class).toProvider(TestUserProvider.class);
+            bind(ApplicationSettings.class).toProvider(ApplicationSettingsProvider.class);
         }
     }
 
@@ -84,18 +90,24 @@ public class DataServiceTest {
         injector.getInstance(PersistService.class).start();
         dataService = injector.getInstance(DataService.class);
 
-        UnitOfWork unitOfWork = injector.getInstance(UnitOfWork.class);
-        unitOfWork.begin();
-        EntityManager entityManager = injector.getInstance(EntityManager.class);
-        entityManager.getTransaction().begin();
-        injector.getInstance(DBMigrations.CreateAdmin.class).migrate(entityManager);
-        entityManager.getTransaction().commit();
-        unitOfWork.end();
+        runInTransaction(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                injector.getInstance(DBMigrations.CreateAdmin.class).migrate(injector.getInstance(EntityManager.class));
+                return null;
+            }
+        });
     }
 
     @After
     public void cleanup() {
         currentUserId = null;
+    }
+
+    @AfterClass
+    public static void destroy() {
+        injector = null;
+        dataService = null;
     }
 
     @Test
@@ -122,7 +134,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void testDeleteUserWithNotificationSettings() throws AccessDeniedException {
+    public void testDeleteUserWithNotificationSettings() throws TraccarException {
         Long originalUserId = injector.getProvider(User.class).get().getId();
 
         User user = new User("test", "test");
@@ -141,7 +153,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void testResetPasswordByAdmin() throws AccessDeniedException {
+    public void testResetPasswordByAdmin() throws TraccarException {
         User user = new User("test", "test");
         user = dataService.addUser(user);
 
@@ -154,7 +166,7 @@ public class DataServiceTest {
     }
 
     @Test
-    public void testResetPasswordByManager() throws AccessDeniedException {
+    public void testResetPasswordByManager() throws TraccarException {
         User manager = new User("manager", "manager");
         manager.setManager(Boolean.TRUE);
         manager = dataService.addUser(manager);
@@ -172,5 +184,86 @@ public class DataServiceTest {
         dataService.removeUser(manager);
 
         assertEquals("test1", user.getPassword());
+    }
+
+    @Test
+    public void testLoginPasswordHashAndSalt() throws Exception {
+        String salt = dataService.getApplicationSettings().getSalt();
+        // ordinary log in
+        User admin = dataService.login("admin", "admin");
+        assertEquals(MD5.doHash("admin", salt), admin.getPassword());
+        // log in with hash
+        admin = dataService.login("admin", MD5.doHash("admin", salt), true);
+        assertEquals(MD5.doHash("admin", salt), admin.getPassword());
+        // update user
+        runInTransaction(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                injector.getInstance(EntityManager.class).createQuery("UPDATE User u SET u.password=:pwd")
+                        .setParameter("pwd", MD5.doHash("admin", null))
+                        .executeUpdate();
+                return null;
+            }
+        });
+        // log in with hash will not be possible anymore
+        try {
+            admin = dataService.login("admin", MD5.doHash("admin", salt), true);
+            fail("Should be impossible to log in with different hash");
+        } catch (IllegalStateException expected) {
+            // do nothing since exception is expected in this case
+        }
+        // check logging in with old hash (for backwards compatibility)
+        admin = dataService.login("admin", MD5.doHash("admin", null), true);
+        assertEquals(MD5.doHash("admin", null), admin.getPassword());
+        // log in and check if password is updated
+        admin = dataService.login("admin", "admin");
+        assertEquals(MD5.doHash("admin", salt), admin.getPassword());
+    }
+
+    @Test
+    public void testDeviceOwner() throws Exception {
+        Long originalUserId = injector.getProvider(User.class).get().getId();
+
+        User user = new User("test", "test");
+        user = dataService.addUser(user);
+
+        Device device = new Device();
+        device.setUniqueId("1");
+        device.setName("D1");
+        device.setMaintenances(Collections.<Maintenance>emptyList());
+        device.setSensors(Collections.<Sensor>emptyList());
+        currentUserId = user.getId();
+        device = dataService.addDevice(device);
+        currentUserId = originalUserId;
+
+        assertEquals(user, device.getOwner());
+        dataService.removeUser(user);
+        runInTransaction(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                Device device = dataService.getDevices().get(0);
+                assertTrue(device.getUsers().isEmpty());
+                assertNull(device.getOwner());
+                return null;
+            }
+        });
+
+    }
+
+    private static <V> V runInTransaction(Callable<V> c) throws Exception {
+        UnitOfWork unitOfWork = injector.getInstance(UnitOfWork.class);
+        unitOfWork.begin();
+        EntityManager entityManager = injector.getInstance(EntityManager.class);
+        entityManager.getTransaction().begin();
+        try {
+            V result = c.call();
+            entityManager.getTransaction().commit();
+            return result;
+        } catch (Exception ex) {
+            entityManager.getTransaction().rollback();
+            throw ex;
+        } finally {
+            unitOfWork.end();
+        }
     }
 }

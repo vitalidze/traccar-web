@@ -31,10 +31,7 @@ import org.traccar.web.client.model.NotificationService;
 import org.traccar.web.client.model.NotificationServiceAsync;
 import org.traccar.web.client.model.UserProperties;
 import org.traccar.web.client.view.*;
-import org.traccar.web.shared.model.ApplicationSettings;
-import org.traccar.web.shared.model.NotificationSettings;
-import org.traccar.web.shared.model.NotificationTemplate;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
@@ -87,23 +84,36 @@ public class SettingsController implements DeviceView.SettingsHandler {
 
                     @Override
                     public void onAdd() {
-                        new UserDialog(
-                                new User(),
-                                new UserDialog.UserHandler() {
+                        class AddHandler implements UserDialog.UserHandler {
+                            @Override
+                            public void onSave(final User user) {
+                                Application.getDataService().addUser(user, new BaseAsyncCallback<User>(i18n) {
                                     @Override
-                                    public void onSave(User user) {
-                                        Application.getDataService().addUser(user, new BaseAsyncCallback<User>(i18n) {
+                                    public void onSuccess(User result) {
+                                        userStore.add(result);
+                                    }
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        AlertMessageBox msg;
+                                        if (caught instanceof InvalidMaxDeviceNumberForUserException) {
+                                            InvalidMaxDeviceNumberForUserException e = (InvalidMaxDeviceNumberForUserException) caught;
+                                            msg = new AlertMessageBox(i18n.error(), i18n.errMaxNumOfDevicesExceeded(e.getAllowedDevicesNumber()));
+                                        } else {
+                                            msg = new AlertMessageBox(i18n.error(), i18n.errUsernameTaken());
+                                        }
+                                        msg.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
                                             @Override
-                                            public void onSuccess(User result) {
-                                                userStore.add(result);
-                                            }
-                                            @Override
-                                            public void onFailure(Throwable caught) {
-                                                new AlertMessageBox(i18n.error(), i18n.errUsernameTaken()).show();
+                                            public void onDialogHide(DialogHideEvent event) {
+                                                new UserDialog(user, AddHandler.this).show();
                                             }
                                         });
+                                        msg.show();
                                     }
-                                }).show();
+                                });
+                            }
+                        }
+
+                        new UserDialog(new User(), new AddHandler()).show();
                     }
 
                     @Override

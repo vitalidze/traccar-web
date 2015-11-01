@@ -79,9 +79,9 @@ public class UserSettings implements IsSerializable {
         GOOGLE_NORMAL("Google Normal"),
         GOOGLE_SATELLITE("Google Satellite"),
         GOOGLE_TERRAIN("Google Terrain"),
-        BING_ROAD("Bing Road"),
-        BING_HYBRID("Bing Hybrid"),
-        BING_AERIAL("Bing Aerial"),
+        BING_ROAD("Bing Road") { @Override public boolean isBing() { return true; } },
+        BING_HYBRID("Bing Hybrid") { @Override public boolean isBing() { return true; } },
+        BING_AERIAL("Bing Aerial") { @Override public boolean isBing() { return true; } },
         MAPQUEST_ROAD("MapQuest Road"),
         MAPQUEST_AERIAL("MapQuest Aerial"),
         STAMEN_TONER("Stamen Toner");
@@ -96,8 +96,8 @@ public class UserSettings implements IsSerializable {
             return name;
         }
 
-        public String getBingKey() {
-            return "AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F";
+        public boolean isBing() {
+            return false;
         }
     }
 
@@ -164,6 +164,16 @@ public class UserSettings implements IsSerializable {
 
     public void setTraceInterval(Short traceInterval) {
         this.traceInterval = traceInterval;
+    }
+
+    private String timeZoneId;
+
+    public String getTimeZoneId() {
+        return timeZoneId;
+    }
+
+    public void setTimeZoneId(String timeZoneId) {
+        this.timeZoneId = timeZoneId;
     }
 
     @Expose
@@ -321,5 +331,25 @@ public class UserSettings implements IsSerializable {
             overlays.add(OverlayType.valueOf(s));
         }
         return overlays;
+    }
+
+    public void copyFrom(UserSettings userSettings) {
+        id = userSettings.id;
+        speedUnit = userSettings.speedUnit;
+        timePrintInterval = userSettings.timePrintInterval;
+        traceInterval = userSettings.traceInterval;
+        timeZoneId = userSettings.timeZoneId;
+        zoomLevel = userSettings.zoomLevel;
+        centerLongitude = userSettings.centerLongitude;
+        centerLatitude = userSettings.centerLatitude;
+        mapType = userSettings.mapType;
+        overlays = userSettings.overlays;
+        hideZeroCoordinates = userSettings.hideZeroCoordinates;
+        hideInvalidLocations = userSettings.hideInvalidLocations;
+        hideDuplicates = userSettings.hideDuplicates;
+        minDistance = userSettings.minDistance;
+        speedModifier = userSettings.speedModifier;
+        speedForFilter = userSettings.speedForFilter;
+        archiveMarkerType = userSettings.archiveMarkerType;
     }
 }

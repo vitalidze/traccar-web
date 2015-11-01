@@ -94,10 +94,14 @@ callGet({ method: 'getApplicationSettings', success: function(appSettings) { app
 // check authentication
 callGet({ method: 'authenticated',
           success: function(data) {
-              // save user and his settings to the application state
-              appState.user = data;
-              appState.userSettings = data.userSettings;
-              mainView.loadPage({url: 'pages/map.html', animatePages: false});
+              if (data == null) {
+                  mainView.loadPage({url: 'pages/login.html', animatePages: false});
+              } else {
+                  // save user and his settings to the application state
+                  appState.user = data;
+                  appState.userSettings = data.userSettings;
+                  mainView.loadPage({url: 'pages/map.html', animatePages: false});
+              }
           },
           error: function() { mainView.loadPage({url: 'pages/login.html', animatePages: false}); }
         });
@@ -111,6 +115,14 @@ myApp.onPageInit('login-screen', function (page) {
     pageContainer.find('#sign-in').on('click', function() {
         pageContainer.find('#form-login').trigger('submit');
     });
+
+    if (appState.settings.registrationEnabled) {
+        pageContainer.find('#register').on('click', function () {
+            signIn(pageContainer, true);
+        });
+    } else {
+        pageContainer.find('#register').remove();
+    }
 
     var language = pageContainer.find('#language');
     var sel = language[0];
@@ -137,32 +149,36 @@ myApp.onPageInit('login-screen', function (page) {
     pageContainer.find('#form-login').on('submit', function(e) {
         e.preventDefault();
 
-        // removes the iOS keyboard
-        document.activeElement.blur();
-
-        var username = pageContainer.find('input[name="username"]').val();
-        var password = pageContainer.find('input[name="password"]').val();
-
-        if (username.trim().length == 0 || password.trim().length == 0) {
-            myApp.alert(i18n.user_name_and_password_must_not_be_empty);
-            return false;
-        }
-
-        callPost({ method: 'login',
-                   data: [username, password],
-                   success: function(data) {
-                       // save user and his settings to the application state
-                       appState.user = data;
-                       appState.userSettings = data.userSettings;
-
-                       mainView.loadPage('pages/map.html');
-                   },
-                   error: function() { myApp.alert(i18n.user_name_or_password_is_invalid); },
-                   showIndicator: true });
+        signIn(pageContainer, false);
 
         return false;
     });
 });
+
+function signIn(pageContainer, doRegister) {
+    // removes the iOS keyboard
+    document.activeElement.blur();
+
+    var username = pageContainer.find('input[name="username"]').val();
+    var password = pageContainer.find('input[name="password"]').val();
+
+    if (username.trim().length == 0 || password.trim().length == 0) {
+        myApp.alert(i18n.user_name_and_password_must_not_be_empty);
+        return false;
+    }
+
+    callPost({ method: doRegister ? 'register' : 'login',
+        data: [username, password],
+        success: function(data) {
+            // save user and his settings to the application state
+            appState.user = data;
+            appState.userSettings = data.userSettings;
+
+            mainView.loadPage('pages/map.html');
+        },
+        error: function() { myApp.alert(doRegister ? i18n.user_name_already_taken : i18n.user_name_or_password_is_invalid); },
+        showIndicator: true });
+}
 
 // button that opens sidebar menu
 var OpenSideMenuControl = function(opt_options) {
@@ -211,6 +227,14 @@ myApp.onPageInit('map-screen', function(page) {
 
     // set up layers
     var layers = [];
+    // fall back to 'OSM' if there are no bing key
+    if (appState.userSettings.mapType.indexOf("BING_") == 0 &&
+        (appState.settings.bingMapsKey == undefined ||
+        appState.settings.bingMapsKey == null ||
+        appState.settings.bingMapsKey.length == 0)) {
+        appState.userSettings.mapType = 'OSM';
+    }
+
     if (appState.userSettings.mapType == "OSM") {
         var attribution = new ol.control.Attribution({
             collapsible: false
@@ -231,7 +255,7 @@ myApp.onPageInit('map-screen', function(page) {
 
         layers.push(new ol.layer.Tile({
             source: new ol.source.BingMaps({
-                key: 'AseEs0DLJhLlTNoxbNXu7DGsnnH4UoWuGue7-irwKkE3fffaClwc9q_Mr6AyHY8F',
+                key: appState.settings.bingMapsKey,
                 imagerySet: style
             })
         }));
@@ -329,6 +353,18 @@ function loadPositions() {
 
             currentTime = new Date().getTime();
 
+            // push 'selected' position to last place so it will be drawn over other markers
+            for (var i = 0; i < positions.length; i++) {
+                var position = positions[i];
+                prevPosition = appState.latestPositions[position.device.id];
+                if (prevPosition != undefined && prevPosition.selected) {
+                    positions[i] = positions[positions.length - 1];
+                    positions[positions.length - 1] = position;
+                    break;
+                }
+            }
+
+            // draw markers and device details
             for (var i = 0; i < positions.length; i++) {
                 var position = positions[i];
 
@@ -408,7 +444,9 @@ function loadDevices() {
                     success: function() {
                         myApp.closePanel();
                         mainView.loadPage('pages/login.html');
+                        var appSettings = appState.settings;
                         appState = {};
+                        appState.settings = appSettings;
                         $$('#map').html('');
                     },
                     error: function() {

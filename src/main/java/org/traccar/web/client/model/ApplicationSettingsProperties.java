@@ -35,7 +35,9 @@ public interface ApplicationSettingsProperties extends PropertyAccess<Applicatio
 
     ValueProvider<ApplicationSettings, Boolean> eventRecordingEnabled();
 
-    public static class PasswordHashMethodLabelProvider implements LabelProvider<PasswordHashMethod> {
+    ValueProvider<ApplicationSettings, String> bingMapsKey();
+
+    class PasswordHashMethodLabelProvider implements LabelProvider<PasswordHashMethod> {
         @Override
         public String getLabel(PasswordHashMethod item) {
             return item.getName();

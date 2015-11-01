@@ -1,6 +1,7 @@
 package org.traccar.web.server.model;
 
 import org.traccar.web.shared.model.ApplicationSettings;
+import org.traccar.web.shared.model.PasswordHashMethod;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -16,6 +17,13 @@ public class ApplicationSettingsProvider implements Provider<ApplicationSettings
     public ApplicationSettings get() {
         TypedQuery<ApplicationSettings> query = entityManager.get().createQuery("SELECT x FROM ApplicationSettings x", ApplicationSettings.class);
         List<ApplicationSettings> resultList = query.getResultList();
-        return resultList.isEmpty() ? new ApplicationSettings() : resultList.get(0);
+        if (resultList.isEmpty()) {
+            ApplicationSettings appSettings = new ApplicationSettings();
+            appSettings.setSalt(PasswordUtils.generateRandomString());
+            appSettings.setDefaultHashImplementation(PasswordHashMethod.MD5);
+            entityManager.get().persist(appSettings);
+            return appSettings;
+        }
+        return resultList.get(0);
     }
 }
