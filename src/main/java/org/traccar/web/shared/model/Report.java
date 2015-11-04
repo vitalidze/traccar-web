@@ -21,12 +21,34 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "reports",
         indexes = { @Index(name = "reports_pkey", columnList = "id") })
 public class Report implements IsSerializable {
+
+    public Report() {
+    }
+
+    public Report(Report report) {
+        this.id = report.id;
+        this.name = report.name;
+        this.type = report.type;
+        this.period = report.period;
+        this.fromDate = report.fromDate;
+        this.toDate = report.toDate;
+        this.devices = new HashSet<Device>(report.devices.size());
+        for (Device device : report.devices) {
+            this.devices.add(new Device(device));
+        }
+        this.geoFences = new HashSet<GeoFence>(report.geoFences.size());
+        for (GeoFence geoFence : report.geoFences) {
+            this.geoFences.add(new GeoFence().copyFrom(geoFence));
+        }
+    }
+
     @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,7 +97,6 @@ public class Report implements IsSerializable {
         this.users = users;
     }
 
-    @GwtTransient
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "reports_devices",
             foreignKey = @ForeignKey(name = "reports_devices_fkey_report_id"),
@@ -91,7 +112,6 @@ public class Report implements IsSerializable {
         this.devices = devices;
     }
 
-    @GwtTransient
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "reports_geofences",
             foreignKey = @ForeignKey(name = "reports_geofences_fkey_report_id"),

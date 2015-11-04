@@ -239,6 +239,33 @@ public class User implements IsSerializable, Cloneable {
         return getAllAvailableDevices().contains(device);
     }
 
+    @GwtTransient
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "reports_users",
+            foreignKey = @ForeignKey(name = "reports_users_fkey_user_id"),
+            joinColumns = { @JoinColumn(name = "user_id", table = "users", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "report_id", table = "reports", referencedColumnName = "id") })
+    private Set<Report> reports;
+
+    public Set<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(Set<Report> reports) {
+        this.reports = reports;
+    }
+
+    public Set<Report> getAllAvailableReports() {
+        Set<Report> reports = new HashSet<Report>();
+        reports.addAll(getReports());
+        if (getManager()) {
+            for (User managedUser : getManagedUsers()) {
+                reports.addAll(managedUser.getAllAvailableReports());
+            }
+        }
+        return reports;
+    }
+
     @Expose
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))

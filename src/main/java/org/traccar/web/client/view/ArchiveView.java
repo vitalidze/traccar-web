@@ -15,6 +15,8 @@
  */
 package org.traccar.web.client.view;
 
+import static org.traccar.web.client.DateTimeFieldUtil.getCombineDate;
+
 import java.util.*;
 
 import com.google.gwt.dom.client.Style;
@@ -223,19 +225,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiHandler("zoomToTrackMenu")
     public void onMenuSelection(SelectionEvent<Item> event) {
         style.setZoomToTrack(((CheckMenuItem) event.getSelectedItem()).isChecked());
-    }
-
-    @SuppressWarnings("deprecation")
-    private static Date getCombineDate(DateField dateField, TimeField timeField) {
-        Date result = null;
-        Date date = dateField.getValue();
-        Date time = timeField.getValue();
-        if (date != null && time != null) {
-            result = new Date(
-                    date.getYear(), date.getMonth(), date.getDate(),
-                    time.getHours(), time.getMinutes(), time.getSeconds());
-        }
-        return result;
     }
 
     @UiHandler("loadButton")

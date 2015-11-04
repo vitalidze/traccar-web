@@ -236,7 +236,7 @@ public class GeoFence implements IsSerializable {
         setPoints(strPoints);
     }
 
-    public void copyFrom(GeoFence geoFence) {
+    public GeoFence copyFrom(GeoFence geoFence) {
         id = geoFence.id;
         name = geoFence.name;
         description = geoFence.description;
@@ -246,6 +246,7 @@ public class GeoFence implements IsSerializable {
         radius = geoFence.radius;
         allDevices = geoFence.allDevices;
         transferDevices = new HashSet<Device>(geoFence.getTransferDevices());
+        return this;
     }
 
     @Override

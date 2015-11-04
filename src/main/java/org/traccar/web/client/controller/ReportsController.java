@@ -15,12 +15,22 @@
  */
 package org.traccar.web.client.controller;
 
+import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
+import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.model.BaseAsyncCallback;
+import org.traccar.web.client.model.ReportProperties;
+import org.traccar.web.client.model.ReportService;
+import org.traccar.web.client.model.ReportServiceAsync;
 import org.traccar.web.client.view.ReportsDialog;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.Report;
+
+import java.util.List;
 
 public class ReportsController implements ArchiveController.ReportsHandler {
+    private final Messages i18n = GWT.create(Messages.class);
     private final ListStore<Device> deviceStore;
     private final ListStore<GeoFence> geoFenceStore;
 
@@ -31,6 +41,30 @@ public class ReportsController implements ArchiveController.ReportsHandler {
 
     @Override
     public void onShowReports() {
-        new ReportsDialog(deviceStore, geoFenceStore).show();
+        final ReportServiceAsync service = GWT.create(ReportService.class);
+        service.getReports(new BaseAsyncCallback<List<Report>>(i18n) {
+            @Override
+            public void onSuccess(List<Report> result) {
+                ReportProperties reportProperties = GWT.create(ReportProperties.class);
+                ListStore<Report> reportStore = new ListStore<Report>(reportProperties.id());
+                new ReportsDialog(reportStore, deviceStore, geoFenceStore, new ReportsDialog.ReportHandler() {
+                    @Override
+                    public void onAdd(Report report) {
+                        service.addReport(report, new BaseAsyncCallback<Report>(i18n));
+                    }
+
+                    @Override
+                    public void onUpdate(Report report) {
+                        service.updateReport(report, new BaseAsyncCallback<Report>(i18n));
+                    }
+
+                    @Override
+                    public void onRemove(Report report) {
+                        service.removeReport(report, new BaseAsyncCallback<Void>(i18n));
+                    }
+                }).show();
+            }
+        });
+
     }
 }

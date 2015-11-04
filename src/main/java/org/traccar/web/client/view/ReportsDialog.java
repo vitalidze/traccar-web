@@ -15,16 +15,18 @@
  */
 package org.traccar.web.client.view;
 
+import static org.traccar.web.client.DateTimeFieldUtil.getCombineDate;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
@@ -38,6 +40,7 @@ import org.traccar.web.client.widget.PeriodComboBox;
 import org.traccar.web.shared.model.*;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -46,6 +49,14 @@ public class ReportsDialog {
 
     interface ReportsDialogDialogUiBinder extends UiBinder<Widget, ReportsDialog> {
     }
+
+    public interface ReportHandler {
+        void onAdd(Report report);
+        void onUpdate(Report report);
+        void onRemove(Report report);
+    }
+
+    final ReportHandler reportHandler;
 
     @UiField
     Window window;
@@ -57,7 +68,7 @@ public class ReportsDialog {
     ColumnModel<Report> columnModel;
 
     @UiField(provided = true)
-    ListStore<Report> reportStore;
+    final ListStore<Report> reportStore;
 
     @UiField
     TextField name;
@@ -95,8 +106,14 @@ public class ReportsDialog {
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public ReportsDialog(ListStore<Device> deviceStore, ListStore<GeoFence> geoFenceStore) {
+    public ReportsDialog(ListStore<Report> reportStore,
+                         ListStore<Device> deviceStore,
+                         ListStore<GeoFence> geoFenceStore,
+                         ReportHandler reportHandler) {
         ReportProperties reportProperties = GWT.create(ReportProperties.class);
+
+        this.reportStore = reportStore;
+        this.reportHandler = reportHandler;
 
         List<ColumnConfig<Report, ?>> columnConfigList = new LinkedList<ColumnConfig<Report, ?>>();
         columnConfigList.add(new ColumnConfig<Report, String>(reportProperties.name(), 25, i18n.name()));
@@ -129,5 +146,27 @@ public class ReportsDialog {
 
     public void show() {
         window.show();
+    }
+
+    @UiHandler("saveButton")
+    public void onSaveClicked(SelectEvent event) {
+        if (grid.getSelectionModel().getSelectedItem() == null) {
+            reportHandler.onAdd(flush());
+        } else {
+            reportHandler.onUpdate(flush());
+        }
+    }
+
+    private Report flush() {
+        Report selected = grid.getSelectionModel().getSelectedItem();
+        Report report = selected == null ? new Report() : new Report(selected);
+        report.setName(name.getValue());
+        report.setType(type.getValue());
+        report.setPeriod(periodCombo.getValue());
+        report.setFromDate(getCombineDate(fromDate, fromTime));
+        report.setToDate(getCombineDate(toDate, toTime));
+        report.setDevices(new HashSet<Device>(deviceList.getSelectionModel().getSelectedItems()));
+        report.setGeoFences(new HashSet<GeoFence>(geoFenceList.getSelectionModel().getSelectedItems()));
+        return report;
     }
 }

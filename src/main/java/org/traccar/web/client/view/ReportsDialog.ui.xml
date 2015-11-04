@@ -80,12 +80,14 @@
     }
   </ui:style>
 
-  <gxt:Window ui:field="window" pixelSize="700, 500" modal="true" headingText="{i18n.reports}">
+  <gxt:Window ui:field="window" pixelSize="700, 614" modal="true" headingText="{i18n.reports}">
     <container:VerticalLayoutContainer>
         <container:child layoutData="{toolBarRowData}">
             <toolbar:ToolBar>
                 <button:TextButton ui:field="addButton" text="{i18n.newReport}" />
                 <button:TextButton ui:field="saveButton" text="{i18n.save}" />
+                <button:TextButton ui:field="removeButton" text="{i18n.remove}" />
+                <toolbar:FillToolItem />
                 <button:TextButton ui:field="generateButton" text="{i18n.generate}" />
             </toolbar:ToolBar>
         </container:child>

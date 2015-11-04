@@ -19,17 +19,40 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.ReportService;
 import org.traccar.web.shared.model.Report;
+import org.traccar.web.shared.model.User;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
+import javax.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
 public class ReportServiceImpl extends RemoteServiceServlet implements ReportService {
+    @Inject
+    private Provider<EntityManager> entityManager;
+
+    @Inject
+    private Provider<User> sessionUser;
+
     @Transactional
     @RequireUser
     @Override
     public List<Report> getReports() {
-        return null;
+        List<Report> reports;
+
+        if (sessionUser.get().getAdmin()) {
+            reports = entityManager.get().createQuery("SELECT x FROM Report x", Report.class).getResultList();
+        } else {
+            reports = new ArrayList<Report>(sessionUser.get().getAllAvailableReports());
+        }
+
+        List<Report> result = new ArrayList<Report>(reports.size());
+        for (Report report : reports) {
+            result.add(new Report(report));
+        }
+        return result;
     }
 
     @Transactional
