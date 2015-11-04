@@ -610,6 +610,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             query.setParameter("device", device);
             query.executeUpdate();
 
+            query = entityManager.createQuery("SELECT x FROM Report x WHERE :device MEMBER OF x.devices");
+            query.setParameter("device", device);
+            List<Report> reports = query.getResultList();
+            for (Report report : reports) {
+                report.getDevices().remove(device);
+            }
+
             entityManager.remove(device);
             eventService.devicesChanged();
         }
@@ -959,6 +966,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             Query query = entityManager.get().createQuery("DELETE FROM DeviceEvent x WHERE x.geoFence = :geoFence");
             query.setParameter("geoFence", geoFence);
             query.executeUpdate();
+
+            query = entityManager.get().createQuery("SELECT x FROM Report x WHERE :geoFence MEMBER OF x.geoFences");
+            query.setParameter("geoFence", geoFence);
+            List<Report> reports = query.getResultList();
+            for (Report report : reports) {
+                report.getGeoFences().remove(geoFence);
+            }
 
             getSessionEntityManager().remove(geoFence);
         }
