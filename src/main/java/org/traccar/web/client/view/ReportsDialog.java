@@ -15,48 +15,56 @@
  */
 package org.traccar.web.client.view;
 
-import static org.traccar.web.client.DateTimeFieldUtil.getCombineDate;
-
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
+import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.Window;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
+import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import org.traccar.web.client.Application;
+import org.traccar.web.client.controller.ReportsController;
+import org.traccar.web.client.editor.DateTimeEditor;
+import org.traccar.web.client.editor.ListViewEditor;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.DeviceProperties;
-import org.traccar.web.client.model.EnumKeyProvider;
-import org.traccar.web.client.model.GeoFenceProperties;
-import org.traccar.web.client.model.ReportProperties;
+import org.traccar.web.client.model.*;
 import org.traccar.web.client.widget.PeriodComboBox;
 import org.traccar.web.shared.model.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
-public class ReportsDialog {
+public class ReportsDialog implements Editor<Report>, ReportsController.ReportHandler {
     private static ReportsDialogDialogUiBinder uiBinder = GWT.create(ReportsDialogDialogUiBinder.class);
 
     interface ReportsDialogDialogUiBinder extends UiBinder<Widget, ReportsDialog> {
     }
 
+    interface ReportDriver extends SimpleBeanEditorDriver<Report, ReportsDialog> {
+    }
+
     public interface ReportHandler {
-        void onAdd(Report report);
-        void onUpdate(Report report);
-        void onRemove(Report report);
+        void onAdd(Report report, ReportsController.ReportHandler handler);
+        void onUpdate(Report report, ReportsController.ReportHandler handler);
+        void onRemove(Report report, ReportsController.ReportHandler handler);
     }
 
     final ReportHandler reportHandler;
+    final ReportDriver driver = GWT.create(ReportDriver.class);
 
     @UiField
     Window window;
@@ -80,28 +88,44 @@ public class ReportsDialog {
     final ListStore<Device> deviceStore;
 
     @UiField(provided = true)
-    final ListView<Device, String> deviceList;
+    final ListView<Device, String> devicesList;
+
+    final ListViewEditor<Device> devices;
 
     @UiField(provided = true)
     final ListStore<GeoFence> geoFenceStore;
 
     @UiField(provided = true)
-    final ListView<GeoFence, String> geoFenceList;
+    final ListView<GeoFence, String> geoFencesList;
+
+    final ListViewEditor<GeoFence> geoFences;
 
     @UiField(provided = true)
-    final PeriodComboBox periodCombo;
+    final PeriodComboBox period;
 
     @UiField
-    DateField fromDate;
+    @Ignore
+    DateField fromDateField;
 
     @UiField
-    TimeField fromTime;
+    @Ignore
+    TimeField fromTimeField;
+
+    final DateTimeEditor fromDate;
 
     @UiField
-    DateField toDate;
+    @Ignore
+    DateField toDateField;
 
     @UiField
-    TimeField toTime;
+    @Ignore
+    TimeField toTimeField;
+
+    final DateTimeEditor toDate;
+
+    @UiField
+    @Ignore
+    TextButton removeButton;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
@@ -117,16 +141,16 @@ public class ReportsDialog {
 
         List<ColumnConfig<Report, ?>> columnConfigList = new LinkedList<ColumnConfig<Report, ?>>();
         columnConfigList.add(new ColumnConfig<Report, String>(reportProperties.name(), 25, i18n.name()));
-        columnConfigList.add(new ColumnConfig<Report, ReportType>(reportProperties.type(), 25, i18n.type()));
+        columnConfigList.add(new ColumnConfig<Report, String>(new ReportProperties.ReportTypeLabelProvider(), 25, i18n.type()));
         columnModel = new ColumnModel<Report>(columnConfigList);
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         this.deviceStore = deviceStore;
-        this.deviceList = new ListView<Device, String>(deviceStore, deviceProperties.name());
+        this.devicesList = new ListView<Device, String>(deviceStore, deviceProperties.name());
 
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
         this.geoFenceStore = geoFenceStore;
-        this.geoFenceList = new ListView<GeoFence, String>(geoFenceStore, geoFenceProperties.name());
+        this.geoFencesList = new ListView<GeoFence, String>(geoFenceStore, geoFenceProperties.name());
 
         ListStore<ReportType> geoFenceTypeStore = new ListStore<ReportType>(
                 new EnumKeyProvider<ReportType>());
@@ -136,12 +160,33 @@ public class ReportsDialog {
         type.setForceSelection(true);
         type.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
 
-        periodCombo = new PeriodComboBox();
+        period = new PeriodComboBox();
 
         uiBinder.createAndBindUi(this);
 
-        periodCombo.init(fromDate, fromTime, toDate, toTime);
-        periodCombo.selectFirst();
+        grid.getSelectionModel().setSelectionMode(Style.SelectionMode.SINGLE);
+        grid.getSelectionModel().addSelectionChangedHandler(new SelectionChangedEvent.SelectionChangedHandler<Report>() {
+            @Override
+            public void onSelectionChanged(SelectionChangedEvent<Report> event) {
+                if (event.getSelection().isEmpty()) {
+                    driver.edit(new Report());
+                } else {
+                    driver.edit(event.getSelection().get(0));
+                }
+                removeButton.setEnabled(!event.getSelection().isEmpty());
+            }
+        });
+
+        period.init(fromDateField, fromTimeField, toDateField, toTimeField);
+
+        geoFences = new ListViewEditor<GeoFence>(geoFencesList);
+        devices = new ListViewEditor<Device>(devicesList);
+        fromDate = new DateTimeEditor(fromDateField, fromTimeField);
+        toDate = new DateTimeEditor(toDateField, toTimeField);
+
+        driver.initialize(this);
+        driver.edit(new Report());
+        period.selectFirst();
     }
 
     public void show() {
@@ -150,23 +195,49 @@ public class ReportsDialog {
 
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
+        Report report = driver.flush();
+        if (driver.hasErrors()) {
+            return;
+        }
         if (grid.getSelectionModel().getSelectedItem() == null) {
-            reportHandler.onAdd(flush());
+            reportHandler.onAdd(report, this);
         } else {
-            reportHandler.onUpdate(flush());
+            reportHandler.onUpdate(report, this);
         }
     }
 
-    private Report flush() {
-        Report selected = grid.getSelectionModel().getSelectedItem();
-        Report report = selected == null ? new Report() : new Report(selected);
-        report.setName(name.getValue());
-        report.setType(type.getValue());
-        report.setPeriod(periodCombo.getValue());
-        report.setFromDate(getCombineDate(fromDate, fromTime));
-        report.setToDate(getCombineDate(toDate, toTime));
-        report.setDevices(new HashSet<Device>(deviceList.getSelectionModel().getSelectedItems()));
-        report.setGeoFences(new HashSet<GeoFence>(geoFenceList.getSelectionModel().getSelectedItems()));
-        return report;
+    @UiHandler("removeButton")
+    public void onRemoveClicked(SelectEvent event) {
+        ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmReportRemoval());
+        final Report report = driver.flush();
+        dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+            @Override
+            public void onDialogHide(DialogHideEvent event) {
+                if (event.getHideButton() == Dialog.PredefinedButton.YES) {
+                    reportHandler.onRemove(report, ReportsDialog.this);
+                }
+            }
+        });
+        dialog.show();
+    }
+
+    @UiHandler("newButton")
+    public void onNewClicked(SelectEvent event) {
+        grid.getSelectionModel().deselectAll();
+    }
+
+    @Override
+    public void reportAdded(Report report) {
+        reportStore.add(report);
+    }
+
+    @Override
+    public void reportUpdated(Report report) {
+        reportStore.update(report);
+    }
+
+    @Override
+    public void reportRemoved(Report report) {
+        reportStore.remove(report);
     }
 }

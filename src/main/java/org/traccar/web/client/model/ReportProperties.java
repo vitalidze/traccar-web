@@ -31,12 +31,26 @@ public interface ReportProperties extends PropertyAccess<Report> {
 
     ValueProvider<Report, ReportType> type();
 
-    class ReportTypeLabelProvider implements LabelProvider<ReportType> {
+    class ReportTypeLabelProvider implements LabelProvider<ReportType>, ValueProvider<Report, String> {
         final Messages i18n = GWT.create(Messages.class);
 
         @Override
         public String getLabel(ReportType item) {
             return i18n.reportType(item);
+        }
+
+        @Override
+        public String getValue(Report report) {
+            return report.getType() == null ? "" : getLabel(report.getType());
+        }
+
+        @Override
+        public void setValue(Report object, String value) {
+        }
+
+        @Override
+        public String getPath() {
+            return "type";
         }
     }
 }

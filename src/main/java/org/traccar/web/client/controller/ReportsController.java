@@ -34,6 +34,12 @@ public class ReportsController implements ArchiveController.ReportsHandler {
     private final ListStore<Device> deviceStore;
     private final ListStore<GeoFence> geoFenceStore;
 
+    public interface ReportHandler {
+        void reportAdded(Report report);
+        void reportUpdated(Report report);
+        void reportRemoved(Report report);
+    }
+
     public ReportsController(ListStore<Device> deviceStore, ListStore<GeoFence> geoFenceStore) {
         this.deviceStore = deviceStore;
         this.geoFenceStore = geoFenceStore;
@@ -47,24 +53,39 @@ public class ReportsController implements ArchiveController.ReportsHandler {
             public void onSuccess(List<Report> result) {
                 ReportProperties reportProperties = GWT.create(ReportProperties.class);
                 ListStore<Report> reportStore = new ListStore<Report>(reportProperties.id());
+                reportStore.addAll(result);
                 new ReportsDialog(reportStore, deviceStore, geoFenceStore, new ReportsDialog.ReportHandler() {
                     @Override
-                    public void onAdd(Report report) {
-                        service.addReport(report, new BaseAsyncCallback<Report>(i18n));
+                    public void onAdd(Report report, final ReportHandler handler) {
+                        service.addReport(report, new BaseAsyncCallback<Report>(i18n) {
+                            @Override
+                            public void onSuccess(Report result) {
+                                handler.reportAdded(result);
+                            }
+                        });
                     }
 
                     @Override
-                    public void onUpdate(Report report) {
-                        service.updateReport(report, new BaseAsyncCallback<Report>(i18n));
+                    public void onUpdate(Report report, final ReportHandler handler) {
+                        service.updateReport(report, new BaseAsyncCallback<Report>(i18n) {
+                            @Override
+                            public void onSuccess(Report result) {
+                                handler.reportUpdated(result);
+                            }
+                        });
                     }
 
                     @Override
-                    public void onRemove(Report report) {
-                        service.removeReport(report, new BaseAsyncCallback<Void>(i18n));
+                    public void onRemove(final Report report, final ReportHandler handler) {
+                        service.removeReport(report, new BaseAsyncCallback<Void>(i18n) {
+                            @Override
+                            public void onSuccess(Void result) {
+                                handler.reportRemoved(report);
+                            }
+                        });
                     }
                 }).show();
             }
         });
-
     }
 }

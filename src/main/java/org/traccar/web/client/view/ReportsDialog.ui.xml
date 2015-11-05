@@ -84,9 +84,9 @@
     <container:VerticalLayoutContainer>
         <container:child layoutData="{toolBarRowData}">
             <toolbar:ToolBar>
-                <button:TextButton ui:field="addButton" text="{i18n.newReport}" />
+                <button:TextButton ui:field="newButton" text="{i18n.newReport}" />
                 <button:TextButton ui:field="saveButton" text="{i18n.save}" />
-                <button:TextButton ui:field="removeButton" text="{i18n.remove}" />
+                <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
                 <toolbar:FillToolItem />
                 <button:TextButton ui:field="generateButton" text="{i18n.generate}" />
             </toolbar:ToolBar>
@@ -109,7 +109,7 @@
                             <container:child layoutData="{verticalLayoutData}">
                                 <form:FieldLabel text="{i18n.type}">
                                     <form:widget>
-                                        <form:ComboBox ui:field="type" />
+                                        <form:ComboBox ui:field="type" allowBlank="false" />
                                     </form:widget>
                                 </form:FieldLabel>
                             </container:child>
@@ -118,12 +118,12 @@
                 </container:child>
                 <container:child layoutData="{boxLayoutDataMargins0500Flex3}">
                     <gxt:ContentPanel headingText="{i18n.devices}" bodyStyleName="{style.pad3}">
-                        <gxt:ListView ui:field="deviceList" store="{deviceStore}" />
+                        <gxt:ListView ui:field="devicesList" store="{deviceStore}" />
                     </gxt:ContentPanel>
                 </container:child>
                 <container:child layoutData="{boxLayoutDataMargins0Flex3}">
                     <gxt:ContentPanel headingText="{i18n.geoFence}" bodyStyleName="{style.pad3}">
-                        <gxt:ListView ui:field="geoFenceList" store="{geoFenceStore}" />
+                        <gxt:ListView ui:field="geoFencesList" store="{geoFenceStore}" />
                     </gxt:ContentPanel>
                 </container:child>
             </container:HBoxLayoutContainer>
@@ -132,18 +132,18 @@
             <gxt:ContentPanel headingText="{i18n.timePeriod}" bodyStyleName="{style.pad3}" styleName="{style.pad5}">
                 <container:VerticalLayoutContainer layoutData="{toolBarRowData}">
                     <toolbar:ToolBar>
-                        <form:ComboBox ui:field="periodCombo" editable="false" triggerAction="ALL" />
+                        <form:ComboBox ui:field="period" editable="false" triggerAction="ALL" />
 
                         <toolbar:LabelToolItem label="{i18n.from}:" />
-                        <form:DateField width="125" ui:field="fromDate" />
+                        <form:DateField width="125" ui:field="fromDateField" />
                         <toolbar:LabelToolItem width="5" />
-                        <form:TimeField width="75" ui:field="fromTime" triggerAction="ALL" />
+                        <form:TimeField width="75" ui:field="fromTimeField" triggerAction="ALL" />
                         <toolbar:SeparatorToolItem />
 
                         <toolbar:LabelToolItem label="{i18n.to}:" />
-                        <form:DateField width="125" ui:field="toDate" />
+                        <form:DateField width="125" ui:field="toDateField" />
                         <toolbar:LabelToolItem width="5" />
-                        <form:TimeField width="75" ui:field="toTime" triggerAction="ALL" />
+                        <form:TimeField width="75" ui:field="toTimeField" triggerAction="ALL" />
                     </toolbar:ToolBar>
                 </container:VerticalLayoutContainer>
             </gxt:ContentPanel>

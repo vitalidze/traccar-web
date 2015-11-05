@@ -32,23 +32,6 @@ public class Report implements IsSerializable {
     public Report() {
     }
 
-    public Report(Report report) {
-        this.id = report.id;
-        this.name = report.name;
-        this.type = report.type;
-        this.period = report.period;
-        this.fromDate = report.fromDate;
-        this.toDate = report.toDate;
-        this.devices = new HashSet<Device>(report.devices.size());
-        for (Device device : report.devices) {
-            this.devices.add(new Device(device));
-        }
-        this.geoFences = new HashSet<GeoFence>(report.geoFences.size());
-        for (GeoFence geoFence : report.geoFences) {
-            this.geoFences.add(new GeoFence().copyFrom(geoFence));
-        }
-    }
-
     @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -160,5 +143,15 @@ public class Report implements IsSerializable {
 
     public void setToDate(Date toDate) {
         this.toDate = toDate;
+    }
+
+    public Report copyFrom(Report report) {
+        this.id = report.id;
+        this.name = report.name;
+        this.type = report.type;
+        this.period = report.period;
+        this.fromDate = report.fromDate;
+        this.toDate = report.toDate;
+        return this;
     }
 }
