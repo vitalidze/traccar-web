@@ -37,7 +37,6 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
-import org.traccar.web.client.Application;
 import org.traccar.web.client.controller.ReportsController;
 import org.traccar.web.client.editor.DateTimeEditor;
 import org.traccar.web.client.editor.ListViewEditor;
@@ -61,6 +60,7 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
         void onAdd(Report report, ReportsController.ReportHandler handler);
         void onUpdate(Report report, ReportsController.ReportHandler handler);
         void onRemove(Report report, ReportsController.ReportHandler handler);
+        void onGenerate(Report report);
     }
 
     final ReportHandler reportHandler;
@@ -224,6 +224,11 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
     @UiHandler("newButton")
     public void onNewClicked(SelectEvent event) {
         grid.getSelectionModel().deselectAll();
+    }
+
+    @UiHandler("generateButton")
+    public void onGenerateClicked(SelectEvent event) {
+        reportHandler.onGenerate(driver.flush());
     }
 
     @Override

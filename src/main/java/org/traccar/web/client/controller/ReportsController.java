@@ -84,8 +84,17 @@ public class ReportsController implements ArchiveController.ReportsHandler {
                             }
                         });
                     }
+
+                    @Override
+                    public void onGenerate(Report report) {
+                        generate(report);
+                    }
                 }).show();
             }
         });
+    }
+
+    private void generate(Report report) {
+
     }
 }

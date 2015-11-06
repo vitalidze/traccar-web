@@ -83,6 +83,11 @@
       <artifactId>guice-servlet</artifactId>
       <version>${guiceVersion}</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-multibindings</artifactId>
+      <version>${guiceVersion}</version>
+    </dependency>
     <!-- Database drivers -->
     <dependency>
       <groupId>com.h2database</groupId>
