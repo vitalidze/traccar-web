@@ -15,11 +15,13 @@
  */
 package org.traccar.web.server.model;
 
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.floreysoft.jmte.Engine;
 import com.floreysoft.jmte.NamedRenderer;
 import com.floreysoft.jmte.RenderFormatInfo;
 import com.floreysoft.jmte.Renderer;
-import com.google.gson.stream.JsonWriter;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.DataService;
@@ -40,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -269,16 +270,19 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
                 os = conn.getOutputStream();
-                JsonWriter writer = new JsonWriter(new OutputStreamWriter(os));
-                writer.beginObject();
-                writer
-                    .name("email").value(user.getEmail())
-                    .name("type").value("note")
-                    .name("title").value(subject)
-                        .name("body").value(body);
-                writer.endObject();
-                writer.flush();
-                writer.close();
+
+                JsonFactory jsonFactory = new JsonFactory(); // or, for data binding, org.codehaus.jackson.mapper.MappingJsonFactory
+                JsonGenerator json = jsonFactory.createGenerator(os, JsonEncoding.UTF8);
+
+                json.writeStartObject();
+                json.writeStringField("email", user.getEmail());
+                json.writeStringField("type", "note");
+                json.writeStringField("title", subject);
+                json.writeStringField("body", body);
+                json.writeEndObject();
+                json.flush();
+                json.close();
+
                 is = conn.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                 try {

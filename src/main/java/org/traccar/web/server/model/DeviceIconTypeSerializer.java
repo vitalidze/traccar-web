@@ -15,36 +15,37 @@
  */
 package org.traccar.web.server.model;
 
-import com.google.gson.*;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import org.traccar.web.shared.model.DeviceIconType;
 import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.PositionIconType;
 
-import java.lang.reflect.Type;
+import java.io.IOException;
 
-class DeviceIconTypeSerializer implements JsonSerializer<DeviceIconType> {
+class DeviceIconTypeSerializer extends JsonSerializer<DeviceIconType> {
     static final DeviceIconTypeSerializer INSTANCE = new DeviceIconTypeSerializer();
 
-    private DeviceIconTypeSerializer() {
-    }
-
     @Override
-    public JsonElement serialize(DeviceIconType deviceIcon, Type typeOfSrc, JsonSerializationContext context) {
-        JsonObject jsonDeviceIconType = new JsonObject();
+    public void serialize(DeviceIconType deviceIcon,
+                          JsonGenerator json,
+                          SerializerProvider serializerProvider) throws IOException {
+        json.writeStartObject();
         for (Position.Status status : Position.Status.values()) {
+            json.writeObjectFieldStart(status.name());
+
             PositionIconType positionIcon = deviceIcon.getPositionIconType(status);
-            JsonObject jsonPositionIconType = new JsonObject();
+            json.writeNumberField("width", positionIcon.getWidth());
+            json.writeNumberField("height", positionIcon.getHeight());
 
-            jsonPositionIconType.addProperty("width", positionIcon.getWidth());
-            jsonPositionIconType.addProperty("height", positionIcon.getHeight());
+            json.writeArrayFieldStart("urls");
+            json.writeString(positionIcon.getURL(false));
+            json.writeString(positionIcon.getURL(true));
+            json.writeEndArray();
 
-            JsonArray urls = new JsonArray();
-            urls.add(new JsonPrimitive(positionIcon.getURL(false)));
-            urls.add(new JsonPrimitive(positionIcon.getURL(true)));
-            jsonPositionIconType.add("urls", urls);
-
-            jsonDeviceIconType.add(status.name(), jsonPositionIconType);
+            json.writeEndObject();
         }
-        return jsonDeviceIconType;
+        json.writeEndObject();
     }
 }

@@ -15,8 +15,8 @@
  */
 package org.traccar.web.server.model;
 
-import com.google.gson.Gson;
-import org.apache.commons.io.IOUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.persist.Transactional;
 import org.traccar.web.server.reports.ReportGenerator;
 import org.traccar.web.server.reports.ReportGeneratorFactory;
 import org.traccar.web.shared.model.Report;
@@ -29,9 +29,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,17 +40,16 @@ public class ReportServlet extends HttpServlet {
     @Inject
     private Provider<ReportGeneratorFactory> generators;
 
+    @Transactional
+    @RequireUser
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Gson gson = GsonUtils.create();
+        ObjectMapper jackson = JacksonUtils.create();
         Report report;
-        Reader reader = null;
         try {
-            reader = new InputStreamReader(req.getInputStream());
-            report = gson.fromJson(reader, Report.class);
+            report = jackson.readValue(req.getInputStream(), Report.class);
         } catch (Exception ex) {
             logger.log(Level.WARNING, "Unable to read report generation request", ex);
-            IOUtils.closeQuietly(reader);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }

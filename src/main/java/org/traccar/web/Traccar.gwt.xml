@@ -13,6 +13,7 @@
     <inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
     <inherits name="com.google.gwt.resources.Resources" />
     <inherits name='com.sencha.gxt.theme.neptune.Theme' />
+    <inherits name="com.github.nmorel.gwtjackson.GwtJackson" />
 
     <!-- theme -->
     <replace-with class="com.sencha.gxt.theme.neptune.client.base.menu.Css3MenuItemAppearance">

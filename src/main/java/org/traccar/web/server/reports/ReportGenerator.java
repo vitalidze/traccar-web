@@ -16,7 +16,26 @@
 package org.traccar.web.server.reports;
 
 import org.traccar.web.shared.model.Report;
+import org.traccar.web.shared.model.User;
+
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public abstract class ReportGenerator {
-    public abstract void generate(Report report);
+    @Inject
+    EntityManager entityManager;
+
+    @Inject
+    User currentUser;
+
+    @Inject
+    HttpServletRequest request;
+
+    @Inject
+    HttpServletResponse response;
+
+    public abstract void generate(Report report) throws IOException;
 }

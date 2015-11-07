@@ -15,6 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.*;
@@ -37,6 +38,7 @@ public class Maintenance implements IsSerializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
+    @JsonIgnore
     private long id;
 
     public long getId() {
@@ -49,6 +51,7 @@ public class Maintenance implements IsSerializable {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(foreignKey = @ForeignKey(name = "maintenances_fkey_device_id"))
+    @JsonIgnore
     private Device device;
 
     public Device getDevice() {

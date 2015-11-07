@@ -17,9 +17,11 @@ package org.traccar.web.server.reports;
 
 import org.traccar.web.shared.model.Report;
 
+import java.io.IOException;
+
 public class ReportGI extends ReportGenerator {
     @Override
-    public void generate(Report report) {
-
+    public void generate(Report report) throws IOException {
+        response.getWriter().write(report.getName());
     }
 }

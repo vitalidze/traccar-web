@@ -1,6 +1,6 @@
 package org.traccar.web.shared.model;
 
-import com.google.gson.annotations.Expose;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.Column;
@@ -22,6 +22,7 @@ public class ApplicationSettings implements IsSerializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
+    @JsonIgnore
     private long id;
 
     public ApplicationSettings() {
@@ -32,21 +33,18 @@ public class ApplicationSettings implements IsSerializable {
         language = "default";
     }
 
-    @Expose
     private boolean registrationEnabled;
 
-    @Expose
     private Short updateInterval;
 
     @Enumerated(EnumType.STRING)
-    @Expose
     private PasswordHashMethod defaultPasswordHash;
 
-    @Expose
     @Column(nullable = true)
     private boolean disallowDeviceManagementByUsers;
 
     @Column(nullable = true)
+    @JsonIgnore
     private boolean eventRecordingEnabled;
 
     public void setRegistrationEnabled(boolean registrationEnabled) {
@@ -89,6 +87,7 @@ public class ApplicationSettings implements IsSerializable {
         this.eventRecordingEnabled = eventRecordingEnabled;
     }
 
+    @JsonIgnore
     private String language;
 
     public String getLanguage() {
@@ -99,6 +98,7 @@ public class ApplicationSettings implements IsSerializable {
         this.language = language;
     }
 
+    @JsonIgnore
     private String salt;
 
     public String getSalt() {
@@ -109,7 +109,7 @@ public class ApplicationSettings implements IsSerializable {
         this.salt = salt;
     }
 
-    @Expose
+    @JsonIgnore
     private String bingMapsKey;
 
     public String getBingMapsKey() {

@@ -15,7 +15,7 @@
  */
 package org.traccar.web.server.model;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.persist.Transactional;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -152,8 +152,8 @@ public class PicturesServlet  extends HttpServlet {
             FileUtils.deleteQuietly(file);
         }
 
-        Gson gson = GsonUtils.create();
-        gson.toJson(uploadedPictures, resp.getWriter());
+        ObjectMapper jackson = JacksonUtils.create();
+        jackson.writeValue(resp.getOutputStream(), uploadedPictures);
     }
 
     @Transactional(rollbackOn = { IOException.class, RuntimeException.class })

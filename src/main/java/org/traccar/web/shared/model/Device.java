@@ -15,7 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
-import com.google.gson.annotations.Expose;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -67,7 +67,6 @@ public class Device implements IsSerializable {
         }
     }
 
-    @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -80,6 +79,7 @@ public class Device implements IsSerializable {
     @GwtTransient
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_position_id"))
+    @JsonIgnore
     private Position latestPosition;
 
     public void setLatestPosition(Position latestPosition) {
@@ -90,7 +90,6 @@ public class Device implements IsSerializable {
         return latestPosition;
     }
 
-    @Expose
     private String uniqueId;
 
     public void setUniqueId(String uniqueId) {
@@ -101,7 +100,6 @@ public class Device implements IsSerializable {
         return uniqueId;
     }
 
-    @Expose
     private String name;
 
     public void setName(String name) {
@@ -112,7 +110,6 @@ public class Device implements IsSerializable {
         return name;
     }
 
-    @Expose
     private String description;
 
     public String getDescription() {
@@ -123,6 +120,7 @@ public class Device implements IsSerializable {
         this.description = description;
     }
 
+    @JsonIgnore
     private transient boolean follow;
 
     public boolean isFollow() {
@@ -133,6 +131,7 @@ public class Device implements IsSerializable {
         this.follow = follow;
     }
 
+    @JsonIgnore
     private transient boolean recordTrace;
 
     public boolean isRecordTrace() {
@@ -146,7 +145,6 @@ public class Device implements IsSerializable {
     /**
      * Consider device offline after 'timeout' seconds spent from last position
      */
-    @Expose
     @Column(nullable = true)
     private int timeout = DEFAULT_TIMEOUT;
 
@@ -158,7 +156,6 @@ public class Device implements IsSerializable {
         this.timeout = timeout;
     }
 
-    @Expose
     @Column(nullable = true)
     private double idleSpeedThreshold;
 
@@ -181,6 +178,7 @@ public class Device implements IsSerializable {
                foreignKey = @ForeignKey(name = "users_devices_fkey_devices_id"),
                joinColumns = { @JoinColumn(name = "devices_id", table = "devices", referencedColumnName = "id") },
                inverseJoinColumns = { @JoinColumn(name = "users_id", table = "users", referencedColumnName = "id") })
+    @JsonIgnore
     private Set<User> users;
 
     public Set<User> getUsers() {
@@ -194,6 +192,7 @@ public class Device implements IsSerializable {
     @GwtTransient
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_owner_id"))
+    @JsonIgnore
     private User owner;
 
     public User getOwner() {
@@ -204,7 +203,6 @@ public class Device implements IsSerializable {
         this.owner = owner;
     }
 
-    @Expose
     @Enumerated(EnumType.STRING)
     private DeviceIconType iconType;
 
@@ -216,7 +214,6 @@ public class Device implements IsSerializable {
         this.iconType = iconType;
     }
 
-    @Expose
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_icon_id"))
     private DeviceIcon icon;
@@ -231,6 +228,7 @@ public class Device implements IsSerializable {
 
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_photo_id"))
+    @JsonIgnore
     private Picture photo;
 
     public Picture getPhoto() {
@@ -241,6 +239,7 @@ public class Device implements IsSerializable {
         this.photo = photo;
     }
 
+    @JsonIgnore
     private String phoneNumber;
 
     public String getPhoneNumber() {
@@ -251,6 +250,7 @@ public class Device implements IsSerializable {
         this.phoneNumber = phoneNumber;
     }
 
+    @JsonIgnore
     private String plateNumber;
 
     public String getPlateNumber() {
@@ -261,6 +261,7 @@ public class Device implements IsSerializable {
         this.plateNumber = plateNumber;
     }
 
+    @JsonIgnore
     private String vehicleInfo;
 
     public String getVehicleInfo() {
@@ -273,6 +274,7 @@ public class Device implements IsSerializable {
 
     // contains current odometer value in kilometers
     @Column(nullable = true)
+    @JsonIgnore
     private double odometer;
 
     public double getOdometer() {
@@ -285,6 +287,7 @@ public class Device implements IsSerializable {
 
     // indicates that odometer must be updated automatically by positions history
     @Column(nullable = true)
+    @JsonIgnore
     private boolean autoUpdateOdometer;
 
     public boolean isAutoUpdateOdometer() {
@@ -295,7 +298,6 @@ public class Device implements IsSerializable {
         this.autoUpdateOdometer = autoUpdateOdometer;
     }
 
-    @Expose
     @Transient
     private List<Maintenance> maintenances;
 
@@ -307,7 +309,6 @@ public class Device implements IsSerializable {
         this.maintenances = maintenances;
     }
 
-    @Expose
     @Transient
     private List<Sensor> sensors;
 

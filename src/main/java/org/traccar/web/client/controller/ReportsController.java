@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.controller;
 
+import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
 import org.traccar.web.client.i18n.Messages;
@@ -31,8 +32,11 @@ import java.util.List;
 
 public class ReportsController implements ArchiveController.ReportsHandler {
     private final Messages i18n = GWT.create(Messages.class);
+    private final ReportMapper reportMapper = GWT.create(ReportMapper.class);
     private final ListStore<Device> deviceStore;
     private final ListStore<GeoFence> geoFenceStore;
+
+    interface ReportMapper extends ObjectMapper<Report> {}
 
     public interface ReportHandler {
         void reportAdded(Report report);
@@ -95,6 +99,6 @@ public class ReportsController implements ArchiveController.ReportsHandler {
     }
 
     private void generate(Report report) {
-
+        GWT.log(reportMapper.write(report));
     }
 }
