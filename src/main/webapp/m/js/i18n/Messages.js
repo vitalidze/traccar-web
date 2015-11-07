@@ -719,7 +719,7 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
-    el_GR{
+    el_GR: {
         _name_: 'Greek',
         // login screen
         language: 'Γλώσσα',
