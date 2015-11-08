@@ -1,9 +1,35 @@
 ---
 layout: default
-title: Netbeans IDE setup
+title: NetBeans IDE setup
 ---
 
-0) Clone repository.
+0) Install GWT plugin for NetBeans
+
+Open Tools >> Plugins menu.
+
+![NB - Tools - Plugins](http://i65.tinypic.com/20u75n5.png)
+
+If you are using NetBeans 7.0, 7.1, 7.2, 7.3, 7.4 or 8.0 plugin can be installed on the 'Available plugins' tab. For the latest NetBeans 8.1 you will need to manually download the plugin for 8.0 from the [plugin page](http://plugins.netbeans.org/plugin/44509/gwt4nb) and then install it from the 'Downloaded' tab. Click 'Add Plugins...' button.
+
+![NB - Downloaded plugins tab](http://i66.tinypic.com/2cghon9.png)
+
+Then navigate to the folder, which contains downloaded plugin file and click 'Open'.
+
+![NB - Plugin file location](http://i67.tinypic.com/2usg5er.png)
+
+Click on 'Install' button and follow installation instructions to install the plugin.
+
+![NB - Downloaded plugin installation](http://i63.tinypic.com/2j5e1zq.png)
+
+Ignore the 'self-signed' warning by clicking on 'Continue' button.
+
+![NB - Plugin installation self-signed warning](http://i68.tinypic.com/2jaaiqf.png)
+
+Restart the NetBeans IDE as suggested by the installer.
+
+![NB - IDE restart after plugin installation completed](http://i66.tinypic.com/25ztu02.png)
+
+1) Clone repository.
 
 Open Team >> Git >> Clone... menu.
 
@@ -25,7 +51,7 @@ Wait until cloning completes. This usually takes 3-5 minutes and depends on inte
 
 ![NB - Git wait until clone completes](http://i57.tinypic.com/2ibjio3.png)
 
-1) Open cloned project
+2) Open cloned project
 
 Open File >> Open Project...
 
@@ -35,7 +61,7 @@ Select cloned project
 
 ![NB - Open project window](http://i57.tinypic.com/9qxztd.png)
 
-2) Debug application
+3) Debug application
 
 Open Debug >> GWT Dev Mode w/o a JEE server
 
@@ -45,7 +71,7 @@ Wait until project is compiled and debug session is started. When it's done ther
 
     Listening for transport dt_socket at address: 8000
 
-![NB - GWT debug session startup](http://i57.tinypic.com/66zyjd.png)
+![NB - GWT debug session startup](http://i68.tinypic.com/27zlytl.png)
 
 Open Debug >> Attach Debugger...
 
