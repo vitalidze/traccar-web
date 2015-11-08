@@ -188,13 +188,13 @@
         <configuration>
           <deploy>${project.build.directory}/gwt-deploy</deploy>
           <runTarget>traccar.html</runTarget>
-	      <hostedWebapp>${webappDirectory}</hostedWebapp>
+	  <hostedWebapp>${webappDirectory}</hostedWebapp>
+          <extraJvmArgs>-Xmx1G -Xss1024k</extraJvmArgs>
         </configuration>
         <executions>
           <execution>
             <configuration>
               <module>org.traccar.web.Traccar</module>
-              <extraJvmArgs>-Xmx1G -Xss1024k</extraJvmArgs>
             </configuration>
             <goals>
               <goal>compile</goal>
