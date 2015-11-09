@@ -17,6 +17,8 @@ package org.traccar.web.client.controller;
 
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.Hidden;
 import com.sencha.gxt.data.shared.ListStore;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
@@ -99,6 +101,12 @@ public class ReportsController implements ArchiveController.ReportsHandler {
     }
 
     private void generate(Report report) {
-        GWT.log(reportMapper.write(report));
+        FormPanel form = new FormPanel("_blank");
+        form.setAction("traccar/report");
+        form.setMethod(FormPanel.METHOD_POST);
+        form.setEncoding(FormPanel.ENCODING_URLENCODED);
+        Hidden hidden = new Hidden("report", reportMapper.write(report));
+        form.add(hidden);
+        form.submit();
     }
 }

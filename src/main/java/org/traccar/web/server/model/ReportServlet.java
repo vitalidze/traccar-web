@@ -47,7 +47,7 @@ public class ReportServlet extends HttpServlet {
         ObjectMapper jackson = JacksonUtils.create();
         Report report;
         try {
-            report = jackson.readValue(req.getInputStream(), Report.class);
+            report = jackson.readValue(req.getParameter("report"), Report.class);
         } catch (Exception ex) {
             logger.log(Level.WARNING, "Unable to read report generation request", ex);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -62,6 +62,6 @@ public class ReportServlet extends HttpServlet {
 
         generator.generate(report);
 
-        resp.sendError(HttpServletResponse.SC_OK);
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 }
