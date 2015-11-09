@@ -15,6 +15,8 @@
  */
 package org.traccar.web.server.reports;
 
+import org.traccar.web.client.model.DataService;
+import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Report;
 import org.traccar.web.shared.model.User;
 
@@ -23,6 +25,8 @@ import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class ReportGenerator {
     @Inject
@@ -37,5 +41,116 @@ public abstract class ReportGenerator {
     @Inject
     HttpServletResponse response;
 
-    public abstract void generate(Report report) throws IOException;
+    @Inject
+    DataService dataService;
+
+    private ReportRenderer renderer;
+
+    abstract void generateImpl(Report report) throws IOException;
+
+    public final void generate(Report report) throws IOException {
+        renderer = new ReportRenderer(response);
+        renderer.start(report);
+        generateImpl(report);
+        renderer.end(report);
+    }
+
+    void h1(String text) {
+        renderer.h1(text);
+    }
+
+    void h2(String text) {
+        renderer.h2(text);
+    }
+
+    void h3(String text) {
+        renderer.h3(text);
+    }
+
+    public void tableRowStart() {
+        renderer.tableRowStart();
+    }
+
+    public void paragraphEnd() {
+        renderer.paragraphEnd();
+    }
+
+    public void tableRowEnd() {
+        renderer.tableRowEnd();
+    }
+
+    public void tableBodyEnd() {
+        renderer.tableBodyEnd();
+    }
+
+    public void tableStart() {
+        renderer.tableStart();
+    }
+
+    public void panelBodyStart() {
+        renderer.panelBodyStart();
+    }
+
+    public void panelBodyEnd() {
+        renderer.panelBodyEnd();
+    }
+
+    public void tableCellEnd() {
+        renderer.tableCellEnd();
+    }
+
+    public void panelStart() {
+        renderer.panelStart();
+    }
+
+    public void panelHeadingEnd() {
+        renderer.panelHeadingEnd();
+    }
+
+    public void text(String text) {
+        renderer.text(text);
+    }
+
+    public void tableEnd() {
+        renderer.tableEnd();
+    }
+
+    public void panelEnd() {
+        renderer.panelEnd();
+    }
+
+    public void panelHeadingStart() {
+        renderer.panelHeadingStart();
+    }
+
+    public void tableBodyStart() {
+        renderer.tableBodyStart();
+    }
+
+    public void paragraphStart() {
+        renderer.paragraphStart();
+    }
+
+    public void bold(String text) {
+        renderer.bold(text);
+    }
+
+    public void tableCellStart() {
+        renderer.tableCellStart();
+    }
+
+    List<Device> getDevices(Report report) {
+        if (report.getDevices().isEmpty()) {
+            return dataService.getDevices();
+        } else {
+            List<Device> devices = new ArrayList<Device>(report.getDevices().size());
+            for (Device reportDevice : report.getDevices()) {
+                Device device = entityManager.find(Device.class, reportDevice.getId());
+                if (currentUser.hasAccessTo(device)) {
+                    devices.add(device);
+                }
+            }
+            return devices;
+        }
+    }
 }
