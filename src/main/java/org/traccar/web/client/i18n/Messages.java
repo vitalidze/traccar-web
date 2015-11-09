@@ -136,6 +136,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String timePrintInterval();
 
     String trackerServerLog();
+    
+    String trackerServerLogWrapper();
 
     String refresh();
 
