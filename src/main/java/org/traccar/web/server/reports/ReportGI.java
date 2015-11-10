@@ -15,19 +15,31 @@
  */
 package org.traccar.web.server.reports;
 
+import org.traccar.web.shared.model.AccessDeniedException;
 import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.Report;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 public class ReportGI extends ReportGenerator {
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     @Override
     void generateImpl(Report report) throws IOException {
         h2(report.getName());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         for (Device device : getDevices(report)) {
+            List<Position> positions;
+            try {
+                positions = dataService.getPositions(device, report.getFromDate(), report.getToDate(), true);
+            } catch (AccessDeniedException ade) {
+                continue;
+            }
+
             panelStart();
 
             // heading
@@ -43,26 +55,75 @@ public class ReportGI extends ReportGenerator {
             text(dateFormat.format(report.getFromDate()) + " - " + dateFormat.format(report.getToDate()));
             paragraphEnd();
             // data table
-            dataTable(device);
+            dataTable(new Info(positions).calculate());
             panelBodyEnd();
 
             panelEnd();
+
+            entityManager.clear();
         }
     }
 
-    void dataTable(Device device) {
+    static class Info {
+        final List<Position> positions;
+        Date start;
+        Date end;
+        long length;
+        long moveDuration;
+        long stopDuration;
+        double topSpeed;
+        double averageSpeed;
+        int overspeedCount;
+
+        Info(List<Position> positions) {
+            this.positions = positions;
+        }
+
+        Info calculate() {
+            this.start = positions.isEmpty() ? null : positions.get(0).getTime();
+            this.end = positions.isEmpty() ? null : positions.get(positions.size() - 1).getTime();
+            this.length = positions.isEmpty() ? 0 : Math.round(positions.get(positions.size() - 1).getDistance());
+
+            Position prevPosition = null;
+            double totalSpeed = 0;
+            int movingCount = 0;
+            for (Position position : positions) {
+                if (prevPosition != null) {
+                    long diffTime = position.getTime().getTime() - prevPosition.getTime().getTime();
+                    if (prevPosition.getSpeed() != null
+                            && prevPosition.getSpeed() > prevPosition.getDevice().getIdleSpeedThreshold()) {
+                        moveDuration += diffTime;
+                    } else {
+                        stopDuration += diffTime;
+                    }
+                }
+                if (position.getSpeed() != null && position.getSpeed() > position.getDevice().getIdleSpeedThreshold()) {
+                    movingCount++;
+                    totalSpeed += position.getSpeed() == null ? 0 : position.getSpeed();
+                    topSpeed = Math.max(position.getSpeed(), topSpeed);
+                }
+
+                prevPosition = position;
+            }
+
+            this.averageSpeed = movingCount == 0 ? 0 : totalSpeed / movingCount;
+
+            return this;
+        }
+    }
+
+    void dataTable(Info info) {
         tableStart();
         tableBodyStart();
 
-        dataRow("Route start", "");
-        dataRow("Route end", "");
-        dataRow("Route length", "");
-        dataRow("Move duration", "");
-        dataRow("Stop duration", "");
-        dataRow("Top speed", "");
-        dataRow("Average speed", "");
+        dataRow("Route start", info.start == null ? "n/a" : dateFormat.format(info.start));
+        dataRow("Route end", info.end == null ? "n/a" : dateFormat.format(info.end));
+        dataRow("Route length", Long.toString(info.length));
+        dataRow("Move duration", formatDuration(info.moveDuration));
+        dataRow("Stop duration", formatDuration(info.stopDuration));
+        dataRow("Top speed", formatSpeed(info.topSpeed));
+        dataRow("Average speed", formatSpeed(info.averageSpeed));
         dataRow("Overspeed count", "");
-        dataRow("Odometer", "");
 
         tableBodyEnd();
         tableEnd();

@@ -153,4 +153,31 @@ public abstract class ReportGenerator {
             return devices;
         }
     }
+
+    String formatDuration(long duration) {
+        if (duration == 0) {
+            return "0s";
+        }
+
+        int days = (int) (duration / 86400000L);
+        duration -= (long) days * 86400000L;
+
+        int hours = (int) (duration / 3600000L);
+        duration -= (long) hours * 3600000L;
+
+        int minutes = (int) (duration / 60000L);
+        duration -= (long) minutes * 60000L;
+
+        int seconds = (int) (duration / 1000L);
+
+        return
+                (days == 0 ? "" : days + "d ") +
+                        (hours == 0 ? "" : hours + "h ") +
+                        (minutes == 0 ? "" : minutes + "m ") +
+                        (seconds == 0 ? "" : seconds + "s ");
+    }
+
+    String formatSpeed(double speed) {
+        return Double.toString(speed);
+    }
 }
