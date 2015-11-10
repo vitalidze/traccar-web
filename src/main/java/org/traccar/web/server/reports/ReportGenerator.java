@@ -16,15 +16,15 @@
 package org.traccar.web.server.reports;
 
 import org.traccar.web.client.model.DataService;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Report;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.server.model.ServerMessages;
+import org.traccar.web.shared.model.*;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +43,12 @@ public abstract class ReportGenerator {
 
     @Inject
     DataService dataService;
+
+    @Inject
+    ServerMessages messages;
+
+    @Inject
+    ApplicationSettings applicationSettings;
 
     private ReportRenderer renderer;
 
@@ -171,13 +177,34 @@ public abstract class ReportGenerator {
         int seconds = (int) (duration / 1000L);
 
         return
-                (days == 0 ? "" : days + "d ") +
-                        (hours == 0 ? "" : hours + "h ") +
-                        (minutes == 0 ? "" : minutes + "m ") +
-                        (seconds == 0 ? "" : seconds + "s ");
+                (days == 0 ? "" : days + message("day") + " ") +
+                        (hours == 0 ? "" : hours + message("hour") + " ") +
+                        (minutes == 0 ? "" : minutes + message("minute") + " ") +
+                        (seconds == 0 ? "" : seconds + message("second") + " ");
     }
 
     String formatSpeed(double speed) {
-        return Double.toString(speed);
+        UserSettings.SpeedUnit speedUnit = currentUser.getUserSettings().getSpeedUnit();
+        NumberFormat speedFormat = NumberFormat.getInstance();
+        speedFormat.setMaximumFractionDigits(2);
+        speedFormat.setMinimumIntegerDigits(0);
+        return speedFormat.format((Double.isNaN(speed) ? 0d : speed) * speedUnit.getFactor()) + " " + speedUnit.getUnit();
+    }
+
+    String formatDistance(double distance) {
+        UserSettings.SpeedUnit speedUnit = currentUser.getUserSettings().getSpeedUnit();
+        UserSettings.DistanceUnit distanceUnit = speedUnit.getDistanceUnit();
+        NumberFormat distanceFormat = NumberFormat.getInstance();
+        distanceFormat.setMaximumFractionDigits(2);
+        distanceFormat.setMinimumIntegerDigits(0);
+        return distanceFormat.format((Double.isNaN(distance) ? 0d : distance) * distanceUnit.getFactor()) + " " + distanceUnit.getUnit();
+    }
+
+    String message(String key) {
+        String locale = request.getParameter("locale");
+        if (locale == null) {
+            locale = applicationSettings.getLanguage();
+        }
+        return messages.message(locale, key);
     }
 }

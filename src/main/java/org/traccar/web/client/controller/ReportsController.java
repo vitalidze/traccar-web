@@ -17,8 +17,10 @@ package org.traccar.web.client.controller;
 
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Hidden;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sencha.gxt.data.shared.ListStore;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
@@ -105,8 +107,10 @@ public class ReportsController implements ArchiveController.ReportsHandler {
         form.setAction("traccar/report");
         form.setMethod(FormPanel.METHOD_POST);
         form.setEncoding(FormPanel.ENCODING_URLENCODED);
-        Hidden hidden = new Hidden("report", reportMapper.write(report));
-        form.add(hidden);
+        HorizontalPanel container = new HorizontalPanel();
+        container.add(new Hidden("report", reportMapper.write(report)));
+        container.add(new Hidden("locale", LocaleInfo.getCurrentLocale().getLocaleName()));
+        form.add(container);
         form.submit();
     }
 }

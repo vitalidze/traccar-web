@@ -29,6 +29,7 @@ public class ReportRenderer {
 
     public ReportRenderer(HttpServletResponse response) throws IOException {
         this.response = response;
+        response.setCharacterEncoding("UTF-8");
         this.writer = response.getWriter();
     }
 

@@ -51,7 +51,7 @@ public class ReportGI extends ReportGenerator {
             panelBodyStart();
             // period
             paragraphStart();
-            bold("Period: ");
+            bold(message("timePeriod") + ": ");
             text(dateFormat.format(report.getFromDate()) + " - " + dateFormat.format(report.getToDate()));
             paragraphEnd();
             // data table
@@ -68,7 +68,7 @@ public class ReportGI extends ReportGenerator {
         final List<Position> positions;
         Date start;
         Date end;
-        long length;
+        double length;
         long moveDuration;
         long stopDuration;
         double topSpeed;
@@ -82,7 +82,7 @@ public class ReportGI extends ReportGenerator {
         Info calculate() {
             this.start = positions.isEmpty() ? null : positions.get(0).getTime();
             this.end = positions.isEmpty() ? null : positions.get(positions.size() - 1).getTime();
-            this.length = positions.isEmpty() ? 0 : Math.round(positions.get(positions.size() - 1).getDistance());
+            this.length = positions.isEmpty() ? 0 : positions.get(positions.size() - 1).getDistance();
 
             Position prevPosition = null;
             double totalSpeed = 0;
@@ -116,14 +116,14 @@ public class ReportGI extends ReportGenerator {
         tableStart();
         tableBodyStart();
 
-        dataRow("Route start", info.start == null ? "n/a" : dateFormat.format(info.start));
-        dataRow("Route end", info.end == null ? "n/a" : dateFormat.format(info.end));
-        dataRow("Route length", Long.toString(info.length));
-        dataRow("Move duration", formatDuration(info.moveDuration));
-        dataRow("Stop duration", formatDuration(info.stopDuration));
-        dataRow("Top speed", formatSpeed(info.topSpeed));
-        dataRow("Average speed", formatSpeed(info.averageSpeed));
-        dataRow("Overspeed count", "");
+        dataRow(message("routeStart"), info.start == null ? "n/a" : dateFormat.format(info.start));
+        dataRow(message("routeEnd"), info.end == null ? "n/a" : dateFormat.format(info.end));
+        dataRow(message("routeLength"), formatDistance(info.length));
+        dataRow(message("moveDuration"), formatDuration(info.moveDuration));
+        dataRow(message("stopDuration"), formatDuration(info.stopDuration));
+        dataRow(message("topSpeed"), formatSpeed(info.topSpeed));
+        dataRow(message("averageSpeed"), formatSpeed(info.averageSpeed));
+        dataRow(message("overspeedCount"), "");
 
         tableBodyEnd();
         tableEnd();

@@ -418,4 +418,20 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String reportType(@Select ReportType type);
 
     String confirmReportRemoval();
+
+    String routeStart();
+
+    String routeEnd();
+
+    String routeLength();
+
+    String moveDuration();
+
+    String stopDuration();
+
+    String topSpeed();
+
+    String averageSpeed();
+
+    String overspeedCount();
 }
