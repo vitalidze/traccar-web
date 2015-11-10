@@ -88,19 +88,29 @@ public class ReportGI extends ReportGenerator {
             double totalSpeed = 0;
             int movingCount = 0;
             for (Position position : positions) {
+                Device device = position.getDevice();
+
                 if (prevPosition != null) {
                     long diffTime = position.getTime().getTime() - prevPosition.getTime().getTime();
                     if (prevPosition.getSpeed() != null
-                            && prevPosition.getSpeed() > prevPosition.getDevice().getIdleSpeedThreshold()) {
+                            && prevPosition.getSpeed() > device.getIdleSpeedThreshold()) {
                         moveDuration += diffTime;
                     } else {
                         stopDuration += diffTime;
                     }
                 }
-                if (position.getSpeed() != null && position.getSpeed() > position.getDevice().getIdleSpeedThreshold()) {
+                if (position.getSpeed() != null && position.getSpeed() > device.getIdleSpeedThreshold()) {
                     movingCount++;
                     totalSpeed += position.getSpeed() == null ? 0 : position.getSpeed();
                     topSpeed = Math.max(position.getSpeed(), topSpeed);
+                }
+
+                if (device.getSpeedLimit() != null
+                        && position.getSpeed() != null && position.getSpeed() > device.getSpeedLimit()
+                        && (prevPosition == null
+                            || prevPosition.getSpeed() == null
+                            || prevPosition.getSpeed() <= device.getSpeedLimit())) {
+                    overspeedCount++;
                 }
 
                 prevPosition = position;
@@ -123,7 +133,7 @@ public class ReportGI extends ReportGenerator {
         dataRow(message("stopDuration"), formatDuration(info.stopDuration));
         dataRow(message("topSpeed"), formatSpeed(info.topSpeed));
         dataRow(message("averageSpeed"), formatSpeed(info.averageSpeed));
-        dataRow(message("overspeedCount"), "");
+        dataRow(message("overspeedCount"), Integer.toString(info.overspeedCount));
 
         tableBodyEnd();
         tableEnd();
