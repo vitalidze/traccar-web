@@ -25,7 +25,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public abstract class ReportGenerator {
@@ -51,6 +53,8 @@ public abstract class ReportGenerator {
     ApplicationSettings applicationSettings;
 
     private ReportRenderer renderer;
+
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     abstract void generateImpl(Report report) throws IOException;
 
@@ -90,7 +94,39 @@ public abstract class ReportGenerator {
     }
 
     public void tableStart() {
-        renderer.tableStart();
+        renderer.tableStart(null);
+    }
+
+    public void tableStart(ReportRenderer.TableStyle style) {
+        renderer.tableStart(style);
+    }
+
+    ReportRenderer.TableStyle hover() {
+        return new ReportRenderer.TableStyle().hover();
+    }
+
+    ReportRenderer.TableStyle condensed() {
+        return new ReportRenderer.TableStyle().condensed();
+    }
+
+    public void tableHeadStart() {
+        renderer.tableHeadStart();
+    }
+
+    public void tableHeadEnd() {
+        renderer.tableHeadEnd();
+    }
+
+    public void tableHeadCellStart() {
+        renderer.tableHeadCellStart(null);
+    }
+
+    public void tableHeadCellStart(ReportRenderer.CellStyle style) {
+        renderer.tableHeadCellStart(style);
+    }
+
+    public void tableHeadCellEnd() {
+        renderer.tableHeadCellEnd();
     }
 
     public void panelBodyStart() {
@@ -142,7 +178,25 @@ public abstract class ReportGenerator {
     }
 
     public void tableCellStart() {
-        renderer.tableCellStart();
+        renderer.tableCellStart(null);
+    }
+
+    void tableCell(String text) {
+        tableCellStart();
+        text(text);
+        tableCellEnd();
+    }
+
+    public void tableCellStart(ReportRenderer.CellStyle style) {
+        renderer.tableCellStart(style);
+    }
+
+    ReportRenderer.CellStyle colspan(int colspan) {
+        return new ReportRenderer.CellStyle().colspan(colspan);
+    }
+
+    ReportRenderer.CellStyle rowspan(int rowspan) {
+        return new ReportRenderer.CellStyle().rowspan(rowspan);
     }
 
     List<Device> getDevices(Report report) {
@@ -197,7 +251,12 @@ public abstract class ReportGenerator {
         NumberFormat distanceFormat = NumberFormat.getInstance();
         distanceFormat.setMaximumFractionDigits(2);
         distanceFormat.setMinimumIntegerDigits(0);
+        distanceFormat.setMinimumIntegerDigits(1);
         return distanceFormat.format((Double.isNaN(distance) ? 0d : distance) * distanceUnit.getFactor()) + " " + distanceUnit.getUnit();
+    }
+
+    String formatDate(Date date) {
+        return dateFormat.format(date);
     }
 
     String message(String key) {

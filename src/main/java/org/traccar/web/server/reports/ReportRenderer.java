@@ -124,12 +124,79 @@ public class ReportRenderer {
         line("</p>");
     }
 
-    public void tableStart() {
-        line("<table>");
+    static class TableStyle {
+        private boolean hover;
+        private boolean condensed;
+
+        TableStyle hover() {
+            this.hover = true;
+            return this;
+        }
+
+        TableStyle condensed() {
+            this.condensed = true;
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return "class=\"table" +
+                    (hover ? " table-hover" : "") +
+                    (condensed ? " table-condensed" : "") + "\"";
+        }
+    }
+
+    public void tableStart(TableStyle style) {
+        if (style == null) {
+            line("<table>");
+        } else {
+            line("<table " + style + ">");
+        }
     }
 
     public void tableEnd() {
         line("</table>");
+    }
+
+    public void tableHeadStart() {
+        line("<thead>");
+    }
+
+    public void tableHeadEnd() {
+        line("</thead>");
+    }
+
+    static class CellStyle {
+        int colspan;
+        int rowspan;
+
+        CellStyle colspan(int colspan) {
+            this.colspan = colspan;
+            return this;
+        }
+
+        CellStyle rowspan(int rowspan) {
+            this.rowspan = rowspan;
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return (colspan == 0 ? "" : ("colspan=\"" + colspan + "\"")) +
+                   (rowspan == 0 ? "" : (" rowspan=\"" + rowspan + "\""));
+        }
+    }
+
+    public void tableHeadCellStart(CellStyle style) {
+        if (style == null) {
+            line("<th>");
+        } else {
+            line("<th " + style + ">");
+        }
+    }
+
+    public void tableHeadCellEnd() {
+        line("</th>");
     }
 
     public void tableBodyStart() {
@@ -148,8 +215,12 @@ public class ReportRenderer {
         line("</tr>");
     }
 
-    public void tableCellStart() {
-        line("<td>");
+    public void tableCellStart(CellStyle style) {
+        if (style == null) {
+            line("<td>");
+        } else {
+            line("<td " + style + ">");
+        }
     }
 
     public void tableCellEnd() {

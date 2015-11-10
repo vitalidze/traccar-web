@@ -436,4 +436,18 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String overspeedCount();
 
     String speedLimit();
+
+    String status();
+
+    String start();
+
+    String end();
+
+    String duration();
+
+    String moving();
+
+    String stopped();
+
+    String stopPosition();
 }

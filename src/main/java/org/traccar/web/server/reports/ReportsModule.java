@@ -24,5 +24,7 @@ public class ReportsModule extends AbstractModule {
     protected void configure() {
         MapBinder.newMapBinder(binder(), ReportType.class, ReportGenerator.class)
                 .addBinding(ReportType.GENERAL_INFORMATION).to(ReportGI.class);
+        MapBinder.newMapBinder(binder(), ReportType.class, ReportGenerator.class)
+                .addBinding(ReportType.DRIVES_AND_STOPS).to(ReportDS.class);
     }
 }

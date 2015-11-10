@@ -26,8 +26,6 @@ import java.util.Date;
 import java.util.List;
 
 public class ReportGI extends ReportGenerator {
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     @Override
     void generateImpl(Report report) throws IOException {
         h2(report.getName());
@@ -52,7 +50,7 @@ public class ReportGI extends ReportGenerator {
             // period
             paragraphStart();
             bold(message("timePeriod") + ": ");
-            text(dateFormat.format(report.getFromDate()) + " - " + dateFormat.format(report.getToDate()));
+            text(formatDate(report.getFromDate()) + " - " + formatDate(report.getToDate()));
             paragraphEnd();
             // data table
             dataTable(new Info(positions).calculate());
@@ -126,8 +124,8 @@ public class ReportGI extends ReportGenerator {
         tableStart();
         tableBodyStart();
 
-        dataRow(message("routeStart"), info.start == null ? "n/a" : dateFormat.format(info.start));
-        dataRow(message("routeEnd"), info.end == null ? "n/a" : dateFormat.format(info.end));
+        dataRow(message("routeStart"), info.start == null ? "n/a" : formatDate(info.start));
+        dataRow(message("routeEnd"), info.end == null ? "n/a" : formatDate(info.end));
         dataRow(message("routeLength"), formatDistance(info.length));
         dataRow(message("moveDuration"), formatDuration(info.moveDuration));
         dataRow(message("stopDuration"), formatDuration(info.stopDuration));
