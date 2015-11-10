@@ -250,7 +250,7 @@ public class GeoFence implements IsSerializable {
         points = geoFence.points;
         radius = geoFence.radius;
         allDevices = geoFence.allDevices;
-        if (transferDevices != null) {
+        if (geoFence.transferDevices != null) {
             transferDevices = new HashSet<Device>(geoFence.getTransferDevices());
         }
         return this;

@@ -53,13 +53,13 @@ public class Device implements IsSerializable {
         photo = device.getPhoto();
         odometer = device.odometer;
         autoUpdateOdometer = device.autoUpdateOdometer;
-        if (maintenances != null) {
+        if (device.maintenances != null) {
             maintenances = new ArrayList<Maintenance>(device.maintenances.size());
             for (Maintenance maintenance : device.maintenances) {
                 maintenances.add(new Maintenance(maintenance));
             }
         }
-        if (sensors != null) {
+        if (device.sensors != null) {
             sensors = new ArrayList<Sensor>(device.sensors.size());
             for (Sensor sensor : device.sensors) {
                 sensors.add(new Sensor(sensor));
@@ -165,6 +165,17 @@ public class Device implements IsSerializable {
 
     public void setIdleSpeedThreshold(double idleSpeedThreshold) {
         this.idleSpeedThreshold = idleSpeedThreshold;
+    }
+
+    @Column(nullable = true)
+    private double speedLimit;
+
+    public double getSpeedLimit() {
+        return speedLimit;
+    }
+
+    public void setSpeedLimit(double speedLimit) {
+        this.speedLimit = speedLimit;
     }
 
     // Hibernate bug HHH-8783: (http://hibernate.atlassian.net/browse/HHH-8783)
