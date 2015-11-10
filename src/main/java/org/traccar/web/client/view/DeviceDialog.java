@@ -91,6 +91,9 @@ public class DeviceDialog implements Editor<Device> {
     NumberField<Double> idleSpeedThreshold;
 
     @UiField
+    NumberField<Double> speedLimit;
+
+    @UiField
     FieldLabel labelMarkers;
 
     @UiField
@@ -134,6 +137,9 @@ public class DeviceDialog implements Editor<Device> {
         driver.edit(device);
 
         idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
+        if (device.getSpeedLimit() != null) {
+            speedLimit.setValue(device.getSpeedLimit() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
+        }
         updateIcon();
 
         updatePhoto();
@@ -160,6 +166,9 @@ public class DeviceDialog implements Editor<Device> {
         window.hide();
         Device device = driver.flush();
         device.setIdleSpeedThreshold(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getIdleSpeedThreshold()));
+        if (device.getSpeedLimit() != null) {
+            device.setSpeedLimit(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getSpeedLimit()));
+        }
         device.setIconType(selectedIcon.getBuiltInIcon());
         device.setIcon(selectedIcon.getDatabaseIcon());
         maintenanceEditor.flush();

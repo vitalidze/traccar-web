@@ -121,6 +121,18 @@
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.speedLimit}" labelWidth="180">
+                          <form:widget>
+                              <form:NumberField editor="{doublePropertyEditor}"
+                                                ui:field="speedLimit"
+                                                allowNegative="false"
+                                                allowDecimals="true"
+                                                allowBlank="true"
+                                                width="5" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
                   <container:child layoutData="{verticalLayoutDataWithButtons}">
                       <form:FieldLabel ui:field="labelMarkers" labelWidth="180">
                           <form:widget>

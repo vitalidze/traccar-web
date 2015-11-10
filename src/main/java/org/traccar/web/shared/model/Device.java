@@ -168,13 +168,13 @@ public class Device implements IsSerializable {
     }
 
     @Column(nullable = true)
-    private double speedLimit;
+    private Double speedLimit;
 
-    public double getSpeedLimit() {
+    public Double getSpeedLimit() {
         return speedLimit;
     }
 
-    public void setSpeedLimit(double speedLimit) {
+    public void setSpeedLimit(Double speedLimit) {
         this.speedLimit = speedLimit;
     }
 
