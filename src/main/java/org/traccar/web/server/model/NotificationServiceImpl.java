@@ -74,6 +74,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         @Inject
         Provider<ApplicationSettings> applicationSettings;
 
+        @Inject
+        ServerMessages messages;
+
         @Transactional
         @Override
         public void doWork() throws Exception {
@@ -302,6 +305,17 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             } finally {
                 if (is != null ) try { is.close(); } catch (IOException ignored) {}
             }
+        }
+
+        String defaultBody(DeviceEventType type, String locale) {
+            String body = messages.message(locale, "defaultNotificationTemplate[" + type.name() + "]");
+
+            return body.replace("''", "'")
+                    .replace("{1}", "${deviceName}")
+                    .replace("{2}", "${geoFenceName}")
+                    .replace("{3}", "${eventTime}")
+                    .replace("{4}", "${positionTime}")
+                    .replace("{5}", "${maintenanceName}");
         }
     }
 
@@ -563,27 +577,5 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 entityManager.get().persist(newTemplate);
             }
         }
-    }
-
-    static String defaultBody(DeviceEventType type, String locale) throws IOException {
-        Properties defaultMessages = new Properties();
-        defaultMessages.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/client/i18n/Messages.properties"));
-
-        Properties localeMessages = new Properties();
-        InputStream messagesIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/client/i18n/Messages_" + locale + ".properties");
-        if (messagesIS == null) {
-            localeMessages = defaultMessages;
-        } else {
-            localeMessages.load(new InputStreamReader(messagesIS, "UTF-8"));
-        }
-
-        String key = "defaultNotificationTemplate[" + type.name() + "]";
-        String body = localeMessages.getProperty(key, defaultMessages.getProperty(key));
-        return body.replace("''", "'")
-                .replace("{1}", "${deviceName}")
-                .replace("{2}", "${geoFenceName}")
-                .replace("{3}", "${eventTime}")
-                .replace("{4}", "${positionTime}")
-                .replace("{5}", "${maintenanceName}");
     }
 }
