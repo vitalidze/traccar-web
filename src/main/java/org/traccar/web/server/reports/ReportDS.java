@@ -21,7 +21,6 @@ import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.Report;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
