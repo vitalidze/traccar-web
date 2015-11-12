@@ -80,13 +80,13 @@ public class ReportGI extends ReportGenerator {
         Info calculate() {
             this.start = positions.isEmpty() ? null : positions.get(0).getTime();
             this.end = positions.isEmpty() ? null : positions.get(positions.size() - 1).getTime();
-            this.length = positions.isEmpty() ? 0 : positions.get(positions.size() - 1).getDistance();
 
             Position prevPosition = null;
             double totalSpeed = 0;
             int movingCount = 0;
             for (Position position : positions) {
                 Device device = position.getDevice();
+                this.length += position.getDistance();
 
                 if (prevPosition != null) {
                     long diffTime = position.getTime().getTime() - prevPosition.getTime().getTime();
