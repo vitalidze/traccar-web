@@ -227,6 +227,20 @@ public class ReportRenderer {
         line("</td>");
     }
 
+    public void link(String url, String target, String text) {
+        writer.write("<a href=\"");
+        writer.write(url);
+        writer.write("\"");
+        if (target != null) {
+            writer.write(" target=\"");
+            writer.write(target);
+            writer.write("\"");
+        }
+        writer.write(">");
+        writer.write(text);
+        writer.write("</a>");
+    }
+
     private ReportRenderer line(String html) {
         writer.println(html);
         return this;

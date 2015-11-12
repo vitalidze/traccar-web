@@ -24,6 +24,8 @@ import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -189,6 +191,38 @@ public abstract class ReportGenerator {
 
     public void tableCellStart(ReportRenderer.CellStyle style) {
         renderer.tableCellStart(style);
+    }
+
+    public void link(String url, String target, String text) {
+        renderer.link(url, target, text);
+    }
+
+    void mapLink(double latitude, double longitude) {
+        UserSettings userSettings = currentUser.getUserSettings();
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator('.');
+        DecimalFormat lonLatFormat = new DecimalFormat("##.######", symbols);
+        String text = lonLatFormat.format(latitude) + " \u00B0, " +
+                lonLatFormat.format(longitude) + " \u00B0";
+
+        switch (userSettings.getMapType()) {
+            case GOOGLE_HYBRID:
+            case GOOGLE_NORMAL:
+            case GOOGLE_SATELLITE:
+            case GOOGLE_TERRAIN: {
+                link("https://maps.google.com/maps?q=" + lonLatFormat.format(latitude) + "," + lonLatFormat.format(longitude) + "&t=m",
+                        "_blank", text);
+                break;
+            }
+            default: {
+                link("http://www.openstreetmap.org/?" +
+                                "mlat=" + lonLatFormat.format(latitude) + "&mlon=" + lonLatFormat.format(longitude) +
+                                "#map=" + userSettings.getZoomLevel() + "/" +
+                                lonLatFormat.format(latitude) + "/" + lonLatFormat.format(longitude),
+                        "_blank", text);
+                break;
+            }
+        }
     }
 
     ReportRenderer.CellStyle colspan(int colspan) {
