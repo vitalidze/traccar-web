@@ -57,8 +57,6 @@ public class ReportGI extends ReportGenerator {
             panelBodyEnd();
 
             panelEnd();
-
-            entityManager.clear();
         }
     }
 

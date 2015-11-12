@@ -62,7 +62,6 @@ public class ReportDS extends ReportGenerator {
             panelBodyEnd();
 
             panelEnd();
-            entityManager.clear();
         }
     }
 
