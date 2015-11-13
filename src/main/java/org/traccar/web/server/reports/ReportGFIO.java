@@ -49,7 +49,8 @@ public class ReportGFIO extends ReportGenerator {
             bold(message("timePeriod") + ": ");
             text(formatDate(report.getFromDate()) + " - " + formatDate(report.getToDate()));
             paragraphEnd();
-
+            // device details
+            deviceDetails(device);
             // data table
             if (!positions.isEmpty() && !geoFences.isEmpty()) {
                 drawTable(calculate(geoFences, positions));

@@ -21,7 +21,6 @@ import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.Report;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -52,6 +51,8 @@ public class ReportGI extends ReportGenerator {
             bold(message("timePeriod") + ": ");
             text(formatDate(report.getFromDate()) + " - " + formatDate(report.getToDate()));
             paragraphEnd();
+            // device details
+            deviceDetails(device);
             // data table
             dataTable(new Info(positions).calculate());
             panelBodyEnd();
@@ -133,16 +134,5 @@ public class ReportGI extends ReportGenerator {
 
         tableBodyEnd();
         tableEnd();
-    }
-
-    void dataRow(String title, String text) {
-        tableRowStart();
-        tableCellStart();
-        bold(title + ":");
-        tableCellEnd();
-        tableCellStart();
-        text(text);
-        tableCellEnd();
-        tableRowEnd();
     }
 }

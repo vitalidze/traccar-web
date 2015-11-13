@@ -51,7 +51,8 @@ public class ReportDS extends ReportGenerator {
             bold(message("timePeriod") + ": ");
             text(formatDate(report.getFromDate()) + " - " + formatDate(report.getToDate()));
             paragraphEnd();
-
+            // device details
+            deviceDetails(device);
             // data table
             if (!positions.isEmpty()) {
                 drawTable(positions);
@@ -202,17 +203,6 @@ public class ReportDS extends ReportGenerator {
 
         tableBodyEnd();
         tableEnd();
-    }
-
-    void dataRow(String title, String text) {
-        tableRowStart();
-        tableCellStart();
-        bold(title + ":");
-        tableCellEnd();
-        tableCellStart();
-        text(text);
-        tableCellEnd();
-        tableRowEnd();
     }
 
     private boolean isIdle(Position position) {

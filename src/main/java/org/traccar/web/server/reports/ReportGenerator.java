@@ -226,6 +226,52 @@ public abstract class ReportGenerator {
         }
     }
 
+    void dataRow(String title, String text) {
+        tableRowStart();
+        tableCellStart();
+        bold(title + ":");
+        tableCellEnd();
+        tableCellStart();
+        text(text);
+        tableCellEnd();
+        tableRowEnd();
+    }
+
+    void deviceDetails(Device device) {
+        if (hasNonEmpty(device.getDescription(), device.getPlateNumber(), device.getVehicleInfo())) {
+            tableStart();
+            tableBodyStart();
+
+            if (!isNotEmpty(device.getDescription())) {
+                dataRow(message("description"), device.getDescription());
+            }
+
+            if (!isNotEmpty(device.getPlateNumber())) {
+                dataRow(message("plateNumber"), device.getPlateNumber());
+            }
+
+            if (!isNotEmpty(device.getVehicleInfo())) {
+                dataRow(message("vehicleBrandModelColor"), device.getVehicleInfo());
+            }
+
+            tableBodyEnd();
+            tableEnd();
+        }
+    }
+
+    boolean hasNonEmpty(String... strings) {
+        for (String string : strings) {
+            if (isNotEmpty(string)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean isNotEmpty(String string) {
+        return string != null && !string.trim().isEmpty();
+    }
+
     ReportRenderer.CellStyle colspan(int colspan) {
         return new ReportRenderer.CellStyle().colspan(colspan);
     }
