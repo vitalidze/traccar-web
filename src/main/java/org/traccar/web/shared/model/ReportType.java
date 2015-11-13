@@ -20,6 +20,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public enum ReportType implements IsSerializable {
     GENERAL_INFORMATION,
     DRIVES_AND_STOPS,
+    MILEAGE_DETAIL,
     OVERSPEEDS,
     GEO_FENCE_IN_OUT {
         @Override

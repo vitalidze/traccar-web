@@ -28,10 +28,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public abstract class ReportGenerator {
     @Inject
@@ -57,12 +54,23 @@ public abstract class ReportGenerator {
 
     private ReportRenderer renderer;
 
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat dateFormat;
+
+    private SimpleDateFormat longDateFormat;
+
+    private TimeZone timeZone;
 
     abstract void generateImpl(Report report) throws IOException;
 
     public final void generate(Report report) throws IOException {
         renderer = new ReportRenderer(response);
+        timeZone = currentUser.getUserSettings().getTimeZoneId() == null
+                ? TimeZone.getDefault()
+                : TimeZone.getTimeZone(currentUser.getUserSettings().getTimeZoneId());
+        Locale locale = new Locale(getLocale());
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", locale);
+        longDateFormat = new SimpleDateFormat("d MMM yyyy", locale);
+
         renderer.start(report);
         generateImpl(report);
         renderer.end(report);
@@ -363,11 +371,23 @@ public abstract class ReportGenerator {
         return dateFormat.format(date);
     }
 
-    String message(String key) {
+    String formatDateLong(Date date) {
+        return longDateFormat.format(date);
+    }
+
+    String getLocale() {
         String locale = request.getParameter("locale");
         if (locale == null) {
             locale = applicationSettings.getLanguage();
         }
-        return messages.message(locale, key);
+        return locale;
+    }
+
+    String message(String key) {
+        return messages.message(getLocale(), key);
+    }
+
+    TimeZone getTimeZone() {
+        return timeZone;
     }
 }

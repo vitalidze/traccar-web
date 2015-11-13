@@ -32,5 +32,7 @@ public class ReportsModule extends AbstractModule {
                 .addBinding(ReportType.GEO_FENCE_IN_OUT).to(ReportGFIO.class);
         MapBinder.newMapBinder(binder(), ReportType.class, ReportGenerator.class)
                 .addBinding(ReportType.EVENTS).to(ReportEV.class);
+        MapBinder.newMapBinder(binder(), ReportType.class, ReportGenerator.class)
+                .addBinding(ReportType.MILEAGE_DETAIL).to(ReportMD.class);
     }
 }
