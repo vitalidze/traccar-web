@@ -80,4 +80,8 @@ public class PeriodComboBox extends ComboBox<Period> {
 		setValue(getStore().get(0));
 		setDateTimefd(getStore().get(0));
 	}
+
+	public void update() {
+		setDateTimefd(getValue());
+	}
 }

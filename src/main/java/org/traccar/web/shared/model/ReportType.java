@@ -21,5 +21,14 @@ public enum ReportType implements IsSerializable {
     GENERAL_INFORMATION,
     DRIVES_AND_STOPS,
     OVERSPEEDS,
-    GEO_FENCE_IN_OUT;
+    GEO_FENCE_IN_OUT {
+        @Override
+        public boolean supportsGeoFences() {
+            return true;
+        }
+    };
+
+    public boolean supportsGeoFences() {
+        return false;
+    }
 }

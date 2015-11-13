@@ -122,8 +122,8 @@
                     </gxt:ContentPanel>
                 </container:child>
                 <container:child layoutData="{boxLayoutDataMargins0Flex3}">
-                    <gxt:ContentPanel headingText="{i18n.geoFence}" bodyStyleName="{style.pad3}">
-                        <gxt:ListView ui:field="geoFencesList" store="{geoFenceStore}" />
+                    <gxt:ContentPanel headingText="{i18n.geoFence}" bodyStyleName="{style.pad3}" ui:field="geoFencesPanel">
+                        <gxt:ListView ui:field="geoFencesList" store="{geoFenceStore}" enabled="false" />
                     </gxt:ContentPanel>
                 </container:child>
             </container:HBoxLayoutContainer>

@@ -18,6 +18,8 @@ package org.traccar.web.client.view;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -25,6 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.Window;
@@ -127,6 +130,9 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
     @Ignore
     TextButton removeButton;
 
+    @UiField
+    ContentPanel geoFencesPanel;
+
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
@@ -168,17 +174,27 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
         grid.getSelectionModel().addSelectionChangedHandler(new SelectionChangedEvent.SelectionChangedHandler<Report>() {
             @Override
             public void onSelectionChanged(SelectionChangedEvent<Report> event) {
+                Report report = event.getSelection().isEmpty() ? new Report() : event.getSelection().get(0);
+                driver.edit(report);
                 if (event.getSelection().isEmpty()) {
-                    driver.edit(new Report());
+                    period.selectFirst();
                 } else {
-                    driver.edit(event.getSelection().get(0));
+                    period.update(); // recalculate dates once again
                 }
+                updateGeoFencesListState();
                 removeButton.setEnabled(!event.getSelection().isEmpty());
+            }
+        });
+        type.addSelectionHandler(new SelectionHandler<ReportType>() {
+            @Override
+            public void onSelection(SelectionEvent<ReportType> event) {
+                updateGeoFencesListState();
             }
         });
 
         period.init(fromDateField, fromTimeField, toDateField, toTimeField);
 
+        geoFencesPanel.setHeadingText(i18n.overlayType(UserSettings.OverlayType.GEO_FENCES));
         geoFences = new ListViewEditor<GeoFence>(geoFencesList);
         devices = new ListViewEditor<Device>(devicesList);
         fromDate = new DateTimeEditor(fromDateField, fromTimeField);
@@ -228,7 +244,15 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
 
     @UiHandler("generateButton")
     public void onGenerateClicked(SelectEvent event) {
-        reportHandler.onGenerate(driver.flush());
+        Report report = driver.flush();
+        if (!driver.hasErrors()) {
+            reportHandler.onGenerate(report);
+        }
+    }
+
+    private void updateGeoFencesListState() {
+        ReportType type = this.type.getValue();
+        geoFencesList.setEnabled(type != null && type.supportsGeoFences());
     }
 
     @Override
