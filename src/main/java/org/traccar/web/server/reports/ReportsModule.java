@@ -30,5 +30,7 @@ public class ReportsModule extends AbstractModule {
                 .addBinding(ReportType.OVERSPEEDS).to(ReportOS.class);
         MapBinder.newMapBinder(binder(), ReportType.class, ReportGenerator.class)
                 .addBinding(ReportType.GEO_FENCE_IN_OUT).to(ReportGFIO.class);
+        MapBinder.newMapBinder(binder(), ReportType.class, ReportGenerator.class)
+                .addBinding(ReportType.EVENTS).to(ReportEV.class);
     }
 }

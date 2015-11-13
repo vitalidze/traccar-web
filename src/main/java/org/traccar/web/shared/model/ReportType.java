@@ -26,6 +26,12 @@ public enum ReportType implements IsSerializable {
         public boolean supportsGeoFences() {
             return true;
         }
+    },
+    EVENTS {
+        @Override
+        public boolean supportsGeoFences() {
+            return true;
+        }
     };
 
     public boolean supportsGeoFences() {
