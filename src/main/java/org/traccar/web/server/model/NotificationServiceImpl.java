@@ -177,7 +177,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             }
             if (event.getType() == DeviceEventType.GEO_FENCE_ENTER || event.getType() == DeviceEventType.GEO_FENCE_EXIT) {
                 // check whether user has access to the geo-fence
-                if (!user.getAdmin() && !user.hasAccessTo(event.getGeoFence())) {
+                if (!user.hasAccessTo(event.getGeoFence())) {
                     return;
                 }
             }

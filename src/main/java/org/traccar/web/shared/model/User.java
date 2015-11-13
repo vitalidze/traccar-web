@@ -204,6 +204,10 @@ public class User implements IsSerializable, Cloneable {
     }
 
     public boolean hasAccessTo(GeoFence geoFence) {
+        if (getAdmin()) {
+            return true;
+        }
+
         if (hasAccessOnLowerLevelTo(geoFence)) {
             return true;
         }

@@ -452,4 +452,12 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String stopPosition();
 
     String overspeedPosition();
+
+    String geoFenceIn();
+
+    String geoFenceOut();
+
+    String geoFenceName();
+
+    String geoFencePosition();
 }

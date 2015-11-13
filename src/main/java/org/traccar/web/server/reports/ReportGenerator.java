@@ -30,6 +30,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class ReportGenerator {
@@ -246,6 +247,29 @@ public abstract class ReportGenerator {
             }
             return devices;
         }
+    }
+
+    List<GeoFence> getGeoFences(Report report, Device device) {
+        List<GeoFence> geoFences;
+        if (report.getGeoFences().isEmpty()) {
+            geoFences = new ArrayList<GeoFence>(dataService.getGeoFences());
+        } else {
+            geoFences = new ArrayList<GeoFence>(report.getGeoFences().size());
+            for (GeoFence reportGeoFence : report.getGeoFences()) {
+                GeoFence geoFence = entityManager.find(GeoFence.class, reportGeoFence.getId());
+                if (currentUser.hasAccessTo(geoFence)) {
+                    geoFences.add(geoFence);
+                }
+            }
+        }
+        // filter device-specific geo-fences that are not assigned to device from method arguments
+        for (Iterator<GeoFence> it = geoFences.iterator(); it.hasNext(); ) {
+            GeoFence geoFence = it.next();
+            if (!geoFence.isAllDevices() && !geoFence.getDevices().contains(device)) {
+                it.remove();
+            }
+        }
+        return geoFences;
     }
 
     String formatDuration(long duration) {
