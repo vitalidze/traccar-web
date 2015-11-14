@@ -55,6 +55,9 @@ public class ReportGI extends ReportGenerator {
             deviceDetails(device);
             // data table
             dataTable(new Info(positions).calculate());
+            if (!positions.isEmpty() && report.isIncludeMap()) {
+                mapWithRoute(positions, "100%", "400px");
+            }
             panelBodyEnd();
 
             panelEnd();

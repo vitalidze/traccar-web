@@ -16,12 +16,15 @@
 package org.traccar.web.server.reports;
 
 import org.apache.commons.io.IOUtils;
+import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.Report;
+import org.traccar.web.shared.model.UserSettings;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 public class ReportRenderer {
     final HttpServletResponse response;
@@ -62,6 +65,11 @@ public class ReportRenderer {
         IOUtils.copy(Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/server/reports/bootstrap.min.css"),
                 writer, "UTF-8");
         line("</style>");
+        // include OpenLayers 3 css and javascript if report intends to include map
+        if (report.isIncludeMap() && report.getType().supportsMapDisplay()) {
+            line("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/ol3/3.11.1/ol.min.js\" type=\"text/css\">");
+            line("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/ol3/3.11.1/ol.min.js\" type=\"text/javascript\"></script>");
+        }
 
         line("</head>").line("<body>").line("<div class=\"container\">");
     }
@@ -239,6 +247,47 @@ public class ReportRenderer {
         writer.write(">");
         writer.write(text);
         writer.write("</a>");
+    }
+
+    int mapCount;
+
+    public void mapWithRoute(List<Position> positions, UserSettings.MapType mapType, int zoomLevel, String width, String height) {
+        String mapId = "map-" + mapCount++;
+        line("<div id=\"" + mapId + "\" style=\"width: " + width + "; height: " + height + ";\"></div>");
+        line("<script type=\"text/javascript\">");
+        // prepare points
+        line("      var polyline = '" + PolylineEncoder.encode(positions) + "';");
+        line("      var routeGeom = new ol.format.Polyline().readGeometry(polyline, {dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857'});");
+        line("      var route = new ol.Feature({ geometry: routeGeom, name: 'Route'});");
+        line("      route.setStyle(new ol.style.Style({ stroke: new ol.style.Stroke({color: '#00f', width: 2}) }));");
+        line("      var routeStart = new ol.Feature({ geometry: new ol.geom.Point(routeGeom.getFirstCoordinate()), name: 'Route Start'});");
+        line("      routeStart.setStyle(new ol.style.Style({");
+        line("          image: new ol.style.Icon({ anchor: [0.5, 25], anchorXUnits: 'fraction', anchorYUnits: 'pixels', opacity: 0.75, src: 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker.png' })");
+        line("      }));");
+        line("      var routeEnd = new ol.Feature({ geometry: new ol.geom.Point(routeGeom.getLastCoordinate()), name: 'Route End'});");
+        line("      routeEnd.setStyle(new ol.style.Style({");
+        line("          image: new ol.style.Icon({ anchor: [0.5, 25], anchorXUnits: 'fraction', anchorYUnits: 'pixels', opacity: 0.75, src: 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/marker-blue.png' })");
+        line("      }));");
+
+        // draw map
+        line("     var map = new ol.Map({")
+        .line("     target: '" + mapId + "',")
+        .line("     layers: [")
+        .line("          new ol.layer.Tile({")
+        .line("               source: new ol.source.OSM()")
+        .line("          }),")
+        .line("          new ol.layer.Vector({")
+        .line("               source: new ol.source.Vector({")
+        .line("                   features: [route, routeStart, routeEnd]")
+        .line("               })")
+        .line("          }),")
+        .line("     ],")
+        .line("     view: new ol.View()")
+        .line("     });");
+        // zoom to route
+        line("     map.getView().fit(routeGeom, map.getSize());");
+
+        line("</script>");
     }
 
     private ReportRenderer line(String html) {

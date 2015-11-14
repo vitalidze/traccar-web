@@ -234,6 +234,10 @@ public abstract class ReportGenerator {
         }
     }
 
+    void mapWithRoute(List<Position> positions, String width, String height) {
+        renderer.mapWithRoute(positions, currentUser.getUserSettings().getMapType(), currentUser.getUserSettings().getZoomLevel(), width, height);
+    }
+
     void dataRow(String title, String text) {
         tableRowStart();
         tableCellStart();
