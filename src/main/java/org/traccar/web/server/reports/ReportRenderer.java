@@ -55,11 +55,6 @@ public class ReportRenderer {
         line("<head>");
         line("<title>" + report.getName() + "</title>");
         line("<meta charset=\"utf-8\">");
-        // include bootstrap JS
-        line("<script type=\"text/javascript\">");
-        IOUtils.copy(Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/server/reports/bootstrap.min.js"),
-                writer, "UTF-8");
-        line("</script>");
         // include bootstrap CSS
         line("<style type=\"text/css\">");
         IOUtils.copy(Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/server/reports/bootstrap.min.css"),
