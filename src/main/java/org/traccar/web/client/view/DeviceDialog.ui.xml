@@ -122,6 +122,18 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.minIdleTime} ({i18n.second})" labelWidth="180">
+                          <form:widget>
+                              <form:NumberField editor="{integerPropertyEditor}"
+                                                ui:field="minIdleTime"
+                                                allowNegative="false"
+                                                allowDecimals="false"
+                                                allowBlank="false"
+                                                width="5" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
                       <form:FieldLabel text="{i18n.speedLimit}" labelWidth="180">
                           <form:widget>
                               <form:NumberField editor="{doublePropertyEditor}"

@@ -33,6 +33,7 @@ public class Device implements IsSerializable {
 
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_TIMEOUT = 5 * 60;
+    public static final short DEFAULT_MIN_IDLE_TIME = 1 * 60;
 
     public Device() {
         iconType = DeviceIconType.DEFAULT;
@@ -48,6 +49,7 @@ public class Device implements IsSerializable {
         vehicleInfo = device.vehicleInfo;
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
+        minIdleTime = device.minIdleTime;
         iconType = device.iconType;
         icon = device.getIcon();
         photo = device.getPhoto();
@@ -165,6 +167,17 @@ public class Device implements IsSerializable {
 
     public void setIdleSpeedThreshold(double idleSpeedThreshold) {
         this.idleSpeedThreshold = idleSpeedThreshold;
+    }
+
+    @Column(nullable = true)
+    private int minIdleTime = DEFAULT_MIN_IDLE_TIME;
+
+    public int getMinIdleTime() {
+        return minIdleTime;
+    }
+
+    public void setMinIdleTime(int minIdleTime) {
+        this.minIdleTime = minIdleTime;
     }
 
     @Column(nullable = true)

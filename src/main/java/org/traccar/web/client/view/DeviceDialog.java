@@ -23,7 +23,6 @@ import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
-import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.*;
@@ -89,6 +88,9 @@ public class DeviceDialog implements Editor<Device> {
 
     @UiField
     NumberField<Double> idleSpeedThreshold;
+
+    @UiField
+    NumberField<Integer> minIdleTime;
 
     @UiField
     NumberField<Double> speedLimit;

@@ -478,4 +478,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String logs();
 
     String includeMap();
+
+    String minIdleTime();
 }

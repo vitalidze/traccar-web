@@ -21,6 +21,7 @@ import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.Report;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class ReportDS extends ReportGenerator {
             deviceDetails(device);
             // data table
             if (!positions.isEmpty()) {
-                drawTable(positions);
+                drawTable(calculate(positions));
             } else {
                 drawSummary(0d, 0, 0, 0d, 0d);
             }
@@ -66,7 +67,101 @@ public class ReportDS extends ReportGenerator {
         }
     }
 
-    void drawTable(List<Position> positions) {
+    static class Data {
+        final boolean idle;
+
+        Position start;
+        Position end;
+        double topSpeed;
+        double totalSpeed;
+        double distance;
+        int positionsWithSpeed;
+
+        Data(boolean idle, Position start) {
+            this.start = start;
+            this.idle = idle;
+        }
+
+        long getDuration() {
+            return end.getTime().getTime() - start.getTime().getTime();
+        }
+
+        double getAverageSpeed() {
+            return totalSpeed / positionsWithSpeed;
+        }
+    }
+
+    List<Data> calculate(List<Position> positions) {
+        Position prevPosition = null;
+        List<Data> datas = new ArrayList<Data>();
+        Data currentData = null;
+
+        for (Iterator<Position> it = positions.iterator(); it.hasNext(); ) {
+            Position position = it.next();
+
+            if (currentData == null) {
+                currentData = new Data(isIdle(position), position);
+            }
+
+            if (prevPosition != null && isIdle(position) != isIdle(prevPosition)) {
+                currentData.end = position;
+                datas.add(currentData);
+                currentData = new Data(isIdle(position), position);
+            }
+
+            if (position.getSpeed() != null && !isIdle(position)) {
+                currentData.topSpeed = Math.max(currentData.topSpeed, position.getSpeed());
+                currentData.totalSpeed += position.getSpeed();
+                currentData.positionsWithSpeed++;
+            }
+            currentData.distance += position.getDistance();
+
+            prevPosition = position;
+        }
+        currentData.end = positions.get(positions.size() - 1);
+        datas.add(currentData);
+
+        // filter 'idle' data, which duration is less than the setting from device profile
+        Device device = positions.get(0).getDevice();
+        Data prevData = null;
+        for (Iterator<Data> it = datas.iterator(); it.hasNext(); ) {
+            Data data = it.next();
+            if (isIdle(data.start) && data.getDuration() < device.getMinIdleTime() * 1000) {
+                Data nonIdleData = prevData == null ? it.next() : prevData;
+                if (prevData == null) {
+                    nonIdleData.start = data.start;
+                } else {
+                    nonIdleData.end = data.end;
+                }
+                nonIdleData.distance += data.distance;
+                nonIdleData.positionsWithSpeed += data.positionsWithSpeed;
+                nonIdleData.topSpeed = Math.max(data.topSpeed, nonIdleData.topSpeed);
+                nonIdleData.totalSpeed += data.totalSpeed;
+                it.remove();
+            }
+            if (!data.idle) {
+                prevData = data;
+            }
+        }
+        // merge sequential 'moving' datas into one
+        prevData = null;
+        for (Iterator<Data> it = datas.iterator(); it.hasNext(); ) {
+            Data data = it.next();
+            if (prevData != null && !prevData.idle && !data.idle) {
+                prevData.distance += data.distance;
+                prevData.positionsWithSpeed += data.positionsWithSpeed;
+                prevData.topSpeed = Math.max(data.topSpeed, prevData.topSpeed);
+                prevData.totalSpeed += data.totalSpeed;
+                prevData.end = data.end;
+                it.remove();
+                continue;
+            }
+            prevData = data;
+        }
+        return datas;
+    }
+
+    void drawTable(List<Data> datas) {
         tableStart(hover().condensed());
 
         // header
@@ -98,82 +193,44 @@ public class ReportDS extends ReportGenerator {
         // body
         tableBodyStart();
 
-        Position prevPosition = null;
-        Position start = null;
-        double topSpeed = 0;
-        double speedSUM = 0;
-        double distance = 0;
-        int movingPositionCount = 0;
-
-        double totalDistance = 0;
-        long totalMoveDuration = 0;
         long totalStopDuration = 0;
+        long totalMoveDuration = 0;
+        double totalDistance = 0;
         int totalMovingPositionCount = 0;
-        double totalSpeedSUM = 0;
+        double totalSpeed = 0;
         double totalTopSpeed = 0;
-        for (Iterator<Position> it = positions.iterator(); it.hasNext(); ) {
-            Position position = it.next();
-            totalDistance += position.getDistance();
 
-            if (!it.hasNext()) {
-                if (start == null) {
-                    start = position;
-                }
-                if (prevPosition == null) {
-                    prevPosition = position;
-                }
+        for (Data data : datas) {
+            tableRowStart();
+            tableCell(message(data.idle ? "stopped" : "moving"));
+            tableCell(formatDate(data.start.getTime()));
+            tableCell(formatDate(data.end.getTime()));
+            // update total counters
+            if (data.idle) {
+                totalStopDuration += data.getDuration();
+            } else {
+                totalMoveDuration += data.getDuration();
             }
+            tableCell(formatDuration(data.getDuration()));
 
-            if (!it.hasNext() || (prevPosition != null && isIdle(position) != isIdle(prevPosition))) {
-                tableRowStart();
-                tableCell(message(isIdle(start) ? "stopped" : "moving"));
-                tableCell(formatDate(start.getTime()));
-                tableCell(formatDate(position.getTime()));
-                long duration = position.getTime().getTime() - start.getTime().getTime();
-                if (isIdle(start)) {
-                    totalStopDuration += duration;
-                } else {
-                    totalMoveDuration += duration;
+            if (data.idle) {
+                tableCellStart(colspan(3));
+                mapLink(data.start.getLatitude(), data.start.getLongitude());
+                if (data.start.getAddress() != null && !data.start.getAddress().isEmpty()) {
+                    text(" - " + data.start.getAddress());
                 }
-                tableCell(formatDuration(duration));
-
-                if (isIdle(start)) {
-                    tableCellStart(colspan(3));
-                    mapLink(start.getLatitude(), start.getLongitude());
-                    if (start.getAddress() != null && !start.getAddress().isEmpty()) {
-                        text(" - " + start.getAddress());
-                    }
-                    tableCellEnd();
-                } else {
-                    tableCell(formatDistance(distance));
-                    tableCell(formatSpeed(topSpeed));
-                    tableCell(formatSpeed(speedSUM / movingPositionCount));
-                }
-                tableRowEnd();
-                // reset counters
-                start = null;
-                topSpeed = 0;
-                speedSUM = 0;
-                movingPositionCount = 0;
-                distance = 0;
+                tableCellEnd();
+            } else {
+                tableCell(formatDistance(data.distance));
+                tableCell(formatSpeed(data.topSpeed));
+                tableCell(formatSpeed(data.getAverageSpeed()));
+                // update total counters
+                totalMovingPositionCount += data.positionsWithSpeed;
+                totalSpeed += data.totalSpeed;
+                totalTopSpeed = Math.max(totalTopSpeed, data.topSpeed);
             }
-
-            if (start == null) {
-                start = position;
-            }
-
-            if (!isIdle(position)) {
-                topSpeed = Math.max(topSpeed, position.getSpeed());
-                speedSUM += position.getSpeed();
-                movingPositionCount++;
-                distance += position.getDistance();
-
-                totalMovingPositionCount++;
-                totalSpeedSUM += position.getSpeed();
-                totalTopSpeed = Math.max(totalTopSpeed, position.getSpeed());
-            }
-
-            prevPosition = position;
+            totalDistance += data.distance;
+            tableRowEnd();
         }
 
         tableBodyEnd();
@@ -184,7 +241,7 @@ public class ReportDS extends ReportGenerator {
                 totalMoveDuration,
                 totalStopDuration,
                 totalTopSpeed,
-                totalMovingPositionCount == 0 ? 0d : totalSpeedSUM / totalMovingPositionCount);
+                totalMovingPositionCount == 0 ? 0d : totalSpeed / totalMovingPositionCount);
     }
 
     private void drawSummary(double routeLength,

@@ -86,6 +86,7 @@ public class ReportGI extends ReportGenerator {
             Position prevPosition = null;
             double totalSpeed = 0;
             int movingCount = 0;
+            long nextStopDuration = 0;
             for (Position position : positions) {
                 Device device = position.getDevice();
                 this.length += position.getDistance();
@@ -95,13 +96,20 @@ public class ReportGI extends ReportGenerator {
                     if (prevPosition.getSpeed() != null
                             && prevPosition.getSpeed() > device.getIdleSpeedThreshold()) {
                         moveDuration += diffTime;
+                        // reclassify 'stop' duration into 'move' duration if the stop was less than setting from device profile
+                        if (nextStopDuration > 0 && nextStopDuration < device.getMinIdleTime() * 1000) {
+                            stopDuration -= nextStopDuration;
+                            moveDuration += nextStopDuration;
+                        }
+                        nextStopDuration = 0;
                     } else {
                         stopDuration += diffTime;
+                        nextStopDuration += diffTime;
                     }
                 }
                 if (position.getSpeed() != null && position.getSpeed() > device.getIdleSpeedThreshold()) {
                     movingCount++;
-                    totalSpeed += position.getSpeed() == null ? 0 : position.getSpeed();
+                    totalSpeed += position.getSpeed();
                     topSpeed = Math.max(position.getSpeed(), topSpeed);
                 }
 
