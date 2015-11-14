@@ -111,7 +111,7 @@ public class ReportMD extends ReportGenerator {
                 dailyDistance = 0;
             }
 
-            if (!isIdle(position)) {
+            if (isMoving(position)) {
                 if (start == null) {
                     start = position;
                 }
@@ -138,7 +138,7 @@ public class ReportMD extends ReportGenerator {
         return prev.get(Calendar.DAY_OF_MONTH) != curr.get(Calendar.DAY_OF_MONTH);
     }
 
-    boolean isIdle(Position position) {
-        return position.getSpeed() == null || position.getSpeed() <= position.getDevice().getIdleSpeedThreshold();
+    boolean isMoving(Position position) {
+        return position.getSpeed() != null && position.getSpeed() > position.getDevice().getIdleSpeedThreshold();
     }
 }
