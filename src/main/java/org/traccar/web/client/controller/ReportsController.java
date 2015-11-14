@@ -27,6 +27,7 @@ import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.ReportProperties;
 import org.traccar.web.client.model.ReportService;
 import org.traccar.web.client.model.ReportServiceAsync;
+import org.traccar.web.client.view.NavView;
 import org.traccar.web.client.view.ReportsDialog;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
@@ -34,7 +35,7 @@ import org.traccar.web.shared.model.Report;
 
 import java.util.List;
 
-public class ReportsController implements ArchiveController.ReportsHandler {
+public class ReportsController implements NavView.ReportsHandler {
     private final Messages i18n = GWT.create(Messages.class);
     private final ReportMapper reportMapper = GWT.create(ReportMapper.class);
     private final ListStore<Device> deviceStore;

@@ -20,7 +20,6 @@ import java.util.*;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.http.client.*;
-import com.google.gwt.i18n.client.NumberFormat;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.format.EncodedPolyline;
 import org.traccar.web.client.*;
@@ -28,7 +27,6 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.view.ArchiveView;
 import org.traccar.web.client.view.FilterDialog;
-import org.traccar.web.client.view.ReportsDialog;
 import org.traccar.web.client.view.UserSettingsDialog;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -48,10 +46,6 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
         void onDrawTrack(Track track);
     }
 
-    public interface ReportsHandler {
-        void onShowReports();
-    }
-
     private final ArchiveHandler archiveHandler;
 
     private final UserSettingsDialog.UserSettingsHandler userSettingsHandler;
@@ -64,15 +58,12 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     private final Map<Long, Track> originalTracks;
     private final Map<Long, Track> snappedTracks;
     private final ListStore<Device> deviceStore;
-    private final ReportsHandler reportsHandler;
 
     public ArchiveController(ArchiveHandler archiveHandler,
                              UserSettingsDialog.UserSettingsHandler userSettingsHandler,
-                             ReportsHandler reportsHandler,
                              ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;
         this.userSettingsHandler = userSettingsHandler;
-        this.reportsHandler = reportsHandler;
         this.archiveView = new ArchiveView(this, deviceStore);
         this.originalTracks = new HashMap<Long, Track>();
         this.snappedTracks = new HashMap<Long, Track>();
@@ -260,9 +251,4 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     static native String formatLonLat(double lonLat) /*-{
         return lonLat.toFixed(6);
     }-*/;
-
-    @Override
-    public void onShowReports() {
-        reportsHandler.onShowReports();
-    }
 }

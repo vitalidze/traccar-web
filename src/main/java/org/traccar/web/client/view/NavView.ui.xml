@@ -1,0 +1,55 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+    xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+    xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+    xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
+    xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
+    xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+    xmlns:menu="urn:import:com.sencha.gxt.widget.core.client.menu">
+
+  <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
+
+  <ui:style>
+    .app-menu {
+      background-color: #157FCC !important;
+      background-image: none !important;
+    }
+  </ui:style>
+
+  <gxt:ContentPanel ui:field="contentPanel" headerVisible="false" addStyleNames="{style.app-menu}">
+    <toolbar:ToolBar addStyleNames="{style.app-menu}">
+      <button:TextButton ui:field="reportsButton" text="{i18n.reports}" />
+      <button:TextButton text="{i18n.settings}" ui:field="settingsButton">
+        <button:menu>
+          <menu:Menu>
+            <menu:MenuItem text="{i18n.users}" ui:field="settingsUsers" visible="false" />
+            <menu:MenuItem text="{i18n.global}" ui:field="settingsGlobal" visible="false" />
+            <menu:MenuItem text="{i18n.notifications}" ui:field="settingsNotifications" visible="false" />
+          </menu:Menu>
+        </button:menu>
+      </button:TextButton>
+      <button:TextButton text="{i18n.importData} / {i18n.exportData}">
+        <button:menu>
+          <menu:Menu>
+            <menu:MenuItem text="{i18n.exportToCSV}"/>
+            <menu:MenuItem text="{i18n.exportToGPX}"/>
+            <menu:MenuItem text="{i18n.importData}"/>
+          </menu:Menu>
+        </button:menu>
+      </button:TextButton>
+      <button:TextButton text="{i18n.logs}" ui:field="logsButton">
+        <button:menu>
+          <menu:Menu>
+            <menu:MenuItem text="{i18n.trackerServerLog}" ui:field="showTrackerServerLog" />
+          </menu:Menu>
+        </button:menu>
+      </button:TextButton>
+      <toolbar:FillToolItem addStyleNames="{style.app-menu}"/>
+      <button:TextButton text="{i18n.account}" ui:field="settingsAccount" />
+      <button:TextButton text="{i18n.preferences}" ui:field="settingsPreferences" />
+      <button:TextButton text="{i18n.logout}" ui:field="logoutButton" />
+    </toolbar:ToolBar>
+  </gxt:ContentPanel>
+
+</ui:UiBinder>

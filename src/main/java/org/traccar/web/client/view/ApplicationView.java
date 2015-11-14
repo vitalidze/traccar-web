@@ -38,13 +38,16 @@ public class ApplicationView extends Composite {
     }
 
     @UiField(provided = true)
-    ContentPanel devicePanel;
+    final ContentPanel navPanel;
 
     @UiField(provided = true)
-    ContentPanel mapPanel;
+    final ContentPanel devicePanel;
 
     @UiField(provided = true)
-    ContentPanel archivePanel;
+    final ContentPanel mapPanel;
+
+    @UiField(provided = true)
+    final ContentPanel archivePanel;
 
     @UiField
     BorderLayoutContainer container;
@@ -107,7 +110,11 @@ public class ApplicationView extends Composite {
         }
     }
 
-    public ApplicationView(ContentPanel deviceView, ContentPanel mapView, ContentPanel archiveView) {
+    public ApplicationView(ContentPanel navView,
+                           ContentPanel deviceView,
+                           ContentPanel mapView,
+                           ContentPanel archiveView) {
+        navPanel = navView;
         devicePanel = deviceView;
         mapPanel = mapView;
         archivePanel = archiveView;

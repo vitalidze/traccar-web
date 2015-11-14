@@ -40,7 +40,7 @@ import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 
-public class SettingsController implements DeviceView.SettingsHandler {
+public class SettingsController implements NavView.SettingsHandler {
 
     private Messages i18n = GWT.create(Messages.class);
     private final UserSettingsDialog.UserSettingsHandler userSettingsHandler;

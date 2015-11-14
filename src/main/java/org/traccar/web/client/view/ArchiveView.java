@@ -70,7 +70,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         void onFilterSettings();
         void onClear(Device device);
         void onChangeArchiveMarkerType(PositionIconType newMarkerType);
-        void onShowReports();
     }
 
     private ArchiveHandler archiveHandler;
@@ -361,10 +360,5 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiHandler("snapToRoads")
     public void onSnapToRoadsClicked(ValueChangeEvent<Boolean> event) {
         archiveHandler.onSnapToRoads(snapToRoads.getValue());
-    }
-
-    @UiHandler("reportsButton")
-    public void onReportsClicked(SelectEvent event) {
-        archiveHandler.onShowReports();
     }
 }
