@@ -18,7 +18,12 @@ package org.traccar.web.shared.model;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum ReportType implements IsSerializable {
-    GENERAL_INFORMATION,
+    GENERAL_INFORMATION {
+        @Override
+        public boolean supportsMapDisplay() {
+            return true;
+        }
+    },
     DRIVES_AND_STOPS,
     MILEAGE_DETAIL,
     OVERSPEEDS,
@@ -36,6 +41,10 @@ public enum ReportType implements IsSerializable {
     };
 
     public boolean supportsGeoFences() {
+        return false;
+    }
+
+    public boolean supportsMapDisplay() {
         return false;
     }
 }

@@ -113,6 +113,9 @@
                                     </form:widget>
                                 </form:FieldLabel>
                             </container:child>
+                            <container:child layoutData="{verticalLayoutData}">
+                                <form:CheckBox ui:field="includeMap" boxLabel="{i18n.includeMap}" enabled="false" />
+                            </container:child>
                         </container:VerticalLayoutContainer>
                     </gxt:ContentPanel>
                 </container:child>

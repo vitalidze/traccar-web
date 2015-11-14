@@ -87,6 +87,9 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
     @UiField(provided = true)
     ComboBox<ReportType> type;
 
+    @UiField
+    CheckBox includeMap;
+
     @UiField(provided = true)
     final ListStore<Device> deviceStore;
 
@@ -181,14 +184,14 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
                 } else {
                     period.update(); // recalculate dates once again
                 }
-                updateGeoFencesListState();
+                reportTypeChanged(report.getType());
                 removeButton.setEnabled(!event.getSelection().isEmpty());
             }
         });
         type.addSelectionHandler(new SelectionHandler<ReportType>() {
             @Override
             public void onSelection(SelectionEvent<ReportType> event) {
-                updateGeoFencesListState();
+                reportTypeChanged(event.getSelectedItem());
             }
         });
 
@@ -250,9 +253,9 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
         }
     }
 
-    private void updateGeoFencesListState() {
-        ReportType type = this.type.getValue();
+    private void reportTypeChanged(ReportType type) {
         geoFencesList.setEnabled(type != null && type.supportsGeoFences());
+        includeMap.setEnabled(type != null && type.supportsMapDisplay());
     }
 
     @Override

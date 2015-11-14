@@ -141,6 +141,16 @@ public class Report implements IsSerializable {
         this.toDate = toDate;
     }
 
+    private boolean includeMap;
+
+    public boolean isIncludeMap() {
+        return includeMap;
+    }
+
+    public void setIncludeMap(boolean displayMap) {
+        this.includeMap = displayMap;
+    }
+
     public Report copyFrom(Report report) {
         this.id = report.id;
         this.name = report.name;
@@ -148,6 +158,7 @@ public class Report implements IsSerializable {
         this.period = report.period;
         this.fromDate = report.fromDate;
         this.toDate = report.toDate;
+        this.includeMap = report.includeMap;
         return this;
     }
 }
