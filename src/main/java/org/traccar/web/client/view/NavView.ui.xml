@@ -29,7 +29,6 @@
           </menu:Menu>
         </button:menu>
       </button:TextButton>
-      <button:TextButton text="{i18n.importData}" ui:field="importButton" />
       <button:TextButton text="{i18n.logs}" ui:field="logsButton">
         <button:menu>
           <menu:Menu>
@@ -37,6 +36,7 @@
           </menu:Menu>
         </button:menu>
       </button:TextButton>
+      <button:TextButton text="{i18n.importData}" ui:field="importButton" />
       <toolbar:FillToolItem addStyleNames="{style.app-menu}"/>
       <button:TextButton text="{i18n.account}" ui:field="settingsAccount" />
       <button:TextButton text="{i18n.preferences}" ui:field="settingsPreferences" />
