@@ -54,6 +54,12 @@ public class NavView {
 
     private final ReportsHandler reportsHandler;
 
+    public interface ImportHandler {
+        void onImport();
+    }
+
+    private final ImportHandler importHandler;
+
     @UiField
     ContentPanel contentPanel;
 
@@ -89,9 +95,11 @@ public class NavView {
     final Messages i18n = GWT.create(Messages.class);
 
     public NavView(SettingsHandler settingsHandler,
-                   ReportsHandler reportsHandler) {
+                   ReportsHandler reportsHandler,
+                   ImportHandler importHandler) {
         this.settingsHandler = settingsHandler;
         this.reportsHandler = reportsHandler;
+        this.importHandler = importHandler;
 
         uiBinder.createAndBindUi(this);
 
@@ -153,5 +161,10 @@ public class NavView {
     @UiHandler("reportsButton")
     public void onReportsClicked(SelectEvent event) {
         reportsHandler.onShowReports();
+    }
+
+    @UiHandler("importButton")
+    public void onImportClicked(SelectEvent event) {
+        importHandler.onImport();
     }
 }

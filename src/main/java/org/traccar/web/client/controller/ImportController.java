@@ -15,24 +15,20 @@
  */
 package org.traccar.web.client.controller;
 
-import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.data.shared.ListStore;
+import org.traccar.web.client.view.ImportDialog;
 import org.traccar.web.client.view.NavView;
+import org.traccar.web.shared.model.Device;
 
-public class NavController implements ContentController {
-    private final NavView navView;
+public class ImportController implements NavView.ImportHandler {
+    private final ListStore<Device> deviceStore;
 
-    public NavController(NavView.SettingsHandler settingsHandler,
-                         NavView.ReportsHandler reportsHandler,
-                         NavView.ImportHandler importHandler) {
-        navView = new NavView(settingsHandler, reportsHandler, importHandler);
+    public ImportController(ListStore<Device> deviceStore) {
+        this.deviceStore = deviceStore;
     }
 
     @Override
-    public ContentPanel getView() {
-        return navView.getView();
-    }
-
-    @Override
-    public void run() {
+    public void onImport() {
+        new ImportDialog(deviceStore).show();
     }
 }

@@ -47,6 +47,7 @@ public class Application {
 
     private final SettingsController settingsController;
     private final NavController navController;
+    private final ImportController importController;
     private final DeviceController deviceController;
     private final GeoFenceController geoFenceController;
     private final MapController mapController;
@@ -71,7 +72,8 @@ public class Application {
                 geoFenceController.getDeviceGeoFences(),
                 this);
         reportsController = new ReportsController(deviceController.getDeviceStore(), geoFenceController.getGeoFenceStore());
-        navController = new NavController(settingsController, reportsController);
+        importController = new ImportController(deviceController.getDeviceStore());
+        navController = new NavController(settingsController, reportsController, importController);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
 
         view = new ApplicationView(

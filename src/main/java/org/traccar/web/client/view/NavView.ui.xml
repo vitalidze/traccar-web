@@ -29,15 +29,7 @@
           </menu:Menu>
         </button:menu>
       </button:TextButton>
-      <button:TextButton text="{i18n.importData} / {i18n.exportData}">
-        <button:menu>
-          <menu:Menu>
-            <menu:MenuItem text="{i18n.exportToCSV}"/>
-            <menu:MenuItem text="{i18n.exportToGPX}"/>
-            <menu:MenuItem text="{i18n.importData}"/>
-          </menu:Menu>
-        </button:menu>
-      </button:TextButton>
+      <button:TextButton text="{i18n.importData}" ui:field="importButton" />
       <button:TextButton text="{i18n.logs}" ui:field="logsButton">
         <button:menu>
           <menu:Menu>
