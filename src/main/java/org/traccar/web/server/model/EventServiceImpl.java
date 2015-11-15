@@ -41,31 +41,41 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         @Inject
         Provider<EntityManager> entityManager;
 
+        /**
+         * Id of device <-> Id of position, which has posted offline event
+         */
+        Map<Long, Long> latestOfflineEvents = new HashMap<Long, Long>();
+
         @Override
         @Transactional
         public void doWork() {
             Date currentTime = new Date();
 
-            for (Device device : entityManager.get().createQuery("SELECT d FROM Device d", Device.class).getResultList()) {
-                // skip devices without any positions
-                if (device.getLatestPosition() == null) {
-                    continue;
-                }
-
+            for (Device device : entityManager.get().createQuery("SELECT d FROM Device d INNER JOIN FETCH d.latestPosition", Device.class).getResultList()) {
+                Position position = device.getLatestPosition();
                 // check that device is offline
-                if (currentTime.getTime() - device.getLatestPosition().getTime().getTime() >= device.getTimeout() * 1000
-                        && (device.getLatestPosition().getServerTime() == null || device.getLatestPosition().getServerTime().getTime() >= device.getTimeout() * 1000)) {
-                    List<DeviceEvent> offlineEvents = entityManager.get().createQuery("SELECT e FROM DeviceEvent e WHERE e.position=:position AND e.type=:offline")
-                            .setParameter("position", device.getLatestPosition())
-                            .setParameter("offline", DeviceEventType.OFFLINE)
-                            .getResultList();
-                    if (offlineEvents.isEmpty()) {
+                if (currentTime.getTime() - position.getTime().getTime() >= device.getTimeout() * 1000
+                        && (position.getServerTime() == null || position.getServerTime().getTime() >= device.getTimeout() * 1000)) {
+                    Long latestOfflinePositionId = latestOfflineEvents.get(device.getId());
+                    if (latestOfflinePositionId == null) {
+                        List<DeviceEvent> offlineEvents = entityManager.get().createQuery("SELECT e FROM DeviceEvent e WHERE e.position=:position AND e.type=:offline")
+                                .setParameter("position", position)
+                                .setParameter("offline", DeviceEventType.OFFLINE)
+                                .getResultList();
+                        if (!offlineEvents.isEmpty()) {
+                            latestOfflineEvents.put(device.getId(), position.getId());
+                            latestOfflinePositionId = position.getId();
+                        }
+                    }
+
+                    if (latestOfflinePositionId == null || latestOfflinePositionId.longValue() != position.getId()) {
                         DeviceEvent offlineEvent = new DeviceEvent();
                         offlineEvent.setTime(currentTime);
                         offlineEvent.setDevice(device);
                         offlineEvent.setType(DeviceEventType.OFFLINE);
                         offlineEvent.setPosition(device.getLatestPosition());
                         entityManager.get().persist(offlineEvent);
+                        latestOfflineEvents.put(device.getId(), position.getId());
                     }
                 }
             }
