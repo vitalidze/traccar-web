@@ -47,15 +47,15 @@ public class LoginController implements LoginDialog.LoginHandler {
         Application.getDataService().authenticated(new BaseAsyncCallback<User>(i18n) {
             @Override
             public void onSuccess(User result) {
-                ApplicationContext.getInstance().setUser(result);
-                hideLoadingDiv();
-                loginHandler.onLogin();
-            }
-            @Override
-            public void onFailure(Throwable caught) {
-                dialog = new LoginDialog(LoginController.this);
-                hideLoadingDiv();
-                dialog.show();
+                if (result == null) {
+                    dialog = new LoginDialog(LoginController.this);
+                    hideLoadingDiv();
+                    dialog.show();
+                } else {
+                    ApplicationContext.getInstance().setUser(result);
+                    hideLoadingDiv();
+                    loginHandler.onLogin();
+                }
             }
 
             void hideLoadingDiv() {

@@ -718,5 +718,41 @@ var i18n = {
         send_location_url_by_email: 'Send location URL by Email',
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
+    },
+    el_GR: {
+        _name_: 'Greek',
+        // login screen
+        language: 'Γλώσσα',
+        username: 'Όνομα Χρήστη',
+        password: 'Κωδικός',
+        your_username: 'Το όνομα χρήστη σας',
+        your_password: 'Ο κωδικός σας',
+        sign_in: 'Είσοδος',
+        register: 'Εγγραφή',
+        user_name_and_password_must_not_be_empty: 'Το όνομα χρήστη και ο κωδικός θα πρέπει να είναι κενά',
+        user_name_or_password_is_invalid: 'Το όνομα χρήστη ή ο κωδικός δεν είναι έγκυρο',
+        user_name_already_taken: 'Το όνομα χρήστη υπάρχει ήδη',
+        unexpected_error: 'Μη αναμενόμενο σφάλμα',
+        open_desktop_version: 'Άνοιγμα έκδοσης για υπολογιστή',
+        // sidebar
+        devices: 'Συσκευές',
+        logout: 'Έξοδος',
+        // device details
+        select_on_map: 'Επιλογή στον χάρτη',
+        no_data_available: 'Δεν βρέθηκαν δεδομένα',
+        time: 'Ώρα',
+        latitude: 'Γεωγραφικό Πλάτος',
+        longitude: 'Γεωγραφικό Μήκος',
+        altitude: 'Υψόμετρο',
+        speed: 'Ταχύτητα',
+        course: 'Πορεία',
+        address: 'Διεύθυνση',
+        follow: 'Ακολούθησε',
+        stop_following: 'Παύση ακολουθίας',
+        geo_fence: 'Γεωγραφικός φράκτης',
+        send_location_by_email: 'Αποστολή τοποθεσίας με Email',
+        send_location_url_by_email: 'Αποστολή τοποθεσίας URL με Email',
+        send_location_by_sms: 'Αποστολή τοποθεσίας με SMS',
+        send_location_url_by_sms: 'Αποστολή τοποθεσίας URL με SMS'    
     }
 };
