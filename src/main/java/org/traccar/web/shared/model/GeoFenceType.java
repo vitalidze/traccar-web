@@ -18,7 +18,7 @@ package org.traccar.web.shared.model;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum GeoFenceType implements IsSerializable {
-    LINE,
+    POLYGON,
     CIRCLE,
-    POLYGON;
+    LINE;
 }

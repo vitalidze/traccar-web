@@ -28,7 +28,7 @@ import java.util.*;
 public class GeoFence implements IsSerializable {
 
     public GeoFence() {
-        type = GeoFenceType.LINE;
+        type = GeoFenceType.POLYGON;
         color = "4169E1";
         radius = 30f;
         allDevices = true;
