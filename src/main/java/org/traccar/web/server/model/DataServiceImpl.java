@@ -440,7 +440,6 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 sensor.setId(0);
                 entityManager.persist(sensor);
             }
-            eventService.devicesChanged();
             return device;
         } else {
             throw new DeviceExistsException();
@@ -561,9 +560,6 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 getSessionEntityManager().persist(sensor);
             }
 
-            // notify event service about updated device
-            eventService.devicesChanged();
-
             return tmp_device;
         } else {
             throw new DeviceExistsException();
@@ -620,7 +616,6 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             }
 
             entityManager.remove(device);
-            eventService.devicesChanged();
         }
         return device;
     }
