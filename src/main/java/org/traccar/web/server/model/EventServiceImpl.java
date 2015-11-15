@@ -82,145 +82,28 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         }
     }
 
-    public static class GeoFenceDetector extends EventProducer {
-        @Inject
-        Provider<EntityManager> entityManager;
-
-        Set<GeoFence> geoFences = new HashSet<GeoFence>();
-        GeoFenceCalculator geoFenceCalculator;
-
-        Date currentDate = new Date();
-
-        @Override
-        @Transactional
-        void before() {
-            currentDate = new Date();
-            geoFences.addAll(entityManager.get().createQuery("SELECT g FROM GeoFence g LEFT JOIN FETCH g.devices", GeoFence.class).getResultList());
-            if (geoFences.isEmpty()) {
-                return;
-            }
-            geoFenceCalculator = new GeoFenceCalculator(geoFences);
-        }
-
-        @Transactional
-        @Override
-        void positionScanned(Position prevPosition, Position position) {
-            if (geoFences.isEmpty()) {
-                return;
-            }
-
-            Device device = position.getDevice();
-            // calculate
-            for (GeoFence geoFence : geoFences) {
-                if (prevPosition != null) {
-                    boolean containsCurrent = geoFenceCalculator.contains(geoFence, position);
-                    boolean containsPrevious = geoFenceCalculator.contains(geoFence, prevPosition);
-
-                    DeviceEventType eventType = null;
-                    if (containsCurrent && !containsPrevious) {
-                        eventType = DeviceEventType.GEO_FENCE_ENTER;
-                    } else if (!containsCurrent && containsPrevious) {
-                        eventType = DeviceEventType.GEO_FENCE_EXIT;
-                    }
-
-                    if (eventType != null) {
-                        DeviceEvent event = new DeviceEvent();
-                        event.setTime(currentDate);
-                        event.setDevice(device);
-                        event.setType(eventType);
-                        event.setPosition(position);
-                        event.setGeoFence(geoFence);
-                        entityManager.get().persist(event);
-                    }
-                }
-            }
-        }
-
-        @Override
-        void after() {
-            geoFences.clear();
-            geoFenceCalculator = null;
-        }
-    }
-
-    public static class OdometerUpdater extends EventProducer {
-        Date currentDate = new Date();
-        Map<Device, List<Maintenance>> maintenances = new HashMap<Device, List<Maintenance>>();
-
-        @Transactional
-        @Override
-        void before() {
-            currentDate = new Date();
-            List<Device> devices = entityManager().createQuery("SELECT d FROM Device d WHERE d.autoUpdateOdometer=:b", Device.class)
-                    .setParameter("b", Boolean.TRUE).getResultList();
-            if (devices.isEmpty()) {
-                return;
-            }
-
-            // load maintenances
-            for (Maintenance maintenance : entityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices", Maintenance.class)
-                    .setParameter("devices", devices).getResultList()) {
-                List<Maintenance> deviceMaintenances = maintenances.get(maintenance.getDevice());
-                if (deviceMaintenances == null) {
-                    deviceMaintenances = new LinkedList<Maintenance>();
-                    maintenances.put(maintenance.getDevice(), deviceMaintenances);
-                }
-                deviceMaintenances.add(maintenance);
-            }
-        }
-
-        @Transactional
-        @Override
-        void positionScanned(Position prevPosition, Position position) {
-            Device device = position.getDevice();
-            if (device.isAutoUpdateOdometer() && prevPosition != null) {
-                double distance = GeoFenceCalculator.getDistance(
-                        prevPosition.getLongitude(), prevPosition.getLatitude(),
-                        position.getLongitude(), position.getLatitude());
-
-                if (distance > 0.003) {
-                    double prevOdometer = device.getOdometer();
-                    device.setOdometer(prevOdometer + distance);
-                    // post maintenance overdue events
-                    List<Maintenance> deviceMaintenances = maintenances.get(device);
-                    if (deviceMaintenances != null) {
-                        for (Maintenance maintenance : deviceMaintenances) {
-                            double serviceThreshold = maintenance.getLastService() + maintenance.getServiceInterval();
-                            if (prevOdometer < serviceThreshold && device.getOdometer() >= serviceThreshold) {
-                                DeviceEvent event = new DeviceEvent();
-                                event.setTime(currentDate);
-                                event.setDevice(device);
-                                event.setType(DeviceEventType.MAINTENANCE_REQUIRED);
-                                event.setPosition(position);
-                                event.setMaintenance(maintenance);
-                                entityManager().persist(event);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        @Override
-        void after() {
-            maintenances.clear();
-        }
-    }
-
     static abstract class EventProducer {
         @Inject
         Provider<EntityManager> entityManager;
 
-        void before() {
+        private Date currentDate;
+
+        void setCurrentDate(Date currentDate) {
+            this.currentDate = currentDate;
         }
+
+        abstract void before();
 
         abstract void positionScanned(Position prevPosition, Position position);
 
-        void after() {
-        }
+        abstract void after();
 
         EntityManager entityManager() {
             return entityManager.get();
+        }
+
+        Date currentDate() {
+            return currentDate;
         }
     }
 
@@ -257,7 +140,9 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                     .getResultList();
 
             // init event producers
+            Date currentDate = new Date();
             for (EventProducer eventProducer : eventProducers) {
+                eventProducer.setCurrentDate(currentDate);
                 eventProducer.before();
             }
 
@@ -297,12 +182,164 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         }
     }
 
+    public static class GeoFenceDetector extends EventProducer {
+        @Inject
+        Provider<EntityManager> entityManager;
+
+        Set<GeoFence> geoFences = new HashSet<GeoFence>();
+        GeoFenceCalculator geoFenceCalculator;
+
+        @Override
+        @Transactional
+        void before() {
+            geoFences.addAll(entityManager.get().createQuery("SELECT g FROM GeoFence g LEFT JOIN FETCH g.devices", GeoFence.class).getResultList());
+            if (geoFences.isEmpty()) {
+                return;
+            }
+            geoFenceCalculator = new GeoFenceCalculator(geoFences);
+        }
+
+        @Transactional
+        @Override
+        void positionScanned(Position prevPosition, Position position) {
+            if (geoFences.isEmpty()) {
+                return;
+            }
+
+            Device device = position.getDevice();
+            // calculate
+            for (GeoFence geoFence : geoFences) {
+                if (prevPosition != null) {
+                    boolean containsCurrent = geoFenceCalculator.contains(geoFence, position);
+                    boolean containsPrevious = geoFenceCalculator.contains(geoFence, prevPosition);
+
+                    DeviceEventType eventType = null;
+                    if (containsCurrent && !containsPrevious) {
+                        eventType = DeviceEventType.GEO_FENCE_ENTER;
+                    } else if (!containsCurrent && containsPrevious) {
+                        eventType = DeviceEventType.GEO_FENCE_EXIT;
+                    }
+
+                    if (eventType != null) {
+                        DeviceEvent event = new DeviceEvent();
+                        event.setTime(currentDate());
+                        event.setDevice(device);
+                        event.setType(eventType);
+                        event.setPosition(position);
+                        event.setGeoFence(geoFence);
+                        entityManager.get().persist(event);
+                    }
+                }
+            }
+        }
+
+        @Override
+        void after() {
+            geoFences.clear();
+            geoFenceCalculator = null;
+        }
+    }
+
+    public static class OdometerUpdater extends EventProducer {
+        Map<Device, List<Maintenance>> maintenances = new HashMap<Device, List<Maintenance>>();
+
+        @Transactional
+        @Override
+        void before() {
+            List<Device> devices = entityManager().createQuery("SELECT d FROM Device d WHERE d.autoUpdateOdometer=:b", Device.class)
+                    .setParameter("b", Boolean.TRUE).getResultList();
+            if (devices.isEmpty()) {
+                return;
+            }
+
+            // load maintenances
+            for (Maintenance maintenance : entityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices", Maintenance.class)
+                    .setParameter("devices", devices).getResultList()) {
+                List<Maintenance> deviceMaintenances = maintenances.get(maintenance.getDevice());
+                if (deviceMaintenances == null) {
+                    deviceMaintenances = new LinkedList<Maintenance>();
+                    maintenances.put(maintenance.getDevice(), deviceMaintenances);
+                }
+                deviceMaintenances.add(maintenance);
+            }
+        }
+
+        @Transactional
+        @Override
+        void positionScanned(Position prevPosition, Position position) {
+            Device device = position.getDevice();
+            if (device.isAutoUpdateOdometer() && prevPosition != null) {
+                double distance = GeoFenceCalculator.getDistance(
+                        prevPosition.getLongitude(), prevPosition.getLatitude(),
+                        position.getLongitude(), position.getLatitude());
+
+                if (distance > 0.003) {
+                    double prevOdometer = device.getOdometer();
+                    device.setOdometer(prevOdometer + distance);
+                    // post maintenance overdue events
+                    List<Maintenance> deviceMaintenances = maintenances.get(device);
+                    if (deviceMaintenances != null) {
+                        for (Maintenance maintenance : deviceMaintenances) {
+                            double serviceThreshold = maintenance.getLastService() + maintenance.getServiceInterval();
+                            if (prevOdometer < serviceThreshold && device.getOdometer() >= serviceThreshold) {
+                                DeviceEvent event = new DeviceEvent();
+                                event.setTime(currentDate());
+                                event.setDevice(device);
+                                event.setType(DeviceEventType.MAINTENANCE_REQUIRED);
+                                event.setPosition(position);
+                                event.setMaintenance(maintenance);
+                                entityManager().persist(event);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        void after() {
+            maintenances.clear();
+        }
+    }
+
+    public static class OverspeedDetector extends EventProducer {
+        @Override
+        void before() {
+        }
+
+        @Override
+        void positionScanned(Position prevPosition, Position position) {
+            Device device = position.getDevice();
+            if (position.getSpeed() == null || device.getSpeedLimit() == null) {
+                return;
+            }
+
+            if (position.getSpeed() > device.getSpeedLimit() &&
+                    prevPosition == null
+                    || prevPosition.getSpeed() == null
+                    || prevPosition.getSpeed() <= device.getSpeedLimit()) {
+                DeviceEvent overspeedEvent = new DeviceEvent();
+                overspeedEvent.setTime(currentDate());
+                overspeedEvent.setDevice(device);
+                overspeedEvent.setType(DeviceEventType.OVERSPEED);
+                overspeedEvent.setPosition(position);
+                entityManager().persist(overspeedEvent);
+            }
+        }
+
+        @Override
+        void after() {
+        }
+    }
+
     @Inject
     private OfflineDetector offlineDetector;
     @Inject
     private GeoFenceDetector geoFenceDetector;
     @Inject
     private OdometerUpdater odometerUpdater;
+    @Inject
+    private OverspeedDetector overspeedDetector;
     @Inject
     private PositionScanner positionScanner;
 
@@ -319,6 +356,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
 
         positionScanner.eventProducers.add(geoFenceDetector);
         positionScanner.eventProducers.add(odometerUpdater);
+        positionScanner.eventProducers.add(overspeedDetector);
 
         if (applicationSettings.get().isEventRecordingEnabled()) {
             startTasks();
