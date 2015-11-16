@@ -6,4 +6,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 public interface LogServiceAsync {
     void getTrackerServerLog(short sizeKb, AsyncCallback<String> async);
+
+    void getWrapperLog(short sizeKb, AsyncCallback<String> async);
 }

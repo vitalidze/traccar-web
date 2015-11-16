@@ -30,10 +30,25 @@ public class LogController implements NavView.LogHandler {
 
     @Override
     public void onShowTrackerServerLog() {
-        new TrackerServerLogViewDialog(new TrackerServerLogViewDialog.LogHandler() {
+        new TrackerServerLogViewDialog(i18n.trackerServerLog(), new TrackerServerLogViewDialog.LogHandler() {
             @Override
             public void onLoad(short size, final TextArea logArea) {
                 service.getTrackerServerLog(size, new BaseAsyncCallback<String>(i18n) {
+                    @Override
+                    public void onSuccess(String result) {
+                        logArea.setText(result);
+                    }
+                });
+            }
+        }).show();
+    }
+
+    @Override
+    public void onShowWrapperLog() {
+        new TrackerServerLogViewDialog(i18n.wrapperLog(), new TrackerServerLogViewDialog.LogHandler() {
+            @Override
+            public void onLoad(short size, final TextArea logArea) {
+                service.getWrapperLog(size, new BaseAsyncCallback<String>(i18n) {
                     @Override
                     public void onSuccess(String result) {
                         logArea.setText(result);

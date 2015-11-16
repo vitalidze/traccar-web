@@ -23,6 +23,8 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Singleton
 public class LogServiceImpl extends RemoteServiceServlet implements LogService {
@@ -30,10 +32,21 @@ public class LogServiceImpl extends RemoteServiceServlet implements LogService {
     @RequireUser(roles = { Role.ADMIN })
     @Override
     public String getTrackerServerLog(short sizeKB) {
+        return getLog("tracker-server.log", sizeKB);
+    }
+
+    @Transactional
+    @RequireUser(roles = { Role.ADMIN })
+    @Override
+    public String getWrapperLog(short sizeKb) {
+        return getLog("wrapper.log." + new SimpleDateFormat("yyyyMMdd").format(new Date()), sizeKb);
+    }
+
+    private String getLog(String fileName, short sizeKB) {
         File workingFolder = new File(System.getProperty("user.dir"));
-        File logFile1 = new File(workingFolder, "logs" + File.separatorChar + "tracker-server.log");
-        File logFile2 = new File(workingFolder.getParentFile(), "logs" + File.separatorChar + "tracker-server.log");
-        File logFile3 = new File(workingFolder, "tracker-server.log");
+        File logFile1 = new File(workingFolder, "logs" + File.separatorChar + fileName);
+        File logFile2 = new File(workingFolder.getParentFile(), "logs" + File.separatorChar + fileName);
+        File logFile3 = new File(workingFolder, fileName);
 
         File logFile = logFile1.exists() ? logFile1 :
                 logFile2.exists() ? logFile2 :
@@ -50,7 +63,7 @@ public class LogServiceImpl extends RemoteServiceServlet implements LogService {
                     length = (int) raf.length();
                 }
                 /**
-                 * Read last 5 megabytes from file
+                 * Read last X kilobytes from file
                  */
                 raf.seek(Math.max(0, raf.length() - sizeKB * 1024));
                 byte[] result = new byte[Math.min(length, sizeKB * 1024)];
@@ -66,8 +79,7 @@ public class LogServiceImpl extends RemoteServiceServlet implements LogService {
                 }
             }
         }
-
-        return ("Tracker server log is not available. Looked at " + logFile1.getAbsolutePath() +
+        return ("Log is not available. Looked at " + logFile1.getAbsolutePath() +
                 ", " + logFile2.getAbsolutePath() +
                 ", " + logFile3.getAbsolutePath());
     }

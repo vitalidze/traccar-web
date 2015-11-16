@@ -62,6 +62,7 @@ public class NavView {
 
     public interface LogHandler {
         void onShowTrackerServerLog();
+        void onShowWrapperLog();
     }
 
     final LogHandler logHandler;
@@ -164,6 +165,11 @@ public class NavView {
     @UiHandler("showTrackerServerLog")
     public void onShowTrackerServerLog(SelectionEvent<Item> event) {
         logHandler.onShowTrackerServerLog();
+    }
+
+    @UiHandler("showWrapperLog")
+    public void onShowWrapperLog(SelectionEvent<Item> event) {
+        logHandler.onShowWrapperLog();
     }
 
     @UiHandler("reportsButton")

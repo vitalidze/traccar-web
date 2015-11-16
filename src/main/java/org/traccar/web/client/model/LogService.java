@@ -21,4 +21,5 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("logService")
 public interface LogService extends RemoteService {
     String getTrackerServerLog(short sizeKb);
+    String getWrapperLog(short sizeKb);
 }

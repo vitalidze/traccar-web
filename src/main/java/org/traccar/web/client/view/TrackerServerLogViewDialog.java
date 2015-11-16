@@ -20,6 +20,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.NumberField;
@@ -56,10 +57,12 @@ public class TrackerServerLogViewDialog {
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public TrackerServerLogViewDialog(LogHandler logHandler) {
+    public TrackerServerLogViewDialog(String title, LogHandler logHandler) {
         this.logHandler = logHandler;
 
         uiBinder.createAndBindUi(this);
+
+        window.setHeadingText(title);
 
         logSize.addValidator(new MinNumberValidator<Short>((short) 1));
         logSize.addValidator(new MaxNumberValidator<Short>((short) 16384));
