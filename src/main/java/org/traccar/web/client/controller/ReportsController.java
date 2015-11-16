@@ -21,6 +21,7 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.data.shared.ListStore;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
@@ -105,6 +106,7 @@ public class ReportsController implements NavView.ReportsHandler {
 
     private void generate(Report report) {
         FormPanel form = new FormPanel("_blank");
+        form.setVisible(false);
         form.setAction("traccar/report");
         form.setMethod(FormPanel.METHOD_POST);
         form.setEncoding(FormPanel.ENCODING_URLENCODED);
@@ -112,6 +114,11 @@ public class ReportsController implements NavView.ReportsHandler {
         container.add(new Hidden("report", reportMapper.write(report)));
         container.add(new Hidden("locale", LocaleInfo.getCurrentLocale().getLocaleName()));
         form.add(container);
-        form.submit();
+        RootPanel.get().add(form);
+        try {
+            form.submit();
+        } finally {
+            RootPanel.get().remove(form);
+        }
     }
 }
