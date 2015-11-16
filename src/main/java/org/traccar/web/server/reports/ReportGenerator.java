@@ -251,23 +251,25 @@ public abstract class ReportGenerator {
 
     void deviceDetails(Device device) {
         if (hasNonEmpty(device.getDescription(), device.getPlateNumber(), device.getVehicleInfo())) {
+            paragraphStart();
             tableStart();
             tableBodyStart();
 
-            if (!isNotEmpty(device.getDescription())) {
+            if (isNotEmpty(device.getDescription())) {
                 dataRow(message("description"), device.getDescription());
             }
 
-            if (!isNotEmpty(device.getPlateNumber())) {
+            if (isNotEmpty(device.getPlateNumber())) {
                 dataRow(message("plateNumber"), device.getPlateNumber());
             }
 
-            if (!isNotEmpty(device.getVehicleInfo())) {
+            if (isNotEmpty(device.getVehicleInfo())) {
                 dataRow(message("vehicleBrandModelColor"), device.getVehicleInfo());
             }
 
             tableBodyEnd();
             tableEnd();
+            paragraphEnd();
         }
     }
 
