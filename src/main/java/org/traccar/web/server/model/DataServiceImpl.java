@@ -757,52 +757,6 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     }
 
     @Transactional
-    @RequireUser(roles = { Role.ADMIN })
-    @Override
-    public String getTrackerServerLog(short sizeKB) {
-        File workingFolder = new File(System.getProperty("user.dir"));
-        File logFile1 = new File(workingFolder, "logs" + File.separatorChar + "tracker-server.log");
-        File logFile2 = new File(workingFolder.getParentFile(), "logs" + File.separatorChar + "tracker-server.log");
-        File logFile3 = new File(workingFolder, "tracker-server.log");
-
-        File logFile = logFile1.exists() ? logFile1 :
-                logFile2.exists() ? logFile2 :
-                        logFile3.exists() ? logFile3 : null;
-
-        if (logFile != null) {
-            RandomAccessFile raf = null;
-            try {
-                raf = new RandomAccessFile(logFile, "r");
-                int length = 0;
-                if (raf.length() > Integer.MAX_VALUE) {
-                    length = Integer.MAX_VALUE;
-                } else {
-                    length = (int) raf.length();
-                }
-                /**
-                 * Read last 5 megabytes from file
-                 */
-                raf.seek(Math.max(0, raf.length() - sizeKB * 1024));
-                byte[] result = new byte[Math.min(length, sizeKB * 1024)];
-                raf.read(result);
-                return new String(result);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            } finally {
-                try {
-                    raf.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-
-        return ("Tracker server log is not available. Looked at " + logFile1.getAbsolutePath() +
-                ", " + logFile2.getAbsolutePath() +
-                ", " + logFile3.getAbsolutePath());
-    }
-
-    @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
     @Override

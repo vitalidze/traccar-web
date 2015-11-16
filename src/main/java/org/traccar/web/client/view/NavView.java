@@ -60,6 +60,12 @@ public class NavView {
 
     private final ImportHandler importHandler;
 
+    public interface LogHandler {
+        void onShowTrackerServerLog();
+    }
+
+    final LogHandler logHandler;
+
     @UiField
     ContentPanel contentPanel;
 
@@ -96,10 +102,12 @@ public class NavView {
 
     public NavView(SettingsHandler settingsHandler,
                    ReportsHandler reportsHandler,
-                   ImportHandler importHandler) {
+                   ImportHandler importHandler,
+                   LogHandler logHandler) {
         this.settingsHandler = settingsHandler;
         this.reportsHandler = reportsHandler;
         this.importHandler = importHandler;
+        this.logHandler = logHandler;
 
         uiBinder.createAndBindUi(this);
 
@@ -155,7 +163,7 @@ public class NavView {
 
     @UiHandler("showTrackerServerLog")
     public void onShowTrackerServerLog(SelectionEvent<Item> event) {
-        new TrackerServerLogViewDialog().show();
+        logHandler.onShowTrackerServerLog();
     }
 
     @UiHandler("reportsButton")

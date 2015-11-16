@@ -23,8 +23,9 @@ public class NavController implements ContentController {
 
     public NavController(NavView.SettingsHandler settingsHandler,
                          NavView.ReportsHandler reportsHandler,
-                         NavView.ImportHandler importHandler) {
-        navView = new NavView(settingsHandler, reportsHandler, importHandler);
+                         NavView.ImportHandler importHandler,
+                         NavView.LogHandler logHandler) {
+        navView = new NavView(settingsHandler, reportsHandler, importHandler, logHandler);
     }
 
     @Override

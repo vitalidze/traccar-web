@@ -27,15 +27,19 @@ import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.TextArea;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
-import org.traccar.web.client.Application;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseAsyncCallback;
 
 public class TrackerServerLogViewDialog {
     private static TrackerServerLogViewDialogUiBinder uiBinder = GWT.create(TrackerServerLogViewDialogUiBinder.class);
 
     interface TrackerServerLogViewDialogUiBinder extends UiBinder<Widget, TrackerServerLogViewDialog> {
     }
+
+    public interface LogHandler {
+        void onLoad(short size, TextArea logArea);
+    }
+
+    final LogHandler logHandler;
 
     @UiField
     Window window;
@@ -52,7 +56,9 @@ public class TrackerServerLogViewDialog {
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public TrackerServerLogViewDialog() {
+    public TrackerServerLogViewDialog(LogHandler logHandler) {
+        this.logHandler = logHandler;
+
         uiBinder.createAndBindUi(this);
 
         logSize.addValidator(new MinNumberValidator<Short>((short) 1));
@@ -64,12 +70,7 @@ public class TrackerServerLogViewDialog {
     }
 
     private void refresh() {
-        Application.getDataService().getTrackerServerLog(logSize.getValue(), new BaseAsyncCallback<String>(i18n) {
-            @Override
-            public void onSuccess(String result) {
-                logArea.setText(result);
-            }
-        });
+        logHandler.onLoad(logSize.getValue(), logArea);
     }
 
     public void show() {
