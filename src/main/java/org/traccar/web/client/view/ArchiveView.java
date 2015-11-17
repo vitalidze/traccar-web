@@ -19,10 +19,10 @@ import static org.traccar.web.client.DateTimeFieldUtil.getCombineDate;
 
 import java.util.*;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
 import com.sencha.gxt.theme.neptune.client.base.tabs.Css3TabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
@@ -108,7 +108,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     CheckBox snapToRoads;
 
     @UiField(provided = true)
-    TextButton styleButtonTrackColor;
+    Label styleButtonTrackColor;
 
     @UiField
     TextButton styleButton;
@@ -144,9 +144,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 		periodCombo = new PeriodComboBox();
 
         // Element that displays the current track color
-        styleButtonTrackColor = new TextButton();
+        styleButtonTrackColor = new Label();
         styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor", "#".concat(style.DEFAULT_COLOR));
-        styleButtonTrackColor.getElement().getStyle().setCursor(Style.Cursor.TEXT);
         // Menu with the small palette
         smallColorMenu = new ExtColorMenu(ArchiveStyle.COLORS, ArchiveStyle.COLORS);
         smallColorMenu.setColor(ArchiveStyle.DEFAULT_COLOR);
