@@ -32,6 +32,6 @@ Bugs fixed:
 
 Also there are two more major things related to the project:
 
-1) I have updated [NetBeans](http://traccar.litvak.su/ide/netbeans.html) project setup instructions. Now anyone should be able to run project from that IDE.
+1) I have updated [NetBeans](/ide/netbeans.html) project setup instructions. Now anyone should be able to run project from that IDE.
 
 2) The translations are now reside on [transifex](https://www.transifex.com/traccar-web-ui-mod/traccar-web/) project. Everyone interested in updating existing/submitting new translations are welcome to the web site. Of course, it is still possible to send translations as the text files by email. But the project on transifex is the preferred and I believe simpler way to help with translation.
