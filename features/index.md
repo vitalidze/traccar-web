@@ -17,7 +17,7 @@ This project has following features, which don't exist in original `traccar-web`
     * [spanish language](spanish.html) (available via ?locale=es URL parameter)
     * [polish language](polish.html) (available via ?locale=pl URL parameter)
     * tagalog language (available via ?locale=tl URL parameter)
-    * hungarian language (available via ?locale=hu URL parameter)
+    * [hungarian](hungarian.html) language (available via ?locale=hu URL parameter)
     * [portuguese language](portuguese.html) (available via ?locale=pt_PT URL parameter)
     * [lithuanian language](lithuanian.html) (available via ?locale=lt URL parameter)
     * [dutch language](dutch.html) (available via ?locale=nl URL parameter)
@@ -30,7 +30,9 @@ This project has following features, which don't exist in original `traccar-web`
     * [serbian language](serbian.html) (available via ?locale=sr URL parameter)
     * [hebrew language](hebrew.html) (available via ?locale=he URL parameter)
     * [persian language](persian.html) (available via ?locale=fa URL parameter)
-* 'show server log' menu for viewing tracker-server.log file on Web
+    * [greek language](greek.html) (available via ?locale=el_GR URL parameter)
+* 'show server log' menu for viewing `tracker-server.log` file on Web
+* 'show wrapper.log' menu for viewing `wrapper.log` file on Web 
 * [archive filtering](archive-filtering.html)
 * change default map center position, zoom, provider (Google, OSM, Bing) (in Settings >> Preferences)
 * replaced 'current state' panel with popups. They appear either when you hover a row in 'devices' table or when you hover a marker on map
@@ -72,3 +74,4 @@ This project has following features, which don't exist in original `traccar-web`
 * [snap to roads](snap-to-roads.html)
 * added [MapQuest](http://www.mapquest.com/) and [Stamen toner](http://maps.stamen.com/toner/) mapping providers
 * added [OpenSeaMap](http://openseamap.org/) seamarks layer
+* [reports](reports.html)
