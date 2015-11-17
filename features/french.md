@@ -3,4 +3,4 @@ layout: feature
 title: French translation
 ---
 
-![French UI screen shot](http://i62.tinypic.com/6q9ojr.png)
+![French UI screen shot](http://i64.tinypic.com/2vxgm6p.png)

@@ -3,4 +3,4 @@ layout: feature
 title: Spanish translation
 ---
 
-![Spanish UI screen shot](http://i57.tinypic.com/n2mkxt.png)
+![Spanish UI screen shot](http://i66.tinypic.com/20thsbd.png)
