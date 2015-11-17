@@ -27,11 +27,11 @@ title: Roadmap
         {% for task in site.data.tasks %}
         <tr>
             <td>
-                {% if done %}
+                {% if task.done %}
                 <strike>
                 {% endif %}
                 {{task.description}}
-                {% if done %}
+                {% if task.done %}
                 </strike>
                 {% endif %}
             </td>
