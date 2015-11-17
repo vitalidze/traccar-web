@@ -26,7 +26,15 @@ title: Roadmap
         <tbody>
         {% for task in site.data.tasks %}
         <tr>
-            <td>{{task.description}}</td>
+            <td>
+                {% if done %}
+                <strike>
+                {% endif %}
+                {{task.description}}
+                {% if done %}
+                </strike>
+                {% endif %}
+            </td>
             <td>
                 {% for ticketid in task.tickets %}
                 <a href="https://github.com/vitalidze/traccar-web/issues/{{ticketid}}">{{ticketid}}</a>
