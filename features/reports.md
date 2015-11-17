@@ -48,3 +48,6 @@ Several notable points about report calculation:
 * as already mentioned in report fields list the empty selection of devices/geo-fences means that all available entities must be included on report
 * the 'Speed limit' setting from the device profile is used for overspeeding detection
 * the 'Min. idle time' setting from the device profile is used to detect stop/movement
+* reports are localized based on the language selected in currently running web UI
+* for the time period the time from the web browser is used
+* dates are formatted with timezone selected in `Preferences` screen
