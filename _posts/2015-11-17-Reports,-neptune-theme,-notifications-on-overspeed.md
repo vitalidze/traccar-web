@@ -16,10 +16,10 @@ Also there were several minor features added:
 * offline devices detection now should be much more lightweight and scalable since it will not scan all posted offline events
 * redesigned 'Import' screen, which now contains the drop-down list to select destination device. Previously it took device selection from the 'Archive' toolbar. I believe now Import is more convenient.
 * other events (geo-fence enter/exit, maintenace, overspeed) calculation was slightly rewritten, which should make it both more lightweight and extensible in future
-* updated [/features/spanish.html](spanish) translation (thanks to Miguel Abad)
-* updated [/features/french.html](french) translation (thanks to [toshdi](https://github.com/toshdi) github user and Igor)
-* updated [/features/hungarian.html](hungarian) translation (thanks to Balogh Zoltán)
-* added [/features/greek.html](greek) translation (thanks to [gsiotas](https://github.com/gsiotas) github user)
+* updated [spanish](/features/spanish.html) translation (thanks to Miguel Abad)
+* updated [french](/features/french.html) translation (thanks to [toshdi](https://github.com/toshdi) github user and Igor)
+* updated [hungarian](/features/hungarian.html) translation (thanks to Balogh Zoltán)
+* added [greek](/features/greek.html) translation (thanks to [gsiotas](https://github.com/gsiotas) github user)
 * added new settings to the device profile: 
     * 'Min. idle time' - used to calculate device status both in live data and on reports. Device will not be considered idle until it's speed is less than the defined value for the specified duration
     * 'Speed limit' - used to produce 'Overspeed' events/notifications and for reports calculation
