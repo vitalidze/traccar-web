@@ -779,9 +779,13 @@ function invoke(options) {
 
             if (xhr.status != 200 && options.error != undefined) {
                 options.error(xhr);
+                options.error = undefined;
             }
         },
-        error: options.error
+        error: function(xhr) {
+            options.error(xhr);
+            options.error = undefined;
+        }
     })
 }
 
