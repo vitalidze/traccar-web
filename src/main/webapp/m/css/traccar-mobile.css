@@ -1,18 +1,15 @@
 /*
- * Button for opening side bar
+ * Buttons on map
  */
-.button-open-side-menu {
+.button-map {
     position: absolute;
-    top: 65px;
     left: 8px;
     background: rgba(255,255,255,0.4);
     border-radius: 4px;
     padding: 2px;
 }
-.ol-touch .button-open-side-menu {
-    top: 80px;
-}
-.button-open-side-menu a {
+
+.button-map a {
     display: block;
     color: white;
     font-size: 16px;
@@ -26,14 +23,40 @@
     width: 22px;
     background: rgba(0,60,136,0.5);
 }
-.ol-touch .button-open-side-menu a {
+.ol-touch .button-map a {
     font-size: 20px;
     height: 30px;
     width: 30px;
     line-height: 26px;
 }
-.button-open-side-menu a:hover {
+.button-map a:hover {
     background: rgba(0,60,136,0.7);
+}
+
+.button-map-selected a {
+    background: rgba(0,60,136,0.7);
+}
+
+/*
+ * button for opening side bar
+ */
+.button-open-side-menu {
+    top: 65px;
+}
+
+.ol-touch .button-open-side-menu {
+    top: 80px;
+}
+
+/*
+ * button for showing geo-location
+ */
+.button-geolocate-me {
+    top: 95px;
+}
+
+.ol-touch .button-geolocate-me {
+    top: 120px;
 }
 
 /*

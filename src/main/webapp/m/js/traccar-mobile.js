@@ -197,7 +197,7 @@ var OpenSideMenuControl = function(opt_options) {
     anchor.addEventListener('touchstart', handleOpenSideMenu, false);
 
     var element = document.createElement('div');
-    element.className = 'button-open-side-menu ol-unselectable ol-has-tooltip';
+    element.className = 'button-map button-open-side-menu ol-unselectable ol-has-tooltip';
     element.appendChild(anchor);
 
     ol.control.Control.call(this, {
@@ -207,6 +207,83 @@ var OpenSideMenuControl = function(opt_options) {
 
 };
 ol.inherits(OpenSideMenuControl, ol.control.Control);
+
+// button that puts current device location on map
+var GeoLocateMeControl = function(opt_options) {
+    var options = opt_options || {};
+
+    var anchor = document.createElement('a');
+    anchor.href = '#geolocate-me';
+    anchor.innerHTML = "&#9678;";
+
+    var geolocation = null;
+    var centerAndZoomOnFirstChange = false;
+    var handleGeoLocateMe = function(e) {
+        e.preventDefault();
+        if (geolocation == null) {
+            geolocation = new ol.Geolocation({
+                projection: map.getView().getProjection()
+            });
+
+            var accuracyFeature = new ol.Feature();
+            geolocation.on('change:accuracyGeometry', function() {
+                accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
+                if (centerAndZoomOnFirstChange) {
+                    map.getView().fit(geolocation.getAccuracyGeometry(), map.getSize());
+                    centerAndZoomOnFirstChange = false;
+                }
+            });
+
+            var positionFeature = new ol.Feature();
+            positionFeature.setStyle(new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 6,
+                    fill: new ol.style.Fill({
+                        color: '#3399CC'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#fff',
+                        width: 2
+                    })
+                })
+            }));
+
+            geolocation.on('change:position', function() {
+                var coordinates = geolocation.getPosition();
+                positionFeature.setGeometry(coordinates ? new ol.geom.Point(coordinates) : null);
+            });
+
+            new ol.layer.Vector({
+                map: map,
+                source: new ol.source.Vector({
+                    features: [accuracyFeature, positionFeature]
+                })
+            });
+        }
+
+        geolocation.setTracking(!geolocation.getTracking());
+        centerAndZoomOnFirstChange = geolocation.getTracking();
+        if (geolocation.getTracking()) {
+            $$('#geolocate-me').addClass('button-map-selected');
+        } else {
+            $$('#geolocate-me').removeClass('button-map-selected');
+        }
+    };
+
+    anchor.addEventListener('click', handleGeoLocateMe, false);
+    anchor.addEventListener('touchstart', handleGeoLocateMe, false);
+
+    var element = document.createElement('div');
+    element.id = 'geolocate-me';
+    element.className = 'button-map button-geolocate-me ol-unselectable ol-has-tooltip';
+    element.appendChild(anchor);
+
+    ol.control.Control.call(this, {
+        element: element,
+        target: options.target
+    });
+};
+ol.inherits(GeoLocateMeControl, ol.control.Control);
 
 // initialize map when page ready
 var map;
@@ -324,7 +401,7 @@ myApp.onPageInit('map-screen', function(page) {
         target: divOlMap,
         layers: layers,
         view: view,
-        controls: controls.extend([new OpenSideMenuControl()])
+        controls: controls.extend([new OpenSideMenuControl(), new GeoLocateMeControl()])
     });
 
     // set up map center and zoom
