@@ -50,6 +50,7 @@ public class Device implements IsSerializable {
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
         minIdleTime = device.minIdleTime;
+        speedLimit = device.speedLimit;
         iconType = device.iconType;
         icon = device.getIcon();
         photo = device.getPhoto();
