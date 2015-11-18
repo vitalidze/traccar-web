@@ -479,6 +479,7 @@ public class User implements IsSerializable, Cloneable {
         this.phoneNumber = phoneNumber;
     }
 
+    @JsonIgnore
     public int getNumberOfDevicesToAdd() {
         int myNumber;
         if (getMaxNumOfDevices() == null) {
@@ -491,6 +492,7 @@ public class User implements IsSerializable, Cloneable {
         return Math.min(myNumber, managerNumber);
     }
 
+    @JsonIgnore
     public User getUserWhoReachedLimitOnDevicesNumber() {
         User user = this;
         while (user != null && user.getNumberOfDevicesToAdd() == 0) {
@@ -502,6 +504,7 @@ public class User implements IsSerializable, Cloneable {
         return null;
     }
 
+    @JsonIgnore
     public int getNumberOfDevicesToDistribute() {
         Integer maxNumberOfDevices = getMaxNumOfDevices();
         User manager = this;
