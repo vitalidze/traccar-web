@@ -13,12 +13,23 @@ title: Installation
 
 4) Update configuration file (located in `conf\traccar.xml` of traccar installation folder):
 
-* add following lines:
+* add following line:
 
 Right after `<entry key='web.path'>/opt/traccar/web</entry>` line
 
+  * for v. 3.0 and 3.1 
+
+
      <entry key='web.old'>true</entry>
      <entry key='web.application'>/opt/traccar/traccar-web.war</entry>
+
+     
+  * for v. 3.2 and later
+  
+  
+     <entry key='web.type'>old</entry>
+     <entry key='web.application'>/opt/traccar/traccar-web.war</entry>
+     
     
 Replace `/opt/traccar/traccar-web.war` path with the path to your traccar installation (usually it will be same on linux/mac, on windows it is most probably `c:\Program Files\Traccar\traccar-web.war`).
 
