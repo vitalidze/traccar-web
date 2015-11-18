@@ -3,4 +3,4 @@ layout: feature
 title: Bulgarian translation
 ---
 
-![Bulgarian UI screen shot](http://i59.tinypic.com/rs8xw7.png)
+![Bulgarian UI screen shot](http://i66.tinypic.com/14t69vr.png)
