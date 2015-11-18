@@ -63,6 +63,8 @@ public class User implements IsSerializable, Cloneable {
             transferNotificationEvents = new HashSet<DeviceEventType>(user.notificationEvents);
         }
         maxNumOfDevices = user.maxNumOfDevices;
+        expirationDate = user.expirationDate;
+        blocked = user.blocked;
         readOnly = user.readOnly;
         archive = user.archive;
         companyName = user.companyName;
