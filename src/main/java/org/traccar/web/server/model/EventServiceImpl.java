@@ -154,7 +154,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                 if (device == null || device.getId() != position.getDevice().getId()) {
                     device = position.getDevice();
                     state = deviceState.get(device.getId());
-                    if (state == null) {
+                    if (state == null || state.latestPositionId == null) {
                         state = new DeviceState();
                         deviceState.put(device.getId(), state);
                         prevPosition = null;
@@ -315,9 +315,9 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
             }
 
             if (position.getSpeed() > device.getSpeedLimit() &&
-                    prevPosition == null
+                    (prevPosition == null
                     || prevPosition.getSpeed() == null
-                    || prevPosition.getSpeed() <= device.getSpeedLimit()) {
+                    || prevPosition.getSpeed() <= device.getSpeedLimit())) {
                 DeviceEvent overspeedEvent = new DeviceEvent();
                 overspeedEvent.setTime(currentDate());
                 overspeedEvent.setDevice(device);
