@@ -15,10 +15,7 @@
  */
 package org.traccar.web.client.i18n;
 
-import org.traccar.web.shared.model.DeviceEventType;
-import org.traccar.web.shared.model.GeoFenceType;
-import org.traccar.web.shared.model.MessagePlaceholder;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
 public interface Messages extends com.google.gwt.i18n.client.Messages {
     String authentication();
@@ -393,14 +390,9 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String overlayType(@Select UserSettings.OverlayType type);
 
     String snapToRoads();
-    
-    String periodComboBox_today();
-    String periodComboBox_Yesterday();
-    String periodComboBox_ThisWeek();
-    String periodComboBox_PreviousWeek();
-    String periodComboBox_ThisMonth();
-    String periodComboBox_PreviousMonth();
-    String periodComboBox_Custom();
+
+    String period(@Select Period period);
+
     String periodComboBox_SelectPeriod();
 
     String traceInterval();
@@ -412,4 +404,82 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String timeZone();
 
     String bingMapsKey();
+
+    String reports();
+
+    String report();
+
+    String timePeriod();
+
+    String generate();
+
+    String newReport();
+
+    String reportType(@Select ReportType type);
+
+    String confirmReportRemoval();
+
+    String routeStart();
+
+    String routeEnd();
+
+    String routeLength();
+
+    String moveDuration();
+
+    String stopDuration();
+
+    String topSpeed();
+
+    String averageSpeed();
+
+    String overspeedCount();
+
+    String speedLimit();
+
+    String status();
+
+    String start();
+
+    String end();
+
+    String duration();
+
+    String moving();
+
+    String stopped();
+
+    String stopPosition();
+
+    String overspeedPosition();
+
+    String geoFenceIn();
+
+    String geoFenceOut();
+
+    String geoFenceName();
+
+    String geoFencePosition();
+
+    String eventPosition();
+
+    String totalOffline();
+
+    String totalGeoFenceEnters();
+
+    String totalGeoFenceExits();
+
+    String totalMaintenanceRequired();
+
+    String date();
+
+    String totalMileage();
+
+    String logs();
+
+    String includeMap();
+
+    String minIdleTime();
+
+    String wrapperLog();
 }

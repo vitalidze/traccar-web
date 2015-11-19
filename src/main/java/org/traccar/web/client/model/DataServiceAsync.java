@@ -61,8 +61,6 @@ public interface DataServiceAsync {
 
     void getApplicationSettings(AsyncCallback<ApplicationSettings> async);
 
-    void getTrackerServerLog(short sizeKB, AsyncCallback<String> async);
-
     void saveRoles(List<User> users, AsyncCallback<Void> async);
 
     void getDeviceShare(Device device, AsyncCallback<Map<User, Boolean>> async);

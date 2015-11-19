@@ -12,7 +12,7 @@
   </ui:with>
 
   <ui:with type="com.sencha.gxt.core.client.util.Margins" field="buttonDataMargins">
-    <ui:attributes top="2" right="0" bottom="2" left="0" />
+    <ui:attributes top="4" right="0" bottom="4" left="0" />
   </ui:with>
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutDataWithButtons">
@@ -50,54 +50,54 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="640, 480" modal="true" headingText="{i18n.device}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="670, 480" modal="true" headingText="{i18n.device}" focusWidget="{saveButton}">
       <gxt:PlainTabPanel ui:field="tabs">
           <gxt:child config="{settingsTabConfig}">
               <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.name}" labelWidth="160">
+                      <form:FieldLabel text="{i18n.name}" labelWidth="180">
                           <form:widget>
                               <form:TextField ui:field="name" allowBlank="false" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.uniqueIdentifier}" labelWidth="160">
+                      <form:FieldLabel text="{i18n.uniqueIdentifier}" labelWidth="180">
                           <form:widget>
                               <form:TextField ui:field="uniqueId" allowBlank="false" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.description}" labelWidth="160">
+                      <form:FieldLabel text="{i18n.description}" labelWidth="180">
                           <form:widget>
                               <form:TextField ui:field="description" allowBlank="true" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.phoneNumber}" labelWidth="160">
+                      <form:FieldLabel text="{i18n.phoneNumber}" labelWidth="180">
                           <form:widget>
                               <form:TextField ui:field="phoneNumber" allowBlank="true" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.plateNumber}" labelWidth="160">
+                      <form:FieldLabel text="{i18n.plateNumber}" labelWidth="180">
                           <form:widget>
                               <form:TextField ui:field="plateNumber" allowBlank="true" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.vehicleBrandModelColor}" labelWidth="160">
+                      <form:FieldLabel text="{i18n.vehicleBrandModelColor}" labelWidth="180">
                           <form:widget>
                               <form:TextField ui:field="vehicleInfo" allowBlank="true" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.deviceTimeout} ({i18n.second})" labelWidth="160">
+                      <form:FieldLabel text="{i18n.deviceTimeout} ({i18n.second})" labelWidth="180">
                           <form:widget>
                               <form:NumberField editor="{integerPropertyEditor}"
                                                 ui:field="timeout"
@@ -110,7 +110,7 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.idleWhenSpeedIsLE}" labelWidth="160">
+                      <form:FieldLabel text="{i18n.idleWhenSpeedIsLE}" labelWidth="180">
                           <form:widget>
                               <form:NumberField editor="{doublePropertyEditor}"
                                                 ui:field="idleSpeedThreshold"
@@ -121,8 +121,32 @@
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.minIdleTime} ({i18n.second})" labelWidth="180">
+                          <form:widget>
+                              <form:NumberField editor="{integerPropertyEditor}"
+                                                ui:field="minIdleTime"
+                                                allowNegative="false"
+                                                allowDecimals="false"
+                                                allowBlank="false"
+                                                width="5" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.speedLimit}" labelWidth="180">
+                          <form:widget>
+                              <form:NumberField editor="{doublePropertyEditor}"
+                                                ui:field="speedLimit"
+                                                allowNegative="false"
+                                                allowDecimals="true"
+                                                allowBlank="true"
+                                                width="5" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
                   <container:child layoutData="{verticalLayoutDataWithButtons}">
-                      <form:FieldLabel ui:field="labelMarkers" labelWidth="160">
+                      <form:FieldLabel ui:field="labelMarkers" labelWidth="180">
                           <form:widget>
                               <container:HorizontalLayoutContainer ui:field="panelMarkers">
                                   <container:child layoutData="{horizontalLayoutData}">
@@ -136,7 +160,7 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutDataWithButtons}">
-                      <form:FieldLabel text="{i18n.photo}" labelWidth="160">
+                      <form:FieldLabel text="{i18n.photo}" labelWidth="180">
                           <form:widget>
                               <container:HorizontalLayoutContainer>
                                   <container:child layoutData="{horizontalLayoutData}">

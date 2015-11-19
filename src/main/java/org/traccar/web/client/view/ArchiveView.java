@@ -15,25 +15,22 @@
  */
 package org.traccar.web.client.view;
 
+import static org.traccar.web.client.DateTimeFieldUtil.getCombineDate;
+
 import java.util.*;
 
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
-import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
+import com.sencha.gxt.theme.neptune.client.base.tabs.Css3TabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import com.sencha.gxt.widget.core.client.form.*;
-import com.sencha.gxt.widget.core.client.info.Info;
 import com.sencha.gxt.widget.core.client.menu.*;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.ArchiveStyle;
@@ -102,7 +99,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     ComboBox<Device> deviceCombo;
 
 	@UiField(provided = true)
-	ComboBox<String> periodCombo;
+	PeriodComboBox periodCombo;
 
     @UiField
     CheckBox disableFilter;
@@ -111,7 +108,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     CheckBox snapToRoads;
 
     @UiField(provided = true)
-    TextButton styleButtonTrackColor;
+    Label styleButtonTrackColor;
 
     @UiField
     TextButton styleButton;
@@ -145,18 +142,10 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
 
 		periodCombo = new PeriodComboBox();
-		periodCombo.select(1);
-        periodCombo.addSelectionHandler(new SelectionHandler<String>() {
-            @Override
-            public void onSelection(SelectionEvent<String> event) {
-                setDateTimefd(periodCombo.getStore().indexOf(event.getSelectedItem()));
-            }
-        });
 
         // Element that displays the current track color
-        styleButtonTrackColor = new TextButton();
+        styleButtonTrackColor = new Label();
         styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor", "#".concat(style.DEFAULT_COLOR));
-        styleButtonTrackColor.getElement().getStyle().setCursor(Style.Cursor.TEXT);
         // Menu with the small palette
         smallColorMenu = new ExtColorMenu(ArchiveStyle.COLORS, ArchiveStyle.COLORS);
         smallColorMenu.setColor(ArchiveStyle.DEFAULT_COLOR);
@@ -202,7 +191,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
             routeMarkersType.add(item);
         }
 
-        devicesTabs = new TabPanel(GWT.<TabPanel.TabPanelAppearance>create(BlueTabPanelBottomAppearance.class));
+        devicesTabs = new TabPanel(GWT.<TabPanel.TabPanelAppearance>create(Css3TabPanelBottomAppearance.class));
         archivePanels = new HashMap<Long, ArchivePanel>();
 
         uiBinder.createAndBindUi(this);
@@ -218,6 +207,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         fromTime.setValue(from);
         toDate.setValue(to);
         toTime.setValue(to);
+
+        periodCombo.init(fromDate, fromTime, toDate, toTime);
     }
 
     @Override
@@ -232,19 +223,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiHandler("zoomToTrackMenu")
     public void onMenuSelection(SelectionEvent<Item> event) {
         style.setZoomToTrack(((CheckMenuItem) event.getSelectedItem()).isChecked());
-    }
-
-    @SuppressWarnings("deprecation")
-    private static Date getCombineDate(DateField dateField, TimeField timeField) {
-        Date result = null;
-        Date date = dateField.getValue();
-        Date time = timeField.getValue();
-        if (date != null && time != null) {
-            result = new Date(
-                    date.getYear(), date.getMonth(), date.getDate(),
-                    time.getHours(), time.getMinutes(), time.getSeconds());
-        }
-        return result;
     }
 
     @UiHandler("loadButton")
@@ -297,15 +275,6 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
                             "&filter=" + !disableFilter.getValue(),
                     "_blank", null);
-        }
-    }
-
-    @UiHandler("importButton")
-    public void onImportClicked(SelectionEvent<Item> event) {
-        if (deviceCombo.getValue() == null) {
-            new AlertMessageBox(i18n.error(), i18n.errFillFields()).show();
-        } else {
-            new ImportDialog(deviceCombo.getValue()).show();
         }
     }
 
@@ -382,14 +351,4 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     public void onSnapToRoadsClicked(ValueChangeEvent<Boolean> event) {
         archiveHandler.onSnapToRoads(snapToRoads.getValue());
     }
-
-	private void setDateTimefd(int index){
-		if (index != 6){
-            PeriodComboBox combo = (PeriodComboBox) periodCombo;
-			fromTime.setValue(combo.getStartPeriod(index));
-			fromDate.setValue(combo.getStartPeriod(index));
-			toDate.setValue(combo.getEndOfPeriod(index));
-			toTime.setValue(combo.getEndOfPeriod(index));
-		}
-	}
 }

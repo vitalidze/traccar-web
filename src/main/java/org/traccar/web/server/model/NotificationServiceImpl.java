@@ -15,11 +15,13 @@
  */
 package org.traccar.web.server.model;
 
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.floreysoft.jmte.Engine;
 import com.floreysoft.jmte.NamedRenderer;
 import com.floreysoft.jmte.RenderFormatInfo;
 import com.floreysoft.jmte.Renderer;
-import com.google.gson.stream.JsonWriter;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.DataService;
@@ -40,7 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -72,6 +73,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
         @Inject
         Provider<ApplicationSettings> applicationSettings;
+
+        @Inject
+        ServerMessages messages;
 
         @Transactional
         @Override
@@ -173,7 +177,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             }
             if (event.getType() == DeviceEventType.GEO_FENCE_ENTER || event.getType() == DeviceEventType.GEO_FENCE_EXIT) {
                 // check whether user has access to the geo-fence
-                if (!user.getAdmin() && !user.hasAccessTo(event.getGeoFence())) {
+                if (!user.hasAccessTo(event.getGeoFence())) {
                     return;
                 }
             }
@@ -269,16 +273,19 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
                 os = conn.getOutputStream();
-                JsonWriter writer = new JsonWriter(new OutputStreamWriter(os));
-                writer.beginObject();
-                writer
-                    .name("email").value(user.getEmail())
-                    .name("type").value("note")
-                    .name("title").value(subject)
-                        .name("body").value(body);
-                writer.endObject();
-                writer.flush();
-                writer.close();
+
+                JsonFactory jsonFactory = new JsonFactory(); // or, for data binding, org.codehaus.jackson.mapper.MappingJsonFactory
+                JsonGenerator json = jsonFactory.createGenerator(os, JsonEncoding.UTF8);
+
+                json.writeStartObject();
+                json.writeStringField("email", user.getEmail());
+                json.writeStringField("type", "note");
+                json.writeStringField("title", subject);
+                json.writeStringField("body", body);
+                json.writeEndObject();
+                json.flush();
+                json.close();
+
                 is = conn.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                 try {
@@ -298,6 +305,17 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             } finally {
                 if (is != null ) try { is.close(); } catch (IOException ignored) {}
             }
+        }
+
+        String defaultBody(DeviceEventType type, String locale) {
+            String body = messages.message(locale, "defaultNotificationTemplate[" + type.name() + "]");
+
+            return body.replace("''", "'")
+                    .replace("{1}", "${deviceName}")
+                    .replace("{2}", "${geoFenceName}")
+                    .replace("{3}", "${eventTime}")
+                    .replace("{4}", "${positionTime}")
+                    .replace("{5}", "${maintenanceName}");
         }
     }
 
@@ -559,27 +577,5 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 entityManager.get().persist(newTemplate);
             }
         }
-    }
-
-    static String defaultBody(DeviceEventType type, String locale) throws IOException {
-        Properties defaultMessages = new Properties();
-        defaultMessages.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/client/i18n/Messages.properties"));
-
-        Properties localeMessages = new Properties();
-        InputStream messagesIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/client/i18n/Messages_" + locale + ".properties");
-        if (messagesIS == null) {
-            localeMessages = defaultMessages;
-        } else {
-            localeMessages.load(new InputStreamReader(messagesIS, "UTF-8"));
-        }
-
-        String key = "defaultNotificationTemplate[" + type.name() + "]";
-        String body = localeMessages.getProperty(key, defaultMessages.getProperty(key));
-        return body.replace("''", "'")
-                .replace("{1}", "${deviceName}")
-                .replace("{2}", "${geoFenceName}")
-                .replace("{3}", "${eventTime}")
-                .replace("{4}", "${positionTime}")
-                .replace("{5}", "${maintenanceName}");
     }
 }

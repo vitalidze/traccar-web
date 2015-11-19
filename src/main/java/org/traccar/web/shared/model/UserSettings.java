@@ -1,6 +1,6 @@
 package org.traccar.web.shared.model;
 
-import com.google.gson.annotations.Expose;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.Column;
@@ -29,6 +29,7 @@ public class UserSettings implements IsSerializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
+    @JsonIgnore
     private long id;
 
     public UserSettings() {
@@ -127,7 +128,6 @@ public class UserSettings implements IsSerializable {
     }
 
     @Enumerated(EnumType.STRING)
-    @Expose
     private SpeedUnit speedUnit;
 
     public void setSpeedUnit(SpeedUnit speedUnit) {
@@ -141,7 +141,6 @@ public class UserSettings implements IsSerializable {
     /**
      * Interval of printing time on recorded trace in minutes based on position time
      */
-    @Expose
     private Short timePrintInterval;
 
     public Short getTimePrintInterval() {
@@ -155,7 +154,6 @@ public class UserSettings implements IsSerializable {
     /**
      * Interval to record latest trace (in minutes)
      */
-    @Expose
     private Short traceInterval;
 
     public Short getTraceInterval() {
@@ -166,6 +164,7 @@ public class UserSettings implements IsSerializable {
         this.traceInterval = traceInterval;
     }
 
+    @JsonIgnore
     private String timeZoneId;
 
     public String getTimeZoneId() {
@@ -176,16 +175,13 @@ public class UserSettings implements IsSerializable {
         this.timeZoneId = timeZoneId;
     }
 
-    @Expose
     private Integer zoomLevel;
-    @Expose
     private Double centerLongitude;
-    @Expose
     private Double centerLatitude;
     @Enumerated(EnumType.STRING)
-    @Expose
     private MapType mapType;
 
+    @JsonIgnore
     private String overlays;
 
     public Integer getZoomLevel() {
@@ -229,13 +225,19 @@ public class UserSettings implements IsSerializable {
     }
 
     @Column(nullable = true)
+    @JsonIgnore
     private boolean hideZeroCoordinates;
     @Column(nullable = true)
+    @JsonIgnore
     private boolean hideInvalidLocations;
     @Column(nullable = true)
+    @JsonIgnore
     private boolean hideDuplicates;
+    @JsonIgnore
     private Double minDistance;
+    @JsonIgnore
     private String speedModifier;
+    @JsonIgnore
     private Double speedForFilter;
 
     public boolean isHideZeroCoordinates() {
@@ -288,6 +290,7 @@ public class UserSettings implements IsSerializable {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
+    @JsonIgnore
     private PositionIconType archiveMarkerType;
 
     public PositionIconType getArchiveMarkerType() {

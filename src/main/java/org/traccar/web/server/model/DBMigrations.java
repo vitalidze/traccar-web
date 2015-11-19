@@ -38,6 +38,7 @@ public class DBMigrations {
                 new SetDefaultDeviceTimeout(),
                 new SetDefaultDeviceOdometer(),
                 new SetDefaultIdleSpeedThreshold(),
+                new SetDefaultMinIdleTime(),
                 new SetDefaultDisallowDeviceManagementByUsers(),
                 new SetDefaultEventRecordingEnabled(),
                 new SetDefaultLanguage(),
@@ -165,6 +166,16 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.idleSpeedThreshold = :idleSpeedThreshold WHERE D.idleSpeedThreshold IS NULL")
                     .setParameter("idleSpeedThreshold", Double.valueOf(0))
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultMinIdleTime implements Migration {
+
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.minIdleTime = :minIdleTime WHERE D.minIdleTime IS NULL")
+                    .setParameter("minIdleTime", Integer.valueOf(Device.DEFAULT_MIN_IDLE_TIME))
                     .executeUpdate();
         }
     }

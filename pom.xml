@@ -9,7 +9,7 @@
   <groupId>org.traccar</groupId>
   <artifactId>traccar-web</artifactId>
   <packaging>war</packaging>
-  <version>0.8.3-SNAPSHOT</version>
+  <version>0.9.1-SNAPSHOT</version>
   <name>Traccar Web UI</name>
 
   <properties>
@@ -21,6 +21,7 @@
     <guiceVersion>3.0</guiceVersion>
     <!-- Convenience property to set the javamail version -->
     <javaMailVersion>1.5.2</javaMailVersion>
+    <jackson2Version>2.6.3</jackson2Version>
     <!-- GWT needs at least java 1.5 -->
     <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -83,6 +84,11 @@
       <artifactId>guice-servlet</artifactId>
       <version>${guiceVersion}</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-multibindings</artifactId>
+      <version>${guiceVersion}</version>
+    </dependency>
     <!-- Database drivers -->
     <dependency>
       <groupId>com.h2database</groupId>
@@ -110,6 +116,12 @@
        <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>com.sencha.gxt</groupId>
+      <artifactId>gxt-theme-neptune</artifactId>
+      <version>3.1.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
        <groupId>org.gwtopenmaps.openlayers</groupId>
        <artifactId>gwt-openlayers-client</artifactId>
        <version>1.0</version>
@@ -126,6 +138,28 @@
       <artifactId>smtp</artifactId>
       <version>${javaMailVersion}</version>
     </dependency>
+    <!-- Jackson dependencies -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson2Version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson2Version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson2Version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.nmorel.gwtjackson</groupId>
+      <artifactId>gwt-jackson</artifactId>
+      <version>0.10.0</version>
+      <scope>provided</scope>
+    </dependency>
     <!-- Test dependencies -->
     <dependency>
       <groupId>junit</groupId>
@@ -139,11 +173,6 @@
       <version>1.10.19</version>
     </dependency>
     <!-- Other dependencies -->
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.3</version>
-    </dependency>
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
@@ -188,13 +217,13 @@
         <configuration>
           <deploy>${project.build.directory}/gwt-deploy</deploy>
           <runTarget>traccar.html</runTarget>
-	      <hostedWebapp>${webappDirectory}</hostedWebapp>
+	  <hostedWebapp>${webappDirectory}</hostedWebapp>
+          <extraJvmArgs>-Xmx1G -Xss1024k</extraJvmArgs>
         </configuration>
         <executions>
           <execution>
             <configuration>
               <module>org.traccar.web.Traccar</module>
-              <extraJvmArgs>-Xmx1G -Xss1024k</extraJvmArgs>
             </configuration>
             <goals>
               <goal>compile</goal>

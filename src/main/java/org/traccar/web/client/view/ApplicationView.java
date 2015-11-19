@@ -38,19 +38,25 @@ public class ApplicationView extends Composite {
     }
 
     @UiField(provided = true)
-    ContentPanel devicePanel;
+    final ContentPanel navPanel;
 
     @UiField(provided = true)
-    ContentPanel mapPanel;
+    final ContentPanel devicePanel;
 
     @UiField(provided = true)
-    ContentPanel archivePanel;
+    final ContentPanel mapPanel;
+
+    @UiField(provided = true)
+    final ContentPanel archivePanel;
 
     @UiField
     BorderLayoutContainer container;
 
     @UiField
     BorderLayoutContainer.BorderLayoutData southData;
+
+    @UiField
+    BorderLayoutContainer.BorderLayoutData westData;
 
     class ExpandCollapseHandler implements ResizeHandler, SelectEvent.SelectHandler {
         final int toolbarSize;
@@ -104,7 +110,11 @@ public class ApplicationView extends Composite {
         }
     }
 
-    public ApplicationView(ContentPanel deviceView, ContentPanel mapView, ContentPanel archiveView) {
+    public ApplicationView(ContentPanel navView,
+                           ContentPanel deviceView,
+                           ContentPanel mapView,
+                           ContentPanel archiveView) {
+        navPanel = navView;
         devicePanel = deviceView;
         mapPanel = mapView;
         archivePanel = archiveView;
@@ -115,6 +125,10 @@ public class ApplicationView extends Composite {
             archivePanel.removeFromParent();
         }
 
-        new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 52);
+        if (devicePanel.getElement().getSize().getWidth() < 260) {
+            westData.setSize(260);
+        }
+
+        new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 84);
     }
 }

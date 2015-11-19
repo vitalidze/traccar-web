@@ -15,8 +15,6 @@
  */
 package org.traccar.web.client;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.i18n.client.TimeZoneInfo;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
@@ -47,17 +45,15 @@ public class Application {
         return dataService;
     }
 
-    private static Logger logger = Logger.getLogger("");
-
-    public static Logger getLogger() {
-        return logger;
-    }
-
     private final SettingsController settingsController;
+    private final NavController navController;
+    private final ImportController importController;
     private final DeviceController deviceController;
     private final GeoFenceController geoFenceController;
     private final MapController mapController;
     private final ArchiveController archiveController;
+    private final ReportsController reportsController;
+    private final LogController logController;
 
     private ApplicationView view;
 
@@ -71,20 +67,25 @@ public class Application {
         geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
         deviceController = new DeviceController(mapController,
                 geoFenceController,
-                settingsController, deviceStore,
+                deviceStore,
                 deviceStoreHandler,
                 geoFenceController.getGeoFenceStore(),
                 geoFenceController.getDeviceGeoFences(),
                 this);
+        reportsController = new ReportsController(deviceController.getDeviceStore(), geoFenceController.getGeoFenceStore());
+        importController = new ImportController(deviceController.getDeviceStore());
+        logController = new LogController();
+        navController = new NavController(settingsController, reportsController, importController, logController);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
 
         view = new ApplicationView(
-                deviceController.getView(), mapController.getView(), archiveController.getView());
+                navController.getView(), deviceController.getView(), mapController.getView(), archiveController.getView());
     }
 
     public void run() {
         RootPanel.get().add(view);
 
+        navController.run();
         deviceController.run();
         mapController.run();
         archiveController.run();

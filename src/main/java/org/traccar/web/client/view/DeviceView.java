@@ -23,13 +23,17 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
+import com.sencha.gxt.core.client.XTemplates;
+import com.sencha.gxt.theme.neptune.client.base.tabs.Css3TabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
-import com.sencha.gxt.theme.blue.client.tabs.BlueTabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.ListView;
 import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
@@ -37,13 +41,9 @@ import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
-import com.sencha.gxt.widget.core.client.toolbar.FillToolItem;
-import com.sencha.gxt.widget.core.client.toolbar.SeparatorToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
-import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.GeoFenceProperties;
 import org.traccar.web.client.state.GridStateHandler;
@@ -54,7 +54,6 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.data.shared.ListStore;
@@ -64,8 +63,6 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
-import com.sencha.gxt.widget.core.client.menu.Item;
-import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.UserSettings;
@@ -124,12 +121,6 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     @UiField
     TextButton removeButton;
 
-    @UiField
-    FillToolItem fillItem;
-
-    @UiField
-    SeparatorToolItem separatorItem;
-
     @UiField(provided = true)
     TabPanel objectsTabs;
 
@@ -151,38 +142,15 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     @UiField(provided = true)
     ListView<GeoFence, String> geoFenceList;
 
-    @UiField
-    TextButton settingsButton;
-
-    @UiField
-    MenuItem settingsAccount;
-
-    @UiField
-    MenuItem settingsPreferences;
-
-    @UiField
-    MenuItem settingsUsers;
-
-    @UiField
-    MenuItem settingsGlobal;
-
-    @UiField
-    MenuItem settingsNotifications;
-
-    @UiField
-    MenuItem showTrackerServerLog;
-
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
     public DeviceView(final DeviceHandler deviceHandler,
                       final GeoFenceHandler geoFenceHandler,
-                      SettingsHandler settingsHandler,
                       final ListStore<Device> deviceStore,
                       final ListStore<GeoFence> geoFenceStore) {
         this.deviceHandler = deviceHandler;
         this.geoFenceHandler = geoFenceHandler;
-        this.settingsHandler = settingsHandler;
         this.deviceStore = deviceStore;
         this.geoFenceStore = geoFenceStore;
 
@@ -217,16 +185,23 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         });
         columnConfigList.add(colName);
 
-        ColumnConfig<Device, Boolean> colFollow = new ColumnConfig<Device, Boolean>(deviceProperties.follow(), 50, i18n.follow());
+        Resources resources = GWT.create(Resources.class);
+        HeaderIconTemplate headerTemplate = GWT.create(HeaderIconTemplate.class);
+
+        ColumnConfig<Device, Boolean> colFollow = new ColumnConfig<Device, Boolean>(deviceProperties.follow(), 50,
+                headerTemplate.render(AbstractImagePrototype.create(resources.follow()).getSafeHtml()));
         colFollow.setCell(new CheckBoxCell());
         colFollow.setFixed(true);
         colFollow.setResizable(false);
+        colFollow.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.follow()).toSafeHtml());
         columnConfigList.add(colFollow);
 
-        ColumnConfig<Device, Boolean> colRecordTrace = new ColumnConfig<Device, Boolean>(deviceProperties.recordTrace(), 60, i18n.recordTrace());
+        ColumnConfig<Device, Boolean> colRecordTrace = new ColumnConfig<Device, Boolean>(deviceProperties.recordTrace(), 50,
+                headerTemplate.render(AbstractImagePrototype.create(resources.footprints()).getSafeHtml()));
         colRecordTrace.setCell(new CheckBoxCell());
         colRecordTrace.setFixed(true);
         colRecordTrace.setResizable(false);
+        colRecordTrace.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.recordTrace()).toSafeHtml());
         columnConfigList.add(colRecordTrace);
 
         columnModel = new ColumnModel<Device>(columnConfigList);
@@ -252,7 +227,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         geoFenceHandler.setGeoFenceListView(geoFenceList);
 
         // tab panel
-        objectsTabs = new TabPanel(GWT.<TabPanelAppearance>create(BlueTabPanelBottomAppearance.class));
+        objectsTabs = new TabPanel(GWT.<TabPanelAppearance>create(Css3TabPanelBottomAppearance.class));
 
         uiBinder.createAndBindUi(this);
 
@@ -275,21 +250,11 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
         boolean manager = ApplicationContext.getInstance().getUser().getManager();
 
-        settingsButton.setVisible(admin || !readOnly);
-        settingsAccount.setVisible(!readOnly);
-        settingsPreferences.setVisible(!readOnly);
-
-        settingsGlobal.setVisible(!readOnly && admin);
-        showTrackerServerLog.setVisible(admin);
-        settingsUsers.setVisible(!readOnly && (admin || manager));
-        settingsNotifications.setVisible(!readOnly && (admin || manager));
         shareButton.setVisible(!readOnly && (admin || manager));
 
         addButton.setVisible(!readOnly);
         editButton.setVisible(!readOnly);
         removeButton.setVisible(!readOnly);
-        fillItem.setVisible(!readOnly);
-        separatorItem.setVisible(!readOnly);
         toggleManagementButtons();
     }
 
@@ -359,59 +324,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         }
     }
 
-    @UiHandler("logoutButton")
-    public void onLogoutClicked(SelectEvent event) {
-        Application.getDataService().logout(new BaseAsyncCallback<Boolean>(i18n) {
-            @Override
-            public void onSuccess(Boolean result) {
-                Window.Location.reload();
-            }
-        });
-    }
-
     public void selectDevice(Device device) {
         grid.getSelectionModel().select(deviceStore.findModel(device), false);
         deviceHandler.onSelected(grid.getSelectionModel().getSelectedItem());
-    }
-
-    public interface SettingsHandler {
-        public void onAccountSelected();
-        public void onPreferencesSelected();
-        public void onUsersSelected();
-        public void onApplicationSelected();
-        public void onNotificationsSelected();
-    }
-
-    private SettingsHandler settingsHandler;
-
-    @UiHandler("settingsAccount")
-    public void onSettingsAccountSelected(SelectionEvent<Item> event) {
-        settingsHandler.onAccountSelected();
-    }
-
-    @UiHandler("settingsPreferences")
-    public void onSettingsPreferencesSelected(SelectionEvent<Item> event) {
-        settingsHandler.onPreferencesSelected();
-    }
-
-    @UiHandler("settingsUsers")
-    public void onSettingsUsersSelected(SelectionEvent<Item> event) {
-        settingsHandler.onUsersSelected();
-    }
-
-    @UiHandler("settingsGlobal")
-    public void onSettingsGlobalSelected(SelectionEvent<Item> event) {
-        settingsHandler.onApplicationSelected();
-    }
-
-    @UiHandler("settingsNotifications")
-    public void onSettingsNotificationsSelected(SelectionEvent<Item> event) {
-        settingsHandler.onNotificationsSelected();
-    }
-
-    @UiHandler("showTrackerServerLog")
-    public void onShowTrackerServerLog(SelectionEvent<Item> event) {
-        new TrackerServerLogViewDialog().show();
     }
 
     @UiHandler("objectsTabs")
@@ -441,5 +356,18 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     public ListView<GeoFence, String> getGeoFenceList() {
         return geoFenceList;
+    }
+
+    interface HeaderIconTemplate extends XTemplates {
+        @XTemplate("<div style=\"text-align:center;\">{img}</div>")
+        SafeHtml render(SafeHtml img);
+    }
+
+    interface Resources extends ClientBundle {
+        @Source("org/traccar/web/client/theme/icon/follow.png")
+        ImageResource follow();
+
+        @Source("org/traccar/web/client/theme/icon/footprints.png")
+        ImageResource footprints();
     }
 }

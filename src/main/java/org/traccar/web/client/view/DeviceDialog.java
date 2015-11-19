@@ -23,7 +23,6 @@ import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
-import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.*;
@@ -91,6 +90,12 @@ public class DeviceDialog implements Editor<Device> {
     NumberField<Double> idleSpeedThreshold;
 
     @UiField
+    NumberField<Integer> minIdleTime;
+
+    @UiField
+    NumberField<Double> speedLimit;
+
+    @UiField
     FieldLabel labelMarkers;
 
     @UiField
@@ -134,6 +139,9 @@ public class DeviceDialog implements Editor<Device> {
         driver.edit(device);
 
         idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
+        if (device.getSpeedLimit() != null) {
+            speedLimit.setValue(device.getSpeedLimit() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
+        }
         updateIcon();
 
         updatePhoto();
@@ -160,6 +168,9 @@ public class DeviceDialog implements Editor<Device> {
         window.hide();
         Device device = driver.flush();
         device.setIdleSpeedThreshold(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getIdleSpeedThreshold()));
+        if (device.getSpeedLimit() != null) {
+            device.setSpeedLimit(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getSpeedLimit()));
+        }
         device.setIconType(selectedIcon.getBuiltInIcon());
         device.setIcon(selectedIcon.getDatabaseIcon());
         maintenanceEditor.flush();

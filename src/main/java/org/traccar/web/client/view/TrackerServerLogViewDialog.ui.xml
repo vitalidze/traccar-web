@@ -19,7 +19,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="640, 480" modal="true" headingText="{i18n.trackerServerLog}" focusWidget="{refreshButton}">
+  <gxt:Window ui:field="window" pixelSize="640, 480" modal="true" focusWidget="{refreshButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{textAreaLayoutData}">
         <form:TextArea ui:field="logArea"/>

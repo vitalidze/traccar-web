@@ -20,7 +20,6 @@ import java.util.*;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.http.client.*;
-import com.google.gwt.i18n.client.NumberFormat;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.format.EncodedPolyline;
 import org.traccar.web.client.*;
@@ -60,7 +59,9 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     private final Map<Long, Track> snappedTracks;
     private final ListStore<Device> deviceStore;
 
-    public ArchiveController(ArchiveHandler archiveHandler, UserSettingsDialog.UserSettingsHandler userSettingsHandler, ListStore<Device> deviceStore) {
+    public ArchiveController(ArchiveHandler archiveHandler,
+                             UserSettingsDialog.UserSettingsHandler userSettingsHandler,
+                             ListStore<Device> deviceStore) {
         this.archiveHandler = archiveHandler;
         this.userSettingsHandler = userSettingsHandler;
         this.archiveView = new ArchiveView(this, deviceStore);

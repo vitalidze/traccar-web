@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Vitaly Litvak (vitavaque@gmail.com)
+ * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.server.model;
+package org.traccar.web.server.reports;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.traccar.web.shared.model.DeviceIconType;
+import com.google.inject.Inject;
+import com.google.inject.servlet.RequestScoped;
+import org.traccar.web.shared.model.Report;
+import org.traccar.web.shared.model.ReportType;
 
-class GsonUtils {
-    static Gson create() {
-        return new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .registerTypeAdapter(DeviceIconType.class, DeviceIconTypeSerializer.INSTANCE)
-                .setDateFormat("EEE, dd MMM yyyy HH:mm:ss Z")
-                .create();
+import java.util.Map;
+
+@RequestScoped
+public class ReportGeneratorFactory {
+    @Inject
+    private Map<ReportType, ReportGenerator> generators;
+
+    public ReportGenerator getGenerator(Report report) {
+        return generators.get(report.getType());
     }
 }

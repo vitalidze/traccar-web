@@ -417,7 +417,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         User user = getSessionUser();
 
         if (!user.getAdmin() && user.getNumberOfDevicesToAdd() <= 0) {
-            throw new MaxDeviceNumberReachedException(fillUserSettings(new User(user.getUserWhoReachedLimitOnDevicesNumber())));
+            throw new MaxDeviceNumberReachedException(user.getUserWhoReachedLimitOnDevicesNumber());
         }
 
         EntityManager entityManager = getSessionEntityManager();
@@ -439,7 +439,6 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 sensor.setId(0);
                 entityManager.persist(sensor);
             }
-            eventService.devicesChanged();
             return device;
         } else {
             throw new DeviceExistsException();
@@ -473,6 +472,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setVehicleInfo(device.getVehicleInfo());
             tmp_device.setTimeout(device.getTimeout());
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
+            tmp_device.setMinIdleTime(device.getMinIdleTime());
+            tmp_device.setSpeedLimit(device.getSpeedLimit());
             tmp_device.setIconType(device.getIconType());
             tmp_device.setIcon(device.getIcon() == null ? null : entityManager.find(DeviceIcon.class, device.getIcon().getId()));
             tmp_device.setPhoto(device.getPhoto() == null ? null : entityManager.find(Picture.class, device.getPhoto().getId()));
@@ -558,9 +559,6 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 getSessionEntityManager().persist(sensor);
             }
 
-            // notify event service about updated device
-            eventService.devicesChanged();
-
             return tmp_device;
         } else {
             throw new DeviceExistsException();
@@ -609,8 +607,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             query.setParameter("device", device);
             query.executeUpdate();
 
+            query = entityManager.createQuery("SELECT x FROM Report x WHERE :device MEMBER OF x.devices");
+            query.setParameter("device", device);
+            List<Report> reports = query.getResultList();
+            for (Report report : reports) {
+                report.getDevices().remove(device);
+            }
+
             entityManager.remove(device);
-            eventService.devicesChanged();
         }
         return device;
     }
@@ -750,52 +754,6 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     public void updateApplicationSettings(ApplicationSettings applicationSettings) {
         getSessionEntityManager().merge(applicationSettings);
         eventService.applicationSettingsChanged();
-    }
-
-    @Transactional
-    @RequireUser(roles = { Role.ADMIN })
-    @Override
-    public String getTrackerServerLog(short sizeKB) {
-        File workingFolder = new File(System.getProperty("user.dir"));
-        File logFile1 = new File(workingFolder, "logs" + File.separatorChar + "tracker-server.log");
-        File logFile2 = new File(workingFolder.getParentFile(), "logs" + File.separatorChar + "tracker-server.log");
-        File logFile3 = new File(workingFolder, "tracker-server.log");
-
-        File logFile = logFile1.exists() ? logFile1 :
-                logFile2.exists() ? logFile2 :
-                        logFile3.exists() ? logFile3 : null;
-
-        if (logFile != null) {
-            RandomAccessFile raf = null;
-            try {
-                raf = new RandomAccessFile(logFile, "r");
-                int length = 0;
-                if (raf.length() > Integer.MAX_VALUE) {
-                    length = Integer.MAX_VALUE;
-                } else {
-                    length = (int) raf.length();
-                }
-                /**
-                 * Read last 5 megabytes from file
-                 */
-                raf.seek(Math.max(0, raf.length() - sizeKB * 1024));
-                byte[] result = new byte[Math.min(length, sizeKB * 1024)];
-                raf.read(result);
-                return new String(result);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            } finally {
-                try {
-                    raf.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-
-        return ("Tracker server log is not available. Looked at " + logFile1.getAbsolutePath() +
-                ", " + logFile2.getAbsolutePath() +
-                ", " + logFile3.getAbsolutePath());
     }
 
     @Transactional
@@ -958,6 +916,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             Query query = entityManager.get().createQuery("DELETE FROM DeviceEvent x WHERE x.geoFence = :geoFence");
             query.setParameter("geoFence", geoFence);
             query.executeUpdate();
+
+            query = entityManager.get().createQuery("SELECT x FROM Report x WHERE :geoFence MEMBER OF x.geoFences");
+            query.setParameter("geoFence", geoFence);
+            List<Report> reports = query.getResultList();
+            for (Report report : reports) {
+                report.getGeoFences().remove(geoFence);
+            }
 
             getSessionEntityManager().remove(geoFence);
         }

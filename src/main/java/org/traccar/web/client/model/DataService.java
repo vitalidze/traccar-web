@@ -69,8 +69,6 @@ public interface DataService extends RemoteService {
 
     void updateApplicationSettings(ApplicationSettings applicationSettings);
 
-    String getTrackerServerLog(short sizeKb);
-
     void saveRoles(List<User> users) throws InvalidMaxDeviceNumberForUserException;
 
     List<GeoFence> getGeoFences();

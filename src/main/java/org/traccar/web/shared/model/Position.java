@@ -33,7 +33,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import com.google.gson.annotations.Expose;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.user.client.rpc.GwtTransient;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -69,7 +69,6 @@ public class Position implements IsSerializable, Cloneable {
         distance = position.distance;
     }
 
-    @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -79,7 +78,6 @@ public class Position implements IsSerializable, Cloneable {
         return id;
     }
 
-    @Expose
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(foreignKey = @ForeignKey(name = "positions_fkey_device_id"))
     private Device device;
@@ -92,7 +90,6 @@ public class Position implements IsSerializable, Cloneable {
         this.device = device;
     }
 
-    @Expose
     @Temporal(TemporalType.TIMESTAMP)
     private Date time;
 
@@ -104,7 +101,6 @@ public class Position implements IsSerializable, Cloneable {
         this.time = time;
     }
 
-    @Expose
     private Boolean valid;
 
     public Boolean getValid() {
@@ -115,7 +111,6 @@ public class Position implements IsSerializable, Cloneable {
         this.valid = valid;
     }
 
-    @Expose
     private Double latitude;
 
     public Double getLatitude() {
@@ -126,7 +121,6 @@ public class Position implements IsSerializable, Cloneable {
         this.latitude = latitude;
     }
 
-    @Expose
     private Double longitude;
 
     public Double getLongitude() {
@@ -137,7 +131,6 @@ public class Position implements IsSerializable, Cloneable {
         this.longitude = longitude;
     }
 
-    @Expose
     private Double altitude;
 
     public Double getAltitude() {
@@ -148,7 +141,6 @@ public class Position implements IsSerializable, Cloneable {
         this.altitude = altitude;
     }
 
-    @Expose
     private Double speed;
 
     public Double getSpeed() {
@@ -159,7 +151,6 @@ public class Position implements IsSerializable, Cloneable {
         this.speed = speed;
     }
 
-    @Expose
     private Double course;
 
     public Double getCourse() {
@@ -173,6 +164,7 @@ public class Position implements IsSerializable, Cloneable {
     /**
      * @deprecated not used anymore by the traccar backend, left for backwards compatibility
      */
+    @JsonIgnore
     private Double power;
 
     public Double getPower() {
@@ -183,7 +175,6 @@ public class Position implements IsSerializable, Cloneable {
         this.power = power;
     }
 
-    @Expose
     private String address;
 
     public String getAddress() {
@@ -194,7 +185,6 @@ public class Position implements IsSerializable, Cloneable {
         this.address = address;
     }
 
-    @Expose
     private String other;
 
     public String getOther() {
@@ -205,7 +195,6 @@ public class Position implements IsSerializable, Cloneable {
         this.other = other;
     }
 
-    @Expose
     private String protocol;
 
     public String getProtocol() {
@@ -216,7 +205,6 @@ public class Position implements IsSerializable, Cloneable {
         this.protocol = protocol;
     }
 
-    @Expose
     private Date serverTime;
 
     public Date getServerTime() {
@@ -228,6 +216,7 @@ public class Position implements IsSerializable, Cloneable {
     }
 
     @GwtTransient
+    @JsonIgnore
     private transient Status status;
 
     public Status getStatus() {
@@ -239,6 +228,7 @@ public class Position implements IsSerializable, Cloneable {
     }
 
     @GwtTransient
+    @JsonIgnore
     private transient PositionIcon icon;
 
     public PositionIcon getIcon() {
@@ -250,6 +240,7 @@ public class Position implements IsSerializable, Cloneable {
     }
 
     @GwtTransient
+    @JsonIgnore
     private transient Date idleSince;
 
     public Date getIdleSince() {
@@ -261,6 +252,7 @@ public class Position implements IsSerializable, Cloneable {
     }
 
     @Transient
+    @JsonIgnore
     private double distance;
 
     public double getDistance() {
@@ -271,7 +263,6 @@ public class Position implements IsSerializable, Cloneable {
         this.distance = distance;
     }
 
-    @Expose
     @Transient
     private List<GeoFence> geoFences;
 

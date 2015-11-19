@@ -15,7 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
-import com.google.gson.annotations.Expose;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -28,7 +28,7 @@ import java.util.*;
 public class GeoFence implements IsSerializable {
 
     public GeoFence() {
-        type = GeoFenceType.LINE;
+        type = GeoFenceType.POLYGON;
         color = "4169E1";
         radius = 30f;
         allDevices = true;
@@ -39,7 +39,6 @@ public class GeoFence implements IsSerializable {
         this.name = name;
     }
 
-    @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -49,7 +48,6 @@ public class GeoFence implements IsSerializable {
         return id;
     }
 
-    @Expose
     private String name;
 
     public void setName(String name) {
@@ -60,6 +58,7 @@ public class GeoFence implements IsSerializable {
         return name;
     }
 
+    @JsonIgnore
     private String description;
 
     public String getDescription() {
@@ -70,7 +69,6 @@ public class GeoFence implements IsSerializable {
         this.description = description;
     }
 
-    @Expose
     private String color;
 
     public String getColor() {
@@ -82,6 +80,7 @@ public class GeoFence implements IsSerializable {
     }
 
     @Enumerated(EnumType.STRING)
+    @JsonIgnore
     private GeoFenceType type;
 
     public GeoFenceType getType() {
@@ -95,6 +94,7 @@ public class GeoFence implements IsSerializable {
     // will hold list of lon/lat pairs of base points for this geo-fence separated by comma
     // for example: -1.342 1.23423,33.442324 54.3454
     @Column(length = 2048)
+    @JsonIgnore
     private String points;
 
     public String getPoints() {
@@ -106,6 +106,7 @@ public class GeoFence implements IsSerializable {
     }
 
     // for circular geo-fence contains radius, for line it's width
+    @JsonIgnore
     private float radius;
 
     public float getRadius() {
@@ -122,6 +123,7 @@ public class GeoFence implements IsSerializable {
             foreignKey = @ForeignKey(name = "users_geofences_fkey_geofence_id"),
             joinColumns = { @JoinColumn(name = "geofence_id", table = "geofences", referencedColumnName = "id") },
             inverseJoinColumns = { @JoinColumn(name = "user_id", table = "users", referencedColumnName = "id") })
+    @JsonIgnore
     private Set<User> users;
 
     public Set<User> getUsers() {
@@ -135,6 +137,7 @@ public class GeoFence implements IsSerializable {
     // indicates that this geo-fence is applied to all available devices
     // it is possible to configure geo-fence per device
     @Column(nullable = true)
+    @JsonIgnore
     private boolean allDevices;
 
     public boolean isAllDevices() {
@@ -151,6 +154,7 @@ public class GeoFence implements IsSerializable {
             foreignKey = @ForeignKey(name = "devices_geofences_fkey_geofence_id"),
             joinColumns = { @JoinColumn(name = "geofence_id", table = "geofences", referencedColumnName = "id") },
             inverseJoinColumns = { @JoinColumn(name = "device_id", table = "devices", referencedColumnName = "id") })
+    @JsonIgnore
     private Set<Device> devices;
 
     public Set<Device> getDevices() {
@@ -163,6 +167,7 @@ public class GeoFence implements IsSerializable {
 
     // collection used to transfer devices through GWT RPC and JSON
     @Transient
+    @JsonIgnore
     private Set<Device> transferDevices;
 
     public Set<Device> getTransferDevices() {
@@ -236,7 +241,7 @@ public class GeoFence implements IsSerializable {
         setPoints(strPoints);
     }
 
-    public void copyFrom(GeoFence geoFence) {
+    public GeoFence copyFrom(GeoFence geoFence) {
         id = geoFence.id;
         name = geoFence.name;
         description = geoFence.description;
@@ -245,7 +250,10 @@ public class GeoFence implements IsSerializable {
         points = geoFence.points;
         radius = geoFence.radius;
         allDevices = geoFence.allDevices;
-        transferDevices = new HashSet<Device>(geoFence.getTransferDevices());
+        if (geoFence.transferDevices != null) {
+            transferDevices = new HashSet<Device>(geoFence.getTransferDevices());
+        }
+        return this;
     }
 
     @Override

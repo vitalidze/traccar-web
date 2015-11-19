@@ -191,7 +191,7 @@ public class MapView {
         this.mapHandler = mapHandler;
         this.popup = new PositionInfoPopup(deviceStore);
         contentPanel = new ContentPanel();
-        contentPanel.setHeadingText(i18n.map());
+        contentPanel.setHeaderVisible(false);
 
         MapOptions defaultMapOptions = new MapOptions();
         defaultMapOptions.setMaxExtent(new Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34));

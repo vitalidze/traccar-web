@@ -441,8 +441,13 @@ public class MapPositionRenderer {
             }
 
             // Assigns color to style
-            Style style = mapView.getVectorLayer().getStyle();
+            Style style = new Style();
+            Style defaultStyle = mapView.getVectorLayer().getStyle();
             style.setStrokeColor("#" + track.getStyle().getTrackColor());
+            style.setStrokeOpacity(defaultStyle.getStrokeOpacity());
+            style.setStrokeWidth(defaultStyle.getStrokeWidth());
+            style.setStrokeDashstyle(defaultStyle.getStrokeDashstyle());
+            style.setStrokeLinecap(defaultStyle.getStrokeLinecap());
 
             VectorFeature mapTrack = new VectorFeature(lineString, style);
             getVectorLayer().addFeature(mapTrack);

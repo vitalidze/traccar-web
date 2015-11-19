@@ -5,7 +5,6 @@
         xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
         xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
         xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
-        xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
         xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
         xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
         xmlns:menu="urn:import:com.sencha.gxt.widget.core.client.menu">
@@ -48,7 +47,7 @@
                     <form:CheckBox ui:field="snapToRoads" boxLabel="{i18n.snapToRoads}" />
 
                     <toolbar:ToolBar ui:field="styleToolbar">
-                        <button:TextButton ui:field="styleButtonTrackColor" text=" " height="80%"/>
+                        <g:Label ui:field="styleButtonTrackColor" text="&nbsp;&nbsp;&nbsp;&nbsp;" />
                         <button:TextButton ui:field="styleButton" text="{i18n.style}">
                             <button:menu>
                                 <menu:Menu ui:field="menu1">
@@ -81,12 +80,11 @@
                     <toolbar:SeparatorToolItem />
                     <button:TextButton ui:field="clearButton" text="{i18n.clear}" />
                     <toolbar:FillToolItem />
-                    <button:TextButton text="{i18n.importData} / {i18n.exportData}">
+                    <button:TextButton text="{i18n.exportData}">
                         <button:menu>
                             <menu:Menu>
                                 <menu:MenuItem ui:field="csvButton" text="{i18n.exportToCSV}"/>
                                 <menu:MenuItem ui:field="gpxButton" text="{i18n.exportToGPX}"/>
-                                <menu:MenuItem ui:field="importButton" text="{i18n.importData}"/>
                             </menu:Menu>
                         </button:menu>
                     </button:TextButton>

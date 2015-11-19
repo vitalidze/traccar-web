@@ -26,6 +26,7 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.EventService;
+import org.traccar.web.server.reports.ReportsModule;
 import org.traccar.web.shared.model.ApplicationSettings;
 import org.traccar.web.shared.model.Picture;
 import org.traccar.web.shared.model.User;
@@ -58,6 +59,7 @@ public class GuiceServletConfig extends GuiceServletContextListener {
                 }
 
                 install(new JpaPersistModule(persistenceUnit));
+                install(new ReportsModule());
 
                 filter("/traccar/*").through(PersistFilter.class);
                 filter("/", "/traccar.html", "/m/", "/m/index.html").through(LocaleFilter.class);
@@ -67,10 +69,13 @@ public class GuiceServletConfig extends GuiceServletContextListener {
                 serve("/traccar/eventService").with(EventServiceImpl.class);
                 serve("/traccar/notificationService").with(NotificationServiceImpl.class);
                 serve("/traccar/picturesService").with(PicturesServiceImpl.class);
+                serve("/traccar/reportService").with(ReportServiceImpl.class);
+                serve("/traccar/logService").with(LogServiceImpl.class);
 
                 serve("/traccar/rest/*").with(RESTApiServlet.class);
                 serve("/traccar/export/*").with(ExportServlet.class);
                 serve("/traccar/import/*").with(ImportServlet.class);
+                serve("/traccar/report").with(ReportServlet.class);
                 serve("/traccar/s/login").with(LoginServlet.class);
                 serve("/" + Picture.URL_PREFIX + "*").with(PicturesServlet.class);
 

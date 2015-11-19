@@ -12,6 +12,21 @@
     <inherits name='com.sencha.gxt.ui.GXT'/>
     <inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
     <inherits name="com.google.gwt.resources.Resources" />
+    <inherits name='com.sencha.gxt.theme.neptune.Theme' />
+    <inherits name="com.github.nmorel.gwtjackson.GwtJackson" />
+
+    <!-- theme -->
+    <replace-with class="com.sencha.gxt.theme.neptune.client.base.menu.Css3MenuItemAppearance">
+        <when-type-is class="com.sencha.gxt.widget.core.client.menu.Item.ItemAppearance"/>
+    </replace-with>
+
+    <replace-with class="org.traccar.web.client.theme.WindowAppearance">
+        <when-type-is class="com.sencha.gxt.widget.core.client.Window.WindowAppearance"/>
+    </replace-with>
+
+    <replace-with class="org.traccar.web.client.theme.ToolbarAppearance">
+        <when-type-is class="com.sencha.gxt.widget.core.client.toolbar.ToolBar.ToolBarAppearance"/>
+    </replace-with>
 
     <set-property name="gwt.logging.enabled" value="FALSE"/>
     <set-property name="gwt.logging.consoleHandler" value="DISABLED"/>
