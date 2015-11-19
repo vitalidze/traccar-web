@@ -568,12 +568,12 @@ var i18n = {
         course: 'Rota',
         address: 'Morada',
         follow: 'Seguir',
-        stop_following: 'Stop following',
-        geo_fence: 'Geo-fence',
-        send_location_by_email: 'Send location by Email',
-        send_location_url_by_email: 'Send location URL by Email',
-        send_location_by_sms: 'Send location by SMS',
-        send_location_url_by_sms: 'Send location URL by SMS'
+        stop_following: 'Parar de seguir',
+        geo_fence: 'Cerca virtual',
+        send_location_by_email: 'Enviar localização por e-mail',
+        send_location_url_by_email: 'Enviar URL da localização por e-mail',
+        send_location_by_sms: 'Enviar localização por SMS',
+        send_location_url_by_sms: 'Enviar URL da localização por SMS'
     },
     pt_BR: {
         _name_: 'Portugu\u00EAs BR',
