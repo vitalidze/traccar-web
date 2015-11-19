@@ -44,7 +44,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         /**
          * Id of device <-> Id of position, which has posted offline event
          */
-        Map<Long, Long> latestOfflineEvents = new HashMap<Long, Long>();
+        Map<Long, Long> latestOfflineEvents = new HashMap<>();
 
         @Override
         @Transactional
@@ -58,7 +58,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                         && (position.getServerTime() == null || position.getServerTime().getTime() >= device.getTimeout() * 1000)) {
                     Long latestOfflinePositionId = latestOfflineEvents.get(device.getId());
                     if (latestOfflinePositionId == null) {
-                        List<DeviceEvent> offlineEvents = entityManager.get().createQuery("SELECT e FROM DeviceEvent e WHERE e.position=:position AND e.type=:offline")
+                        List<DeviceEvent> offlineEvents = entityManager.get().createQuery("SELECT e FROM DeviceEvent e WHERE e.position=:position AND e.type=:offline", DeviceEvent.class)
                                 .setParameter("position", position)
                                 .setParameter("offline", DeviceEventType.OFFLINE)
                                 .getResultList();
@@ -111,14 +111,14 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         @Inject
         Provider<EntityManager> entityManager;
 
-        Map<Long, DeviceState> deviceState = new HashMap<Long, DeviceState>();
+        Map<Long, DeviceState> deviceState = new HashMap<>();
 
         /**
          * Scanning is based on assumption that position identifiers are incremented sequentially
          */
         Long lastScannedPositionId;
 
-        List<EventProducer> eventProducers = new ArrayList<EventProducer>();
+        List<EventProducer> eventProducers = new ArrayList<>();
 
         @Transactional
         @Override
@@ -186,7 +186,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         @Inject
         Provider<EntityManager> entityManager;
 
-        Set<GeoFence> geoFences = new HashSet<GeoFence>();
+        Set<GeoFence> geoFences = new HashSet<>();
         GeoFenceCalculator geoFenceCalculator;
 
         @Override
@@ -241,7 +241,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
     }
 
     public static class OdometerUpdater extends EventProducer {
-        Map<Device, List<Maintenance>> maintenances = new HashMap<Device, List<Maintenance>>();
+        Map<Device, List<Maintenance>> maintenances = new HashMap<>();
 
         @Transactional
         @Override
@@ -257,7 +257,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                     .setParameter("devices", devices).getResultList()) {
                 List<Maintenance> deviceMaintenances = maintenances.get(maintenance.getDevice());
                 if (deviceMaintenances == null) {
-                    deviceMaintenances = new LinkedList<Maintenance>();
+                    deviceMaintenances = new LinkedList<>();
                     maintenances.put(maintenance.getDevice(), deviceMaintenances);
                 }
                 deviceMaintenances.add(maintenance);
@@ -343,7 +343,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
     @Inject
     private PositionScanner positionScanner;
 
-    private Map<Class<?>, ScheduledFuture<?>> futures = new HashMap<Class<?>, ScheduledFuture<?>>();
+    private Map<Class<?>, ScheduledFuture<?>> futures = new HashMap<>();
 
     @Inject
     private Provider<ApplicationSettings> applicationSettings;

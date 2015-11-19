@@ -16,6 +16,7 @@
 package org.traccar.web.client.view;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -288,7 +289,7 @@ public class MapView {
 
     public void showLatestPositions(List<Position> positions) {
         for (Position position : positions) {
-            latestPositionRenderer.showPositions(Arrays.asList(position));
+            latestPositionRenderer.showPositions(Collections.singletonList(position));
         }
     }
 

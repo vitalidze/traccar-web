@@ -21,7 +21,6 @@ import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.widget.core.client.Window;
@@ -82,7 +81,7 @@ public class FilterDialog implements Editor<UserSettings> {
     public FilterDialog(UserSettings filterSettings, UserSettingsDialog.UserSettingsHandler userSettingsHandler) {
         this.userSettingsHandler = userSettingsHandler;
 
-        speedModifier = new SimpleComboBox<String>(new StringLabelProvider<String>());
+        speedModifier = new SimpleComboBox<>(new StringLabelProvider<String>());
         speedModifier.add("<");
         speedModifier.add("<=");
         speedModifier.add("=");
@@ -95,11 +94,11 @@ public class FilterDialog implements Editor<UserSettings> {
         speedUnits.setLabel(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getUnit());
         distanceUnits.setLabel(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getDistanceUnit().getUnit());
 
-        speedForFilter.addValidator(new MinNumberValidator<Double>(0d));
-        speedForFilter.addValidator(new MaxNumberValidator<Double>(30000d));
+        speedForFilter.addValidator(new MinNumberValidator<>(0d));
+        speedForFilter.addValidator(new MaxNumberValidator<>(30000d));
 
-        minDistance.addValidator(new MinNumberValidator<Double>(0d));
-        minDistance.addValidator(new MaxNumberValidator<Double>(30000d));
+        minDistance.addValidator(new MinNumberValidator<>(0d));
+        minDistance.addValidator(new MaxNumberValidator<>(30000d));
 
         driver.initialize(this);
         driver.edit(filterSettings);

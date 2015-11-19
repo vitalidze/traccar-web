@@ -55,9 +55,9 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
         this.deviceStore = deviceStore;
         this.mapController = mapController;
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
-        this.geoFenceStore = new ListStore<GeoFence>(geoFenceProperties.id());
-        this.geoFenceStore.addSortInfo(new Store.StoreSortInfo<GeoFence>(geoFenceProperties.name(), SortDir.ASC));
-        this.deviceGeoFences = new HashMap<Long, Set<GeoFence>>();
+        this.geoFenceStore = new ListStore<>(geoFenceProperties.id());
+        this.geoFenceStore.addSortInfo(new Store.StoreSortInfo<>(geoFenceProperties.name(), SortDir.ASC));
+        this.deviceGeoFences = new HashMap<>();
     }
 
     abstract class BaseGeoFenceHandler implements GeoFenceWindow.GeoFenceHandler {
@@ -280,7 +280,7 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
             for (Device device : geoFence.getTransferDevices()) {
                 Set<GeoFence> geoFences = deviceGeoFences.get(device.getId());
                 if (geoFences == null) {
-                    geoFences = new HashSet<GeoFence>();
+                    geoFences = new HashSet<>();
                     deviceGeoFences.put(device.getId(), geoFences);
                 }
                 geoFences.add(geoFence);

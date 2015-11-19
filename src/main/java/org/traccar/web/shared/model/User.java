@@ -35,7 +35,7 @@ public class User implements IsSerializable, Cloneable {
     public User() {
         admin = false;
         manager = false;
-        transferNotificationEvents = new HashSet<DeviceEventType>();
+        transferNotificationEvents = new HashSet<>();
     }
 
     public User(String login) {
@@ -45,8 +45,8 @@ public class User implements IsSerializable, Cloneable {
     public User(String login, String password) {
         this(login);
         this.password = password;
-        this.geoFences = new HashSet<GeoFence>();
-        this.managedUsers = new HashSet<User>();
+        this.geoFences = new HashSet<>();
+        this.managedUsers = new HashSet<>();
     }
 
     public User(User user) {
@@ -60,7 +60,7 @@ public class User implements IsSerializable, Cloneable {
         userSettings = user.userSettings;
         notifications = user.notifications;
         if (user.notificationEvents != null) {
-            transferNotificationEvents = new HashSet<DeviceEventType>(user.notificationEvents);
+            transferNotificationEvents = new HashSet<>(user.notificationEvents);
         }
         maxNumOfDevices = user.maxNumOfDevices;
         expirationDate = user.expirationDate;
@@ -148,7 +148,7 @@ public class User implements IsSerializable, Cloneable {
                joinColumns = { @JoinColumn(name = "users_id", table = "users", referencedColumnName = "id") },
                inverseJoinColumns = { @JoinColumn(name = "devices_id", table = "devices", referencedColumnName = "id") })
     @JsonIgnore
-    private Set<Device> devices = new HashSet<Device>();
+    private Set<Device> devices = new HashSet<>();
 
     public void setDevices(Set<Device> devices) {
         this.devices = devices;
@@ -160,7 +160,7 @@ public class User implements IsSerializable, Cloneable {
 
     @JsonIgnore
     public Set<Device> getAllAvailableDevices() {
-        Set<Device> devices = new HashSet<Device>();
+        Set<Device> devices = new HashSet<>();
         devices.addAll(getDevices());
         if (getManager()) {
             for (User managedUser : getManagedUsers()) {
@@ -189,7 +189,7 @@ public class User implements IsSerializable, Cloneable {
 
     @JsonIgnore
     public Set<GeoFence> getAllAvailableGeoFences() {
-        Set<GeoFence> result = new HashSet<GeoFence>();
+        Set<GeoFence> result = new HashSet<>();
         result.addAll(getGeoFences());
         if (getManager()) {
             for (User user : getManagedUsers()) {
@@ -264,7 +264,7 @@ public class User implements IsSerializable, Cloneable {
 
     @JsonIgnore
     public Set<Report> getAllAvailableReports() {
-        Set<Report> reports = new HashSet<Report>();
+        Set<Report> reports = new HashSet<>();
         reports.addAll(getReports());
         if (getManager()) {
             for (User managedUser : getManagedUsers()) {
@@ -315,7 +315,7 @@ public class User implements IsSerializable, Cloneable {
 
     @JsonIgnore
     public Set<User> getAllManagedUsers() {
-        Set<User> result = new HashSet<User>();
+        Set<User> result = new HashSet<>();
         result.addAll(getManagedUsers());
         for (User managedUser : getManagedUsers()) {
             if (managedUser.getManager()) {
@@ -522,7 +522,7 @@ public class User implements IsSerializable, Cloneable {
         int alreadyDistributedNumberOfDevices = 0;
         Set<User> users = manager.getManagedUsers();
         while (!users.isEmpty()) {
-            Set<User> nextLevelUsers = new HashSet<User>();
+            Set<User> nextLevelUsers = new HashSet<>();
             for (User user : users) {
                 if (user.getMaxNumOfDevices() == null) {
                     nextLevelUsers.addAll(user.getManagedUsers());

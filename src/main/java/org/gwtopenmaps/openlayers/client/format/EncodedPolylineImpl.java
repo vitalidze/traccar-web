@@ -17,11 +17,6 @@ package org.gwtopenmaps.openlayers.client.format;
 
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 
-
-/**
- * @author Vitaly Litvak
- *
- */
 public class EncodedPolylineImpl
 {
     public static native JSObject create()

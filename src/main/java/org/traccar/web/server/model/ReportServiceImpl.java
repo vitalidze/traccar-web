@@ -49,10 +49,10 @@ public class ReportServiceImpl extends RemoteServiceServlet implements ReportSer
         if (sessionUser.get().getAdmin()) {
             reports = entityManager.get().createQuery("SELECT x FROM Report x", Report.class).getResultList();
         } else {
-            reports = new ArrayList<Report>(sessionUser.get().getAllAvailableReports());
+            reports = new ArrayList<>(sessionUser.get().getAllAvailableReports());
         }
 
-        List<Report> result = new ArrayList<Report>(reports.size());
+        List<Report> result = new ArrayList<>(reports.size());
         for (Report report : reports) {
             result.add(unproxy(report));
         }

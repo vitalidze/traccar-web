@@ -55,7 +55,7 @@ public class UserDialog implements Editor<User> {
     }
 
     public interface UserHandler {
-        public void onSave(User user);
+        void onSave(User user);
     }
 
     private UserHandler userHandler;
@@ -120,26 +120,26 @@ public class UserDialog implements Editor<User> {
     public UserDialog(User user, UserHandler userHandler) {
         this.userHandler = userHandler;
         // notification types grid
-        IdentityValueProvider<DeviceEventType> identity = new IdentityValueProvider<DeviceEventType>();
-        final CheckBoxSelectionModel<DeviceEventType> selectionModel = new CheckBoxSelectionModel<DeviceEventType>(identity);
+        IdentityValueProvider<DeviceEventType> identity = new IdentityValueProvider<>();
+        final CheckBoxSelectionModel<DeviceEventType> selectionModel = new CheckBoxSelectionModel<>(identity);
 
-        ColumnConfig<DeviceEventType, String> nameCol = new ColumnConfig<DeviceEventType, String>(new ToStringValueProvider<DeviceEventType>() {
+        ColumnConfig<DeviceEventType, String> nameCol = new ColumnConfig<>(new ToStringValueProvider<DeviceEventType>() {
             @Override
             public String getValue(DeviceEventType object) {
                 return i18n.deviceEventType(object);
             }
         }, 200, i18n.event());
-        List<ColumnConfig<DeviceEventType, ?>> columns = new ArrayList<ColumnConfig<DeviceEventType, ?>>();
+        List<ColumnConfig<DeviceEventType, ?>> columns = new ArrayList<>();
         columns.add(selectionModel.getColumn());
         columns.add(nameCol);
 
-        columnModel = new ColumnModel<DeviceEventType>(columns);
+        columnModel = new ColumnModel<>(columns);
 
-        view = new NoScrollbarGridView<DeviceEventType>();
+        view = new NoScrollbarGridView<>();
         view.setAutoFill(true);
         view.setStripeRows(true);
 
-        notificationEventStore = new ListStore<DeviceEventType>(new EnumKeyProvider<DeviceEventType>());
+        notificationEventStore = new ListStore<>(new EnumKeyProvider<DeviceEventType>());
         notificationEventStore.addAll(Arrays.asList(DeviceEventType.values()));
 
         uiBinder.createAndBindUi(this);
@@ -184,7 +184,7 @@ public class UserDialog implements Editor<User> {
     public void onSaveClicked(SelectEvent event) {
         window.hide();
         User user = driver.flush();
-        user.setTransferNotificationEvents(new HashSet<DeviceEventType>(grid.getSelectionModel().getSelectedItems()));
+        user.setTransferNotificationEvents(new HashSet<>(grid.getSelectionModel().getSelectedItems()));
         userHandler.onSave(user);
     }
 

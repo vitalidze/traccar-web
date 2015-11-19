@@ -54,7 +54,7 @@ public class GeoFenceCalculator {
     private final Map<GeoFence, GeoFenceData> geoFences;
 
     public GeoFenceCalculator(Collection<GeoFence> geoFences) {
-        this.geoFences = new HashMap<GeoFence, GeoFenceData>(geoFences.size());
+        this.geoFences = new HashMap<>(geoFences.size());
         for (GeoFence geoFence : geoFences) {
             List<GeoFence.LonLat> points = geoFence.points();
             Shape shape = null;

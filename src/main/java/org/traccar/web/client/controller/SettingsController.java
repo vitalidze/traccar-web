@@ -77,7 +77,7 @@ public class SettingsController implements NavView.SettingsHandler {
             @Override
             public void onSuccess(List<User> result) {
                 UserProperties userProperties = GWT.create(UserProperties.class);
-                final ListStore<User> userStore = new ListStore<User>(userProperties.id());
+                final ListStore<User> userStore = new ListStore<>(userProperties.id());
                 userStore.addAll(result);
 
                 new UsersDialog(userStore, new UsersDialog.UserHandler() {
@@ -137,7 +137,7 @@ public class SettingsController implements NavView.SettingsHandler {
 
                     @Override
                     public void onSaveRoles() {
-                        List<User> updatedUsers = new ArrayList<User>(userStore.getModifiedRecords().size());
+                        List<User> updatedUsers = new ArrayList<>(userStore.getModifiedRecords().size());
                         for (Store<User>.Record record : userStore.getModifiedRecords()) {
                             User updatedUser = new User(record.getModel());
                             for (Store.Change<User, ?> change : record.getChanges()) {

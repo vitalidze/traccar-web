@@ -25,7 +25,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell.TriggerAction;
 import com.sencha.gxt.core.client.ToStringValueProvider;
-import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.Window;
@@ -126,17 +125,17 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
         this.settings = notificationSettings;
         this.notificationSettingsHandler = notificationSettingsHandler;
 
-        ListStore<NotificationSettings.SecureConnectionType> secureConnectionTypeStore = new ListStore<NotificationSettings.SecureConnectionType>(new EnumKeyProvider<NotificationSettings.SecureConnectionType>());
+        ListStore<NotificationSettings.SecureConnectionType> secureConnectionTypeStore = new ListStore<>(new EnumKeyProvider<NotificationSettings.SecureConnectionType>());
         secureConnectionTypeStore.addAll(Arrays.asList(NotificationSettings.SecureConnectionType.values()));
 
-        secureConnectionType = new ComboBox<NotificationSettings.SecureConnectionType>(secureConnectionTypeStore, new NotificationSettingsProperties.SecureConnectionTypeLabelProvider());
+        secureConnectionType = new ComboBox<>(secureConnectionTypeStore, new NotificationSettingsProperties.SecureConnectionTypeLabelProvider());
         secureConnectionType.setForceSelection(true);
         secureConnectionType.setTriggerAction(TriggerAction.ALL);
 
-        ListStore<DeviceEventType> eventTypeStore = new ListStore<DeviceEventType>(new EnumKeyProvider<DeviceEventType>());
+        ListStore<DeviceEventType> eventTypeStore = new ListStore<>(new EnumKeyProvider<DeviceEventType>());
         eventTypeStore.addAll(Arrays.asList(DeviceEventType.values()));
 
-        eventType = new ComboBox<DeviceEventType>(eventTypeStore, new LabelProvider<DeviceEventType>() {
+        eventType = new ComboBox<>(eventTypeStore, new LabelProvider<DeviceEventType>() {
             @Override
             public String getLabel(DeviceEventType item) {
                 return i18n.deviceEventType(item);
@@ -146,32 +145,32 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
         eventType.setTriggerAction(TriggerAction.ALL);
 
         // set up placeholder grid
-        List<ColumnConfig<MessagePlaceholder, ?>> placeholderColumns = new LinkedList<ColumnConfig<MessagePlaceholder, ?>>();
-        placeholderColumns.add(new ColumnConfig<MessagePlaceholder, String>(new ToStringValueProvider<MessagePlaceholder>() {
+        List<ColumnConfig<MessagePlaceholder, ?>> placeholderColumns = new LinkedList<>();
+        placeholderColumns.add(new ColumnConfig<>(new ToStringValueProvider<MessagePlaceholder>() {
             @Override
             public String getValue(MessagePlaceholder ph) {
                 return "${" + ph.name() + "}";
             }
         }, 150));
         placeholderColumns.get(placeholderColumns.size() - 1).setFixed(true);
-        placeholderColumns.add(new ColumnConfig<MessagePlaceholder, String>(new ToStringValueProvider<MessagePlaceholder>() {
+        placeholderColumns.add(new ColumnConfig<>(new ToStringValueProvider<MessagePlaceholder>() {
             @Override
             public String getValue(MessagePlaceholder ph) {
                 return i18n.placeholderDescription(ph);
             }
         }));
         placeholderColumns.get(placeholderColumns.size() - 1).setHeader(i18n.description());
-        ListStore<MessagePlaceholder> placeholderListStore = new ListStore<MessagePlaceholder>(new EnumKeyProvider<MessagePlaceholder>());
+        ListStore<MessagePlaceholder> placeholderListStore = new ListStore<>(new EnumKeyProvider<MessagePlaceholder>());
         placeholderListStore.addAll(Arrays.asList(MessagePlaceholder.values()));
-        GridView<MessagePlaceholder> placeholderGridView = new GridView<MessagePlaceholder>();
+        GridView<MessagePlaceholder> placeholderGridView = new GridView<>();
         placeholderGridView.setStripeRows(true);
         placeholderGridView.setAutoFill(true);
-        placeholderGrid = new Grid<MessagePlaceholder>(placeholderListStore, new ColumnModel<MessagePlaceholder>(placeholderColumns), placeholderGridView);
+        placeholderGrid = new Grid<>(placeholderListStore, new ColumnModel<>(placeholderColumns), placeholderGridView);
 
         uiBinder.createAndBindUi(this);
 
-        port.addValidator(new MinNumberValidator<Integer>(Integer.valueOf(1)));
-        port.addValidator(new MaxNumberValidator<Integer>(Integer.valueOf(65535)));
+        port.addValidator(new MinNumberValidator<>(1));
+        port.addValidator(new MaxNumberValidator<>(65535));
 
         driver.initialize(this);
         driver.edit(notificationSettings);

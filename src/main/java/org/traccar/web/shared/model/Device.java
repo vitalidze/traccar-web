@@ -57,13 +57,13 @@ public class Device implements IsSerializable {
         odometer = device.odometer;
         autoUpdateOdometer = device.autoUpdateOdometer;
         if (device.maintenances != null) {
-            maintenances = new ArrayList<Maintenance>(device.maintenances.size());
+            maintenances = new ArrayList<>(device.maintenances.size());
             for (Maintenance maintenance : device.maintenances) {
                 maintenances.add(new Maintenance(maintenance));
             }
         }
         if (device.sensors != null) {
-            sensors = new ArrayList<Sensor>(device.sensors.size());
+            sensors = new ArrayList<>(device.sensors.size());
             for (Sensor sensor : device.sensors) {
                 sensors.add(new Sensor(sensor));
             }

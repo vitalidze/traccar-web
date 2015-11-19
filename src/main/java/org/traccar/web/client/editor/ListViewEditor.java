@@ -34,12 +34,12 @@ public class ListViewEditor<T> implements LeafValueEditor<Set<T>> {
         if (value == null) {
             listView.getSelectionModel().deselectAll();
         } else {
-            listView.getSelectionModel().select(new ArrayList<T>(value), false);
+            listView.getSelectionModel().select(new ArrayList<>(value), false);
         }
     }
 
     @Override
     public Set<T> getValue() {
-        return new HashSet<T>(listView.getSelectionModel().getSelectedItems());
+        return new HashSet<>(listView.getSelectionModel().getSelectedItems());
     }
 }

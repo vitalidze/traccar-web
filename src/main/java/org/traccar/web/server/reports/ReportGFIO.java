@@ -82,8 +82,8 @@ public class ReportGFIO extends ReportGenerator {
     List<Data> calculate(List<GeoFence> geoFences, List<Position> positions) {
         // calculate
         GeoFenceCalculator calculator = new GeoFenceCalculator(geoFences);
-        Map<GeoFence, Data> currentData = new HashMap<GeoFence, Data>(geoFences.size());
-        List<Data> result = new ArrayList<Data>();
+        Map<GeoFence, Data> currentData = new HashMap<>(geoFences.size());
+        List<Data> result = new ArrayList<>();
 
         for (Position position : positions) {
             for (GeoFence geoFence : geoFences) {

@@ -102,7 +102,7 @@ public class UserShareDialog {
     public UserShareDialog(Map<User, Boolean> shares, UserShareHandler shareHandler) {
         this.shareHandler = shareHandler;
 
-        List<User> users = new ArrayList<User>(shares.keySet());
+        List<User> users = new ArrayList<>(shares.keySet());
         Collections.sort(users, new Comparator<User>() {
             @Override
             public int compare(User o1, User o2) {
@@ -112,20 +112,20 @@ public class UserShareDialog {
 
         UserSharedProperties userSharedProperties = GWT.create(UserSharedProperties.class);
 
-        shareStore = new ListStore<UserShared>(userSharedProperties.id());
+        shareStore = new ListStore<>(userSharedProperties.id());
 
         for (User user : users) {
             shareStore.add(new UserShared(user, shares.get(user)));
         }
 
-        List<ColumnConfig<UserShared, ?>> columnConfigList = new LinkedList<ColumnConfig<UserShared, ?>>();
-        columnConfigList.add(new ColumnConfig<UserShared, String>(userSharedProperties.name(), 25, i18n.name()));
+        List<ColumnConfig<UserShared, ?>> columnConfigList = new LinkedList<>();
+        columnConfigList.add(new ColumnConfig<>(userSharedProperties.name(), 25, i18n.name()));
 
-        ColumnConfig<UserShared, Boolean> colManager = new ColumnConfig<UserShared, Boolean>(userSharedProperties.shared(), 25, i18n.share());
+        ColumnConfig<UserShared, Boolean> colManager = new ColumnConfig<>(userSharedProperties.shared(), 25, i18n.share());
         colManager.setCell(new CheckBoxCell());
         columnConfigList.add(colManager);
 
-        columnModel = new ColumnModel<UserShared>(columnConfigList);
+        columnModel = new ColumnModel<>(columnConfigList);
 
         uiBinder.createAndBindUi(this);
 
@@ -142,7 +142,7 @@ public class UserShareDialog {
 
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
-        Map<User, Boolean> updatedShare = new HashMap<User, Boolean>(shareStore.getModifiedRecords().size());
+        Map<User, Boolean> updatedShare = new HashMap<>(shareStore.getModifiedRecords().size());
         for (Store<UserShared>.Record record : shareStore.getModifiedRecords()) {
             UserShared updated = new UserShared(record.getModel().user, record.getModel().shared);
             for (Store.Change<UserShared, ?> change : record.getChanges()) {

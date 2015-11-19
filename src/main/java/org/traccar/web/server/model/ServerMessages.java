@@ -34,7 +34,7 @@ public class ServerMessages {
     protected Logger logger;
 
     Properties defaultMessages = new Properties();
-    Map<String, Properties> localeMessages = new HashMap<String, Properties>();
+    Map<String, Properties> localeMessages = new HashMap<>();
 
     public ServerMessages() throws IOException {
         defaultMessages.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/client/i18n/Messages.properties"));

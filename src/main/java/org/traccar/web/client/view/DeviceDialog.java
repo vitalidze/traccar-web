@@ -132,8 +132,8 @@ public class DeviceDialog implements Editor<Device> {
 
         uiBinder.createAndBindUi(this);
 
-        timeout.addValidator(new MinNumberValidator<Integer>(1));
-        timeout.addValidator(new MaxNumberValidator<Integer>(7 * 24 * 60 * 60));
+        timeout.addValidator(new MinNumberValidator<>(1));
+        timeout.addValidator(new MaxNumberValidator<>(7 * 24 * 60 * 60));
 
         driver.initialize(this);
         driver.edit(device);

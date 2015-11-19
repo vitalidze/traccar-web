@@ -15,8 +15,6 @@
  */
 package org.traccar.web.client.view;
 
-import com.google.gwt.core.client.GWT;
-import org.gwtopenmaps.openlayers.client.OpenLayers;
 import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.*;
@@ -31,7 +29,7 @@ import java.util.Map;
 
 public class GeoFenceRenderer {
     private final MapView mapView;
-    private final Map<Long, GeoFenceDrawing> drawings = new HashMap<Long, GeoFenceDrawing>();
+    private final Map<Long, GeoFenceDrawing> drawings = new HashMap<>();
 
     public GeoFenceRenderer(MapView mapView) {
         this.mapView = mapView;

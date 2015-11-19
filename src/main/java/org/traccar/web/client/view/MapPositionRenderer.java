@@ -222,15 +222,15 @@ public class MapPositionRenderer {
     }
 
     private static class DeviceData {
-        Map<Long, Marker> markerMap = new HashMap<Long, Marker>(); // Position.id -> Marker
+        Map<Long, Marker> markerMap = new HashMap<>(); // Position.id -> Marker
         List<Position> positions;
         VectorFeature title;
         VectorFeature track;
         VectorFeature alert;
         LineString trackLine;
-        List<VectorFeature> trackPoints = new ArrayList<VectorFeature>();
-        List<VectorFeature> labels = new ArrayList<VectorFeature>();
-        Map<Position, VectorFeature> timeLabels = new HashMap<Position, VectorFeature>();
+        List<VectorFeature> trackPoints = new ArrayList<>();
+        List<VectorFeature> labels = new ArrayList<>();
+        Map<Position, VectorFeature> timeLabels = new HashMap<>();
 
         SnappingHandler snappingHandler;
 
@@ -239,7 +239,7 @@ public class MapPositionRenderer {
         }
     }
 
-    private Map<Long, DeviceData> deviceMap = new HashMap<Long, DeviceData>(); // Device.id -> Device Data
+    private Map<Long, DeviceData> deviceMap = new HashMap<>(); // Device.id -> Device Data
 
     private final DateTimeFormat timeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE);
 
@@ -398,7 +398,7 @@ public class MapPositionRenderer {
         List<TrackSegment> segments = track.getSegments();
         if (!segments.isEmpty()) {
             DeviceData deviceData = getDeviceData(segments.get(0).getPositions());
-            List<Point> linePoints = new ArrayList<Point>();
+            List<Point> linePoints = new ArrayList<>();
 
             for (TrackSegment segment : segments) {
                 if (segment.getGeometry() == null) {
@@ -425,7 +425,7 @@ public class MapPositionRenderer {
                 lineString = deviceData.trackLine;
                 getVectorLayer().removeFeature(deviceData.track);
                 deviceData.track.destroy();
-                deviceData.positions = new ArrayList<Position>(deviceData.positions);
+                deviceData.positions = new ArrayList<>(deviceData.positions);
                 List<Position> trackPositions = track.getPositions();
                 if (deviceData.positions.get(deviceData.positions.size() - 1).equals(trackPositions.get(0))) {
                     for (int i = 1; i < linePoints.size(); i++) {

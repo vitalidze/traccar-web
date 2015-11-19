@@ -75,24 +75,24 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     }
 
     public interface DeviceHandler {
-        public void onSelected(Device device);
-        public void onAdd();
-        public void onEdit(Device device);
-        public void onShare(Device device);
-        public void onRemove(Device device);
-        public void onMouseOver(int mouseX, int mouseY, Device device);
-        public void onMouseOut(int mouseX, int mouseY, Device device);
-        public void doubleClicked(Device device);
-        public void onClearSelection();
+        void onSelected(Device device);
+        void onAdd();
+        void onEdit(Device device);
+        void onShare(Device device);
+        void onRemove(Device device);
+        void onMouseOver(int mouseX, int mouseY, Device device);
+        void onMouseOut(int mouseX, int mouseY, Device device);
+        void doubleClicked(Device device);
+        void onClearSelection();
     }
 
     public interface GeoFenceHandler {
-        public void onAdd();
-        public void onEdit(GeoFence geoFence);
-        public void onRemove(GeoFence geoFence);
-        public void onSelected(GeoFence geoFence);
-        public void onShare(GeoFence geoFence);
-        public void setGeoFenceListView(ListView<GeoFence, String> geoFenceListView);
+        void onAdd();
+        void onEdit(GeoFence geoFence);
+        void onRemove(GeoFence geoFence);
+        void onSelected(GeoFence geoFence);
+        void onShare(GeoFence geoFence);
+        void setGeoFenceListView(ListView<GeoFence, String> geoFenceListView);
     }
 
     private final DeviceHandler deviceHandler;
@@ -156,9 +156,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
 
-        List<ColumnConfig<Device, ?>> columnConfigList = new LinkedList<ColumnConfig<Device, ?>>();
+        List<ColumnConfig<Device, ?>> columnConfigList = new LinkedList<>();
 
-        ColumnConfig<Device, String> colName = new ColumnConfig<Device, String>(deviceProperties.name(), 0, i18n.name());
+        ColumnConfig<Device, String> colName = new ColumnConfig<>(deviceProperties.name(), 0, i18n.name());
         colName.setCell(new AbstractCell<String>(BrowserEvents.MOUSEOVER, BrowserEvents.MOUSEOUT) {
             @Override
             public void render(Context context, String value, SafeHtmlBuilder sb) {
@@ -188,7 +188,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         Resources resources = GWT.create(Resources.class);
         HeaderIconTemplate headerTemplate = GWT.create(HeaderIconTemplate.class);
 
-        ColumnConfig<Device, Boolean> colFollow = new ColumnConfig<Device, Boolean>(deviceProperties.follow(), 50,
+        ColumnConfig<Device, Boolean> colFollow = new ColumnConfig<>(deviceProperties.follow(), 50,
                 headerTemplate.render(AbstractImagePrototype.create(resources.follow()).getSafeHtml()));
         colFollow.setCell(new CheckBoxCell());
         colFollow.setFixed(true);
@@ -196,7 +196,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         colFollow.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.follow()).toSafeHtml());
         columnConfigList.add(colFollow);
 
-        ColumnConfig<Device, Boolean> colRecordTrace = new ColumnConfig<Device, Boolean>(deviceProperties.recordTrace(), 50,
+        ColumnConfig<Device, Boolean> colRecordTrace = new ColumnConfig<>(deviceProperties.recordTrace(), 50,
                 headerTemplate.render(AbstractImagePrototype.create(resources.footprints()).getSafeHtml()));
         colRecordTrace.setCell(new CheckBoxCell());
         colRecordTrace.setFixed(true);
@@ -204,7 +204,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         colRecordTrace.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.recordTrace()).toSafeHtml());
         columnConfigList.add(colRecordTrace);
 
-        columnModel = new ColumnModel<Device>(columnConfigList);
+        columnModel = new ColumnModel<>(columnConfigList);
 
         // geo-fences
         geoFencesTabConfig = new TabItemConfig(i18n.overlayType(UserSettings.OverlayType.GEO_FENCES));
@@ -239,9 +239,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         grid.getView().setAutoFill(true);
         grid.getView().setForceFit(true);
 
-        new GridStateHandler<Device>(grid).loadState();
+        new GridStateHandler<>(grid).loadState();
 
-        GridEditing<Device> editing = new GridInlineEditing<Device>(grid);
+        GridEditing<Device> editing = new GridInlineEditing<>(grid);
         grid.getView().setShowDirtyCells(false);
         editing.addEditor(colFollow, new CheckBox());
         editing.addEditor(colRecordTrace, new CheckBox());

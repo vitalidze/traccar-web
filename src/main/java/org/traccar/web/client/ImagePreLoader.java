@@ -75,7 +75,7 @@ public class ImagePreLoader {
     public ImagePreLoader(Collection<ImageResource> imagesToLoad, Listener listener) {
         this(listener);
         // init image loaders
-        imageLoaders = new HashSet<ImageLoader>(imagesToLoad.size());
+        imageLoaders = new HashSet<>(imagesToLoad.size());
         for (ImageResource resource : imagesToLoad) {
             imageLoaders.add(new ImageLoader(loadingArea, resource));
         }
@@ -84,7 +84,7 @@ public class ImagePreLoader {
     public ImagePreLoader(Set<String> imagesToLoad, Listener listener) {
         this(listener);
         // init image loaders
-        imageLoaders = new HashSet<ImageLoader>(imagesToLoad.size());
+        imageLoaders = new HashSet<>(imagesToLoad.size());
         for (String url : imagesToLoad) {
             imageLoaders.add(new ImageLoader(loadingArea, url));
         }
@@ -138,7 +138,7 @@ public class ImagePreLoader {
             }
         });
         // start loading
-        for (ImageLoader loader : new HashSet<ImageLoader>(imageLoaders)) {
+        for (ImageLoader loader : new HashSet<>(imageLoaders)) {
             loader.start();
         }
     }

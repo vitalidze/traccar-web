@@ -139,13 +139,13 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         this.deviceStore = deviceStore;
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
-        deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
+        deviceCombo = new ComboBox<>(deviceStore, deviceProperties.label());
 
 		periodCombo = new PeriodComboBox();
 
         // Element that displays the current track color
         styleButtonTrackColor = new Label();
-        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor", "#".concat(style.DEFAULT_COLOR));
+        styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor", "#".concat(ArchiveStyle.DEFAULT_COLOR));
         // Menu with the small palette
         smallColorMenu = new ExtColorMenu(ArchiveStyle.COLORS, ArchiveStyle.COLORS);
         smallColorMenu.setColor(ArchiveStyle.DEFAULT_COLOR);
@@ -192,7 +192,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         }
 
         devicesTabs = new TabPanel(GWT.<TabPanel.TabPanelAppearance>create(Css3TabPanelBottomAppearance.class));
-        archivePanels = new HashMap<Long, ArchivePanel>();
+        archivePanels = new HashMap<>();
 
         uiBinder.createAndBindUi(this);
 

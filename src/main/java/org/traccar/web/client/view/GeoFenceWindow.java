@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.core.client.*;
-import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
@@ -73,10 +72,10 @@ public class GeoFenceWindow implements Editor<GeoFence> {
     }
 
     public interface GeoFenceHandler {
-        public void onSave(GeoFence geoFence);
-        public void onClear();
-        public void onCancel();
-        public GeoFenceDrawing repaint(GeoFence geoFence);
+        void onSave(GeoFence geoFence);
+        void onClear();
+        void onCancel();
+        GeoFenceDrawing repaint(GeoFence geoFence);
     }
 
     private final GeoFenceHandler geoFenceHandler;
@@ -175,10 +174,10 @@ public class GeoFenceWindow implements Editor<GeoFence> {
         this.geoFence = new GeoFence();
         this.geoFence.copyFrom(geoFence);
 
-        ListStore<GeoFenceType> geoFenceTypeStore = new ListStore<GeoFenceType>(
+        ListStore<GeoFenceType> geoFenceTypeStore = new ListStore<>(
                 new EnumKeyProvider<GeoFenceType>());
         geoFenceTypeStore.addAll(Arrays.asList(GeoFenceType.values()));
-        type = new ComboBox<GeoFenceType>(
+        type = new ComboBox<>(
                 geoFenceTypeStore, new GeoFenceProperties.GeoFenceTypeLabelProvider());
 
         type.setForceSelection(true);
@@ -187,21 +186,21 @@ public class GeoFenceWindow implements Editor<GeoFence> {
         // device selection
         DeviceSelectedProperties deviceSelectedProperties = GWT.create(DeviceSelectedProperties.class);
 
-        deviceSelectionStore = new ListStore<DeviceSelected>(deviceSelectedProperties.id());
+        deviceSelectionStore = new ListStore<>(deviceSelectedProperties.id());
 
         for (Device device : devices.getAll()) {
             deviceSelectionStore.add(new DeviceSelected(device, geoFence.getTransferDevices().contains(device)));
         }
 
-        List<ColumnConfig<DeviceSelected, ?>> columnConfigList = new LinkedList<ColumnConfig<DeviceSelected, ?>>();
+        List<ColumnConfig<DeviceSelected, ?>> columnConfigList = new LinkedList<>();
 
-        ColumnConfig<DeviceSelected, Boolean> colSelected = new ColumnConfig<DeviceSelected, Boolean>(deviceSelectedProperties.selected(), 5, "");
+        ColumnConfig<DeviceSelected, Boolean> colSelected = new ColumnConfig<>(deviceSelectedProperties.selected(), 5, "");
         colSelected.setCell(new CheckBoxCell());
         columnConfigList.add(colSelected);
 
-        columnConfigList.add(new ColumnConfig<DeviceSelected, String>(deviceSelectedProperties.name(), 25, i18n.name()));
+        columnConfigList.add(new ColumnConfig<>(deviceSelectedProperties.name(), 25, i18n.name()));
 
-        columnModel = new ColumnModel<DeviceSelected>(columnConfigList);
+        columnModel = new ColumnModel<>(columnConfigList);
 
         uiBinder.createAndBindUi(this);
 

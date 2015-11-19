@@ -65,9 +65,9 @@ public class ReportEV extends ReportGenerator {
 
     static class Stats {
         int offline;
-        Map<GeoFence, Integer> geoFenceEnter = new HashMap<GeoFence, Integer>();
-        Map<GeoFence, Integer> geoFenceExit = new HashMap<GeoFence, Integer>();
-        Map<Maintenance, Integer> maintenances = new HashMap<Maintenance, Integer>();
+        Map<GeoFence, Integer> geoFenceEnter = new HashMap<>();
+        Map<GeoFence, Integer> geoFenceExit = new HashMap<>();
+        Map<Maintenance, Integer> maintenances = new HashMap<>();
 
         void update(DeviceEvent event) {
             switch (event.getType()) {

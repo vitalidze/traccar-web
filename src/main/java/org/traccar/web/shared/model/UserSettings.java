@@ -329,7 +329,7 @@ public class UserSettings implements IsSerializable {
         if (getOverlays() == null) {
             return Collections.emptyList();
         }
-        List<OverlayType> overlays = new LinkedList<OverlayType>();
+        List<OverlayType> overlays = new LinkedList<>();
         for (String s : getOverlays().split(",")) {
             overlays.add(OverlayType.valueOf(s));
         }

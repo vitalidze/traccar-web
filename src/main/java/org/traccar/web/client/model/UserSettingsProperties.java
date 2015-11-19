@@ -29,7 +29,7 @@ public interface UserSettingsProperties extends PropertyAccess<UserSettings> {
 
     ValueProvider<UserSettings, UserSettings.SpeedUnit> speedUnit();
 
-    public static class SpeedUnitLabelProvider implements LabelProvider<UserSettings.SpeedUnit> {
+    class SpeedUnitLabelProvider implements LabelProvider<UserSettings.SpeedUnit> {
 
         @Override
         public String getLabel(SpeedUnit item) {
@@ -47,7 +47,7 @@ public interface UserSettingsProperties extends PropertyAccess<UserSettings> {
 
     }
 
-    public static class MapTypeLabelProvider implements LabelProvider<UserSettings.MapType> {
+    class MapTypeLabelProvider implements LabelProvider<UserSettings.MapType> {
         @Override
         public String getLabel(UserSettings.MapType item) {
             return item.getName();

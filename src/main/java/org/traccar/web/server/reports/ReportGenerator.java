@@ -298,7 +298,7 @@ public abstract class ReportGenerator {
         if (report.getDevices().isEmpty()) {
             return dataService.getDevices();
         } else {
-            List<Device> devices = new ArrayList<Device>(report.getDevices().size());
+            List<Device> devices = new ArrayList<>(report.getDevices().size());
             for (Device reportDevice : report.getDevices()) {
                 Device device = entityManager.find(Device.class, reportDevice.getId());
                 if (currentUser.hasAccessTo(device)) {
@@ -312,9 +312,9 @@ public abstract class ReportGenerator {
     List<GeoFence> getGeoFences(Report report, Device device) {
         List<GeoFence> geoFences;
         if (report.getGeoFences().isEmpty()) {
-            geoFences = new ArrayList<GeoFence>(dataService.getGeoFences());
+            geoFences = new ArrayList<>(dataService.getGeoFences());
         } else {
-            geoFences = new ArrayList<GeoFence>(report.getGeoFences().size());
+            geoFences = new ArrayList<>(report.getGeoFences().size());
             for (GeoFence reportGeoFence : report.getGeoFences()) {
                 GeoFence geoFence = entityManager.find(GeoFence.class, reportGeoFence.getId());
                 if (currentUser.hasAccessTo(geoFence)) {

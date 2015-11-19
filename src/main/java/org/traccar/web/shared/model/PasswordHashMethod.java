@@ -39,7 +39,7 @@ public enum PasswordHashMethod implements IsSerializable {
                     sha512.update(salt.getBytes());
                 }
                 byte[] data = sha512.digest(s.getBytes());
-                StringBuffer hexData = new StringBuffer();
+                StringBuilder hexData = new StringBuilder();
                 for (int byteIndex = 0; byteIndex < data.length; byteIndex++) {
                     hexData.append(Integer.toString((data[byteIndex] & 0xff) + 0x100, 16).substring(1));
                 }
@@ -59,7 +59,7 @@ public enum PasswordHashMethod implements IsSerializable {
                     md5.update(salt.getBytes());
                 }
                 byte[] array = md5.digest(s.getBytes());
-                StringBuffer hexData = new StringBuffer();
+                StringBuilder hexData = new StringBuilder();
                 for (int i = 0; i < array.length; ++i) {
                     hexData.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
                 }

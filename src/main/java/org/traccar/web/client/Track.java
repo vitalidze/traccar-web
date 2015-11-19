@@ -24,7 +24,7 @@ import java.util.List;
 
 public class Track {
 
-    private List<TrackSegment> segments = new LinkedList<TrackSegment>();
+    private List<TrackSegment> segments = new LinkedList<>();
 
     public Track() {
     }
@@ -62,7 +62,7 @@ public class Track {
         } else if (segments.size() == 1) {
             return segments.get(0).getPositions();
         } else {
-            List<Position> positions = new LinkedList<Position>();
+            List<Position> positions = new LinkedList<>();
             for (TrackSegment segment : segments) {
                 for (Position position : segment.getPositions()) {
                     positions.add(position);
@@ -77,7 +77,7 @@ public class Track {
     }
 
     public List<Position> getTimePositions(long timePrintInterval) {
-        List<Position> withTime = new LinkedList<Position>();
+        List<Position> withTime = new LinkedList<>();
         long prevTime = -1;
         for (Position position : getPositions()) {
             if (prevTime < 0 ||

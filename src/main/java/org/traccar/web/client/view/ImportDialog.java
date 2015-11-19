@@ -56,7 +56,7 @@ public class ImportDialog {
 
     public ImportDialog(final ListStore<Device> deviceStore) {
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
-        this.deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
+        this.deviceCombo = new ComboBox<>(deviceStore, deviceProperties.label());
         uiBinder.createAndBindUi(this);
     }
 

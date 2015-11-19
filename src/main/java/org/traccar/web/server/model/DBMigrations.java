@@ -153,7 +153,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.timeout = :tmout WHERE D.timeout IS NULL OR D.timeout <= 0")
-                    .setParameter("tmout", Integer.valueOf(Device.DEFAULT_TIMEOUT))
+                    .setParameter("tmout", Device.DEFAULT_TIMEOUT)
                     .executeUpdate();
         }
     }
@@ -166,7 +166,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.idleSpeedThreshold = :idleSpeedThreshold WHERE D.idleSpeedThreshold IS NULL")
-                    .setParameter("idleSpeedThreshold", Double.valueOf(0))
+                    .setParameter("idleSpeedThreshold", 0d)
                     .executeUpdate();
         }
     }
@@ -176,7 +176,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.minIdleTime = :minIdleTime WHERE D.minIdleTime IS NULL")
-                    .setParameter("minIdleTime", Integer.valueOf(Device.DEFAULT_MIN_IDLE_TIME))
+                    .setParameter("minIdleTime", Device.DEFAULT_MIN_IDLE_TIME)
                     .executeUpdate();
         }
     }

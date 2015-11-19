@@ -19,19 +19,16 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.google.gwt.cell.client.TextInputCell;
 import com.sencha.gxt.cell.core.client.NumberCell;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.cell.core.client.form.DateCell;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
-import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.UserProperties;
-import org.traccar.web.shared.model.Maintenance;
 import org.traccar.web.shared.model.User;
 
 import com.google.gwt.core.client.GWT;
@@ -57,10 +54,10 @@ public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandle
     }
 
     public interface UserHandler {
-        public void onAdd();
-        public void onRemove(User user);
-        public void onChangePassword(User user);
-        public void onSaveRoles();
+        void onAdd();
+        void onRemove(User user);
+        void onChangePassword(User user);
+        void onSaveRoles();
     }
 
     private UserHandler userHandler;
@@ -95,62 +92,62 @@ public class UsersDialog implements SelectionChangedEvent.SelectionChangedHandle
 
         UserProperties userProperties = GWT.create(UserProperties.class);
 
-        List<ColumnConfig<User, ?>> columnConfigList = new LinkedList<ColumnConfig<User, ?>>();
-        columnConfigList.add(new ColumnConfig<User, String>(userProperties.login(), 25, i18n.name()));
+        List<ColumnConfig<User, ?>> columnConfigList = new LinkedList<>();
+        columnConfigList.add(new ColumnConfig<>(userProperties.login(), 25, i18n.name()));
 
         if (ApplicationContext.getInstance().getUser().getAdmin()) {
-            ColumnConfig<User, Boolean> colAdmin = new ColumnConfig<User, Boolean>(userProperties.admin(), 110, i18n.administrator());
+            ColumnConfig<User, Boolean> colAdmin = new ColumnConfig<>(userProperties.admin(), 110, i18n.administrator());
             colAdmin.setCell(new CheckBoxCell());
             colAdmin.setFixed(true);
             colAdmin.setResizable(false);
             columnConfigList.add(colAdmin);
         }
 
-        ColumnConfig<User, Boolean> colManager = new ColumnConfig<User, Boolean>(userProperties.manager(), 80, i18n.manager());
+        ColumnConfig<User, Boolean> colManager = new ColumnConfig<>(userProperties.manager(), 80, i18n.manager());
         colManager.setCell(new CheckBoxCell());
         colManager.setFixed(true);
         colManager.setResizable(false);
         columnConfigList.add(colManager);
 
-        ColumnConfig<User, Boolean> colReadOnly = new ColumnConfig<User, Boolean>(userProperties.readOnly(), 90, i18n.readOnly());
+        ColumnConfig<User, Boolean> colReadOnly = new ColumnConfig<>(userProperties.readOnly(), 90, i18n.readOnly());
         colReadOnly.setCell(new CheckBoxCell());
         colReadOnly.setFixed(true);
         colReadOnly.setResizable(false);
         columnConfigList.add(colReadOnly);
 
-        ColumnConfig<User, Boolean> colArchive = new ColumnConfig<User, Boolean>(userProperties.archive(), 70, i18n.archive());
+        ColumnConfig<User, Boolean> colArchive = new ColumnConfig<>(userProperties.archive(), 70, i18n.archive());
         colArchive.setCell(new CheckBoxCell());
         colArchive.setFixed(true);
         colArchive.setResizable(false);
         columnConfigList.add(colArchive);
 
-        ColumnConfig<User, Boolean> colBlocked = new ColumnConfig<User, Boolean>(userProperties.blocked(), 75, i18n.blocked());
+        ColumnConfig<User, Boolean> colBlocked = new ColumnConfig<>(userProperties.blocked(), 75, i18n.blocked());
         colBlocked.setCell(new CheckBoxCell());
         colBlocked.setFixed(true);
         colBlocked.setResizable(false);
         columnConfigList.add(colBlocked);
 
-        ColumnConfig<User, Date> colExpirationDate = new ColumnConfig<User, Date>(userProperties.expirationDate(), 165, i18n.expirationDate());
+        ColumnConfig<User, Date> colExpirationDate = new ColumnConfig<>(userProperties.expirationDate(), 165, i18n.expirationDate());
         colExpirationDate.setCell(new DateCell());
         colExpirationDate.setFixed(true);
         colExpirationDate.setResizable(false);
         columnConfigList.add(colExpirationDate);
 
-        ColumnConfig<User, Integer> colMaxNumOfDevices = new ColumnConfig<User, Integer>(userProperties.maxNumOfDevices(), 200, i18n.maxNumOfDevices());
+        ColumnConfig<User, Integer> colMaxNumOfDevices = new ColumnConfig<>(userProperties.maxNumOfDevices(), 200, i18n.maxNumOfDevices());
         colMaxNumOfDevices.setCell(new NumberCell<Integer>());
         colMaxNumOfDevices.setFixed(true);
         colMaxNumOfDevices.setResizable(false);
         columnConfigList.add(colMaxNumOfDevices);
 
-        columnModel = new ColumnModel<User>(columnConfigList);
+        columnModel = new ColumnModel<>(columnConfigList);
 
         uiBinder.createAndBindUi(this);
 
         grid.getSelectionModel().addSelectionChangedHandler(this);
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
-        GridEditing<User> editing = new GridInlineEditing<User>(grid);
-        NumberField<Integer> maxNumOfDevicesEditor = new NumberField<Integer>(new NumberPropertyEditor.IntegerPropertyEditor());
+        GridEditing<User> editing = new GridInlineEditing<>(grid);
+        NumberField<Integer> maxNumOfDevicesEditor = new NumberField<>(new NumberPropertyEditor.IntegerPropertyEditor());
         maxNumOfDevicesEditor.setAllowDecimals(false);
         maxNumOfDevicesEditor.setAllowBlank(true);
         maxNumOfDevicesEditor.setAllowNegative(false);

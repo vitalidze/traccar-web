@@ -46,9 +46,9 @@ public class GPXParser {
 
         XMLStreamReader xsr = XMLInputFactory.newFactory().createXMLStreamReader(inputStream);
 
-        result.positions = new LinkedList<Position>();
+        result.positions = new LinkedList<>();
         Position position = null;
-        Stack<String> extensionsElements = new Stack<String>();
+        Stack<String> extensionsElements = new Stack<>();
         boolean extensionsStarted = false;
 
         while (xsr.hasNext()) {

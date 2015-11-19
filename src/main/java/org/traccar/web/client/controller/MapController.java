@@ -96,11 +96,11 @@ public class MapController implements ContentController, MapView.MapHandler {
         });
     }
 
-    private Map<Long, Position> latestPositionMap = new HashMap<Long, Position>();
+    private Map<Long, Position> latestPositionMap = new HashMap<>();
 
-    private Map<Long, Position> latestNonIdlePositionMap = new HashMap<Long, Position>();
+    private Map<Long, Position> latestNonIdlePositionMap = new HashMap<>();
 
-    private Map<Long, Position> timestampMap = new HashMap<Long, Position>();
+    private Map<Long, Position> timestampMap = new HashMap<>();
 
     private Device selectedDevice;
 
@@ -148,7 +148,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                     // check maintenances
                     for (Maintenance maintenance : device.getMaintenances()) {
                         if (device.getOdometer() >= maintenance.getLastService() + maintenance.getServiceInterval()) {
-                            if (alerts == null) alerts = new LinkedList<Position>();
+                            if (alerts == null) alerts = new LinkedList<>();
                             alerts.add(position);
                             break;
                         }
@@ -178,7 +178,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                             mapView.catchPosition(position);
                         }
                         if (ApplicationContext.getInstance().isRecordingTrace(device)) {
-                            mapView.showLatestTrackPositions(Arrays.asList(prevPosition));
+                            mapView.showLatestTrackPositions(Collections.singletonList(prevPosition));
                             mapView.showLatestTrack(new Track(Arrays.asList(prevPosition, position)));
                             Short traceInterval = ApplicationContext.getInstance().getUserSettings().getTraceInterval();
                             if (traceInterval != null) {
@@ -191,7 +191,7 @@ public class MapController implements ContentController, MapView.MapHandler {
 
                         if (prevTimestampPosition == null ||
                                 (position.getTime().getTime() - prevTimestampPosition.getTime().getTime() >= ApplicationContext.getInstance().getUserSettings().getTimePrintInterval() * 60 * 1000)) {
-                            mapView.showLatestTime(Arrays.asList(position));
+                            mapView.showLatestTime(Collections.singletonList(position));
                             timestampMap.put(device.getId(), position);
                         }
                     }

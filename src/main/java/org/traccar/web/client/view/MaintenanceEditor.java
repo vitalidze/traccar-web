@@ -124,33 +124,33 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
 
         final MaintenanceProperties maintenanceProperties = GWT.create(MaintenanceProperties.class);
 
-        this.maintenanceStore = new ListStore<Maintenance>(maintenanceProperties.indexNo());
+        this.maintenanceStore = new ListStore<>(maintenanceProperties.indexNo());
 
         nextIndex = device.getMaintenances().size();
 
-        List<ColumnConfig<Maintenance, ?>> columnConfigList = new LinkedList<ColumnConfig<Maintenance, ?>>();
-        RowNumberer<Maintenance> rowNumberer = new RowNumberer<Maintenance>();
+        List<ColumnConfig<Maintenance, ?>> columnConfigList = new LinkedList<>();
+        RowNumberer<Maintenance> rowNumberer = new RowNumberer<>();
         rowNumberer.setHeader("#");
 
         columnConfigList.add(rowNumberer);
         rowNumberer.setFixed(true);
         rowNumberer.setResizable(false);
-        nameColumn = new ColumnConfig<Maintenance, String>(maintenanceProperties.name(), 25, i18n.serviceName());
+        nameColumn = new ColumnConfig<>(maintenanceProperties.name(), 25, i18n.serviceName());
         columnConfigList.add(nameColumn);
-        serviceIntervalColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.serviceInterval(), 150, i18n.mileageInterval() + " (" + i18n.km() + ")");
+        serviceIntervalColumn = new ColumnConfig<>(maintenanceProperties.serviceInterval(), 150, i18n.mileageInterval() + " (" + i18n.km() + ")");
         columnConfigList.add(serviceIntervalColumn);
         serviceIntervalColumn.setFixed(true);
         serviceIntervalColumn.setResizable(false);
         serviceIntervalColumn.setHidden(true);
         serviceIntervalColumn.setCell(new NumberCell<Double>(odometerFormat));
-        lastServiceColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 130, i18n.lastServiceMileage() + " (" + i18n.km() + ")");
+        lastServiceColumn = new ColumnConfig<>(maintenanceProperties.lastService(), 130, i18n.lastServiceMileage() + " (" + i18n.km() + ")");
         columnConfigList.add(lastServiceColumn);
         lastServiceColumn.setFixed(true);
         lastServiceColumn.setResizable(false);
         lastServiceColumn.setHidden(true);
         lastServiceColumn.setCell(new NumberCell<Double>(odometerFormat));
 
-        ColumnConfig<Maintenance, Double> stateColumn = new ColumnConfig<Maintenance, Double>(maintenanceProperties.lastService(), 128, i18n.state());
+        ColumnConfig<Maintenance, Double> stateColumn = new ColumnConfig<>(maintenanceProperties.lastService(), 128, i18n.state());
         stateColumn.setFixed(true);
         stateColumn.setResizable(false);
         stateColumn.setCell(new AbstractCell<Double>() {
@@ -178,7 +178,7 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
         });
         columnConfigList.add(stateColumn);
 
-        ColumnConfig<Maintenance, String> resetColumn = new ColumnConfig<Maintenance, String>(new ValueProvider<Maintenance, String>() {
+        ColumnConfig<Maintenance, String> resetColumn = new ColumnConfig<>(new ValueProvider<Maintenance, String>() {
             @Override
             public String getValue(Maintenance object) {
                 return i18n.reset();
@@ -217,10 +217,10 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
             columnConfig.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         }
 
-        columnModel = new ColumnModel<Maintenance>(columnConfigList);
+        columnModel = new ColumnModel<>(columnConfigList);
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
-        deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
+        deviceCombo = new ComboBox<>(deviceStore, deviceProperties.label());
         deviceCombo.addSelectionHandler(new SelectionHandler<Device>() {
             @Override
             public void onSelection(SelectionEvent<Device> event) {
@@ -242,7 +242,7 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         grid.getSelectionModel().addSelectionChangedHandler(this);
 
-        editing = new GridInlineEditing<Maintenance>(grid);
+        editing = new GridInlineEditing<>(grid);
 
         rowNumberer.initPlugin(grid);
     }
@@ -253,7 +253,7 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
 
     public void flush() {
         maintenanceStore.commitChanges();
-        device.setMaintenances(new ArrayList<Maintenance>(maintenanceStore.getAll()));
+        device.setMaintenances(new ArrayList<>(maintenanceStore.getAll()));
         for (int i = 0; i < device.getMaintenances().size(); i++) {
             device.getMaintenances().get(i).setIndexNo(i);
         }
@@ -294,12 +294,12 @@ public class MaintenanceEditor implements SelectionChangedEvent.SelectionChanged
 
     private void startEditing() {
         editing.addEditor(nameColumn, new TextField());
-        NumberField<Double> serviceIntervalEditor = new NumberField<Double>(doublePropertyEditor);
+        NumberField<Double> serviceIntervalEditor = new NumberField<>(doublePropertyEditor);
         serviceIntervalEditor.setAllowDecimals(false);
         serviceIntervalEditor.setAllowBlank(false);
         serviceIntervalEditor.setAllowNegative(false);
         editing.addEditor(serviceIntervalColumn, serviceIntervalEditor);
-        NumberField<Double> lastServiceEditor = new NumberField<Double>(doublePropertyEditor);
+        NumberField<Double> lastServiceEditor = new NumberField<>(doublePropertyEditor);
         lastServiceEditor.setAllowDecimals(false);
         lastServiceEditor.setAllowBlank(false);
         lastServiceEditor.setAllowNegative(false);

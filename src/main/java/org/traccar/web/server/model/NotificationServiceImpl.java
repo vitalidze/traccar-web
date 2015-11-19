@@ -89,9 +89,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 return;
             }
 
-            Map<User, Set<DeviceEvent>> events = new HashMap<User, Set<DeviceEvent>>();
+            Map<User, Set<DeviceEvent>> events = new HashMap<>();
             List<User> admins = null;
-            Map<User, List<User>> managers = new HashMap<User, List<User>>();
+            Map<User, List<User>> managers = new HashMap<>();
 
             for (DeviceEvent event : entityManager.get().createQuery("SELECT e FROM DeviceEvent e INNER JOIN FETCH e.position WHERE e.notificationSent = :false AND e.type IN (:types)", DeviceEvent.class)
                                     .setParameter("false", false)
@@ -103,7 +103,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                     addEvent(events, user, event);
                     List<User> userManagers = managers.get(user);
                     if (userManagers == null) {
-                        userManagers = new LinkedList<User>();
+                        userManagers = new LinkedList<>();
                         User manager = user.getManagedBy();
                         while (manager != null) {
                             if (!manager.getNotificationEvents().isEmpty()) {
@@ -184,7 +184,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
             Set<DeviceEvent> userEvents = events.get(user);
             if (userEvents == null) {
-                userEvents = new HashSet<DeviceEvent>();
+                userEvents = new HashSet<>();
                 events.put(user, userEvents);
             }
             userEvents.add(event);
@@ -470,7 +470,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     }
 
     private static Map<String, Object> getTemplateModel(DeviceEvent event) {
-        Map<String, Object> model = new HashMap<String, Object>();
+        Map<String, Object> model = new HashMap<>();
         model.put(MessagePlaceholder.deviceName.name(), event.getDevice() == null ? "N/A" : event.getDevice().getName());
         model.put(MessagePlaceholder.geoFenceName.name(), event.getGeoFence() == null ? "N/A" : event.getGeoFence().getName());
         model.put(MessagePlaceholder.eventTime.name(), event.getTime());

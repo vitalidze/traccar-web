@@ -36,7 +36,7 @@ public interface NotificationSettingsProperties extends PropertyAccess<Notificat
 
     ValueProvider<NotificationSettings, NotificationSettings.SecureConnectionType> secureConnectionType();
 
-    public static class SecureConnectionTypeLabelProvider implements LabelProvider<NotificationSettings.SecureConnectionType> {
+    class SecureConnectionTypeLabelProvider implements LabelProvider<NotificationSettings.SecureConnectionType> {
         @Override
         public String getLabel(NotificationSettings.SecureConnectionType item) {
             return item.getTitle();

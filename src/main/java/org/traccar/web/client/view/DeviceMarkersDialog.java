@@ -150,7 +150,7 @@ public class DeviceMarkersDialog {
 
         @Override
         public void onSuccess(List<DeviceIcon> loaded) {
-            List<MarkerIcon> result = new ArrayList<MarkerIcon>(loaded.size() + DeviceIconType.values().length);
+            List<MarkerIcon> result = new ArrayList<>(loaded.size() + DeviceIconType.values().length);
             for (DeviceIcon icon : loaded) {
                 result.add(new MarkerIcon.Database(icon));
             }
@@ -200,17 +200,17 @@ public class DeviceMarkersDialog {
             }
         };
 
-        store = new ListStore<MarkerIcon>(keyProvider);
-        Loader<Object, List<MarkerIcon>> loader = new Loader<Object, List<MarkerIcon>>(hybridProxy);
-        loader.addLoadHandler(new ListStoreBinding<Object, MarkerIcon, List<MarkerIcon>>(store));
+        store = new ListStore<>(keyProvider);
+        Loader<Object, List<MarkerIcon>> loader = new Loader<>(hybridProxy);
+        loader.addLoadHandler(new ListStoreBinding<>(store));
 
-        view = new ListView<MarkerIcon, MarkerIcon>(store, new IdentityValueProvider<MarkerIcon>() {
+        view = new ListView<>(store, new IdentityValueProvider<MarkerIcon>() {
             @Override
             public void setValue(MarkerIcon object, MarkerIcon value) {
             }
         }, appearance);
 
-        view.setCell(new SimpleSafeHtmlCell<MarkerIcon>(new AbstractSafeHtmlRenderer<MarkerIcon>() {
+        view.setCell(new SimpleSafeHtmlCell<>(new AbstractSafeHtmlRenderer<MarkerIcon>() {
             @Override
             public SafeHtml render(MarkerIcon object) {
                 return renderer.listCell(style, object);

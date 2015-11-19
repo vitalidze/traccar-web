@@ -65,8 +65,8 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
         this.archiveHandler = archiveHandler;
         this.userSettingsHandler = userSettingsHandler;
         this.archiveView = new ArchiveView(this, deviceStore);
-        this.originalTracks = new HashMap<Long, Track>();
-        this.snappedTracks = new HashMap<Long, Track>();
+        this.originalTracks = new HashMap<>();
+        this.snappedTracks = new HashMap<>();
         this.deviceStore = deviceStore;
     }
 
@@ -213,7 +213,7 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
                                     ? Collections.<Position>emptyList()
                                     : originalPositions.subList(lastIndex, matching.getIndices()[0]);
                             // add snapped track segment
-                            List<Position> snappedPositions = new ArrayList<Position>(matching.getIndices().length);
+                            List<Position> snappedPositions = new ArrayList<>(matching.getIndices().length);
                             for (int i = 0; i < matching.getIndices().length; i++) {
                                 int snappedPositionIndex = matching.getIndices()[i];
                                 double[] latLon = matching.getMatchedPoints()[i];

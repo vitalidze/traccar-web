@@ -215,7 +215,7 @@ public class GeoFence implements IsSerializable {
             return Collections.emptyList();
         }
 
-        List<LonLat> result = new LinkedList<LonLat>();
+        List<LonLat> result = new LinkedList<>();
         for (String strPoint : getPoints().split(",")) {
             int space = strPoint.indexOf(' ');
             double lon = Double.parseDouble(strPoint.substring(0, space));
@@ -251,7 +251,7 @@ public class GeoFence implements IsSerializable {
         radius = geoFence.radius;
         allDevices = geoFence.allDevices;
         if (geoFence.transferDevices != null) {
-            transferDevices = new HashSet<Device>(geoFence.getTransferDevices());
+            transferDevices = new HashSet<>(geoFence.getTransferDevices());
         }
         return this;
     }

@@ -62,7 +62,7 @@ public class ReportsController implements NavView.ReportsHandler {
             @Override
             public void onSuccess(List<Report> result) {
                 ReportProperties reportProperties = GWT.create(ReportProperties.class);
-                ListStore<Report> reportStore = new ListStore<Report>(reportProperties.id());
+                ListStore<Report> reportStore = new ListStore<>(reportProperties.id());
                 reportStore.addAll(result);
                 new ReportsDialog(reportStore, deviceStore, geoFenceStore, new ReportsDialog.ReportHandler() {
                     @Override

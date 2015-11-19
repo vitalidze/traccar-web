@@ -37,7 +37,7 @@ public interface GeoFenceProperties extends PropertyAccess<GeoFence> {
 
     ValueProvider<GeoFence, GeoFenceType> type();
 
-    public static class GeoFenceTypeLabelProvider implements LabelProvider<GeoFenceType> {
+    class GeoFenceTypeLabelProvider implements LabelProvider<GeoFenceType> {
         final Messages i18n = GWT.create(Messages.class);
 
         @Override

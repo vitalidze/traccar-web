@@ -67,12 +67,12 @@ public class PositionInfoPopup {
         String other = position.getOther();
         if (other != null) {
             Device device = deviceStore.findModelWithKey(Long.toString(position.getDevice().getId()));
-            Map<String, Sensor> sensors = new HashMap<String, Sensor>(device.getSensors().size());
+            Map<String, Sensor> sensors = new HashMap<>(device.getSensors().size());
             for (Sensor sensor : device.getSensors()) {
                 sensors.put(sensor.getParameterName(), sensor);
             }
 
-            Map<String, Object> sensorData = new HashMap<String, Object>();
+            Map<String, Object> sensorData = new HashMap<>();
 
             // XML
             if (other.trim().startsWith("<")) {

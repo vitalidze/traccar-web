@@ -64,8 +64,8 @@ public class TrackerServerLogViewDialog {
 
         window.setHeadingText(title);
 
-        logSize.addValidator(new MinNumberValidator<Short>((short) 1));
-        logSize.addValidator(new MaxNumberValidator<Short>((short) 16384));
+        logSize.addValidator(new MinNumberValidator<>((short) 1));
+        logSize.addValidator(new MaxNumberValidator<>((short) 16384));
 
         logSize.setValue((short) 100);
 

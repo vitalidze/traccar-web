@@ -46,8 +46,8 @@ public class LoginDialog {
     }
 
     public interface LoginHandler {
-        public void onLogin(String login, String password);
-        public void onRegister(String login, String password);
+        void onLogin(String login, String password);
+        void onRegister(String login, String password);
     }
 
     private LoginHandler loginHandler;

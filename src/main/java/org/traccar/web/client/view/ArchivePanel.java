@@ -105,7 +105,7 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
         final List<ExtendedSortInfo> sortInfos;
 
         PositionComparator(List<? extends SortInfo> sortInfos) {
-            this.sortInfos = new ArrayList<ExtendedSortInfo>(sortInfos.size());
+            this.sortInfos = new ArrayList<>(sortInfos.size());
 
             ExtendedSortInfo[] availableProviders = new ExtendedSortInfo[] {
                     new ExtendedSortInfo(props.time()),
@@ -152,7 +152,7 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
     }
 
     static class PagingMemoryProxy extends MemoryProxy<PagingLoadConfig, PagingLoadResult<Position>> {
-        List<SortInfo> currentSorting = new ArrayList<SortInfo>();
+        List<SortInfo> currentSorting = new ArrayList<>();
         List<Position> positions = Collections.emptyList();
 
         public PagingMemoryProxy() {
@@ -169,7 +169,7 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
                 }
             }
             List<Position> results = positions.subList(config.getOffset(), Math.min(positions.size(), config.getOffset() + config.getLimit())); // Get results list based on the data the proxy was created with
-            callback.onSuccess(new PagingLoadResultBean<Position>(results, positions.size(), config.getOffset()));  // again, data from the config
+            callback.onSuccess(new PagingLoadResultBean<>(results, positions.size(), config.getOffset()));  // again, data from the config
         }
 
         public void setPositions(List<Position> positions) {
@@ -200,46 +200,46 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
 
         PositionProperties positionProperties = GWT.create(PositionProperties.class);
 
-        this.positionStore = new ListStore<Position>(positionProperties.id());
+        this.positionStore = new ListStore<>(positionProperties.id());
 
-        List<ColumnConfig<Position, ?>> columnConfigList = new LinkedList<ColumnConfig<Position, ?>>();
+        List<ColumnConfig<Position, ?>> columnConfigList = new LinkedList<>();
 
-        ColumnConfig<Position, Boolean> columnConfigValid = new ColumnConfig<Position, Boolean>(positionProperties.valid(), 25, i18n.valid());
+        ColumnConfig<Position, Boolean> columnConfigValid = new ColumnConfig<>(positionProperties.valid(), 25, i18n.valid());
         columnConfigValid.setSortable(false);
         columnConfigList.add(columnConfigValid);
 
-        ColumnConfig<Position, Date> columnConfigDate = new ColumnConfig<Position, Date>(positionProperties.time(), 25, i18n.time());
+        ColumnConfig<Position, Date> columnConfigDate = new ColumnConfig<>(positionProperties.time(), 25, i18n.time());
         columnConfigDate.setCell(new DateCell(ApplicationContext.getInstance().getFormatterUtil().getTimeFormat()));
         columnConfigList.add(columnConfigDate);
 
-        ColumnConfig<Position, String> columnConfigAddress = new ColumnConfig<Position, String>(positionProperties.address(), 25, i18n.address());
+        ColumnConfig<Position, String> columnConfigAddress = new ColumnConfig<>(positionProperties.address(), 25, i18n.address());
         columnConfigList.add(columnConfigAddress);
 
-        columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.latitude(), 25, i18n.latitude()));
-        columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.longitude(), 25, i18n.longitude()));
-        columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.altitude(), 25, i18n.altitude()));
+        columnConfigList.add(new ColumnConfig<>(positionProperties.latitude(), 25, i18n.latitude()));
+        columnConfigList.add(new ColumnConfig<>(positionProperties.longitude(), 25, i18n.longitude()));
+        columnConfigList.add(new ColumnConfig<>(positionProperties.altitude(), 25, i18n.altitude()));
 
-        ColumnConfig<Position, Double> columnConfigSpeed = new ColumnConfig<Position, Double>(positionProperties.speed(), 25, i18n.speed());
+        ColumnConfig<Position, Double> columnConfigSpeed = new ColumnConfig<>(positionProperties.speed(), 25, i18n.speed());
         columnConfigSpeed.setCell(new NumberCell<Double>(ApplicationContext.getInstance().getFormatterUtil().getSpeedFormat()));
         columnConfigList.add(columnConfigSpeed);
 
-        ColumnConfig<Position, Double> columnConfigDistance = new ColumnConfig<Position, Double>(positionProperties.distance(), 25, i18n.distance());
+        ColumnConfig<Position, Double> columnConfigDistance = new ColumnConfig<>(positionProperties.distance(), 25, i18n.distance());
         columnConfigDistance.setCell(new NumberCell<Double>(ApplicationContext.getInstance().getFormatterUtil().getDistanceFormat()));
         columnConfigList.add(columnConfigDistance);
 
-        columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.course(), 25, i18n.course()));
-        columnConfigList.add(new ColumnConfig<Position, Double>(positionProperties.power(), 25, i18n.power()));
+        columnConfigList.add(new ColumnConfig<>(positionProperties.course(), 25, i18n.course()));
+        columnConfigList.add(new ColumnConfig<>(positionProperties.power(), 25, i18n.power()));
 
-        columnModel = new ColumnModel<Position>(columnConfigList);
+        columnModel = new ColumnModel<>(columnConfigList);
 
-        view = new LiveGridView<Position>();
+        view = new LiveGridView<>();
         view.setForceFit(true);
         view.setStripeRows(true);
 
         uiBinder.createAndBindUi(this);
 
         memoryProxy = new PagingMemoryProxy();
-        loader = new PagingLoader<PagingLoadConfig, PagingLoadResult<Position>>(memoryProxy);
+        loader = new PagingLoader<>(memoryProxy);
         loader.setRemoteSort(true);
         loader.addLoadHandler(new LoadHandler<PagingLoadConfig, PagingLoadResult<Position>>() {
             @Override
@@ -262,7 +262,7 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
 
         grid.setLoader(loader);
 
-        new GridStateHandler<Position>(grid).loadState();
+        new GridStateHandler<>(grid).loadState();
 
         grid.getSelectionModel().addSelectionChangedHandler(this);
         grid.getSelectionModel().setSelectionMode(Style.SelectionMode.SINGLE);

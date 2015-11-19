@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -72,12 +73,12 @@ public class UserTest {
         GeoFence g6 = new GeoFence(6, "g6");
         GeoFence g7 = new GeoFence(7, "g7");
 
-        m1.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g1, g7)));
-        m2.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g1, g2)));
-        m3.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g5)));
-        u1.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g3)));
-        u2.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g4)));
-        u3.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g6)));
+        m1.setGeoFences(new HashSet<>(Arrays.asList(g1, g7)));
+        m2.setGeoFences(new HashSet<>(Arrays.asList(g1, g2)));
+        m3.setGeoFences(new HashSet<>(Collections.singleton(g5)));
+        u1.setGeoFences(new HashSet<>(Collections.singleton(g3)));
+        u2.setGeoFences(new HashSet<>(Collections.singleton(g4)));
+        u3.setGeoFences(new HashSet<>(Collections.singleton(g6)));
 
         // test
         assertEquals(set(g1, g2, g3, g4, g5, g6, g7), m1.getAllAvailableGeoFences());

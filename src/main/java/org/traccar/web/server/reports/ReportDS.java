@@ -93,7 +93,7 @@ public class ReportDS extends ReportGenerator {
 
     List<Data> calculate(List<Position> positions) {
         Position prevPosition = null;
-        List<Data> datas = new ArrayList<Data>();
+        List<Data> datas = new ArrayList<>();
         Data currentData = null;
 
         for (Iterator<Position> it = positions.iterator(); it.hasNext(); ) {

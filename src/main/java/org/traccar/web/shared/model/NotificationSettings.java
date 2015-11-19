@@ -48,8 +48,8 @@ public class NotificationSettings implements IsSerializable {
         port = 465;
         useAuthorization = true;
         secureConnectionType = SecureConnectionType.SSL_TLS;
-        templates = new HashSet<NotificationTemplate>();
-        transferTemplates = new HashMap<DeviceEventType, NotificationTemplate>();
+        templates = new HashSet<>();
+        transferTemplates = new HashMap<>();
     }
 
     @Id

@@ -83,23 +83,23 @@ public class SensorIntervalsDialog implements SelectionChangedEvent.SelectionCha
 
         final SensorIntervalProperties sensorProperties = GWT.create(SensorIntervalProperties.class);
 
-        this.sensorStore = new ListStore<SensorInterval>(new ModelKeyProvider<SensorInterval>() {
+        this.sensorStore = new ListStore<>(new ModelKeyProvider<SensorInterval>() {
             @Override
             public String getKey(SensorInterval item) {
                 return item.getText() + "_" + item.getValue();
             }
         });
 
-        List<ColumnConfig<SensorInterval, ?>> columnConfigList = new LinkedList<ColumnConfig<SensorInterval, ?>>();
+        List<ColumnConfig<SensorInterval, ?>> columnConfigList = new LinkedList<>();
 
-        ColumnConfig<SensorInterval, Double> valueColumn = new ColumnConfig<SensorInterval, Double>(sensorProperties.value(), 100, i18n.intervalFrom());
+        ColumnConfig<SensorInterval, Double> valueColumn = new ColumnConfig<>(sensorProperties.value(), 100, i18n.intervalFrom());
         valueColumn.setFixed(true);
         valueColumn.setResizable(false);
         columnConfigList.add(valueColumn);
-        ColumnConfig<SensorInterval, String> nameColumn = new ColumnConfig<SensorInterval, String>(sensorProperties.text(), 25, i18n.text());
+        ColumnConfig<SensorInterval, String> nameColumn = new ColumnConfig<>(sensorProperties.text(), 25, i18n.text());
         columnConfigList.add(nameColumn);
 
-        columnModel = new ColumnModel<SensorInterval>(columnConfigList);
+        columnModel = new ColumnModel<>(columnConfigList);
 
         uiBinder.createAndBindUi(this);
 
@@ -111,8 +111,8 @@ public class SensorIntervalsDialog implements SelectionChangedEvent.SelectionCha
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         grid.getSelectionModel().addSelectionChangedHandler(this);
 
-        GridEditing<SensorInterval> editing = new GridInlineEditing<SensorInterval>(grid);
-        NumberField<Double> valueEditor = new NumberField<Double>(new NumberPropertyEditor.DoublePropertyEditor());
+        GridEditing<SensorInterval> editing = new GridInlineEditing<>(grid);
+        NumberField<Double> valueEditor = new NumberField<>(new NumberPropertyEditor.DoublePropertyEditor());
         valueEditor.setAllowDecimals(true);
         valueEditor.setAllowBlank(false);
         valueEditor.setAllowNegative(true);

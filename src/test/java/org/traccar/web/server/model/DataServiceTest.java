@@ -121,7 +121,7 @@ public class DataServiceTest {
 
         GeoFence geoFence = new GeoFence();
         geoFence.setName("GF1");
-        geoFence.setTransferDevices(new HashSet<Device>(Collections.singleton(device)));
+        geoFence.setTransferDevices(new HashSet<>(Collections.singleton(device)));
         dataService.addGeoFence(geoFence);
 
         dataService.removeDevice(device);

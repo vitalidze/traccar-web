@@ -39,7 +39,7 @@ public class PeriodComboBox extends ComboBox<Period> {
 	private static final Messages i18n = GWT.create(Messages.class);
 
 	public PeriodComboBox() {
-		super(new ListStore<Period>(new EnumKeyProvider<Period>()), new LabelProvider<Period>() {
+		super(new ListStore<>(new EnumKeyProvider<Period>()), new LabelProvider<Period>() {
 			@Override
 			public String getLabel(Period item) {
 				return i18n.period(item);

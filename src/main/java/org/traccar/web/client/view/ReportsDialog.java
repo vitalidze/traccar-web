@@ -158,23 +158,23 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
         this.reportStore = reportStore;
         this.reportHandler = reportHandler;
 
-        List<ColumnConfig<Report, ?>> columnConfigList = new LinkedList<ColumnConfig<Report, ?>>();
-        columnConfigList.add(new ColumnConfig<Report, String>(reportProperties.name(), 25, i18n.name()));
-        columnConfigList.add(new ColumnConfig<Report, String>(new ReportProperties.ReportTypeLabelProvider(), 25, i18n.type()));
-        columnModel = new ColumnModel<Report>(columnConfigList);
+        List<ColumnConfig<Report, ?>> columnConfigList = new LinkedList<>();
+        columnConfigList.add(new ColumnConfig<>(reportProperties.name(), 25, i18n.name()));
+        columnConfigList.add(new ColumnConfig<>(new ReportProperties.ReportTypeLabelProvider(), 25, i18n.type()));
+        columnModel = new ColumnModel<>(columnConfigList);
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         this.deviceStore = deviceStore;
-        this.devicesList = new ListView<Device, String>(deviceStore, deviceProperties.name());
+        this.devicesList = new ListView<>(deviceStore, deviceProperties.name());
 
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
         this.geoFenceStore = geoFenceStore;
-        this.geoFencesList = new ListView<GeoFence, String>(geoFenceStore, geoFenceProperties.name());
+        this.geoFencesList = new ListView<>(geoFenceStore, geoFenceProperties.name());
 
-        ListStore<ReportType> geoFenceTypeStore = new ListStore<ReportType>(
+        ListStore<ReportType> geoFenceTypeStore = new ListStore<>(
                 new EnumKeyProvider<ReportType>());
         geoFenceTypeStore.addAll(Arrays.asList(ReportType.values()));
-        type = new ComboBox<ReportType>(
+        type = new ComboBox<>(
                 geoFenceTypeStore, new ReportProperties.ReportTypeLabelProvider());
         type.setForceSelection(true);
         type.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
@@ -214,8 +214,8 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
         period.init(fromDateField, fromTimeField, toDateField, toTimeField);
 
         geoFencesPanel.setHeadingText(i18n.overlayType(UserSettings.OverlayType.GEO_FENCES));
-        geoFences = new ListViewEditor<GeoFence>(geoFencesList);
-        devices = new ListViewEditor<Device>(devicesList);
+        geoFences = new ListViewEditor<>(geoFencesList);
+        devices = new ListViewEditor<>(devicesList);
         fromDate = new DateTimeEditor(fromDateField, fromTimeField);
         toDate = new DateTimeEditor(toDateField, toTimeField);
 
