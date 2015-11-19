@@ -18,6 +18,8 @@ package org.traccar.web.client.view;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
+import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
+import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -145,6 +147,8 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
+    ReportType prevReportType;
+
     public ReportsDialog(ListStore<Report> reportStore,
                          ListStore<Device> deviceStore,
                          ListStore<GeoFence> geoFenceStore,
@@ -192,6 +196,12 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
                 }
                 reportTypeChanged(report.getType());
                 removeButton.setEnabled(!event.getSelection().isEmpty());
+            }
+        });
+        type.addBeforeSelectionHandler(new BeforeSelectionHandler<ReportType>() {
+            @Override
+            public void onBeforeSelection(BeforeSelectionEvent<ReportType> event) {
+                prevReportType = type.getCurrentValue();
             }
         });
         type.addSelectionHandler(new SelectionHandler<ReportType>() {
@@ -263,6 +273,12 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
         geoFencesList.setEnabled(type != null && type.supportsGeoFences());
         includeMap.setEnabled(type != null && type.supportsMapDisplay());
         disableFilter.setEnabled(type != null && type.supportsFiltering());
+        if (type != null
+              && (name.getCurrentValue() == null
+                  || name.getCurrentValue().trim().isEmpty()
+                  || (prevReportType != null && i18n.reportType(prevReportType).equals(name.getCurrentValue())))) {
+            name.setValue(i18n.reportType(type));
+        }
     }
 
     @Override
