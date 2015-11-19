@@ -48,7 +48,9 @@ public class ReportRenderer {
 
     public void start(Report report) throws IOException {
         response.setContentType("text/html;charset=UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=" + getFilename(report));
+        if (!report.isPreview()) {
+            response.setHeader("Content-Disposition", "attachment; filename=" + getFilename(report));
+        }
 
         line("<!DOCTYPE html>");
         line("<html>");

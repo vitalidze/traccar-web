@@ -49,7 +49,8 @@ public class DBMigrations {
                 new SetGlobalHashSalt(),
                 new SetDefaultUserSettings(),
                 new SetArchiveDefaultColumns(),
-                new SetGeoFenceAllDevicesFlag()
+                new SetGeoFenceAllDevicesFlag(),
+                new SetReportsFilterAndPreview()
         }) {
             em.getTransaction().begin();
             try {
@@ -343,6 +344,18 @@ public class DBMigrations {
 
             em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.autoUpdateOdometer = :b WHERE D.autoUpdateOdometer IS NULL")
                     .setParameter("b", Boolean.FALSE)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetReportsFilterAndPreview implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Report.class.getSimpleName() + " R SET R.preview = :f WHERE R.preview IS NULL")
+                    .setParameter("f", false)
+                    .executeUpdate();
+            em.createQuery("UPDATE " + Report.class.getSimpleName() + " R SET R.disableFilter = :f WHERE R.disableFilter IS NULL")
+                    .setParameter("f", false)
                     .executeUpdate();
         }
     }

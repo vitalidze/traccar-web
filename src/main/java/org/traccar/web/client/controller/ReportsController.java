@@ -107,7 +107,7 @@ public class ReportsController implements NavView.ReportsHandler {
     private void generate(Report report) {
         FormPanel form = new FormPanel("_blank");
         form.setVisible(false);
-        form.setAction("traccar/report");
+        form.setAction("traccar/report" + (report.isPreview() ? "/" + report.getName() + ".html" : ""));
         form.setMethod(FormPanel.METHOD_POST);
         form.setEncoding(FormPanel.ENCODING_URLENCODED);
         HorizontalPanel container = new HorizontalPanel();

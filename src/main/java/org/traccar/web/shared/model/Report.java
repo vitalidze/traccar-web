@@ -151,6 +151,28 @@ public class Report implements IsSerializable {
         this.includeMap = displayMap;
     }
 
+    @Column(nullable = true)
+    private boolean disableFilter;
+
+    public boolean isDisableFilter() {
+        return disableFilter;
+    }
+
+    public void setDisableFilter(boolean disableFilter) {
+        this.disableFilter = disableFilter;
+    }
+
+    @Column(nullable = true)
+    private boolean preview = true;
+
+    public boolean isPreview() {
+        return preview;
+    }
+
+    public void setPreview(boolean preview) {
+        this.preview = preview;
+    }
+
     public Report copyFrom(Report report) {
         this.id = report.id;
         this.name = report.name;
@@ -159,6 +181,8 @@ public class Report implements IsSerializable {
         this.fromDate = report.fromDate;
         this.toDate = report.toDate;
         this.includeMap = report.includeMap;
+        this.disableFilter = report.disableFilter;
+        this.preview = report.preview;
         return this;
     }
 }

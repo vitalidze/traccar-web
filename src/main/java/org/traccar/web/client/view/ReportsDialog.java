@@ -90,6 +90,12 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
     @UiField
     CheckBox includeMap;
 
+    @UiField
+    CheckBox disableFilter;
+
+    @UiField
+    CheckBox preview;
+
     @UiField(provided = true)
     final ListStore<Device> deviceStore;
 
@@ -256,6 +262,7 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
     private void reportTypeChanged(ReportType type) {
         geoFencesList.setEnabled(type != null && type.supportsGeoFences());
         includeMap.setEnabled(type != null && type.supportsMapDisplay());
+        disableFilter.setEnabled(type != null && type.supportsFiltering());
     }
 
     @Override

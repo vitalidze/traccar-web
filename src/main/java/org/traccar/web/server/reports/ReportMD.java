@@ -34,7 +34,7 @@ public class ReportMD extends ReportGenerator {
                 positions = Collections.emptyList();
             } else {
                 try {
-                    positions = dataService.getPositions(device, report.getFromDate(), report.getToDate(), true);
+                    positions = dataService.getPositions(device, report.getFromDate(), report.getToDate(), !report.isDisableFilter());
                 } catch (AccessDeniedException ade) {
                     continue;
                 }

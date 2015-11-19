@@ -33,7 +33,7 @@ public class ReportDS extends ReportGenerator {
         for (Device device : getDevices(report)) {
             List<Position> positions;
             try {
-                positions = dataService.getPositions(device, report.getFromDate(), report.getToDate(), true);
+                positions = dataService.getPositions(device, report.getFromDate(), report.getToDate(), !report.isDisableFilter());
             } catch (AccessDeniedException ade) {
                 continue;
             }

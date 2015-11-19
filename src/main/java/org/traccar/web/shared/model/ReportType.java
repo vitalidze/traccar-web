@@ -38,6 +38,11 @@ public enum ReportType implements IsSerializable {
         public boolean supportsGeoFences() {
             return true;
         }
+
+        @Override
+        public boolean supportsFiltering() {
+            return false;
+        }
     };
 
     public boolean supportsGeoFences() {
@@ -46,5 +51,9 @@ public enum ReportType implements IsSerializable {
 
     public boolean supportsMapDisplay() {
         return false;
+    }
+
+    public boolean supportsFiltering() {
+        return true;
     }
 }
