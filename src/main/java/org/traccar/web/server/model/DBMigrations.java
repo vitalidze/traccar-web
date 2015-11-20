@@ -153,7 +153,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.timeout = :tmout WHERE D.timeout IS NULL OR D.timeout <= 0")
-                    .setParameter("tmout", Device.DEFAULT_TIMEOUT)
+                    .setParameter("tmout", Integer.valueOf(Device.DEFAULT_TIMEOUT))
                     .executeUpdate();
         }
     }
@@ -176,7 +176,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + Device.class.getSimpleName() + " D SET D.minIdleTime = :minIdleTime WHERE D.minIdleTime IS NULL")
-                    .setParameter("minIdleTime", Device.DEFAULT_MIN_IDLE_TIME)
+                    .setParameter("minIdleTime", Integer.valueOf(Device.DEFAULT_MIN_IDLE_TIME))
                     .executeUpdate();
         }
     }
