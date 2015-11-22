@@ -37,6 +37,7 @@ import org.traccar.web.client.ArchiveStyle;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
+import org.traccar.web.client.state.CheckBoxStateHandler;
 import org.traccar.web.client.widget.PeriodComboBox;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -209,6 +210,9 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         toTime.setValue(to);
 
         periodCombo.init(fromDate, fromTime, toDate, toTime);
+
+        new CheckBoxStateHandler(disableFilter).loadState();
+        new CheckBoxStateHandler(snapToRoads).loadState();
     }
 
     @Override

@@ -42,9 +42,9 @@
                     <toolbar:LabelToolItem width="5" />
                     <button:TextButton ui:field="filterButton" text="{i18n.filter}..." />
                     <toolbar:LabelToolItem width="2" />
-                    <form:CheckBox ui:field="disableFilter" boxLabel="{i18n.disableFilter}" />
+                    <form:CheckBox ui:field="disableFilter" boxLabel="{i18n.disableFilter}" stateful="true" stateId="disableFilter" />
                     <toolbar:LabelToolItem width="2" />
-                    <form:CheckBox ui:field="snapToRoads" boxLabel="{i18n.snapToRoads}" />
+                    <form:CheckBox ui:field="snapToRoads" boxLabel="{i18n.snapToRoads}" stateful="true" stateId="snapToRoads" />
 
                     <toolbar:ToolBar ui:field="styleToolbar">
                         <g:Label ui:field="styleButtonTrackColor" text="&nbsp;&nbsp;&nbsp;&nbsp;" />

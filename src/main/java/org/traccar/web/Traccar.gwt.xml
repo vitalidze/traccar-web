@@ -31,6 +31,8 @@
     <set-property name="gwt.logging.enabled" value="FALSE"/>
     <set-property name="gwt.logging.consoleHandler" value="DISABLED"/>
     <set-configuration-property name="locale.cookie" value="GWT_LOCALE" />
+    <set-configuration-property name="GXT.state.autoBeanFactory"
+                                value="org.traccar.web.client.state.StateAutoBeanFactory" />
 
     <entry-point class='org.traccar.web.client.Traccar'/>
 
