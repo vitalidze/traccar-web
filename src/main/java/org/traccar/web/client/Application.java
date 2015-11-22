@@ -17,6 +17,7 @@ package org.traccar.web.client;
 
 import com.google.gwt.i18n.client.TimeZoneInfo;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.grid.GridSelectionModel;
@@ -213,6 +214,7 @@ public class Application {
                                           NumberField<Double> centerLongitude,
                                           NumberField<Double> centerLatitude,
                                           NumberField<Integer> zoomLevel,
+                                          CheckBox maximizeOverviewMap,
                                           GridSelectionModel<UserSettings.OverlayType> overlays) {
             String layerName = mapController.getMap().getBaseLayer().getName();
             for (UserSettings.MapType mapTypeXX : UserSettings.MapType.values()) {
@@ -226,6 +228,8 @@ public class Application {
             centerLongitude.setValue(center.lon());
             centerLatitude.setValue(center.lat());
             zoomLevel.setValue(mapController.getMap().getZoom());
+            maximizeOverviewMap.setValue(mapController.getOverviewMap().getJSObject()
+                    .getProperty("maximizeDiv").getProperty("style").getPropertyAsString("display").equals("none"));
 
             overlays.deselectAll();
             for (UserSettings.OverlayType overlayType : UserSettings.OverlayType.values()) {

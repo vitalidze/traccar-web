@@ -33,7 +33,7 @@
     }
   </ui:style>
 
-  <gxt:Window ui:field="window" pixelSize="445, 540" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="445, 560" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.speedUnits}" labelWidth="160">
@@ -77,14 +77,14 @@
           <gxt:FramedPanel headingText="{i18n.defaultMapState}" bodyStyleName="{style.pad3}">
               <container:VerticalLayoutContainer>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.map}">
+                      <form:FieldLabel text="{i18n.map}" labelWidth="180">
                           <form:widget>
                               <form:ComboBox ui:field="mapType" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.longitude}">
+                      <form:FieldLabel text="{i18n.longitude}" labelWidth="180">
                           <form:widget>
                               <form:NumberField editor="{doublePropertyEditor}"
                                                 ui:field="centerLongitude"
@@ -95,7 +95,7 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.latitude}">
+                      <form:FieldLabel text="{i18n.latitude}" labelWidth="180">
                           <form:widget>
                               <form:NumberField editor="{doublePropertyEditor}"
                                                 ui:field="centerLatitude"
@@ -106,13 +106,20 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.zoom}">
+                      <form:FieldLabel text="{i18n.zoom}" labelWidth="180">
                           <form:widget>
                               <form:NumberField editor="{integerPropertyEditor}"
                                                 ui:field="zoomLevel"
                                                 allowNegative="false"
                                                 allowDecimals="false"
                                                 allowBlank="false" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.maximizeOverviewMap}" labelWidth="180">
+                          <form:widget>
+                              <form:CheckBox ui:field="maximizeOverviewMap" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>

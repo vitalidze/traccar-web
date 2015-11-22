@@ -180,6 +180,8 @@ public class UserSettings implements IsSerializable {
     private Double centerLatitude;
     @Enumerated(EnumType.STRING)
     private MapType mapType;
+    @Column(nullable = true)
+    private boolean maximizeOverviewMap;
 
     @JsonIgnore
     private String overlays;
@@ -222,6 +224,14 @@ public class UserSettings implements IsSerializable {
 
     public void setOverlays(String overlays) {
         this.overlays = overlays;
+    }
+
+    public boolean isMaximizeOverviewMap() {
+        return maximizeOverviewMap;
+    }
+
+    public void setMaximizeOverviewMap(boolean maximizeOverviewMap) {
+        this.maximizeOverviewMap = maximizeOverviewMap;
     }
 
     @Column(nullable = true)
@@ -346,6 +356,7 @@ public class UserSettings implements IsSerializable {
         centerLongitude = userSettings.centerLongitude;
         centerLatitude = userSettings.centerLatitude;
         mapType = userSettings.mapType;
+        maximizeOverviewMap = userSettings.maximizeOverviewMap;
         overlays = userSettings.overlays;
         hideZeroCoordinates = userSettings.hideZeroCoordinates;
         hideInvalidLocations = userSettings.hideInvalidLocations;

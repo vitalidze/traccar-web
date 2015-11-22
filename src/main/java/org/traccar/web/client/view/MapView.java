@@ -34,6 +34,8 @@ import org.gwtopenmaps.openlayers.client.StyleMap;
 import org.gwtopenmaps.openlayers.client.StyleOptions;
 import org.gwtopenmaps.openlayers.client.StyleRules;
 import org.gwtopenmaps.openlayers.client.control.LayerSwitcher;
+import org.gwtopenmaps.openlayers.client.control.OverviewMap;
+import org.gwtopenmaps.openlayers.client.control.OverviewMapOptions;
 import org.gwtopenmaps.openlayers.client.control.ScaleLine;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
@@ -72,6 +74,7 @@ public class MapView {
 
     private MapWidget mapWidget;
     private Map map;
+    private OverviewMap overviewMap;
     private Vector vectorLayer;
     private Markers markerLayer;
     private Vector geofenceLayer;
@@ -81,6 +84,10 @@ public class MapView {
 
     public Map getMap() {
         return map;
+    }
+
+    public OverviewMap getOverviewMap() {
+        return overviewMap;
     }
 
     public Vector getVectorLayer() {
@@ -242,6 +249,9 @@ public class MapView {
 
         map.addControl(new LayerSwitcher());
         map.addControl(new ScaleLine());
+        OverviewMapOptions options = new OverviewMapOptions();
+        options.getJSObject().setProperty("maximized", ApplicationContext.getInstance().getUserSettings().isMaximizeOverviewMap());
+        map.addControl((overviewMap = new OverviewMap(options)));
 
         contentPanel.add(mapWidget);
 

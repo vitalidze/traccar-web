@@ -122,6 +122,9 @@ public class DBMigrations {
                     .setParameter("lon", UserSettings.DEFAULT_CENTER_LONGITUDE)
                     .setParameter("lat", UserSettings.DEFAULT_CENTER_LATITUDE)
                     .executeUpdate();
+            em.createQuery("UPDATE " + UserSettings.class.getSimpleName() + " S SET S.maximizeOverviewMap = :b WHERE S.maximizeOverviewMap IS NULL")
+                    .setParameter("b", false)
+                    .executeUpdate();
         }
     }
 

@@ -24,6 +24,7 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
+import org.gwtopenmaps.openlayers.client.control.OverviewMap;
 import org.gwtopenmaps.openlayers.client.layer.Layer;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.traccar.web.client.Application;
@@ -63,6 +64,10 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public org.gwtopenmaps.openlayers.client.Map getMap() {
         return mapView.getMap();
+    }
+
+    public OverviewMap getOverviewMap() {
+        return mapView.getOverviewMap();
     }
 
     public Vector getGeoFenceLayer() {

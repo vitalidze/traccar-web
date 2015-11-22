@@ -22,6 +22,7 @@ import java.util.List;
 import com.google.gwt.i18n.client.TimeZoneInfo;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.ToStringValueProvider;
+import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
@@ -65,6 +66,7 @@ public class UserSettingsDialog implements Editor<UserSettings> {
                                           NumberField<Double> centerLongitude,
                                           NumberField<Double> centerLatitude,
                                           NumberField<Integer> zoomLevel,
+                                          CheckBox maximizeOverviewMap,
                                           GridSelectionModel<UserSettings.OverlayType> overlays);
     }
 
@@ -103,6 +105,9 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
     @UiField
     NumberField<Integer> zoomLevel;
+
+    @UiField
+    CheckBox maximizeOverviewMap;
 
     @UiField(provided = true)
     ComboBox<UserSettings.MapType> mapType;
@@ -214,6 +219,6 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
     @UiHandler("takeFromMapButton")
     public void onSaveDefaultMapSateClicked(SelectEvent event) {
-        userSettingsHandler.onTakeCurrentMapState(mapType, centerLongitude, centerLatitude, zoomLevel, grid.getSelectionModel());
+        userSettingsHandler.onTakeCurrentMapState(mapType, centerLongitude, centerLatitude, zoomLevel, maximizeOverviewMap, grid.getSelectionModel());
     }
 }

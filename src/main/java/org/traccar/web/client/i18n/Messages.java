@@ -484,4 +484,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String wrapperLog();
 
     String preview();
+
+    String maximizeOverviewMap();
 }
