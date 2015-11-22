@@ -237,7 +237,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             try {
                 msg.setFrom(new InternetAddress(settings.getFromAddress()));
                 msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getLogin() + " <" + user.getEmail() + ">", false));
-                msg.setSubject(subject);
+                msg.setSubject(subject, "UTF-8");
 
                 msg.setContent(body, contentType);
                 msg.setHeader("X-Mailer", "traccar-web.sendmail");
