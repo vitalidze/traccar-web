@@ -143,8 +143,9 @@ public class MapController implements ContentController, MapView.MapHandler {
                             latestNonIdlePositionMap.put(device.getId(), position);
                         } else {
                             Position latestNonIdlePosition = latestNonIdlePositionMap.get(device.getId());
+                            long minIdleTime = (long) device.getMinIdleTime() * 1000;
                             if (latestNonIdlePosition != null
-                                    && position.getTime().getTime() - latestNonIdlePosition.getTime().getTime() > device.getMinIdleTime() * 1000) {
+                                    && position.getTime().getTime() - latestNonIdlePosition.getTime().getTime() > minIdleTime) {
                                 position.setIdleSince(latestNonIdlePosition.getTime());
                             }
                         }

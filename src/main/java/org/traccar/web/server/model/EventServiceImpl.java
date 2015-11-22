@@ -333,6 +333,64 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         }
     }
 
+    public static class StopMoveDetector extends EventProducer {
+        Map<Long, Long> previousIdlePositions;
+
+        @Override
+        void before() {
+            previousIdlePositions = new HashMap<>();
+        }
+
+        @Override
+        void positionScanned(Position prevPosition, Position position) {
+            Device device = position.getDevice();
+
+            if (isIdle(position)) {
+                if (previousIdlePositions.containsKey(device.getId())) {
+                    if (prevPosition != null && !isIdleForMinimumTime(prevPosition) && isIdleForMinimumTime(position)) {
+                        DeviceEvent stopEvent = new DeviceEvent();
+                        stopEvent.setTime(currentDate());
+                        stopEvent.setDevice(device);
+                        stopEvent.setType(DeviceEventType.STOPPED);
+                        stopEvent.setPosition(position);
+                        entityManager().persist(stopEvent);
+                    }
+                } else {
+                    previousIdlePositions.put(device.getId(), position.getId());
+                }
+            } else {
+                if (isIdleForMinimumTime(position)) {
+                    DeviceEvent movingEvent = new DeviceEvent();
+                    movingEvent.setTime(currentDate());
+                    movingEvent.setDevice(device);
+                    movingEvent.setType(DeviceEventType.MOVING);
+                    movingEvent.setPosition(position);
+                    entityManager().persist(movingEvent);
+                }
+                previousIdlePositions.remove(device.getId());
+            }
+        }
+
+        @Override
+        void after() {
+            previousIdlePositions = null;
+        }
+
+        private boolean isIdle(Position position) {
+            return position.getSpeed() == null || position.getSpeed() <= position.getDevice().getIdleSpeedThreshold();
+        }
+
+        private boolean isIdleForMinimumTime(Position position) {
+            Device device = position.getDevice();
+            Long previousIdlePositionId = previousIdlePositions.get(device.getId());
+            Position previousIdlePosition = previousIdlePositionId == null
+                    ? null : entityManager().find(Position.class, previousIdlePositionId);
+            long minIdleTime = (long) device.getMinIdleTime() * 1000;
+            return previousIdlePosition != null
+                    && position.getTime().getTime() - previousIdlePosition.getTime().getTime() > minIdleTime;
+        }
+    }
+
     @Inject
     private OfflineDetector offlineDetector;
     @Inject
@@ -341,6 +399,8 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
     private OdometerUpdater odometerUpdater;
     @Inject
     private OverspeedDetector overspeedDetector;
+    @Inject
+    private StopMoveDetector stopMoveDetector;
     @Inject
     private PositionScanner positionScanner;
 
@@ -358,6 +418,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         positionScanner.eventProducers.add(geoFenceDetector);
         positionScanner.eventProducers.add(odometerUpdater);
         positionScanner.eventProducers.add(overspeedDetector);
+        positionScanner.eventProducers.add(stopMoveDetector);
 
         if (applicationSettings.get().isEventRecordingEnabled()) {
             startTasks();

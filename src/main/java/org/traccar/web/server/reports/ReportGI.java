@@ -97,7 +97,8 @@ public class ReportGI extends ReportGenerator {
                             && prevPosition.getSpeed() > device.getIdleSpeedThreshold()) {
                         moveDuration += diffTime;
                         // reclassify 'stop' duration into 'move' duration if the stop was less than setting from device profile
-                        if (nextStopDuration > 0 && nextStopDuration < device.getMinIdleTime() * 1000) {
+                        long minIdleTime = (long) device.getMinIdleTime() * 1000;
+                        if (nextStopDuration > 0 && nextStopDuration < minIdleTime) {
                             stopDuration -= nextStopDuration;
                             moveDuration += nextStopDuration;
                         }

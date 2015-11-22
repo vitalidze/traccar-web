@@ -126,7 +126,8 @@ public class ReportDS extends ReportGenerator {
         Data prevData = null;
         for (Iterator<Data> it = datas.iterator(); it.hasNext(); ) {
             Data data = it.next();
-            if (isIdle(data.start) && data.getDuration() < device.getMinIdleTime() * 1000) {
+            long minIdleTime = (long) device.getMinIdleTime() * 1000;
+            if (isIdle(data.start) && data.getDuration() < minIdleTime) {
                 Data nonIdleData = prevData == null ? it.next() : prevData;
                 if (prevData == null) {
                     nonIdleData.start = data.start;
