@@ -154,7 +154,8 @@ public class MapPositionRenderer {
                     double dY = jsObject.getPropertyAsDouble("y") - mouseY;
 
                     double squaredDistance = dX * dX + dY * dY;
-                    if (closestPosition == null || squaredDistance < closestSquaredDistance) {
+                    if (j < deviceData.positions.size()
+                            && (closestPosition == null || squaredDistance < closestSquaredDistance)) {
                         closestPosition = deviceData.positions.get(j);
                         closestSquaredDistance = squaredDistance;
                     }
