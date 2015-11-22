@@ -133,7 +133,8 @@ public class MapController implements ContentController, MapView.MapHandler {
                     }
 
                     // update status and icon
-                    boolean isOffline = currentTime - position.getTime().getTime() > position.getDevice().getTimeout() * 1000;
+                    long timeout = (long) position.getDevice().getTimeout() * 1000;
+                    boolean isOffline = currentTime - position.getTime().getTime() > timeout;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
                     position.setIcon(MarkerIcon.create(position));
                     // check 'idle since'

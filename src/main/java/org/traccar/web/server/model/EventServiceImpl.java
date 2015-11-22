@@ -54,8 +54,9 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
             for (Device device : entityManager.get().createQuery("SELECT d FROM Device d INNER JOIN FETCH d.latestPosition", Device.class).getResultList()) {
                 Position position = device.getLatestPosition();
                 // check that device is offline
-                if (currentTime.getTime() - position.getTime().getTime() >= device.getTimeout() * 1000
-                        && (position.getServerTime() == null || position.getServerTime().getTime() >= device.getTimeout() * 1000)) {
+                long timeout = (long) device.getTimeout() * 1000;
+                if (currentTime.getTime() - position.getTime().getTime() >= timeout
+                        && (position.getServerTime() == null || position.getServerTime().getTime() >= timeout)) {
                     Long latestOfflinePositionId = latestOfflineEvents.get(device.getId());
                     if (latestOfflinePositionId == null) {
                         List<DeviceEvent> offlineEvents = entityManager.get().createQuery("SELECT e FROM DeviceEvent e WHERE e.position=:position AND e.type=:offline", DeviceEvent.class)
