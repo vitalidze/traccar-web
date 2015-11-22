@@ -352,7 +352,8 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                         stopEvent.setTime(currentDate());
                         stopEvent.setDevice(device);
                         stopEvent.setType(DeviceEventType.STOPPED);
-                        stopEvent.setPosition(position);
+                        Long previousIdlePositionId = previousIdlePositions.get(device.getId());
+                        stopEvent.setPosition(entityManager().find(Position.class, previousIdlePositionId));
                         entityManager().persist(stopEvent);
                     }
                 } else {
