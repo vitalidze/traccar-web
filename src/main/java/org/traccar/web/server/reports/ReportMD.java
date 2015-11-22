@@ -30,14 +30,10 @@ public class ReportMD extends ReportGenerator {
 
         for (Device device : getDevices(report)) {
             List<Position> positions;
-            if (device.getSpeedLimit() == null) {
-                positions = Collections.emptyList();
-            } else {
-                try {
-                    positions = dataService.getPositions(device, report.getFromDate(), report.getToDate(), !report.isDisableFilter());
-                } catch (AccessDeniedException ade) {
-                    continue;
-                }
+            try {
+                positions = dataService.getPositions(device, report.getFromDate(), report.getToDate(), !report.isDisableFilter());
+            } catch (AccessDeniedException ade) {
+                continue;
             }
 
             panelStart();
