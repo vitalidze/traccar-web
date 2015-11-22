@@ -18,10 +18,7 @@ package org.traccar.web.server.model;
 import com.google.inject.persist.Transactional;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.traccar.web.client.model.DataService;
-import org.traccar.web.shared.model.AccessDeniedException;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.shared.model.*;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -37,9 +34,11 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,6 +51,8 @@ public class ExportServlet extends HttpServlet {
     private Provider<EntityManager> entityManager;
     @Inject
     private DataService dataService;
+    @Inject
+    private Provider<ApplicationSettings> applicationSettings;
     @Inject
     protected Logger logger;
 
@@ -74,7 +75,11 @@ public class ExportServlet extends HttpServlet {
             checkAccess(device);
 
             if (exportType.equals("csv")) {
-                csv(resp, device, from, to, filter);
+                String languageCode = req.getParameter("locale");
+                if (languageCode == null) {
+                    languageCode = applicationSettings.get().getLanguage();
+                }
+                csv(resp, "default".equals(languageCode) ? Locale.getDefault() : new Locale(languageCode), device, from, to, filter);
             } else if (exportType.equals("gpx")) {
                 gpx(resp, device, from, to, filter);
             } else {
@@ -101,14 +106,16 @@ public class ExportServlet extends HttpServlet {
         }
     }
 
-    void csv(HttpServletResponse response, Device device, Date from, Date to, boolean filter) throws IOException, AccessDeniedException {
+    void csv(HttpServletResponse response, Locale locale, Device device, Date from, Date to, boolean filter) throws IOException, AccessDeniedException {
         response.setContentType("text/csv;charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=traccar-positions.csv");
 
-        final char SEPARATOR = ';';
+        DecimalFormatSymbols formatSymbols = new DecimalFormatSymbols(locale);
+        final char SEPARATOR = formatSymbols.getDecimalSeparator() == ',' ? ';' : ',';
 
         PrintWriter writer = response.getWriter();
 
+        writer.println("sep=" + SEPARATOR);
         writer.println(line(SEPARATOR, "time", "valid", "latitude", "longitude", "altitude", "speed", "distance", "course", "power", "address", "other"));
 
         for (Position p : dataService.getPositions(device, from, to, filter)) {

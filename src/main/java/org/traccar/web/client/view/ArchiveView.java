@@ -21,6 +21,7 @@ import java.util.*;
 
 import com.google.gwt.event.logical.shared.*;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
@@ -261,7 +262,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                             "?deviceId=" + (deviceCombo.getValue() == null ? null : deviceCombo.getValue().getId()) +
                             "&from=" + jsonTimeFormat.format(getCombineDate(fromDate, fromTime)).replaceFirst("\\+", "%2B") +
                             "&to=" + jsonTimeFormat.format(getCombineDate(toDate, toTime)).replaceFirst("\\+", "%2B") +
-                            "&filter=" + !disableFilter.getValue(),
+                            "&filter=" + !disableFilter.getValue() +
+                            "&locale=" + LocaleInfo.getCurrentLocale().getLocaleName(),
                     "_blank", null);
         }
     }
