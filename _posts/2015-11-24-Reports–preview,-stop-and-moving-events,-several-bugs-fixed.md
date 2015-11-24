@@ -8,9 +8,9 @@ Today's release contains several new features:
 * possibility to disable filter in reports
 * report name will be set up automatically equal to selected type name
 * events of stopping (idling) and moving along with the appropriate notifications ([#317](https://github.com/vitalidze/traccar-web/issues/317))
-* state of 'snap to roads' and 'disable filter' settings from the archive toolbar is now saved into database tied to the user so it is reloaded every time a user logs in ([#348]((https://github.com/vitalidze/traccar-web/issues/348))
-* added 'overview' map with the possibility to save it's maximized/minimized state to user's preferences ('take from map' is also working) ([#354]((https://github.com/vitalidze/traccar-web/issues/354)))
-* for exporting to CSV separator will be chosen depending on the current user's locale (i.e. language selected), if it uses `,` as the decimal separator then `;` is used as the field separator, in all other cases `,` is used to separate fields in CSV. Also now each exported CSV file will contain a line at the beginning indicating currently used separator character ([#352]((https://github.com/vitalidze/traccar-web/issues/352)))
+* state of 'snap to roads' and 'disable filter' settings from the archive toolbar is now saved into database tied to the user so it is reloaded every time a user logs in ([#348](https://github.com/vitalidze/traccar-web/issues/348))
+* added 'overview' map with the possibility to save it's maximized/minimized state to user's preferences ('take from map' is also working) ([#354](https://github.com/vitalidze/traccar-web/issues/354))
+* for exporting to CSV separator will be chosen depending on the current user's locale (i.e. language selected), if it uses `,` as the decimal separator then `;` is used as the field separator, in all other cases `,` is used to separate fields in CSV. Also now each exported CSV file will contain a line at the beginning indicating currently used separator character ([#352](https://github.com/vitalidze/traccar-web/issues/352))
 
 Updated translations:
 
