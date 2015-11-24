@@ -75,3 +75,4 @@ This project has following features, which don't exist in original `traccar-web`
 * added [MapQuest](http://www.mapquest.com/) and [Stamen toner](http://maps.stamen.com/toner/) mapping providers
 * added [OpenSeaMap](http://openseamap.org/) seamarks layer
 * [reports](reports.html)
+* added 'overview' map with the possibility to save it's maximized/minimized state to user's preferences ('take from map' is also working)
