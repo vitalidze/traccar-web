@@ -12,3 +12,31 @@ You may wish to support this project by sending some amount. For now only paypal
 <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
 <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
 </form>
+
+<!–- moneybookers form -–>
+<form action="https://www.moneybookers.com/app/payment.pl" method="post" target="_blank">
+    <fieldset>
+        <legend>Donate with Moneybookers</legend>
+        <input type="hidden" name="pay_to_email" value="vitavaque@gmail.com">
+        Please enter the amount you would like to give<br>
+        <input type="hidden" name="return_url" value="http://traccar.litvak.su/donate.html">
+        <input type="hidden" name="language" value="EN">
+        <select name="currency" size="1"?>
+            <option>Select a currency</option>
+            <option value="USD">US dollar</option>
+            <option value="GBP">GB pound</option>
+            <option value="EUR">Euro</option>
+            <option value="JPY">Yen</option>
+            <option value="CAD">Canadian $</option>
+            <option value="AUD">Australian $</option>
+        </select>
+        <br>amount:
+        <input type="text" name="amount" value="5.00" size="10">
+        <input type="hidden" name="detail1_description" value="donation to help support Traccar web UI mod (traccar.litvak.su)">
+
+        <input type="hidden" name="detail1_text" value="donation to help support Traccar web UI mod (traccar.litvak.su)">
+        <br>
+        <br>
+        <input type="submit" alt="click to make a donation to traccar.litvak.su" value="Donate!" />
+    </fieldset>
+</form>
