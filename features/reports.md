@@ -10,7 +10,7 @@ Reports screen
 
 The Reports screen is accessed by clicking `Reports` button on the top panel of the web UI.
  
-![Reports screen](http://i63.tinypic.com/9s9chd.png)
+![Reports screen](http://i64.tinypic.com/4qpgg.png)
 
 Define report settings:
 
@@ -23,6 +23,8 @@ Define report settings:
     * **Geo-fence In/Out** - entry/exit time of each zone, time spent in zone
     * **Events** - objects events information. This report is based on events saved in database, which are also used to send notifications.
 * **Include map** - check this box to include map with graphic information based on data from report. For now this is supported only for **General information** report type and it will include map with route for the specified period of time.
+* **Disable filter** - check this box to disable filtering of positions according to the settings from archive
+* **Preview** - if checked then instead of saving to local file the report will be open in a new tab in web browser 
 * **Devices** - select devices to be included on report. *Important note*: if no devices are selected then report will run for all devices, which are accessible by current user.
 * **Geo-fences** - select geo-fences for the report. If report does not support geo-fences then this list will be grayed out. *Important note*: if no geo-fences are selected then report will run for all geo-fences, which are accessible by current user.
 * **Time period** - specify the period of the report. It is also possible to select one of the predefined periods in the drop-down list. *Important note*: if report details are saved and there is something other than `Custom` selected in drop-down list then when report is loaded the period will always be recalculated based on the current date and time.
@@ -44,7 +46,7 @@ To generate report click on 'Generate' button at the top-right corner of the scr
 
 Several notable points about report calculation:
 
-* during history processing the same filter as for archive is applied. It is possible to configure it from the screen opened by clicking 'Filter...' button on the archive toolbar. Most probably in future it will be possible to configure filtering per report.
+* during history processing the same filter as for archive is applied. It is possible to configure it from the screen opened by clicking 'Filter...' button on the archive toolbar. Most probably in future it will be possible to configure filtering per report. It is possible to disable filtering in the report profile.
 * as already mentioned in report fields list the empty selection of devices/geo-fences means that all available entities must be included on report
 * the 'Speed limit' setting from the device profile is used for overspeeding detection
 * the 'Min. idle time' setting from the device profile is used to detect stop/movement
