@@ -3,4 +3,4 @@ layout: feature
 title: German translation
 ---
 
-![German UI screen shot](http://i59.tinypic.com/16bzhpg.png)
+![German UI screen shot](http://i68.tinypic.com/23k5tu.png)
