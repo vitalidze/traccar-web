@@ -8,7 +8,7 @@ Today's release contains several new features:
 * possibility to disable filter in reports
 * report name will be set up automatically equal to selected type name
 * events of stopping (idling) and moving along with the appropriate notifications ([#317](https://github.com/vitalidze/traccar-web/issues/317))
-* state of 'snap to roads' and 'disable filter' settings from the archive toolbar is now saved into database tied to the user so it is reloaded every time a user logs in ([#348](https://github.com/vitalidze/traccar-web/issues/348))
+* state of 'snap to roads' and 'disable filter' settings from the archive toolbar is now saved into database tied to the user so it is reloaded every time a user logs in ([#350](https://github.com/vitalidze/traccar-web/issues/350))
 * added 'overview' map with the possibility to save it's maximized/minimized state to user's preferences ('take from map' is also working) ([#354](https://github.com/vitalidze/traccar-web/issues/354))
 * for exporting to CSV separator will be chosen depending on the current user's locale (i.e. language selected), if it uses `,` as the decimal separator then `;` is used as the field separator, in all other cases `,` is used to separate fields in CSV. Also now each exported CSV file will contain a line at the beginning indicating currently used separator character ([#352](https://github.com/vitalidze/traccar-web/issues/352))
 
@@ -26,6 +26,8 @@ Also there were several bugs fixed:
 * mileage report wasn't working for devices which don't have speed limit setting ([#353](https://github.com/vitalidze/traccar-web/issues/353))
 * positions scanning in 'no markers' mode with 'snap to roads' was producing errors
 * devices with very big timeout setting weren't correctly detected as 'offline'
+
+For the countries, where PayPal does not work I have added an option to [donate](donate.html) through Skrill/Moneybookers.
 
 **Reminder**:
 
