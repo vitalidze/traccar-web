@@ -27,7 +27,7 @@ Also there were several bugs fixed:
 * positions scanning in 'no markers' mode with 'snap to roads' was producing errors
 * devices with very big timeout setting weren't correctly detected as 'offline'
 
-For the countries, where PayPal does not work I have added an option to [donate](donate.html) through Skrill/Moneybookers.
+For the countries, where PayPal does not work I have added an option to [donate](/donate.html) through Skrill/Moneybookers.
 
 **Reminder**:
 
