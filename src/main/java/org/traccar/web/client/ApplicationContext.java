@@ -102,4 +102,14 @@ public class ApplicationContext {
     public boolean isRecordingTrace(Device device) {
         return recordTraceDeviceIds != null && recordTraceDeviceIds.contains(device.getId());
     }
+
+    private boolean backendApiAvailable;
+
+    public boolean isBackendApiAvailable() {
+        return backendApiAvailable;
+    }
+
+    public void setBackendApiAvailable(boolean backendApiAvailable) {
+        this.backendApiAvailable = backendApiAvailable;
+    }
 }

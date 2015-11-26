@@ -41,6 +41,7 @@
           <button:TextButton ui:field="editButton" text="{i18n.edit}" enabled="false" />
           <button:TextButton ui:field="shareButton" text="{i18n.share}" enabled="false" visible="false" />
           <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
+          <button:TextButton ui:field="commandButton" text="{i18n.command}" enabled="false" />
         </toolbar:ToolBar>
       </container:child>
       

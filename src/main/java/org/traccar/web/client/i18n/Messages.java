@@ -486,4 +486,12 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String preview();
 
     String maximizeOverviewMap();
+
+    String command();
+
+    String send();
+
+    String customMessage();
+
+    String commandType(@Select CommandType commandType);
 }

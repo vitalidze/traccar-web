@@ -50,12 +50,14 @@ public class GuiceServletConfig extends GuiceServletContextListener {
             @Override
             protected void configureServlets() {
                 String persistenceUnit;
+                boolean debug = false;
                 try {
                     Context context = new InitialContext();
                     context.lookup(PERSISTENCE_DATASTORE);
                     persistenceUnit = PERSISTENCE_UNIT_RELEASE;
                 } catch (NamingException e) {
                     persistenceUnit = PERSISTENCE_UNIT_DEBUG;
+                    debug = true;
                 }
 
                 install(new JpaPersistModule(persistenceUnit));
@@ -78,6 +80,10 @@ public class GuiceServletConfig extends GuiceServletContextListener {
                 serve("/traccar/report*").with(ReportServlet.class);
                 serve("/traccar/s/login").with(LoginServlet.class);
                 serve("/" + Picture.URL_PREFIX + "*").with(PicturesServlet.class);
+
+                if (debug) {
+                    serve("/api*").with(BackendApiStubServlet.class);
+                }
 
                 UserCheck userCheck = new UserCheck();
                 requestInjection(userCheck);

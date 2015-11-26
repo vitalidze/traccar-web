@@ -95,9 +95,15 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         void setGeoFenceListView(ListView<GeoFence, String> geoFenceListView);
     }
 
+    public interface CommandHandler {
+        void onCommand(Device device);
+    }
+
     private final DeviceHandler deviceHandler;
 
     private final GeoFenceHandler geoFenceHandler;
+
+    private final CommandHandler commandHandler;
 
     @UiField
     ContentPanel contentPanel;
@@ -120,6 +126,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @UiField
     TextButton removeButton;
+
+    @UiField
+    TextButton commandButton;
 
     @UiField(provided = true)
     TabPanel objectsTabs;
@@ -147,10 +156,12 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     public DeviceView(final DeviceHandler deviceHandler,
                       final GeoFenceHandler geoFenceHandler,
+                      final CommandHandler commandHandler,
                       final ListStore<Device> deviceStore,
                       final ListStore<GeoFence> geoFenceStore) {
         this.deviceHandler = deviceHandler;
         this.geoFenceHandler = geoFenceHandler;
+        this.commandHandler = commandHandler;
         this.deviceStore = deviceStore;
         this.geoFenceStore = geoFenceStore;
 
@@ -255,25 +266,21 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         addButton.setVisible(!readOnly);
         editButton.setVisible(!readOnly);
         removeButton.setVisible(!readOnly);
-        toggleManagementButtons();
+        commandButton.setVisible(!readOnly);
+        toggleManagementButtons(null);
     }
 
     final SelectionChangedEvent.SelectionChangedHandler<Device> deviceSelectionHandler = new SelectionChangedEvent.SelectionChangedHandler<Device>() {
         @Override
         public void onSelectionChanged(SelectionChangedEvent<Device> event) {
-            editButton.setEnabled(!event.getSelection().isEmpty());
-            shareButton.setEnabled(!event.getSelection().isEmpty());
-            removeButton.setEnabled(!event.getSelection().isEmpty());
+            toggleManagementButtons(event.getSelection().isEmpty() ? null : event.getSelection().get(0));
         }
     };
 
     final SelectionChangedEvent.SelectionChangedHandler<GeoFence> geoFenceSelectionHandler = new SelectionChangedEvent.SelectionChangedHandler<GeoFence>() {
         @Override
         public void onSelectionChanged(SelectionChangedEvent<GeoFence> event) {
-            editButton.setEnabled(!event.getSelection().isEmpty());
-            shareButton.setEnabled(!event.getSelection().isEmpty());
-            removeButton.setEnabled(!event.getSelection().isEmpty());
-
+            toggleManagementButtons(event.getSelection().isEmpty() ? null : event.getSelection().get(0));
             geoFenceHandler.onSelected(event.getSelection().isEmpty() ? null : event.getSelection().get(0));
         }
     };
@@ -324,6 +331,11 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         }
     }
 
+    @UiHandler("commandButton")
+    public void onCommandClicked(SelectEvent event) {
+        commandHandler.onCommand(grid.getSelectionModel().getSelectedItem());
+    }
+
     public void selectDevice(Device device) {
         grid.getSelectionModel().select(deviceStore.findModel(device), false);
         deviceHandler.onSelected(grid.getSelectionModel().getSelectedItem());
@@ -337,21 +349,24 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         } else {
             geoFenceList.getSelectionModel().deselectAll();
         }
-        toggleManagementButtons();
+        toggleManagementButtons(null);
     }
 
     private boolean editingGeoFences() {
         return objectsTabs.getActiveWidget() == geoFenceList;
     }
 
-    private void toggleManagementButtons() {
+    private void toggleManagementButtons(Object selection) {
         boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
         boolean manager = ApplicationContext.getInstance().getUser().getManager();
         boolean allowDeviceManagement = !ApplicationContext.getInstance().getApplicationSettings().isDisallowDeviceManagementByUsers();
+        boolean backendApiAvailable = ApplicationContext.getInstance().isBackendApiAvailable();
 
         addButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
-        editButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
-        removeButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
+        editButton.setEnabled(selection != null && allowDeviceManagement || editingGeoFences() || admin || manager);
+        removeButton.setEnabled(selection != null && (allowDeviceManagement || editingGeoFences() || admin || manager));
+        commandButton.setEnabled(selection != null && backendApiAvailable && !editingGeoFences() && (allowDeviceManagement || admin || manager));
+        shareButton.setEnabled(selection != null);
     }
 
     public ListView<GeoFence, String> getGeoFenceList() {

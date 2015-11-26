@@ -1,0 +1,48 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder
+        xmlns:ui="urn:ui:com.google.gwt.uibinder"
+        xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+        xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
+        xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
+        xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
+
+    <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
+        <ui:attributes width="1" height="-1" />
+    </ui:with>
+
+    <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
+
+    <gxt:Window ui:field="window" pixelSize="300, -1" modal="true" headingText="{i18n.importData}" focusWidget="{sendButton}">
+        <container:VerticalLayoutContainer>
+            <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.type}">
+                    <form:widget>
+                        <form:ComboBox ui:field="typeCombo" triggerAction="ALL" />
+                    </form:widget>
+                </form:FieldLabel>
+            </container:child>
+            <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel ui:field="parameterLabel" visible="false">
+                    <form:widget>
+                        <form:TextField ui:field="parameterText" visible="false" />
+                    </form:widget>
+                </form:FieldLabel>
+            </container:child>
+            <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.customMessage}">
+                    <form:widget>
+                        <form:TextField ui:field="customMessage" />
+                    </form:widget>
+                </form:FieldLabel>
+            </container:child>
+        </container:VerticalLayoutContainer>
+
+        <gxt:button>
+            <button:TextButton ui:field="sendButton" text="{i18n.send}" />
+        </gxt:button>
+        <gxt:button>
+            <button:TextButton ui:field="cancelButton" text="{i18n.cancel}" />
+        </gxt:button>
+    </gxt:Window>
+
+</ui:UiBinder>

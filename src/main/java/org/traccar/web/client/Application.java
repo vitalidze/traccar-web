@@ -50,6 +50,7 @@ public class Application {
     private final NavController navController;
     private final ImportController importController;
     private final DeviceController deviceController;
+    private final CommandController commandController;
     private final GeoFenceController geoFenceController;
     private final MapController mapController;
     private final ArchiveController archiveController;
@@ -66,8 +67,10 @@ public class Application {
         mapController = new MapController(mapHandler, deviceStore);
         geoFenceController = new GeoFenceController(deviceStore, mapController);
         geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
+        commandController = new CommandController();
         deviceController = new DeviceController(mapController,
                 geoFenceController,
+                commandController,
                 deviceStore,
                 deviceStoreHandler,
                 geoFenceController.getGeoFenceStore(),
@@ -91,6 +94,7 @@ public class Application {
         mapController.run();
         archiveController.run();
         geoFenceController.run();
+        commandController.run();
         setupTimeZone();
     }
 
