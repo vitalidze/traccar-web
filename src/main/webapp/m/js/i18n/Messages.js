@@ -467,6 +467,42 @@ var i18n = {
         send_location_by_sms: 'Send location by SMS',
         send_location_url_by_sms: 'Send location URL by SMS'
     },
+    mk: {
+        _name_: 'Македонски',
+        // login screen
+        language: 'Јазик',
+        username: 'Корисничко име',
+        password: 'Лозинка',
+        your_username: 'Вашето корисничко име',
+        your_password: 'Вашата лозинка',
+        sign_in: 'Најава',
+        register: 'Регистрација',
+        user_name_and_password_must_not_be_empty: 'Корисничкото име и лозинка неможе да бидат празни',
+        user_name_or_password_is_invalid: 'Погрешно корисничко име или лозинка',
+        user_name_already_taken: 'Корисничкото име е зафатено',
+        unexpected_error: 'Грешка',
+        open_desktop_version: 'Десктоп верзија',
+        // sidebar
+        devices: 'Возила',
+        logout: 'Одјава',
+        // device details
+        select_on_map: 'Одбери на мапа',
+        no_data_available: 'Нема податоци',
+        time: 'Време',
+        latitude: 'Ширина',
+        longitude: 'Должина',
+        altitude: 'Височина',
+        speed: 'Брзина',
+        course: 'правец',
+        address: 'Адреса',
+        follow: 'Следи',
+        stop_following: 'Прекини следење',
+        geo_fence: 'Гео-Зона',
+        send_location_by_email: 'Испрати кординати преку E-mail',
+        send_location_url_by_email: 'Испрати веб линк преку E-mail',
+        send_location_by_sms: 'Испрати кординати преку SMS',
+        send_location_url_by_sms: 'Испрати веб линк преку SMS'
+    },
     nl: {
         _name_: 'Dutch',
         // login screen

@@ -59,4 +59,5 @@
     <extend-property name="locale" values="he" />
     <extend-property name="locale" values="fa" />
     <extend-property name="locale" values="el_GR" />
+    <extend-property name="locale" values="mk" />
 </module>
