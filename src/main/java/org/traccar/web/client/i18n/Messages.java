@@ -494,4 +494,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String customMessage();
 
     String commandType(@Select CommandType commandType);
+
+    String frequency();
+
+    String unit();
 }

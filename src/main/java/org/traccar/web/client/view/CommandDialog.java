@@ -16,15 +16,19 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.data.shared.StringLabelProvider;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.form.ComboBox;
+import com.sencha.gxt.widget.core.client.form.*;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.shared.model.CommandType;
@@ -44,7 +48,28 @@ public class CommandDialog {
     Messages i18n = GWT.create(Messages.class);
 
     @UiField(provided = true)
+    NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
+
+    @UiField(provided = true)
     ComboBox<CommandType> typeCombo;
+
+    @UiField
+    FieldLabel lblFrequency;
+
+    @UiField
+    NumberField<Integer> frequency;
+
+    @UiField
+    FieldLabel lblFrequencyUnit;
+
+    @UiField(provided = true)
+    ComboBox<String> frequencyUnit;
+
+    @UiField
+    FieldLabel lblCustomMessage;
+
+    @UiField
+    TextField customMessage;
 
     public CommandDialog() {
         ListStore<CommandType> commandTypes = new ListStore<>(new EnumKeyProvider<CommandType>());
@@ -55,7 +80,35 @@ public class CommandDialog {
                 return i18n.commandType(item);
             }
         });
+
+        ListStore<String> frequencyUnits = new ListStore<>(new ModelKeyProvider<String>() {
+            @Override
+            public String getKey(String item) {
+                return item;
+            }
+        });
+        frequencyUnits.add(i18n.second());
+        frequencyUnits.add(i18n.minute());
+        frequencyUnits.add(i18n.hour());
+        this.frequencyUnit = new ComboBox<>(frequencyUnits, new StringLabelProvider<>());
         uiBinder.createAndBindUi(this);
+
+        typeCombo.addSelectionHandler(new SelectionHandler<CommandType>() {
+            @Override
+            public void onSelection(SelectionEvent<CommandType> event) {
+                toggleUI(event.getSelectedItem());
+            }
+        });
+    }
+
+    private void toggleUI(CommandType type) {
+        lblFrequency.setVisible(type == CommandType.positionPeriodic);
+        frequency.setVisible(type == CommandType.positionPeriodic);
+        lblFrequencyUnit.setVisible(type == CommandType.positionPeriodic);
+        frequencyUnit.setVisible(type == CommandType.positionPeriodic);
+
+        lblCustomMessage.setVisible(type == CommandType.CUSTOM);
+        customMessage.setVisible(type == CommandType.CUSTOM);
     }
 
     public void show() {

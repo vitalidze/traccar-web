@@ -10,9 +10,11 @@
         <ui:attributes width="1" height="-1" />
     </ui:with>
 
+    <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="integerPropertyEditor" />
+
     <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <gxt:Window ui:field="window" pixelSize="300, -1" modal="true" headingText="{i18n.importData}" focusWidget="{sendButton}">
+    <gxt:Window ui:field="window" pixelSize="300, -1" modal="true" headingText="{i18n.command}" focusWidget="{sendButton}">
         <container:VerticalLayoutContainer>
             <container:child layoutData="{verticalLayoutData}">
                 <form:FieldLabel text="{i18n.type}">
@@ -22,14 +24,26 @@
                 </form:FieldLabel>
             </container:child>
             <container:child layoutData="{verticalLayoutData}">
-                <form:FieldLabel ui:field="parameterLabel" visible="false">
+                <form:FieldLabel text="{i18n.frequency}" ui:field="lblFrequency" visible="false">
                     <form:widget>
-                        <form:TextField ui:field="parameterText" visible="false" />
+                        <form:NumberField editor="{integerPropertyEditor}"
+                                          ui:field="frequency"
+                                          allowNegative="false"
+                                          allowDecimals="false"
+                                          allowBlank="false"
+                                          visible="false"/>
                     </form:widget>
                 </form:FieldLabel>
             </container:child>
             <container:child layoutData="{verticalLayoutData}">
-                <form:FieldLabel text="{i18n.customMessage}">
+                <form:FieldLabel text="{i18n.unit}" ui:field="lblFrequencyUnit" visible="false">
+                    <form:widget>
+                        <form:ComboBox ui:field="frequencyUnit" triggerAction="ALL" visible="false" />
+                    </form:widget>
+                </form:FieldLabel>
+            </container:child>
+            <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.customMessage}" ui:field="lblCustomMessage" visible="false">
                     <form:widget>
                         <form:TextField ui:field="customMessage" />
                     </form:widget>
