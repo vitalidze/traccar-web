@@ -32,6 +32,7 @@ import com.sencha.gxt.widget.core.client.form.*;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.shared.model.CommandType;
+import org.traccar.web.shared.model.Device;
 
 import java.util.Arrays;
 
@@ -39,6 +40,10 @@ public class CommandDialog {
     private static ImportDialogUiBinder uiBinder = GWT.create(ImportDialogUiBinder.class);
 
     interface ImportDialogUiBinder extends UiBinder<Widget, CommandDialog> {
+    }
+
+    public interface CommandHandler {
+        void onSend(Device device, CommandType type, int frequency, String rawCommand);
     }
 
     @UiField
@@ -59,9 +64,6 @@ public class CommandDialog {
     @UiField
     NumberField<Integer> frequency;
 
-    @UiField
-    FieldLabel lblFrequencyUnit;
-
     @UiField(provided = true)
     ComboBox<String> frequencyUnit;
 
@@ -71,7 +73,13 @@ public class CommandDialog {
     @UiField
     TextField customMessage;
 
-    public CommandDialog() {
+    final Device device;
+    final CommandHandler commandHandler;
+
+    public CommandDialog(Device device, CommandHandler commandHandler) {
+        this.device = device;
+        this.commandHandler = commandHandler;
+
         ListStore<CommandType> commandTypes = new ListStore<>(new EnumKeyProvider<CommandType>());
         commandTypes.addAll(Arrays.asList(CommandType.values()));
         this.typeCombo = new ComboBox<>(commandTypes, new LabelProvider<CommandType>() {
@@ -104,11 +112,12 @@ public class CommandDialog {
     private void toggleUI(CommandType type) {
         lblFrequency.setVisible(type == CommandType.positionPeriodic);
         frequency.setVisible(type == CommandType.positionPeriodic);
-        lblFrequencyUnit.setVisible(type == CommandType.positionPeriodic);
         frequencyUnit.setVisible(type == CommandType.positionPeriodic);
 
         lblCustomMessage.setVisible(type == CommandType.CUSTOM);
         customMessage.setVisible(type == CommandType.CUSTOM);
+
+        window.forceLayout();
     }
 
     public void show() {
@@ -119,9 +128,21 @@ public class CommandDialog {
         window.hide();
     }
 
+    @UiHandler("sendButton")
+    public void onSendClicked(SelectEvent event) {
+        int frequency = -1;
+        if (this.frequency.getCurrentValue() != null) {
+            String unit = frequencyUnit.getCurrentValue();
+            frequency = this.frequency.getCurrentValue();
+            frequency *=
+                    i18n.minute().equals(unit) ? 60
+                    : i18n.hour().equals(unit) ? 3600 : 1;
+        }
+        commandHandler.onSend(device, typeCombo.getCurrentValue(), frequency, customMessage.getCurrentValue());
+    }
+
     @UiHandler("cancelButton")
     public void onCancelClicked(SelectEvent event) {
         window.hide();
     }
-
 }

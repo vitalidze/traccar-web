@@ -26,4 +26,6 @@ public enum CommandType {
     setTimezone,
     requestPhoto,
     CUSTOM;
+
+    public static final String KEY_FREQUENCY = "frequency";
 }

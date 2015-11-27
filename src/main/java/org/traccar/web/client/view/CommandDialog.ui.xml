@@ -10,40 +10,45 @@
         <ui:attributes width="1" height="-1" />
     </ui:with>
 
+    <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutData">
+        <ui:attributes width="-1" height="-1" />
+    </ui:with>
+
     <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="integerPropertyEditor" />
 
     <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <gxt:Window ui:field="window" pixelSize="300, -1" modal="true" headingText="{i18n.command}" focusWidget="{sendButton}">
+    <gxt:Window ui:field="window" pixelSize="400, -1" modal="true" headingText="{i18n.command}" focusWidget="{sendButton}">
         <container:VerticalLayoutContainer>
             <container:child layoutData="{verticalLayoutData}">
-                <form:FieldLabel text="{i18n.type}">
+                <form:FieldLabel text="{i18n.type}" labelWidth="120">
                     <form:widget>
-                        <form:ComboBox ui:field="typeCombo" triggerAction="ALL" />
+                        <form:ComboBox ui:field="typeCombo" triggerAction="ALL" allowBlank="false" />
                     </form:widget>
                 </form:FieldLabel>
             </container:child>
             <container:child layoutData="{verticalLayoutData}">
-                <form:FieldLabel text="{i18n.frequency}" ui:field="lblFrequency" visible="false">
+                <form:FieldLabel text="{i18n.frequency}" ui:field="lblFrequency" visible="false" labelWidth="120" height="30">
                     <form:widget>
-                        <form:NumberField editor="{integerPropertyEditor}"
-                                          ui:field="frequency"
-                                          allowNegative="false"
-                                          allowDecimals="false"
-                                          allowBlank="false"
-                                          visible="false"/>
+                        <container:HorizontalLayoutContainer>
+                            <container:child layoutData="{horizontalLayoutData}">
+                                <form:NumberField editor="{integerPropertyEditor}"
+                                                  ui:field="frequency"
+                                                  allowNegative="false"
+                                                  allowDecimals="false"
+                                                  allowBlank="false"
+                                                  visible="false"
+                                                  width="70"/>
+                            </container:child>
+                            <container:child layoutData="{horizontalLayoutData}">
+                                <form:ComboBox ui:field="frequencyUnit" triggerAction="ALL" visible="false" width="70" />
+                            </container:child>
+                        </container:HorizontalLayoutContainer>
                     </form:widget>
                 </form:FieldLabel>
             </container:child>
             <container:child layoutData="{verticalLayoutData}">
-                <form:FieldLabel text="{i18n.unit}" ui:field="lblFrequencyUnit" visible="false">
-                    <form:widget>
-                        <form:ComboBox ui:field="frequencyUnit" triggerAction="ALL" visible="false" />
-                    </form:widget>
-                </form:FieldLabel>
-            </container:child>
-            <container:child layoutData="{verticalLayoutData}">
-                <form:FieldLabel text="{i18n.customMessage}" ui:field="lblCustomMessage" visible="false">
+                <form:FieldLabel text="{i18n.customMessage}" ui:field="lblCustomMessage" visible="false" labelWidth="120">
                     <form:widget>
                         <form:TextField ui:field="customMessage" />
                     </form:widget>

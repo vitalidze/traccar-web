@@ -19,6 +19,9 @@ public class BackendApiStubServlet extends HttpServlet {
     }
 
     void handleCommand(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        String line;
+        while ((line = req.getReader().readLine()) != null) {
+            resp.getWriter().println(line);
+        }
     }
 }
