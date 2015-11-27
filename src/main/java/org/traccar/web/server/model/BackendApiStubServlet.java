@@ -11,8 +11,12 @@ import java.io.IOException;
 public class BackendApiStubServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getPathInfo() != null && req.getPathInfo().startsWith("/command")) {
-            handleCommand(req, resp);
+        if (req.getPathInfo() != null) {
+            if (req.getPathInfo().startsWith("/command")) {
+                handleCommand(req, resp);
+            } else if (req.getPathInfo().startsWith("/device")) {
+                resp.setStatus(HttpServletResponse.SC_OK);
+            }
         } else {
             resp.setStatus(HttpServletResponse.SC_FOUND);
         }

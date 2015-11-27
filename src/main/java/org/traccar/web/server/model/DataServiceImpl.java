@@ -406,6 +406,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @ManagesDevices
     @RequireWrite
+    @RefreshBackendPermissions
     @Override
     public Device addDevice(Device device) throws TraccarException {
         if (device.getName() == null || device.getName().trim().isEmpty() ||
@@ -568,6 +569,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @RequireUser
     @RequireWrite
     @ManagesDevices
+    @RefreshBackendPermissions
     @Override
     public Device removeDevice(Device device) {
         EntityManager entityManager = getSessionEntityManager();
@@ -799,6 +801,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
+    @RefreshBackendPermissions
     @Override
     public void saveDeviceShare(Device device, Map<User, Boolean> share) {
         EntityManager entityManager = getSessionEntityManager();
