@@ -136,7 +136,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
 
             // load all positions since latest
             List<Position> positions = entityManager.get().createQuery(
-                    "SELECT p FROM Position p INNER JOIN p.device d WHERE p.id >= :from ORDER BY d.id, p.time ASC", Position.class)
+                    "SELECT p FROM Position p INNER JOIN p.device d WHERE p.id > :from ORDER BY d.id, p.time ASC", Position.class)
                     .setParameter("from", lastScannedPositionId)
                     .getResultList();
 
