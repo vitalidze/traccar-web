@@ -18,6 +18,7 @@ package org.traccar.web.client.view;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.i18n.client.TimeZoneInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -31,19 +32,20 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.*;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
+import org.traccar.web.client.widget.TimeZoneComboBox;
 import org.traccar.web.shared.model.CommandType;
 import org.traccar.web.shared.model.Device;
 
 import java.util.Arrays;
 
 public class CommandDialog {
-    private static ImportDialogUiBinder uiBinder = GWT.create(ImportDialogUiBinder.class);
+    private static CommandDialogUiBinder uiBinder = GWT.create(CommandDialogUiBinder.class);
 
-    interface ImportDialogUiBinder extends UiBinder<Widget, CommandDialog> {
+    interface CommandDialogUiBinder extends UiBinder<Widget, CommandDialog> {
     }
 
     public interface CommandHandler {
-        void onSend(Device device, CommandType type, int frequency, String rawCommand);
+        void onSend(Device device, CommandType type, int frequency, int timeZone, String rawCommand);
     }
 
     @UiField
@@ -66,6 +68,12 @@ public class CommandDialog {
 
     @UiField(provided = true)
     ComboBox<String> frequencyUnit;
+
+    @UiField
+    FieldLabel lblTimeZone;
+
+    @UiField(provided = true)
+    ComboBox<TimeZoneInfo> timeZone;
 
     @UiField
     FieldLabel lblCustomMessage;
@@ -99,6 +107,8 @@ public class CommandDialog {
         frequencyUnits.add(i18n.minute());
         frequencyUnits.add(i18n.hour());
         this.frequencyUnit = new ComboBox<>(frequencyUnits, new StringLabelProvider<>());
+        this.timeZone = new TimeZoneComboBox();
+
         uiBinder.createAndBindUi(this);
 
         typeCombo.addSelectionHandler(new SelectionHandler<CommandType>() {
@@ -116,6 +126,9 @@ public class CommandDialog {
 
         lblCustomMessage.setVisible(type == CommandType.CUSTOM);
         customMessage.setVisible(type == CommandType.CUSTOM);
+
+        lblTimeZone.setVisible(type == CommandType.setTimezone);
+        timeZone.setVisible(type == CommandType.setTimezone);
 
         window.forceLayout();
     }
@@ -138,7 +151,11 @@ public class CommandDialog {
                     i18n.minute().equals(unit) ? 60
                     : i18n.hour().equals(unit) ? 3600 : 1;
         }
-        commandHandler.onSend(device, typeCombo.getCurrentValue(), frequency, customMessage.getCurrentValue());
+        int timezone = -1;
+        if (this.timeZone.getCurrentValue() != null) {
+            timezone = timeZone.getCurrentValue().getStandardOffset() * 60;
+        }
+        commandHandler.onSend(device, typeCombo.getCurrentValue(), frequency, timezone, customMessage.getCurrentValue());
     }
 
     @UiHandler("cancelButton")

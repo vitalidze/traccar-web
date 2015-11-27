@@ -74,21 +74,24 @@ public class CommandController implements ContentController, DeviceView.CommandH
         }-*/;
 
         public final native void set(String attribute, int value) /*-{
-            if (this.data === undefined) {
-                this.data = {};
+            if (this.attributes === undefined) {
+                this.attributes = {};
             }
-            this.data[attribute] = value;
+            this.attributes[attribute] = value;
         }-*/;
     }
 
     @Override
-    public void onSend(Device device, CommandType type, int frequency, String rawCommand) {
+    public void onSend(Device device, CommandType type, int frequency, int timezone, String rawCommand) {
         Command command = JavaScriptObject.createObject().cast();
         command.setType(type.name());
         command.setDeviceId((int) device.getId());
         switch (type) {
             case positionPeriodic:
                 command.set(CommandType.KEY_FREQUENCY, frequency);
+                break;
+            case setTimezone:
+                command.set(CommandType.KEY_TIMEZONE, timezone);
                 break;
             case CUSTOM:
                 command.setCommand(rawCommand);

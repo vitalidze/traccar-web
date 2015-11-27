@@ -28,4 +28,5 @@ public enum CommandType {
     CUSTOM;
 
     public static final String KEY_FREQUENCY = "frequency";
+    public static final String KEY_TIMEZONE = "timezone";
 }
