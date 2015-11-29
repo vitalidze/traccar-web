@@ -274,6 +274,73 @@ public class User implements IsSerializable, Cloneable {
         return reports;
     }
 
+    @GwtTransient
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "groups_users",
+            foreignKey = @ForeignKey(name = "groups_users_fkey_user_id"),
+            joinColumns = { @JoinColumn(name = "user_id", table = "users", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "group_id", table = "groups", referencedColumnName = "id") })
+    @JsonIgnore
+    private Set<Group> groups;
+
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Set<Group> groups) {
+        this.groups = groups;
+    }
+
+    @JsonIgnore
+    public Set<Group> getAllAvailableGroups() {
+        Set<Group> result = new HashSet<>();
+        result.addAll(getGroups());
+        if (getManager()) {
+            for (User user : getManagedUsers()) {
+                result.addAll(user.getAllAvailableGroups());
+            }
+        }
+        User managedBy = getManagedBy();
+        while (managedBy != null) {
+            result.addAll(managedBy.getGroups());
+            managedBy = managedBy.getManagedBy();
+        }
+
+        return result;
+    }
+
+    public boolean hasAccessTo(Group group) {
+        if (getAdmin()) {
+            return true;
+        }
+
+        if (hasAccessOnLowerLevelTo(group)) {
+            return true;
+        }
+        User managedBy = getManagedBy();
+        while (managedBy != null) {
+            if (managedBy.getGroups().contains(group)) {
+                return true;
+            }
+            managedBy = managedBy.getManagedBy();
+        }
+        return false;
+    }
+
+    private boolean hasAccessOnLowerLevelTo(Group group) {
+        if (getGroups().contains(group)) {
+            return true;
+        }
+        if (getManager()) {
+            for (User user : getManagedUsers()) {
+                if (user.hasAccessOnLowerLevelTo(group)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))
     private UserSettings userSettings;

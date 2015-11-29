@@ -56,6 +56,7 @@ public class Application {
     private final ArchiveController archiveController;
     private final ReportsController reportsController;
     private final LogController logController;
+    private final GroupsController groupsController;
 
     private ApplicationView view;
 
@@ -79,7 +80,8 @@ public class Application {
         reportsController = new ReportsController(deviceController.getDeviceStore(), geoFenceController.getGeoFenceStore());
         importController = new ImportController(deviceController.getDeviceStore());
         logController = new LogController();
-        navController = new NavController(settingsController, reportsController, importController, logController);
+        groupsController = new GroupsController();
+        navController = new NavController(settingsController, reportsController, importController, logController, groupsController);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
 
         view = new ApplicationView(

@@ -67,6 +67,12 @@ public class NavView {
 
     final LogHandler logHandler;
 
+    public interface GroupsHandler {
+        void onShowGroups();
+    }
+
+    final GroupsHandler groupsHandler;
+
     @UiField
     ContentPanel contentPanel;
 
@@ -98,17 +104,22 @@ public class NavView {
     @UiField
     MenuItem showTrackerServerLog;
 
+    @UiField
+    TextButton groupsButton;
+
     @UiField(provided = true)
     final Messages i18n = GWT.create(Messages.class);
 
     public NavView(SettingsHandler settingsHandler,
                    ReportsHandler reportsHandler,
                    ImportHandler importHandler,
-                   LogHandler logHandler) {
+                   LogHandler logHandler,
+                   GroupsHandler groupsHandler) {
         this.settingsHandler = settingsHandler;
         this.reportsHandler = reportsHandler;
         this.importHandler = importHandler;
         this.logHandler = logHandler;
+        this.groupsHandler = groupsHandler;
 
         uiBinder.createAndBindUi(this);
 
@@ -125,6 +136,8 @@ public class NavView {
         showTrackerServerLog.setVisible(admin);
         settingsUsers.setVisible(!readOnly && (admin || manager));
         settingsNotifications.setVisible(!readOnly && (admin || manager));
+
+        groupsButton.setVisible(!readOnly);
     }
 
     @UiHandler("settingsAccount")
@@ -180,5 +193,10 @@ public class NavView {
     @UiHandler("importButton")
     public void onImportClicked(SelectEvent event) {
         importHandler.onImport();
+    }
+
+    @UiHandler("groupsButton")
+    public void onGroupsClicked(SelectEvent event) {
+        groupsHandler.onShowGroups();
     }
 }

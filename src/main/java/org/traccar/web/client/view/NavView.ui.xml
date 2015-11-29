@@ -18,6 +18,7 @@
   <gxt:ContentPanel ui:field="contentPanel" headerVisible="false" addStyleNames="{style.app-menu}">
     <toolbar:ToolBar addStyleNames="{style.app-menu}">
       <button:TextButton ui:field="reportsButton" text="{i18n.reports}" />
+      <button:TextButton ui:field="groupsButton" text="{i18n.groups}" />
       <button:TextButton text="{i18n.settings}" ui:field="settingsButton">
         <button:menu>
           <menu:Menu>
