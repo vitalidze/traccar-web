@@ -185,6 +185,7 @@ public class Position implements IsSerializable, Cloneable {
         this.address = address;
     }
 
+    @Column(length = 2048)
     private String other;
 
     public String getOther() {
