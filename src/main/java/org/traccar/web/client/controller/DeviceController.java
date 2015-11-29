@@ -59,6 +59,9 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     // geo-fences per device
     private final Map<Long, Set<GeoFence>> deviceGeoFences;
+
+    private final ListStore<Group> groupStore;
+
     private Device selectedDevice;
 
     public DeviceController(MapController mapController,
@@ -68,6 +71,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             StoreHandlers<Device> deviceStoreHandler,
                             ListStore<GeoFence> geoFenceStore,
                             Map<Long, Set<GeoFence>> deviceGeoFences,
+                            ListStore<Group> groupStore,
                             Application application) {
         this.application = application;
         this.mapController = mapController;
@@ -75,6 +79,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         this.deviceStore = deviceStore;
         this.positionInfo = new PositionInfoPopup(deviceStore);
         this.deviceGeoFences = deviceGeoFences;
+        this.groupStore = groupStore;
 
         this.deviceStore.addStoreRecordChangeHandler(new StoreRecordChangeEvent.StoreRecordChangeHandler<Device>() {
             @Override
@@ -160,7 +165,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             msg.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
                                 @Override
                                 public void onDialogHide(DialogHideEvent event) {
-                                    new DeviceDialog(device, deviceStore, AddHandler.this).show();
+                                    new DeviceDialog(device, deviceStore, groupStore, AddHandler.this).show();
                                 }
                             });
                             msg.show();
@@ -181,7 +186,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         Device newDevice = new Device();
         newDevice.setMaintenances(new ArrayList<Maintenance>());
         newDevice.setSensors(new ArrayList<Sensor>());
-        new DeviceDialog(newDevice, deviceStore, new AddHandler()).show();
+        new DeviceDialog(newDevice, deviceStore, groupStore, new AddHandler()).show();
     }
 
     @Override
@@ -215,7 +220,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             msg.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
                                 @Override
                                 public void onDialogHide(DialogHideEvent event) {
-                                    new DeviceDialog(device, deviceStore, UpdateHandler.this).show();
+                                    new DeviceDialog(device, deviceStore, groupStore, UpdateHandler.this).show();
                                 }
                             });
                             msg.show();
@@ -225,7 +230,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
             }
         }
 
-        new DeviceDialog(new Device(device), deviceStore, new UpdateHandler()).show();
+        new DeviceDialog(new Device(device), deviceStore, groupStore, new UpdateHandler()).show();
     }
 
     @Override

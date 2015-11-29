@@ -15,7 +15,9 @@
  */
 package org.traccar.web.client.model;
 
+import com.google.gwt.editor.client.Editor;
 import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import org.traccar.web.shared.model.Group;
@@ -26,4 +28,7 @@ public interface GroupProperties extends PropertyAccess<Group> {
     ValueProvider<Group, String> name();
 
     ValueProvider<Group, String> description();
+
+    @Editor.Path("name")
+    LabelProvider<Group> label();
 }

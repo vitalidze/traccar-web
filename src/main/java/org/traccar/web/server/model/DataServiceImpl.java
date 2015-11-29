@@ -435,6 +435,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             device.setUsers(new HashSet<User>(1));
             device.getUsers().add(user);
             device.setOwner(user);
+            device.setGroup(device.getGroup() == null ? null : entityManager.find(Group.class, device.getGroup().getId()));
             entityManager.persist(device);
             for (Maintenance maintenance : device.getMaintenances()) {
                 maintenance.setDevice(device);
@@ -483,6 +484,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setIconType(device.getIconType());
             tmp_device.setIcon(device.getIcon() == null ? null : entityManager.find(DeviceIcon.class, device.getIcon().getId()));
             tmp_device.setPhoto(device.getPhoto() == null ? null : entityManager.find(Picture.class, device.getPhoto().getId()));
+            tmp_device.setGroup(device.getGroup() == null ? null : entityManager.find(Group.class, device.getGroup().getId()));
 
             double prevOdometer = tmp_device.getOdometer();
             tmp_device.setOdometer(device.getOdometer());

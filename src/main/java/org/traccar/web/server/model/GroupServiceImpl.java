@@ -103,6 +103,7 @@ public class GroupServiceImpl extends RemoteServiceServlet implements GroupServi
         }
         toRemove.getUsers().remove(user);
         if (toRemove.getUsers().isEmpty()) {
+            entityManager.get().createQuery("UPDATE Device d SET d.group=null WHERE d.group=:group").setParameter("group", toRemove).executeUpdate();
             entityManager.get().remove(toRemove);
         }
     }

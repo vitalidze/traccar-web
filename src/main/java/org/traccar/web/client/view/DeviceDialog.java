@@ -25,6 +25,7 @@ import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.model.GroupProperties;
 import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
@@ -120,15 +121,22 @@ public class DeviceDialog implements Editor<Device> {
 
     MarkerIcon selectedIcon;
 
+    @UiField(provided = true)
+    ComboBox<Group> group;
+
     @UiField
     Messages i18n;
 
     final Device device;
 
-    public DeviceDialog(Device device, ListStore<Device> deviceStore, DeviceHandler deviceHandler) {
+    public DeviceDialog(Device device, ListStore<Device> deviceStore, ListStore<Group> groupStore, DeviceHandler deviceHandler) {
         this.device = device;
         this.deviceHandler = deviceHandler;
         this.selectedIcon = MarkerIcon.create(device);
+
+        GroupProperties groupProperties = GWT.create(GroupProperties.class);
+        this.group = new ComboBox<>(groupStore, groupProperties.label());
+        this.group.setForceSelection(false);
 
         uiBinder.createAndBindUi(this);
 

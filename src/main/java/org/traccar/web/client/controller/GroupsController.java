@@ -18,6 +18,7 @@ package org.traccar.web.client.controller;
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
+import com.sencha.gxt.widget.core.client.ContentPanel;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.*;
 import org.traccar.web.client.view.GroupsDialog;
@@ -26,60 +27,77 @@ import org.traccar.web.shared.model.Group;
 
 import java.util.List;
 
-public class GroupsController implements NavView.GroupsHandler {
+public class GroupsController implements NavView.GroupsHandler, ContentController {
     private final Messages i18n = GWT.create(Messages.class);
+    private final ListStore<Group> groupStore;
+
+    public GroupsController() {
+        GroupProperties groupProperties = GWT.create(GroupProperties.class);
+        this.groupStore = new ListStore<>(groupProperties.id());
+    }
 
     @Override
-    public void onShowGroups() {
+    public ContentPanel getView() {
+        return null;
+    }
+
+    @Override
+    public void run() {
         final GroupServiceAsync service = GWT.create(GroupService.class);
         service.getGroups(new BaseAsyncCallback<List<Group>>(i18n) {
             @Override
             public void onSuccess(List<Group> result) {
-                GroupProperties groupProperties = GWT.create(GroupProperties.class);
-                final ListStore<Group> groupStore = new ListStore<>(groupProperties.id());
                 groupStore.addAll(result);
+            }
+        });
+    }
 
-                GroupsDialog.GroupsHandler handler = new GroupsDialog.GroupsHandler() {
-                    @Override
-                    public void onSave() {
-                        for (Store<Group>.Record record : groupStore.getModifiedRecords()) {
-                            final Group originalGroup = record.getModel();
-                            Group group = new Group(originalGroup.getId(), null).copyFrom(originalGroup);
-                            for (Store.Change<Group, ?> change : record.getChanges()) {
-                                change.modify(group);
-                            }
-                            if (group.getId() < 0) {
-                                service.addGroup(group, new BaseAsyncCallback<Group>(i18n) {
-                                    @Override
-                                    public void onSuccess(Group result) {
-                                        groupStore.remove(originalGroup);
-                                        groupStore.add(result);
-                                    }
-                                });
-                            } else {
-                                service.updateGroup(group, new BaseAsyncCallback<Group>(i18n) {
-                                    @Override
-                                    public void onSuccess(Group result) {
-                                        groupStore.update(result);
-                                    }
-                                });
-                            }
-                        }
+    @Override
+    public void onShowGroups() {
+        final GroupServiceAsync service = GWT.create(GroupService.class);
+        GroupsDialog.GroupsHandler handler = new GroupsDialog.GroupsHandler() {
+            @Override
+            public void onSave() {
+                for (Store<Group>.Record record : groupStore.getModifiedRecords()) {
+                    final Group originalGroup = record.getModel();
+                    Group group = new Group(originalGroup.getId(), null).copyFrom(originalGroup);
+                    for (Store.Change<Group, ?> change : record.getChanges()) {
+                        change.modify(group);
                     }
-
-                    @Override
-                    public void onRemove(final Group group) {
-                        service.removeGroup(group, new BaseAsyncCallback<Void>(i18n) {
+                    if (group.getId() < 0) {
+                        service.addGroup(group, new BaseAsyncCallback<Group>(i18n) {
                             @Override
-                            public void onSuccess(Void result) {
-                                groupStore.remove(group);
+                            public void onSuccess(Group result) {
+                                groupStore.remove(originalGroup);
+                                groupStore.add(result);
+                            }
+                        });
+                    } else {
+                        service.updateGroup(group, new BaseAsyncCallback<Group>(i18n) {
+                            @Override
+                            public void onSuccess(Group result) {
+                                groupStore.update(result);
                             }
                         });
                     }
-                };
-
-                new GroupsDialog(groupStore, handler).show();
+                }
             }
-        });
+
+            @Override
+            public void onRemove(final Group group) {
+                service.removeGroup(group, new BaseAsyncCallback<Void>(i18n) {
+                    @Override
+                    public void onSuccess(Void result) {
+                        groupStore.remove(group);
+                    }
+                });
+            }
+        };
+
+        new GroupsDialog(groupStore, handler).show();
+    }
+
+    public ListStore<Group> getGroupStore() {
+        return groupStore;
     }
 }

@@ -69,6 +69,7 @@ public class Application {
         geoFenceController = new GeoFenceController(deviceStore, mapController);
         geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
         commandController = new CommandController();
+        groupsController = new GroupsController();
         deviceController = new DeviceController(mapController,
                 geoFenceController,
                 commandController,
@@ -76,11 +77,11 @@ public class Application {
                 deviceStoreHandler,
                 geoFenceController.getGeoFenceStore(),
                 geoFenceController.getDeviceGeoFences(),
+                groupsController.getGroupStore(),
                 this);
         reportsController = new ReportsController(deviceController.getDeviceStore(), geoFenceController.getGeoFenceStore());
         importController = new ImportController(deviceController.getDeviceStore());
         logController = new LogController();
-        groupsController = new GroupsController();
         navController = new NavController(settingsController, reportsController, importController, logController, groupsController);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
 
@@ -97,6 +98,7 @@ public class Application {
         archiveController.run();
         geoFenceController.run();
         commandController.run();
+        groupsController.run();
         setupTimeZone();
     }
 
