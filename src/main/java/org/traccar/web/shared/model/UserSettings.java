@@ -336,7 +336,7 @@ public class UserSettings implements IsSerializable {
     }
 
     public List<OverlayType> overlays() {
-        if (getOverlays() == null) {
+        if (getOverlays() == null || getOverlays().trim().isEmpty()) {
             return Collections.emptyList();
         }
         List<OverlayType> overlays = new LinkedList<>();
