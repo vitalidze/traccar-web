@@ -185,4 +185,26 @@ public class Report implements IsSerializable {
         this.preview = report.preview;
         return this;
     }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (getId() ^ (getId() >>> 32));
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + (getType() != null ? getType().hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof GeoFence)) return false;
+
+        Report that = (Report) o;
+
+        if (getId() != that.getId()) return false;
+        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) return false;
+        if (getType() != that.getType()) return false;
+
+        return true;
+    }
 }
