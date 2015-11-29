@@ -348,6 +348,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         for (GeoFence geoFence : user.getGeoFences()) {
             geoFence.getUsers().remove(user);
         }
+        for (Report report : user.getReports()) {
+            report.getUsers().remove(user);
+        }
         entityManager.remove(user);
         return fillUserSettings(user);
     }
