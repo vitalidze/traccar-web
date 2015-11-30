@@ -19,8 +19,10 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.traccar.web.shared.model.AccessDeniedException;
 import org.traccar.web.shared.model.Group;
+import org.traccar.web.shared.model.User;
 
 import java.util.List;
+import java.util.Map;
 
 @RemoteServiceRelativePath("groupService")
 public interface GroupService extends RemoteService {
@@ -28,4 +30,7 @@ public interface GroupService extends RemoteService {
     Group addGroup(Group group);
     Group updateGroup(Group group) throws AccessDeniedException;
     void removeGroup(Group group) throws AccessDeniedException;
+    Map<User, Boolean> getGroupShare(Group group);
+    void saveGroupShare(Group group, Map<User, Boolean> share);
+
 }

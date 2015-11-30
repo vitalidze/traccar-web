@@ -27,9 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Singleton
 public class GroupServiceImpl extends RemoteServiceServlet implements GroupService {
@@ -105,6 +103,41 @@ public class GroupServiceImpl extends RemoteServiceServlet implements GroupServi
         if (toRemove.getUsers().isEmpty()) {
             entityManager.get().createQuery("UPDATE Device d SET d.group=null WHERE d.group=:group").setParameter("group", toRemove).executeUpdate();
             entityManager.get().remove(toRemove);
+        }
+    }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public Map<User, Boolean> getGroupShare(Group group) {
+        group = entityManager.get().find(Group.class, group.getId());
+        List<User> users = dataService.getUsers();
+        Map<User, Boolean> result = new HashMap<>(users.size());
+        for (User user : users) {
+            user = new User(user);
+            user.setUserSettings(null);
+            user.setPassword(null);
+            result.put(user, group.getUsers().contains(user));
+        }
+        return result;
+    }
+
+    @Transactional
+    @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
+    @RequireWrite
+    @Override
+    public void saveGroupShare(Group group, Map<User, Boolean> share) {
+        group = entityManager.get().find(Group.class, group.getId());
+
+        for (User user : dataService.getUsers()) {
+            Boolean shared = share.get(user);
+            if (shared == null) continue;
+            user = entityManager.get().find(User.class, user.getId());
+            if (shared) {
+                group.getUsers().add(user);
+            } else {
+                group.getUsers().remove(user);
+            }
         }
     }
 }

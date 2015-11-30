@@ -53,6 +53,7 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
     public interface GroupsHandler {
         void onSave();
         void onRemove(Group group);
+        void onShare(Group group);
     }
 
     private final GroupsHandler groupsHandler;
@@ -65,6 +66,9 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
 
     @UiField
     TextButton removeButton;
+
+    @UiField
+    TextButton shareButton;
 
     @UiField(provided = true)
     ColumnModel<Group> columnModel;
@@ -111,6 +115,7 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
 
     @Override
     public void onSelectionChanged(SelectionChangedEvent<Group> event) {
+        shareButton.setEnabled(!event.getSelection().isEmpty());
         removeButton.setEnabled(!event.getSelection().isEmpty());
     }
     @UiHandler("addButton")
@@ -133,7 +138,11 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
             }
         });
         dialog.show();
+    }
 
+    @UiHandler("shareButton")
+    public void onShareClicked(SelectEvent event) {
+        groupsHandler.onShare(grid.getSelectionModel().getSelectedItem());
     }
 
     @UiHandler("saveButton")

@@ -19,13 +19,17 @@ import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.Window;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.*;
 import org.traccar.web.client.view.GroupsDialog;
 import org.traccar.web.client.view.NavView;
+import org.traccar.web.client.view.UserShareDialog;
 import org.traccar.web.shared.model.Group;
+import org.traccar.web.shared.model.User;
 
 import java.util.List;
+import java.util.Map;
 
 public class GroupsController implements NavView.GroupsHandler, ContentController {
     private final Messages i18n = GWT.create(Messages.class);
@@ -91,6 +95,27 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
                         groupStore.remove(group);
                     }
                 });
+            }
+
+            @Override
+            public void onShare(final Group group) {
+                service.getGroupShare(group, new BaseAsyncCallback<Map<User, Boolean>>(i18n) {
+                    @Override
+                    public void onSuccess(Map<User, Boolean> result) {
+                        new UserShareDialog(result, new UserShareDialog.UserShareHandler() {
+                            @Override
+                            public void onSaveShares(Map<User, Boolean> shares, final Window window) {
+                                service.saveGroupShare(group, shares, new BaseAsyncCallback<Void>(i18n) {
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        window.hide();
+                                    }
+                                });
+                            }
+                        }).show();
+                    }
+                });
+
             }
         };
 
