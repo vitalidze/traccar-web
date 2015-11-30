@@ -506,10 +506,6 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         shareButton.setEnabled(selection != null);
     }
 
-    public ListView<GeoFence, String> getGeoFenceList() {
-        return geoFenceList;
-    }
-
     interface HeaderIconTemplate extends XTemplates {
         @XTemplate("<div style=\"text-align:center;\">{img}</div>")
         SafeHtml render(SafeHtml img);
