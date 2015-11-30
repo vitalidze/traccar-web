@@ -29,6 +29,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.core.client.ToStringValueProvider;
@@ -116,11 +117,19 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                               final GroupingView<Device> view,
                               final ColumnConfig<Device, ?> groupColumn) {
             this.deviceStore = deviceStore;
-            this.deviceStore.addStoreHandlers(this);
             this.groupStore = groupStore;
-            this.groupStore.addStoreHandlers(this);
             this.view = view;
             this.groupColumn = groupColumn;
+        }
+
+        public void init() {
+            this.deviceStore.addStoreHandlers(this);
+            this.groupStore.addStoreHandlers(this);
+            if (refreshDevices(this.groupStore.getAll(), false)) {
+                refreshView();
+            }
+            view.refresh(true);
+            view.refresh(false);
         }
 
         @Override
@@ -128,7 +137,6 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
             if (refreshDevices(event.getItems(), false)) {
                 refreshView();
             }
-            view.refresh(false);
         }
 
         @Override
@@ -338,9 +346,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         columnConfigList.add(colGroup);
 
         view = new GroupingView<>();
-        view.setAutoFill(true);
         view.setStripeRows(true);
-        view.setForceFit(true);
         view.setShowGroupedColumn(false);
         view.setEnableNoGroups(true);
         view.setEnableGroupingMenu(false);
@@ -377,6 +383,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         grid.addRowMouseDownHandler(this);
         grid.addCellDoubleClickHandler(this);
+
+        view.setAutoFill(true);
+        view.setForceFit(true);
 
         new GridStateHandler<>(grid).loadState();
 
@@ -512,5 +521,17 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         @Source("org/traccar/web/client/theme/icon/footprints.png")
         ImageResource footprints();
+    }
+
+    public void groupDevices() {
+        groupsHandler.init();
+        // ugly workaround to deal with wrong sizes of columns after grouping
+        Timer t = new Timer() {
+            @Override
+            public void run() {
+                view.refresh(true);
+            }
+        };
+        t.schedule(500);
     }
 }
