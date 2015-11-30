@@ -90,7 +90,7 @@ public class Group implements IsSerializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof GeoFence)) return false;
+        if (o == null || !(o instanceof Group)) return false;
 
         Group that = (Group) o;
 

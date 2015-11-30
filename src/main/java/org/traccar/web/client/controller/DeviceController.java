@@ -110,7 +110,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                 }
             }
         });
-        deviceView = new DeviceView(this, geoFenceHandler, commandHandler, deviceStore, geoFenceStore);
+        deviceView = new DeviceView(this, geoFenceHandler, commandHandler, deviceStore, geoFenceStore, groupStore);
     }
 
     public ListStore<Device> getDeviceStore() {

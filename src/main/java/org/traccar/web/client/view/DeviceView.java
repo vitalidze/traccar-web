@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.view;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,7 +31,11 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
+import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.core.client.XTemplates;
+import com.sencha.gxt.data.shared.event.StoreAddEvent;
+import com.sencha.gxt.data.shared.event.StoreRemoveEvent;
+import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
 import com.sencha.gxt.theme.neptune.client.base.tabs.Css3TabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
@@ -39,11 +44,13 @@ import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
+import com.sencha.gxt.widget.core.client.grid.*;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.GeoFenceProperties;
 import org.traccar.web.client.state.GridStateHandler;
@@ -60,11 +67,9 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.Group;
 import org.traccar.web.shared.model.UserSettings;
 
 public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDoubleClickEvent.CellDoubleClickHandler {
@@ -99,11 +104,115 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         void onCommand(Device device);
     }
 
+    private static class GroupsHandler extends BaseStoreHandlers {
+        private final ListStore<Device> deviceStore;
+        private final ListStore<Group> groupStore;
+        private final GroupingView<Device> view;
+        private final ColumnConfig<Device, ?> groupColumn;
+        private boolean grouped;
+
+        private GroupsHandler(ListStore<Device> deviceStore,
+                              ListStore<Group> groupStore,
+                              final GroupingView<Device> view,
+                              final ColumnConfig<Device, ?> groupColumn) {
+            this.deviceStore = deviceStore;
+            this.deviceStore.addStoreHandlers(this);
+            this.groupStore = groupStore;
+            this.groupStore.addStoreHandlers(this);
+            this.view = view;
+            this.groupColumn = groupColumn;
+        }
+
+        @Override
+        public void onAdd(StoreAddEvent event) {
+            if (refreshDevices(event.getItems(), false)) {
+                refreshView();
+            }
+            view.refresh(false);
+        }
+
+        @Override
+        public void onUpdate(StoreUpdateEvent event) {
+            if (refreshDevices(event.getItems(), false)) {
+                refreshView();
+            }
+        }
+
+        @Override
+        public void onRemove(StoreRemoveEvent event) {
+            if (refreshDevices(Collections.singletonList(event.getItem()), true)) {
+                refreshView();
+            }
+        }
+
+        boolean refreshDevices(List items, boolean remove) {
+            boolean needRefresh = false;
+            for (Object item : items) {
+                if (item instanceof Group) {
+                    Group group = (Group) item;
+                    for (int i = 0; i < deviceStore.size(); i++) {
+                        Device device = deviceStore.get(i);
+                        if (device.getGroup() != null && device.getGroup().getId() == group.getId()) {
+                            device.setGroup(remove ? null : group);
+                            needRefresh = true;
+                        }
+                    }
+                }
+                else if (!remove && item instanceof Device) {
+                    if (grouped) {
+                        view.groupBy(null);
+                    }
+                    needRefresh = true;
+                }
+            }
+            return needRefresh;
+        }
+
+        void refreshView() {
+            if (groupStore.size() == 0) {
+                if (grouped) {
+                    view.groupBy(null);
+                    grouped = false;
+                }
+            } else {
+                boolean doGroup = false;
+                for (int i = 0; i < groupStore.size(); i++) {
+                    Group group = groupStore.get(i);
+                    for (int j = 0; j < deviceStore.size(); j++) {
+                        if (group.equals(deviceStore.get(j).getGroup())) {
+                            doGroup = true;
+                            break;
+                        }
+                    }
+                    if (doGroup) {
+                        break;
+                    }
+                }
+                if (doGroup) {
+                    if (grouped) {
+                        view.refresh(true);
+                    }
+                    view.groupBy(groupColumn);
+                    grouped = true;
+                } else {
+                    if (grouped) {
+                        view.groupBy(null);
+                        groupColumn.setHidden(true);
+                        view.refresh(true);
+                        grouped = false;
+                    }
+                }
+            }
+        }
+    }
+
     private final DeviceHandler deviceHandler;
 
     private final GeoFenceHandler geoFenceHandler;
 
     private final CommandHandler commandHandler;
+
+    private final GroupsHandler groupsHandler;
 
     @UiField
     ContentPanel contentPanel;
@@ -143,6 +252,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     Grid<Device> grid;
 
     @UiField(provided = true)
+    GroupingView<Device> view;
+
+    @UiField(provided = true)
     TabItemConfig geoFencesTabConfig;
 
     @UiField(provided = true)
@@ -158,7 +270,8 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                       final GeoFenceHandler geoFenceHandler,
                       final CommandHandler commandHandler,
                       final ListStore<Device> deviceStore,
-                      final ListStore<GeoFence> geoFenceStore) {
+                      final ListStore<GeoFence> geoFenceStore,
+                      ListStore<Group> groupStore) {
         this.deviceHandler = deviceHandler;
         this.geoFenceHandler = geoFenceHandler;
         this.commandHandler = commandHandler;
@@ -215,6 +328,24 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         colRecordTrace.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.recordTrace()).toSafeHtml());
         columnConfigList.add(colRecordTrace);
 
+        ColumnConfig<Device, String> colGroup = new ColumnConfig<>(new ToStringValueProvider<Device>() {
+            @Override
+            public String getValue(Device device) {
+                return device.getGroup() == null ? i18n.noGroup() : device.getGroup().getName();
+            }
+        }, 0, i18n.group());
+        colGroup.setHidden(true);
+        columnConfigList.add(colGroup);
+
+        view = new GroupingView<>();
+        view.setAutoFill(true);
+        view.setStripeRows(true);
+        view.setForceFit(true);
+        view.setShowGroupedColumn(false);
+        view.setEnableNoGroups(true);
+        view.setEnableGroupingMenu(false);
+        groupsHandler = new GroupsHandler(deviceStore, groupStore, view, colGroup);
+
         columnModel = new ColumnModel<>(columnConfigList);
 
         // geo-fences
@@ -247,13 +378,10 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         grid.addRowMouseDownHandler(this);
         grid.addCellDoubleClickHandler(this);
 
-        grid.getView().setAutoFill(true);
-        grid.getView().setForceFit(true);
-
         new GridStateHandler<>(grid).loadState();
 
         GridEditing<Device> editing = new GridInlineEditing<>(grid);
-        grid.getView().setShowDirtyCells(false);
+        view.setShowDirtyCells(false);
         editing.addEditor(colFollow, new CheckBox());
         editing.addEditor(colRecordTrace, new CheckBox());
 
