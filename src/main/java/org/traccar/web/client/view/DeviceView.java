@@ -500,7 +500,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         boolean backendApiAvailable = ApplicationContext.getInstance().isBackendApiAvailable();
 
         addButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
-        editButton.setEnabled(selection != null && allowDeviceManagement || editingGeoFences() || admin || manager);
+        editButton.setEnabled(selection != null && (allowDeviceManagement || editingGeoFences() || admin || manager));
         removeButton.setEnabled(selection != null && (allowDeviceManagement || editingGeoFences() || admin || manager));
         commandButton.setEnabled(selection != null && backendApiAvailable && !editingGeoFences() && (allowDeviceManagement || admin || manager));
         shareButton.setEnabled(selection != null);
