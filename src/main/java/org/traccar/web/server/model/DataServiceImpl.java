@@ -432,10 +432,15 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         List<Device> results = query.getResultList();
 
         if (results.isEmpty()) {
+            Group newGroup = device.getGroup() == null ? null : entityManager.find(Group.class, device.getGroup().getId());
+            if (newGroup != null && !getSessionUser().hasAccessTo(newGroup)) {
+                throw new AccessDeniedException();
+            }
+
             device.setUsers(new HashSet<User>(1));
             device.getUsers().add(user);
             device.setOwner(user);
-            device.setGroup(device.getGroup() == null ? null : entityManager.find(Group.class, device.getGroup().getId()));
+            device.setGroup(newGroup);
             entityManager.persist(device);
             for (Maintenance maintenance : device.getMaintenances()) {
                 maintenance.setDevice(device);
@@ -462,7 +467,6 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             device.getUniqueId() == null || device.getUniqueId().isEmpty()) {
             throw new ValidationException();
         }
-
         EntityManager entityManager = getSessionEntityManager();
         TypedQuery<Device> query = entityManager.createQuery("SELECT x FROM Device x WHERE x.uniqueId = :id AND x.id <> :primary_id", Device.class);
         query.setParameter("primary_id", device.getId());
@@ -471,6 +475,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         if (results.isEmpty()) {
             Device tmp_device = entityManager.find(Device.class, device.getId());
+            Group newGroup = device.getGroup() == null ? null : entityManager.find(Group.class, device.getGroup().getId());
+            if (!getSessionUser().hasAccessTo(device)
+                    || !getSessionUser().allowedToChangeGroup(tmp_device, newGroup)) {
+                throw new AccessDeniedException();
+            }
             tmp_device.setName(device.getName());
             tmp_device.setUniqueId(device.getUniqueId());
             tmp_device.setDescription(device.getDescription());
@@ -484,7 +493,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setIconType(device.getIconType());
             tmp_device.setIcon(device.getIcon() == null ? null : entityManager.find(DeviceIcon.class, device.getIcon().getId()));
             tmp_device.setPhoto(device.getPhoto() == null ? null : entityManager.find(Picture.class, device.getPhoto().getId()));
-            tmp_device.setGroup(device.getGroup() == null ? null : entityManager.find(Group.class, device.getGroup().getId()));
+            tmp_device.setGroup(newGroup);
 
             double prevOdometer = tmp_device.getOdometer();
             tmp_device.setOdometer(device.getOdometer());

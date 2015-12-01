@@ -622,4 +622,15 @@ public class User implements IsSerializable, Cloneable {
     public boolean isExpired() {
         return getExpirationDate() != null && new Date().compareTo(getExpirationDate()) >= 0;
     }
+
+    public boolean allowedToChangeGroup(Device device, Group newGroup)
+    {
+        if (device.getGroup() == null && newGroup != null) {
+            return hasAccessTo(newGroup);
+        } else if (device.getGroup() != null
+                && (newGroup == null || newGroup.getId() != device.getGroup().getId())) {
+            return hasAccessTo(device.getGroup()) && (newGroup == null || hasAccessTo(newGroup));
+        }
+        return true;
+    }
 }
