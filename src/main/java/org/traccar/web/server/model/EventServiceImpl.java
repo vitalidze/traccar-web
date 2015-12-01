@@ -108,27 +108,21 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         }
     }
 
-    static class PositionScanner extends ScheduledTask {
+    static class PositionProvider {
         @Inject
         Provider<EntityManager> entityManager;
-
-        Map<Long, DeviceState> deviceState = new HashMap<>();
 
         /**
          * Scanning is based on assumption that position identifiers are incremented sequentially
          */
         Long lastScannedPositionId;
 
-        List<EventProducer> eventProducers = new ArrayList<>();
-
-        @Transactional
-        @Override
-        public void doWork() throws Exception {
+        public List<Position> getPositions() {
             // find latest position id for the first scan
             if (lastScannedPositionId == null) {
                 List<Long> latestPositionId = entityManager.get().createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class).getResultList();
                 if (latestPositionId.isEmpty() || latestPositionId.get(0) == null) {
-                    return;
+                    return Collections.emptyList();
                 } else {
                     lastScannedPositionId = latestPositionId.get(0);
                 }
@@ -139,6 +133,33 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                     "SELECT p FROM Position p INNER JOIN p.device d WHERE p.id > :from ORDER BY d.id, p.time ASC", Position.class)
                     .setParameter("from", lastScannedPositionId)
                     .getResultList();
+            return positions;
+        }
+
+        public Long getLastScannedPositionId() {
+            return lastScannedPositionId;
+        }
+
+        public void setLastScannedPositionId(Long lastScannedPositionId) {
+            this.lastScannedPositionId = lastScannedPositionId;
+        }
+    }
+
+    static class PositionScanner extends ScheduledTask {
+        @Inject
+        Provider<EntityManager> entityManager;
+        @Inject
+        PositionProvider positionProvider;
+
+        Map<Long, DeviceState> deviceState = new HashMap<>();
+
+        List<EventProducer> eventProducers = new ArrayList<>();
+
+        @Transactional
+        @Override
+        public void doWork() throws Exception {
+            // Load positions
+            List<Position> positions = positionProvider.getPositions();
 
             // init event producers
             Date currentDate = new Date();
@@ -173,7 +194,7 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                 state.latestPositionId = position.getId();
                 prevPosition = position;
                 // update latest position id
-                lastScannedPositionId = Math.max(lastScannedPositionId, position.getId());
+                positionProvider.setLastScannedPositionId(Math.max(positionProvider.getLastScannedPositionId(), position.getId()));
             }
 
             // destroy event producers
@@ -338,7 +359,9 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
 
         @Override
         void before() {
-            previousIdlePositions = new HashMap<>();
+            if (previousIdlePositions == null) {
+                previousIdlePositions = new HashMap<>();
+            }
         }
 
         @Override
@@ -374,7 +397,6 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
 
         @Override
         void after() {
-            previousIdlePositions = null;
         }
 
         private boolean isIdle(Position position) {
