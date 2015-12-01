@@ -299,7 +299,13 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
                                        @Optional String geoFenceName,
                                        @Optional String eventTime,
                                        @Optional String positionTime,
-                                       @Optional String maintenanceName);
+                                       @Optional String maintenanceName,
+                                       @Optional String positionAddress,
+                                       @Optional String positionLat,
+                                       @Optional String positionLon,
+                                       @Optional String positionAlt,
+                                       @Optional String positionSpeed,
+                                       @Optional String positionCourse);
 
     String noMarkers();
 

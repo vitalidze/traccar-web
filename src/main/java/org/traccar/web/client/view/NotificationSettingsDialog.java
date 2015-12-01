@@ -32,10 +32,7 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
-import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
-import com.sencha.gxt.widget.core.client.grid.ColumnModel;
-import com.sencha.gxt.widget.core.client.grid.Grid;
-import com.sencha.gxt.widget.core.client.grid.GridView;
+import com.sencha.gxt.widget.core.client.grid.*;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.model.NotificationSettingsProperties;
@@ -159,12 +156,32 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
                 return i18n.placeholderDescription(ph);
             }
         }));
+        ColumnConfig<MessagePlaceholder, String> colGroup = new ColumnConfig<>(new ToStringValueProvider<MessagePlaceholder>() {
+            @Override
+            public String getValue(MessagePlaceholder ph) {
+                switch (ph) {
+                    case positionCourse:
+                    case positionTime:
+                    case positionAddress:
+                    case positionAlt:
+                    case positionLat:
+                    case positionLon:
+                    case positionSpeed:
+                        return i18n.eventPosition();
+                    default:
+                        return "";
+                }
+            }
+        });
         placeholderColumns.get(placeholderColumns.size() - 1).setHeader(i18n.description());
         ListStore<MessagePlaceholder> placeholderListStore = new ListStore<>(new EnumKeyProvider<MessagePlaceholder>());
         placeholderListStore.addAll(Arrays.asList(MessagePlaceholder.values()));
-        GridView<MessagePlaceholder> placeholderGridView = new GridView<>();
+        GroupingView<MessagePlaceholder> placeholderGridView = new GroupingView<>();
         placeholderGridView.setStripeRows(true);
         placeholderGridView.setAutoFill(true);
+        placeholderGridView.setEnableNoGroups(false);
+        placeholderGridView.setEnableGroupingMenu(false);
+        placeholderGridView.groupBy(colGroup);
         placeholderGrid = new Grid<>(placeholderListStore, new ColumnModel<>(placeholderColumns), placeholderGridView);
 
         uiBinder.createAndBindUi(this);
@@ -214,7 +231,18 @@ public class NotificationSettingsDialog implements Editor<NotificationSettings> 
         if (messageTemplate == null) {
             messageTemplate = new NotificationTemplate();
             messageTemplate.setType(event.getSelectedItem());
-            messageTemplate.setBody(i18n.defaultNotificationTemplate(event.getSelectedItem(), "${deviceName}", "${geoFenceName}", "${eventTime}", "${positionTime}", "${maintenanceName}"));
+            messageTemplate.setBody(i18n.defaultNotificationTemplate(event.getSelectedItem(),
+                    "${deviceName}",
+                    "${geoFenceName}",
+                    "${eventTime}",
+                    "${positionTime}",
+                    "${maintenanceName}",
+                    "${positionAddress}",
+                    "${positionLat}",
+                    "${positionLon}",
+                    "${positionAlt}",
+                    "${positionSpeed}",
+                    "${positionCourse}"));
             settings.getTransferTemplates().put(event.getSelectedItem(), messageTemplate);
         }
         messageSubject.setText(messageTemplate.getSubject());

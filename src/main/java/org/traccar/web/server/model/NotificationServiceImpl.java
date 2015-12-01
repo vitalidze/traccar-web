@@ -15,6 +15,8 @@
  */
 package org.traccar.web.server.model;
 
+import static org.traccar.web.shared.model.MessagePlaceholder.*;
+
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -153,7 +155,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                     }
 
                     Engine engine = getTemplateEngine(getTimeZone(user));
-                    Map<String, Object> model = getTemplateModel(deviceEvent);
+                    Map<String, Object> model = getTemplateModel(user, deviceEvent);
                     String subject = engine.transform(template.getSubject(), model);
                     String body = engine.transform(template.getBody(), model);
 
@@ -454,9 +456,15 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         c.set(Calendar.HOUR, c.get(Calendar.HOUR) - 1);
         c.set(Calendar.MINUTE, c.get(Calendar.MINUTE) - 15);
         testPosition.setTime(c.getTime());
+        testPosition.setAddress("New York, Times Square");
+        testPosition.setLatitude(40.758899);
+        testPosition.setLongitude(-73.987325);
+        testPosition.setAltitude(100d);
+        testPosition.setSpeed(UserSettings.SpeedUnit.kilometersPerHour.toKnots(5d));
+        testPosition.setCourse(30d);
 
         Engine engine = getTemplateEngine(getTimeZone(sessionUser.get()));
-        Map<String, Object> model = getTemplateModel(new DeviceEvent(new Date(), testDevice, testPosition, testGeoFence, testMaintenance));
+        Map<String, Object> model = getTemplateModel(sessionUser.get(), new DeviceEvent(new Date(), testDevice, testPosition, testGeoFence, testMaintenance));
 
         String transformedSubject = engine.transform(template.getSubject(), model);
         String transformedBody = engine.transform(template.getBody(), model);
@@ -469,13 +477,22 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 "</div>";
     }
 
-    private static Map<String, Object> getTemplateModel(DeviceEvent event) {
+    private static Map<String, Object> getTemplateModel(User user, DeviceEvent event) {
         Map<String, Object> model = new HashMap<>();
-        model.put(MessagePlaceholder.deviceName.name(), event.getDevice() == null ? "N/A" : event.getDevice().getName());
-        model.put(MessagePlaceholder.geoFenceName.name(), event.getGeoFence() == null ? "N/A" : event.getGeoFence().getName());
-        model.put(MessagePlaceholder.eventTime.name(), event.getTime());
-        model.put(MessagePlaceholder.positionTime.name(), event.getPosition() == null ? null : event.getPosition().getTime());
-        model.put(MessagePlaceholder.maintenanceName.name(), event.getMaintenance() == null ? "N/A" : event.getMaintenance().getName());
+        model.put(deviceName.name(), event.getDevice() == null ? "N/A" : event.getDevice().getName());
+        model.put(geoFenceName.name(), event.getGeoFence() == null ? "N/A" : event.getGeoFence().getName());
+        model.put(eventTime.name(), event.getTime());
+        if (event.getPosition() != null) {
+            Position p = event.getPosition();
+            model.put(positionTime.name(), p.getTime());
+            model.put(positionAddress.name(), p.getAddress());
+            model.put(positionLat.name(), p.getLatitude());
+            model.put(positionLon.name(), p.getLongitude());
+            model.put(positionAlt.name(), p.getAltitude());
+            model.put(positionSpeed.name(), p.getSpeed() == null ? null : (p.getSpeed() * user.getUserSettings().getSpeedUnit().getFactor()));
+            model.put(positionCourse.name(), p.getCourse());
+        }
+        model.put(maintenanceName.name(), event.getMaintenance() == null ? "N/A" : event.getMaintenance().getName());
         return model;
     }
 
