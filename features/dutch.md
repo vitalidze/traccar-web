@@ -3,4 +3,4 @@ layout: feature
 title: Dutch translation
 ---
 
-![Dutch UI screen shot](http://i62.tinypic.com/34j2grr.png)
+![Dutch UI screen shot](http://i66.tinypic.com/m78cwo.png)
