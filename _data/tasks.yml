@@ -41,7 +41,7 @@
 - id: send_commands
   description: Version 3.1 of traccar support sending of commands. But it is not working from this mod. The support will be added after v3.2 of traccar is released.
   tickets: []
-  done: false
+  done: true
 
 - id: reports
   description: Possibility to generate reports.
