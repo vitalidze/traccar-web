@@ -31,6 +31,7 @@ This project has following features, which don't exist in original `traccar-web`
     * [hebrew language](hebrew.html) (available via ?locale=he URL parameter)
     * [persian language](persian.html) (available via ?locale=fa URL parameter)
     * [greek language](greek.html) (available via ?locale=el_GR URL parameter)
+    * [macedonian language](macedonian.html) (available via ?locale=mk parameter)
 * 'show server log' menu for viewing `tracker-server.log` file on Web
 * 'show wrapper.log' menu for viewing `wrapper.log` file on Web 
 * [archive filtering](archive-filtering.html)
@@ -76,3 +77,5 @@ This project has following features, which don't exist in original `traccar-web`
 * added [OpenSeaMap](http://openseamap.org/) seamarks layer
 * [reports](reports.html)
 * added 'overview' map with the possibility to save it's maximized/minimized state to user's preferences ('take from map' is also working)
+* [commands](commands.html)
+* [device groups](groups.html)

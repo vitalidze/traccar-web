@@ -113,7 +113,58 @@ or
     2015-08-31 16:48:10  WARN: Table "POSITIONS" not found; SQL statement:
     SELECT * FROM positions WHERE id IN (SELECT latestPosition_id FROM devices); [42102-187] - JdbcSQLException (... < QueryBuilder.java:62 < *:132 < DataManager.java:349 < ConnectionManager.java:41 < ...)
     
-This is because necessary tables will be created after the initialisation of `ConnectionManager` on Traccar's backend. To solve it please **restart the Traccar service twice**. 
+This is because necessary tables will be created after the initialisation of `ConnectionManager` on Traccar's backend. To solve it please **restart the Traccar service twice**.
+ 
+4.2) **Specific to v3.2 of traccar**
+
+To enable 'Send commands' functionality it is necessary to update the configuration file entries as follows
+
+  - SQL query to select all available users
+
+Old:
+
+    <entry key='database.selectUsersAll'>
+        SELECT * FROM "user";
+    </entry>
+
+New:
+
+    <entry key='database.selectUsersAll'>
+        SELECT id, login AS name, email, readOnly AS readonly, admin FROM users;
+    </entry>
+    
+  - SQL query to select permissions for users
+
+Old:
+
+    <entry key='database.getPermissionsAll'>
+        SELECT userId, deviceId FROM user_device;
+    </entry>
+
+New:
+
+    <entry key='database.getPermissionsAll'>
+        SELECT u.id AS userId, d.id AS deviceId FROM users u, devices d WHERE u.admin=1
+        UNION
+        SELECT ud.users_id AS userId, ud.devices_id AS deviceId FROM users_devices ud
+        INNER JOIN users u ON ud.users_id=u.id
+        WHERE u.admin=0 AND u.readOnly=0
+    </entry>
+    
+  - SQL query to link device and user
+  
+Old:
+
+    <entry key='database.linkDevice'>
+        INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
+    </entry>
+    
+New: ( **comment out or remove this query** )
+
+    <!-- entry key='database.linkDevice'>
+        INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
+    </entry -->
+
     
 5) Start Traccar service
 
