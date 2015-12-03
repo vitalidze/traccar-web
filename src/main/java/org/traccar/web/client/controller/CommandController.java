@@ -39,7 +39,7 @@ public class CommandController implements ContentController, DeviceView.CommandH
             new RequestBuilder(RequestBuilder.GET, "api").sendRequest(null, new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
-                    ApplicationContext.getInstance().setBackendApiAvailable(response.getStatusCode() == 302);
+                    ApplicationContext.getInstance().setBackendApiAvailable(response.getStatusCode() != 404);
                 }
 
                 @Override
