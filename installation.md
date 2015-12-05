@@ -67,10 +67,20 @@ Old:
         SELECT * FROM position WHERE id IN (SELECT positionId FROM device);
     </entry>
     
-New:
+New (depending on version of traccar):
     
+    <!-- for 3.0 and 3.1 -->
     <entry key='database.selectLatestPositions'>
-        SELECT * FROM positions WHERE id IN (SELECT latestPosition_id FROM devices);
+        SELECT id, protocol, device_id AS deviceId, serverTime, time AS deviceTime, time AS fixTime, 
+        valid, latitude, longitude, altitude, speed, course, address, other 
+        FROM positions WHERE id IN (SELECT latestPosition_id FROM devices);
+    </entry>
+    
+    <!-- for 3.2 -->
+    <entry key='database.selectLatestPositions'>
+        SELECT id, protocol, device_id AS deviceId, serverTime, time AS deviceTime, time AS fixTime, 
+        valid, latitude, longitude, altitude, speed, course, address, other AS attributes 
+        FROM positions WHERE id IN (SELECT latestPosition_id FROM devices);
     </entry>
 
   - SQL query to update database with latest info from device
