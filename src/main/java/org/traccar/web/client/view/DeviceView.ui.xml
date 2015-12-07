@@ -3,6 +3,7 @@
     xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
     xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+    xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
     xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
     xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
     xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
@@ -46,7 +47,14 @@
       <container:child layoutData="{layoutData}">
         <gxt:TabPanel ui:field="objectsTabs">
           <gxt:child config="{devicesTabConfig}">
-            <grid:Grid ui:field="grid" store="{deviceStore}" cm="{columnModel}" view="{view}" stateful="true" stateId="deviceGrid" />
+            <container:VerticalLayoutContainer>
+              <container:child layoutData="{toolBarRowData}">
+                <form:StoreFilterField ui:field="deviceFilter" emptyText="{i18n.filter}..."/>
+              </container:child>
+              <container:child layoutData="{layoutData}">
+                <grid:Grid ui:field="grid" store="{deviceStore}" cm="{columnModel}" view="{view}" stateful="true" stateId="deviceGrid" />
+              </container:child>
+            </container:VerticalLayoutContainer>
           </gxt:child>
 
           <gxt:child config="{geoFencesTabConfig}">

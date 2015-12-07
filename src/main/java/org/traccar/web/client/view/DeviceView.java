@@ -34,8 +34,11 @@ import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.core.client.XTemplates;
+import com.sencha.gxt.data.shared.SortInfo;
+import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.data.shared.event.StoreAddEvent;
 import com.sencha.gxt.data.shared.event.StoreRemoveEvent;
+import com.sencha.gxt.data.shared.event.StoreSortEvent;
 import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
 import com.sencha.gxt.theme.neptune.client.base.tabs.Css3TabPanelBottomAppearance;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
@@ -45,6 +48,7 @@ import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
+import com.sencha.gxt.widget.core.client.form.StoreFilterField;
 import com.sencha.gxt.widget.core.client.grid.*;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
@@ -254,7 +258,10 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     ColumnModel<Device> columnModel;
 
     @UiField(provided = true)
-    ListStore<Device> deviceStore;
+    final ListStore<Device> deviceStore;
+
+    @UiField(provided = true)
+    StoreFilterField<Device> deviceFilter;
 
     @UiField
     Grid<Device> grid;
@@ -283,8 +290,40 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         this.deviceHandler = deviceHandler;
         this.geoFenceHandler = geoFenceHandler;
         this.commandHandler = commandHandler;
-        this.deviceStore = deviceStore;
         this.geoFenceStore = geoFenceStore;
+
+        // create a new devices store so the filtering will not affect global store
+        this.deviceStore = new ListStore<>(deviceStore.getKeyProvider());
+        this.deviceStore.addAll(deviceStore.getAll());
+        // handle events from global devices store and update local one accordingly
+        deviceStore.addStoreHandlers(new BaseStoreHandlers<Device>() {
+            @Override
+            public void onAdd(StoreAddEvent<Device> event) {
+                DeviceView.this.deviceStore.addAll(event.getIndex(), event.getItems());
+            }
+
+            @Override
+            public void onUpdate(StoreUpdateEvent<Device> event) {
+                for (Device device : event.getItems()) {
+                    DeviceView.this.deviceStore.update(device);
+                }
+            }
+
+            @Override
+            public void onRemove(StoreRemoveEvent<Device> event) {
+                DeviceView.this.deviceStore.remove(event.getIndex());
+            }
+        });
+        // handle sort events from local devices store and sort global one accordingly
+        this.deviceStore.addStoreSortHandler(new StoreSortEvent.StoreSortHandler<Device>() {
+            @Override
+            public void onSort(StoreSortEvent<Device> event) {
+                deviceStore.clearSortInfo();
+                for (Store.StoreSortInfo<Device> sortInfo : event.getSource().getSortInfo()) {
+                    deviceStore.addSortInfo(sortInfo);
+                }
+            }
+        });
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
 
@@ -353,6 +392,16 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         groupsHandler = new GroupsHandler(deviceStore, groupStore, view, colGroup);
 
         columnModel = new ColumnModel<>(columnConfigList);
+
+        // configure device store filtering
+        deviceFilter = new StoreFilterField<Device>() {
+            @Override
+            protected boolean doSelect(Store<Device> store, Device parent, Device item, String filter) {
+                return filter.trim().isEmpty() ||
+                        item.getName().toLowerCase().contains(filter.toLowerCase());
+            }
+        };
+        deviceFilter.bind(this.deviceStore);
 
         // geo-fences
         geoFencesTabConfig = new TabItemConfig(i18n.overlayType(UserSettings.OverlayType.GEO_FENCES));
