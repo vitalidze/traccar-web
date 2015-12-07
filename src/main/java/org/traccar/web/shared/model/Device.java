@@ -124,28 +124,6 @@ public class Device implements IsSerializable {
         this.description = description;
     }
 
-    @JsonIgnore
-    private transient boolean follow;
-
-    public boolean isFollow() {
-        return follow;
-    }
-
-    public void setFollow(boolean follow) {
-        this.follow = follow;
-    }
-
-    @JsonIgnore
-    private transient boolean recordTrace;
-
-    public boolean isRecordTrace() {
-        return recordTrace;
-    }
-
-    public void setRecordTrace(boolean recordTrace) {
-        this.recordTrace = recordTrace;
-    }
-
     /**
      * Consider device offline after 'timeout' seconds spent from last position
      */

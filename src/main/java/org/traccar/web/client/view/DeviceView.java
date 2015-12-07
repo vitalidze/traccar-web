@@ -33,6 +33,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.core.client.ToStringValueProvider;
+import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.XTemplates;
 import com.sencha.gxt.data.shared.SortInfo;
 import com.sencha.gxt.data.shared.Store;
@@ -359,16 +360,53 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         Resources resources = GWT.create(Resources.class);
         HeaderIconTemplate headerTemplate = GWT.create(HeaderIconTemplate.class);
 
-        ColumnConfig<Device, Boolean> colFollow = new ColumnConfig<>(deviceProperties.follow(), 50,
-                headerTemplate.render(AbstractImagePrototype.create(resources.follow()).getSafeHtml()));
+        ColumnConfig<Device, Boolean> colFollow = new ColumnConfig<>(new ValueProvider<Device, Boolean>() {
+
+            @Override
+            public Boolean getValue(Device device) {
+                return ApplicationContext.getInstance().isFollowing(device);
+            }
+
+            @Override
+            public void setValue(Device device, Boolean value) {
+                if (value) {
+                    ApplicationContext.getInstance().follow(device);
+                } else {
+                    ApplicationContext.getInstance().stopFollowing(device);
+                }
+            }
+
+            @Override
+            public String getPath() {
+                return "follow";
+            }
+        }, 50, headerTemplate.render(AbstractImagePrototype.create(resources.follow()).getSafeHtml()));
         colFollow.setCell(new CheckBoxCell());
         colFollow.setFixed(true);
         colFollow.setResizable(false);
         colFollow.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.follow()).toSafeHtml());
         columnConfigList.add(colFollow);
 
-        ColumnConfig<Device, Boolean> colRecordTrace = new ColumnConfig<>(deviceProperties.recordTrace(), 50,
-                headerTemplate.render(AbstractImagePrototype.create(resources.footprints()).getSafeHtml()));
+        ColumnConfig<Device, Boolean> colRecordTrace = new ColumnConfig<>(new ValueProvider<Device, Boolean>() {
+            @Override
+            public Boolean getValue(Device device) {
+                return ApplicationContext.getInstance().isRecordingTrace(device);
+            }
+
+            @Override
+            public void setValue(Device device, Boolean value) {
+                if (value) {
+                    ApplicationContext.getInstance().recordTrace(device);
+                } else {
+                    ApplicationContext.getInstance().stopRecordingTrace(device);
+                }
+            }
+
+            @Override
+            public String getPath() {
+                return "recordTrace";
+            }
+        }, 50, headerTemplate.render(AbstractImagePrototype.create(resources.footprints()).getSafeHtml()));
         colRecordTrace.setCell(new CheckBoxCell());
         colRecordTrace.setFixed(true);
         colRecordTrace.setResizable(false);

@@ -46,10 +46,6 @@ public interface DeviceProperties extends PropertyAccess<Device> {
     @Path("name")
     LabelProvider<Device> label();
 
-    ValueProvider<Device, Boolean> follow();
-
-    ValueProvider<Device, Boolean> recordTrace();
-
     ValueProvider<Device, Double> odometer();
 
     ValueProvider<Device, Boolean> autoUpdateOdometer();

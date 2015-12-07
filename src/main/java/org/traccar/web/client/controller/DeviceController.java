@@ -81,35 +81,6 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         this.deviceGeoFences = deviceGeoFences;
         this.groupStore = groupStore;
 
-        this.deviceStore.addStoreRecordChangeHandler(new StoreRecordChangeEvent.StoreRecordChangeHandler<Device>() {
-            @Override
-            public void onRecordChange(StoreRecordChangeEvent<Device> event) {
-                if (event.getProperty().getPath().equals("follow")) {
-                    boolean follow = (Boolean) event.getRecord().getValue(event.getProperty());
-                    Device device = event.getRecord().getModel();
-                    if (follow) {
-                        ApplicationContext.getInstance().follow(device);
-                        for (int i = 0; i < deviceStore.size(); i++) {
-                            Device next = deviceStore.get(i);
-                            if (next.getId() != device.getId()) {
-                                ApplicationContext.getInstance().stopFollowing(next);
-                                deviceStore.getRecord(next).revert(event.getProperty());
-                            }
-                        }
-                    } else {
-                        ApplicationContext.getInstance().stopFollowing(device);
-                    }
-                } else if (event.getProperty().getPath().equals("recordTrace")) {
-                    boolean recordTrace = (Boolean) event.getRecord().getValue(event.getProperty());
-                    Device device = event.getRecord().getModel();
-                    if (recordTrace) {
-                        ApplicationContext.getInstance().recordTrace(device);
-                    } else {
-                        ApplicationContext.getInstance().stopRecordingTrace(device);
-                    }
-                }
-            }
-        });
         deviceView = new DeviceView(this, geoFenceHandler, commandHandler, deviceStore, geoFenceStore, groupStore);
     }
 
