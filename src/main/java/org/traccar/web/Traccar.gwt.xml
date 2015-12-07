@@ -56,6 +56,7 @@
     <extend-property name="locale" values="da" />
     <extend-property name="locale" values="cs" />
     <extend-property name="locale" values="sr" />
+    <extend-property name="locale" values="sr_Latn" />
     <extend-property name="locale" values="he" />
     <extend-property name="locale" values="fa" />
     <extend-property name="locale" values="el_GR" />
