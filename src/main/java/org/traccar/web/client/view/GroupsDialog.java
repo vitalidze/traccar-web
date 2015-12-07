@@ -115,8 +115,8 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
 
     @Override
     public void onSelectionChanged(SelectionChangedEvent<Group> event) {
-        shareButton.setEnabled(!event.getSelection().isEmpty());
-        removeButton.setEnabled(!event.getSelection().isEmpty());
+        shareButton.setEnabled(!event.getSelection().isEmpty() && event.getSelection().get(0).getId() >= 0);
+        removeButton.setEnabled(!event.getSelection().isEmpty() && event.getSelection().get(0).getId() >= 0);
     }
     @UiHandler("addButton")
     public void onAddClicked(SelectEvent event) {
