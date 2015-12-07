@@ -89,12 +89,16 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
 
             @Override
             public void onRemove(final Group group) {
-                service.removeGroup(group, new BaseAsyncCallback<Void>(i18n) {
-                    @Override
-                    public void onSuccess(Void result) {
-                        groupStore.remove(group);
-                    }
-                });
+                if (group.getId() >= 0) {
+                    service.removeGroup(group, new BaseAsyncCallback<Void>(i18n) {
+                        @Override
+                        public void onSuccess(Void result) {
+                            groupStore.remove(group);
+                        }
+                    });
+                } else {
+                    groupStore.remove(group);
+                }
             }
 
             @Override

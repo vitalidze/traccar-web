@@ -19,6 +19,7 @@ import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
+import com.sencha.gxt.widget.core.client.event.HideEvent;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
@@ -84,7 +85,7 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
 
     GroupProperties groupProperties = GWT.create(GroupProperties.class);
 
-    public GroupsDialog(ListStore<Group> groupStore, GroupsHandler groupsHandler) {
+    public GroupsDialog(final ListStore<Group> groupStore, GroupsHandler groupsHandler) {
         this.groupStore = groupStore;
         this.groupsHandler = groupsHandler;
 
@@ -103,6 +104,18 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
         GridEditing<Group> editing = new GridInlineEditing<>(grid);
         editing.addEditor(colName, new TextField());
         editing.addEditor(colDescription, new TextField());
+
+        window.addHideHandler(new HideEvent.HideHandler() {
+            @Override
+            public void onHide(HideEvent event) {
+                for (int i = 0; i < groupStore.size(); i++) {
+                    if (groupStore.get(i).getId() < 0) {
+                        groupStore.remove(i);
+                        i--;
+                    }
+                }
+            }
+        });
     }
 
     public void show() {
@@ -116,7 +129,7 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
     @Override
     public void onSelectionChanged(SelectionChangedEvent<Group> event) {
         shareButton.setEnabled(!event.getSelection().isEmpty() && event.getSelection().get(0).getId() >= 0);
-        removeButton.setEnabled(!event.getSelection().isEmpty() && event.getSelection().get(0).getId() >= 0);
+        removeButton.setEnabled(!event.getSelection().isEmpty());
     }
     @UiHandler("addButton")
     public void onAddClicked(SelectEvent event) {
