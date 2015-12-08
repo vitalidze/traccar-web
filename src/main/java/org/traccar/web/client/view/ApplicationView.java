@@ -124,8 +124,8 @@ public class ApplicationView extends Composite {
             archivePanel.removeFromParent();
         }
 
-        if (devicePanel.getElement().getSize().getWidth() < 260) {
-            westData.setSize(260);
+        if (devicePanel.getElement().getSize().getWidth() < 310) {
+            westData.setSize(310);
         }
 
         new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 84);

@@ -15,10 +15,24 @@
  */
 package org.traccar.web.client.state;
 
-import com.google.web.bindery.autobean.shared.AutoBean;
-import com.sencha.gxt.state.client.DefaultStateAutoBeanFactory;
+import java.util.Set;
 
-public interface StateAutoBeanFactory extends DefaultStateAutoBeanFactory {
-    AutoBean<CheckBoxStateHandler.CheckBoxState> checkBox();
-    AutoBean<DeviceVisibilityState> deviceVisibility();
+public interface DeviceVisibilityState {
+    boolean getHideOnline();
+    void setHideOnline(boolean hideOnline);
+
+    boolean getHideOffline();
+    void setHideOffline(boolean hideOffline);
+
+    boolean getHideIdle();
+    void setHideIdle(boolean hideIdle);
+
+    boolean getHideMoving();
+    void setHideMoving(boolean hideMoving);
+
+    Set<Long> getHiddenForced();
+    void setHiddenForced(Set<Long> hiddenForced);
+
+    Set<Long> getVisibleForced();
+    void setVisibleForced(Set<Long> visibleForced);
 }

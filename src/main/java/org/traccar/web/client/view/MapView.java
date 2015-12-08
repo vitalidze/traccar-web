@@ -15,10 +15,7 @@
  */
 package org.traccar.web.client.view;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
@@ -41,11 +38,14 @@ import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
+import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.state.DeviceVisibilityChangeHandler;
+import org.traccar.web.client.state.DeviceVisibilityProvider;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.Position;
@@ -195,7 +195,9 @@ public class MapView {
         return $wnd.getTileURL;
     }-*/;
 
-    public MapView(MapHandler mapHandler, ListStore<Device> deviceStore) {
+    public MapView(MapHandler mapHandler,
+                   ListStore<Device> deviceStore,
+                   DeviceVisibilityProvider deviceVisibilityProvider) {
         this.mapHandler = mapHandler;
         this.popup = new PositionInfoPopup(deviceStore);
         contentPanel = new ContentPanel();
@@ -282,9 +284,18 @@ public class MapView {
             }
         });
 
-        latestPositionRenderer = new MapPositionRenderer(this, latestPositionSelectHandler, positionMouseHandler);
-        archivePositionRenderer = new MapPositionRenderer(this, archivePositionSelectHandler, positionMouseHandler);
-        latestPositionTrackRenderer = new MapPositionRenderer(this, null, null);
+        latestPositionRenderer = new MapPositionRenderer(this, latestPositionSelectHandler, positionMouseHandler, deviceVisibilityProvider);
+        archivePositionRenderer = new MapPositionRenderer(this, archivePositionSelectHandler, positionMouseHandler, new DeviceVisibilityProvider() {
+            @Override
+            public boolean isVisible(Device device) {
+                return true;
+            }
+
+            @Override
+            public void addVisibilityChangeHandler(DeviceVisibilityChangeHandler visibilityChangeHandler) {
+            }
+        });
+        latestPositionTrackRenderer = new MapPositionRenderer(this, null, null, deviceVisibilityProvider);
         geoFenceRenderer = new GeoFenceRenderer(this);
     }
 
@@ -297,17 +308,23 @@ public class MapView {
         latestPositionRenderer.clearPositionsAndTitlesAndAlerts();
     }
 
-    public void showLatestPositions(List<Position> positions) {
+    public void clearLatestPosition(Long deviceId) {
+        latestPositionRenderer.clear(deviceId);
+    }
+
+    public void showLatestPositions(List<Position> positions, Collection<Position> alerts) {
         for (Position position : positions) {
             latestPositionRenderer.showPositions(Collections.singletonList(position));
         }
+        showAlerts(alerts);
+        showDeviceName(positions);
     }
 
     public void showDeviceName(List<Position> positions) {
         latestPositionRenderer.showDeviceName(positions);
     }
 
-    public void showAlerts(List<Position> positions) {
+    public void showAlerts(Collection<Position> positions) {
         latestPositionRenderer.showAlerts(positions);
     }
 

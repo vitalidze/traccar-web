@@ -67,6 +67,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     public DeviceController(MapController mapController,
                             DeviceView.GeoFenceHandler geoFenceHandler,
                             DeviceView.CommandHandler commandHandler,
+                            DeviceView.DeviceVisibilityHandler deviceVisibilityHandler,
                             final ListStore<Device> deviceStore,
                             StoreHandlers<Device> deviceStoreHandler,
                             ListStore<GeoFence> geoFenceStore,
@@ -81,7 +82,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         this.deviceGeoFences = deviceGeoFences;
         this.groupStore = groupStore;
 
-        deviceView = new DeviceView(this, geoFenceHandler, commandHandler, deviceStore, geoFenceStore, groupStore);
+        deviceView = new DeviceView(this, geoFenceHandler, commandHandler, deviceVisibilityHandler, deviceStore, geoFenceStore, groupStore);
     }
 
     public ListStore<Device> getDeviceStore() {
@@ -246,7 +247,10 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     @Override
     public void onMouseOver(int mouseX, int mouseY, Device device) {
-        positionInfo.show(mouseX, mouseY, mapController.getLatestPosition(device));
+        Position latestPosition = mapController.getLatestPosition(device);
+        if (latestPosition != null) {
+            positionInfo.show(mouseX, mouseY, latestPosition);
+        }
     }
 
     @Override

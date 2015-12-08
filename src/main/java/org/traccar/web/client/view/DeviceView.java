@@ -35,7 +35,6 @@ import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
 import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.XTemplates;
-import com.sencha.gxt.data.shared.SortInfo;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.data.shared.event.StoreAddEvent;
 import com.sencha.gxt.data.shared.event.StoreRemoveEvent;
@@ -59,6 +58,7 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.GeoFenceProperties;
+import org.traccar.web.client.state.DeviceVisibilityProvider;
 import org.traccar.web.client.state.GridStateHandler;
 import org.traccar.web.shared.model.Device;
 
@@ -108,6 +108,10 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     public interface CommandHandler {
         void onCommand(Device device);
+    }
+
+    public interface DeviceVisibilityHandler extends DeviceVisibilityProvider {
+        void setVisible(Device device, boolean b);
     }
 
     private static class GroupsHandler extends BaseStoreHandlers {
@@ -285,6 +289,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     public DeviceView(final DeviceHandler deviceHandler,
                       final GeoFenceHandler geoFenceHandler,
                       final CommandHandler commandHandler,
+                      final DeviceVisibilityHandler deviceVisibilityHandler,
                       final ListStore<Device> deviceStore,
                       final ListStore<GeoFence> geoFenceStore,
                       ListStore<Group> groupStore) {
@@ -295,6 +300,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         // create a new devices store so the filtering will not affect global store
         this.deviceStore = new ListStore<>(deviceStore.getKeyProvider());
+        this.deviceStore.setAutoCommit(true);
         this.deviceStore.addAll(deviceStore.getAll());
         // handle events from global devices store and update local one accordingly
         deviceStore.addStoreHandlers(new BaseStoreHandlers<Device>() {
@@ -327,9 +333,35 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         });
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
+        Resources resources = GWT.create(Resources.class);
+        HeaderIconTemplate headerTemplate = GWT.create(HeaderIconTemplate.class);
 
         List<ColumnConfig<Device, ?>> columnConfigList = new LinkedList<>();
 
+        // 'Visible' column
+        ColumnConfig<Device, Boolean> colVisible = new ColumnConfig<>(new ValueProvider<Device, Boolean>() {
+            @Override
+            public Boolean getValue(Device device) {
+                return deviceVisibilityHandler.isVisible(device);
+            }
+
+            @Override
+            public void setValue(Device device, Boolean value) {
+                deviceVisibilityHandler.setVisible(device, value);
+            }
+
+            @Override
+            public String getPath() {
+                return "visible";
+            }
+        }, 50, "");
+        colVisible.setCell(new CheckBoxCell());
+        colVisible.setFixed(true);
+        colVisible.setResizable(false);
+        colVisible.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.visible()).toSafeHtml());
+        columnConfigList.add(colVisible);
+
+        // Name column
         ColumnConfig<Device, String> colName = new ColumnConfig<>(deviceProperties.name(), 0, i18n.name());
         colName.setCell(new AbstractCell<String>(BrowserEvents.MOUSEOVER, BrowserEvents.MOUSEOUT) {
             @Override
@@ -357,9 +389,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         });
         columnConfigList.add(colName);
 
-        Resources resources = GWT.create(Resources.class);
-        HeaderIconTemplate headerTemplate = GWT.create(HeaderIconTemplate.class);
-
+        // 'Follow' column
         ColumnConfig<Device, Boolean> colFollow = new ColumnConfig<>(new ValueProvider<Device, Boolean>() {
 
             @Override
@@ -387,6 +417,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         colFollow.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.follow()).toSafeHtml());
         columnConfigList.add(colFollow);
 
+        // 'Record trace' column
         ColumnConfig<Device, Boolean> colRecordTrace = new ColumnConfig<>(new ValueProvider<Device, Boolean>() {
             @Override
             public Boolean getValue(Device device) {
@@ -511,7 +542,10 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @Override
     public void onRowMouseDown(RowMouseDownEvent event) {
-        deviceHandler.onSelected(grid.getSelectionModel().getSelectedItem());
+        Device device = grid.getSelectionModel().getSelectedItem();
+        if (device != null) {
+            deviceHandler.onSelected(device);
+        }
     }
 
     @Override

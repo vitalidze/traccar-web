@@ -35,6 +35,7 @@ import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.TrackSegment;
+import org.traccar.web.client.state.DeviceVisibilityProvider;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -61,11 +62,16 @@ public class MapPositionRenderer {
 
     private final SelectHandler selectHandler;
     private final MouseHandler mouseHandler;
+    private final DeviceVisibilityProvider visibilityProvider;
 
-    public MapPositionRenderer(MapView mapView, SelectHandler selectHandler, MouseHandler mouseHandler) {
+    public MapPositionRenderer(MapView mapView,
+                               SelectHandler selectHandler,
+                               MouseHandler mouseHandler,
+                               DeviceVisibilityProvider visibilityProvider) {
         this.mapView = mapView;
         this.selectHandler = selectHandler;
         this.mouseHandler = mouseHandler;
+        this.visibilityProvider = visibilityProvider;
     }
 
     private void addSelectEvent(Marker marker, final Position position) {
@@ -271,6 +277,10 @@ public class MapPositionRenderer {
         clear(getDeviceData(device));
     }
 
+    public void clear(Long deviceId) {
+        clear(getDeviceData(deviceId));
+    }
+
     private void clearMarkersAndTitleAndAlert(DeviceData deviceData) {
         for (Marker marker : deviceData.markerMap.values()) {
             getMarkerLayer().removeMarker(marker);
@@ -335,13 +345,15 @@ public class MapPositionRenderer {
         DeviceData deviceData = getDeviceData(positions);
         deviceData.positions = positions;
         for (Position position : positions) {
-            Marker marker = new Marker(
-                    mapView.createLonLat(position.getLongitude(), position.getLatitude()),
-                    MarkerIconFactory.getIcon(position.getIcon(), false));
-            deviceData.markerMap.put(position.getId(), marker);
-            addSelectEvent(marker, position);
-            addMouseEvent(marker, position);
-            getMarkerLayer().addMarker(marker);
+            if (visibilityProvider.isVisible(position.getDevice())) {
+                Marker marker = new Marker(
+                        mapView.createLonLat(position.getLongitude(), position.getLatitude()),
+                        MarkerIconFactory.getIcon(position.getIcon(), false));
+                deviceData.markerMap.put(position.getId(), marker);
+                addSelectEvent(marker, position);
+                addMouseEvent(marker, position);
+                getMarkerLayer().addMarker(marker);
+            }
         }
 
         if (!selectPosition(null, selectedPosition, false)) {
@@ -359,46 +371,52 @@ public class MapPositionRenderer {
 
     public void showDeviceName(List<Position> positions) {
         for (Position position : positions) {
-            DeviceData deviceData = getDeviceData(position.getDevice());
-            org.gwtopenmaps.openlayers.client.Style st = new org.gwtopenmaps.openlayers.client.Style();
-            st.setLabel(position.getDevice().getName());
-            st.setLabelXOffset(0);
-            st.setLabelYOffset(-12);
-            st.setLabelAlign("cb");
-            st.setFontColor("#0000FF");
-            st.setFontSize("12");
-            st.setFill(false);
-            st.setStroke(false);
+            if (visibilityProvider.isVisible(position.getDevice())) {
+                DeviceData deviceData = getDeviceData(position.getDevice());
+                org.gwtopenmaps.openlayers.client.Style st = new org.gwtopenmaps.openlayers.client.Style();
+                st.setLabel(position.getDevice().getName());
+                st.setLabelXOffset(0);
+                st.setLabelYOffset(-12);
+                st.setLabelAlign("cb");
+                st.setFontColor("#0000FF");
+                st.setFontSize("12");
+                st.setFill(false);
+                st.setStroke(false);
 
-            final VectorFeature deviceName = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), st);
-            getVectorLayer().addFeature(deviceName);
-            deviceData.title = deviceName;
+                final VectorFeature deviceName = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), st);
+                getVectorLayer().addFeature(deviceName);
+                deviceData.title = deviceName;
+            }
         }
     }
 
     public void showTime(List<Position> positions, boolean abovePoint) {
         DeviceData deviceData = getDeviceData(positions);
         for (Position position : positions) {
-            org.gwtopenmaps.openlayers.client.Style st = new org.gwtopenmaps.openlayers.client.Style();
-            st.setLabel(timeFormat.format(position.getTime()));
-            st.setLabelXOffset(0);
-            st.setLabelYOffset(abovePoint ? 12 : -12);
-            st.setLabelAlign("cb");
-            st.setFontColor("#FF4D00");
-            st.setFontSize("11");
-            st.setFill(false);
-            st.setStroke(false);
+            if (visibilityProvider.isVisible(position.getDevice())) {
+                org.gwtopenmaps.openlayers.client.Style st = new org.gwtopenmaps.openlayers.client.Style();
+                st.setLabel(timeFormat.format(position.getTime()));
+                st.setLabelXOffset(0);
+                st.setLabelYOffset(abovePoint ? 12 : -12);
+                st.setLabelAlign("cb");
+                st.setFontColor("#FF4D00");
+                st.setFontSize("11");
+                st.setFill(false);
+                st.setStroke(false);
 
-            final VectorFeature point = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), st);
-            getVectorLayer().addFeature(point);
-            deviceData.timeLabels.put(position, point);
+                final VectorFeature point = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), st);
+                getVectorLayer().addFeature(point);
+                deviceData.timeLabels.put(position, point);
+            }
         }
     }
 
     public void showTrack(Track track) {
         List<TrackSegment> segments = track.getSegments();
-        if (!segments.isEmpty()) {
+        if (!segments.isEmpty()
+                && visibilityProvider.isVisible(segments.get(0).getPositions().get(0).getDevice())) {
             DeviceData deviceData = getDeviceData(segments.get(0).getPositions());
+
             List<Point> linePoints = new ArrayList<>();
 
             for (TrackSegment segment : segments) {
@@ -486,6 +504,9 @@ public class MapPositionRenderer {
     }
 
     public void selectDevice(Device device, boolean center) {
+        if (!visibilityProvider.isVisible(device)) {
+            return;
+        }
         DeviceData oldDeviceData = getDeviceData(selectedDeviceId);
         Position oldPosition = oldDeviceData == null ? null : oldDeviceData.getLatestPosition();
 
@@ -519,7 +540,8 @@ public class MapPositionRenderer {
     }
 
     public void catchPosition(Position position) {
-        if (!mapView.getMap().getExtent().containsLonLat(mapView.createLonLat(position.getLongitude(), position.getLatitude()), true)) {
+        if (visibilityProvider.isVisible(position.getDevice())
+            && !mapView.getMap().getExtent().containsLonLat(mapView.createLonLat(position.getLongitude(), position.getLatitude()), true)) {
             selectPosition(position, true);
         }
     }
@@ -559,9 +581,11 @@ public class MapPositionRenderer {
     public void showTrackPositions(List<Position> positions) {
         DeviceData deviceData = getDeviceData(positions);
         for (Position position : positions) {
-            VectorFeature point = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), getTrackPointStyle());
-            getVectorLayer().addFeature(point);
-            deviceData.trackPoints.add(point);
+            if (visibilityProvider.isVisible(position.getDevice())) {
+                VectorFeature point = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), getTrackPointStyle());
+                getVectorLayer().addFeature(point);
+                deviceData.trackPoints.add(point);
+            }
         }
     }
 
@@ -577,20 +601,24 @@ public class MapPositionRenderer {
     }
 
     public void updateIcon(Device device) {
-        DeviceData deviceData = getDeviceData(device);
-        Position position = deviceData.positions == null || deviceData.positions.size() != 1 ? null : deviceData.positions.get(0);
-        if (position != null) {
-            position.setDevice(device);
-            position.setIcon(MarkerIcon.create(position));
-            boolean selected = selectedPosition != null && selectedPosition.getId() == position.getId();
-            changeMarkerIcon(position, MarkerIconFactory.getIcon(position.getIcon(), selected));
+        if (visibilityProvider.isVisible(device)) {
+            DeviceData deviceData = getDeviceData(device);
+            Position position = deviceData.positions == null || deviceData.positions.size() != 1 ? null : deviceData.positions.get(0);
+            if (position != null) {
+                position.setDevice(device);
+                position.setIcon(MarkerIcon.create(position));
+                boolean selected = selectedPosition != null && selectedPosition.getId() == position.getId();
+                changeMarkerIcon(position, MarkerIconFactory.getIcon(position.getIcon(), selected));
+            }
         }
     }
 
-    public void showAlerts(List<Position> positions) {
+    public void showAlerts(Collection<Position> positions) {
         if (positions != null) {
             for (Position position : positions) {
-                drawAlert(position);
+                if (visibilityProvider.isVisible(position.getDevice())) {
+                    drawAlert(position);
+                }
             }
         }
     }
@@ -618,7 +646,7 @@ public class MapPositionRenderer {
             getVectorLayer().removeFeature(deviceData.alert);
             deviceData.alert.destroy();
         }
-        if (show) {
+        if (show && visibilityProvider.isVisible(device)) {
             Position latestPosition = deviceData.getLatestPosition();
             if (latestPosition != null) {
                 drawAlert(latestPosition);

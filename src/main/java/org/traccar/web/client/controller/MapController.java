@@ -32,13 +32,15 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.state.DeviceVisibilityChangeHandler;
+import org.traccar.web.client.state.DeviceVisibilityProvider;
 import org.traccar.web.client.view.MapView;
 import org.traccar.web.client.view.MarkerIcon;
 import org.traccar.web.shared.model.*;
 
 import java.util.*;
 
-public class MapController implements ContentController, MapView.MapHandler {
+public class MapController implements ContentController, MapView.MapHandler, DeviceVisibilityChangeHandler {
     public interface MapHandler {
         void onDeviceSelected(Device device);
         void onArchivePositionSelected(Position position);
@@ -50,10 +52,13 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     private final ListStore<Device> deviceStore;
 
-    public MapController(MapHandler mapHandler, ListStore<Device> deviceStore) {
+    public MapController(MapHandler mapHandler,
+                         ListStore<Device> deviceStore,
+                         DeviceVisibilityProvider deviceVisibilityProvider) {
         this.mapHandler = mapHandler;
         this.deviceStore = deviceStore;
-        mapView = new MapView(this, deviceStore);
+        mapView = new MapView(this, deviceStore, deviceVisibilityProvider);
+        deviceVisibilityProvider.addVisibilityChangeHandler(this);
         loadMapSettings();
     }
 
@@ -103,6 +108,8 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     private Map<Long, Position> latestPositionMap = new HashMap<>();
 
+    private Map<Long, Position> alertsMap = new HashMap<>();
+
     private Map<Long, Position> latestNonIdlePositionMap = new HashMap<>();
 
     private Map<Long, Position> timestampMap = new HashMap<>();
@@ -122,7 +129,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                 /**
                  * Set up icon, 'idle since' and calculate alerts
                  */
-                List<Position> alerts = null;
+                alertsMap.clear();
                 long currentTime = System.currentTimeMillis();
                 int selectedIndex = -1;
                 for (int i = 0; i < result.size(); i++) {
@@ -155,8 +162,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                     // check maintenances
                     for (Maintenance maintenance : device.getMaintenances()) {
                         if (device.getOdometer() >= maintenance.getLastService() + maintenance.getServiceInterval()) {
-                            if (alerts == null) alerts = new LinkedList<>();
-                            alerts.add(position);
+                            alertsMap.put(device.getId(), position);
                             break;
                         }
                     }
@@ -171,9 +177,7 @@ public class MapController implements ContentController, MapView.MapHandler {
                  * Draw positions
                  */
                 mapView.clearLatestPositions();
-                mapView.showLatestPositions(result);
-                mapView.showAlerts(alerts);
-                mapView.showDeviceName(result);
+                mapView.showLatestPositions(result, alertsMap.values());
                 /**
                  * Follow positions and draw track if necessary
                  */
@@ -311,5 +315,18 @@ public class MapController implements ContentController, MapView.MapHandler {
 
     public void updateAlert(Device device, boolean show) {
         mapView.updateAlert(device, show);
+    }
+
+    @Override
+    public void visibilityChanged(Long deviceId, boolean visible) {
+        if (visible) {
+            Position latestPosition = latestPositionMap.get(deviceId);
+            if (latestPosition != null) {
+                Position alert = alertsMap.get(deviceId);
+                mapView.showLatestPositions(Collections.singletonList(latestPosition), alert == null ? null : Collections.singleton(alert));
+            }
+        } else {
+            mapView.clearLatestPosition(deviceId);
+        }
     }
 }

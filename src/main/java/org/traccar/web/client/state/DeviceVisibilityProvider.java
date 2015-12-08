@@ -15,10 +15,9 @@
  */
 package org.traccar.web.client.state;
 
-import com.google.web.bindery.autobean.shared.AutoBean;
-import com.sencha.gxt.state.client.DefaultStateAutoBeanFactory;
+import org.traccar.web.shared.model.Device;
 
-public interface StateAutoBeanFactory extends DefaultStateAutoBeanFactory {
-    AutoBean<CheckBoxStateHandler.CheckBoxState> checkBox();
-    AutoBean<DeviceVisibilityState> deviceVisibility();
+public interface DeviceVisibilityProvider {
+    boolean isVisible(Device device);
+    void addVisibilityChangeHandler(DeviceVisibilityChangeHandler visibilityChangeHandler);
 }

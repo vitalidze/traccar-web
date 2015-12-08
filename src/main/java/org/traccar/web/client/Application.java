@@ -57,15 +57,17 @@ public class Application {
     private final ReportsController reportsController;
     private final LogController logController;
     private final GroupsController groupsController;
+    private final VisibilityController visibilityController;
 
     private ApplicationView view;
 
     public Application() {
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
-        ListStore<Device> deviceStore = new ListStore<Device>(deviceProperties.id());
+        ListStore<Device> deviceStore = new ListStore<>(deviceProperties.id());
 
         settingsController = new SettingsController(userSettingsHandler);
-        mapController = new MapController(mapHandler, deviceStore);
+        visibilityController = new VisibilityController();
+        mapController = new MapController(mapHandler, deviceStore, visibilityController);
         geoFenceController = new GeoFenceController(deviceStore, mapController);
         geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
         commandController = new CommandController();
@@ -73,6 +75,7 @@ public class Application {
         deviceController = new DeviceController(mapController,
                 geoFenceController,
                 commandController,
+                visibilityController,
                 deviceStore,
                 deviceStoreHandler,
                 geoFenceController.getGeoFenceStore(),
@@ -99,6 +102,7 @@ public class Application {
         geoFenceController.run();
         commandController.run();
         groupsController.run();
+        visibilityController.run();
         setupTimeZone();
     }
 
@@ -242,7 +246,6 @@ public class Application {
             overlays.deselectAll();
             for (UserSettings.OverlayType overlayType : UserSettings.OverlayType.values()) {
                 Layer[] mapLayer = mapController.getMap().getLayersByName(i18n.overlayType(overlayType));
-                GWT.log(i18n.overlayType(overlayType) + ":: " + mapLayer.length);
                 if (mapLayer != null && mapLayer.length == 1 && mapLayer[0].isVisible()) {
                     overlays.select(overlayType, true);
                 }
