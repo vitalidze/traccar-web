@@ -58,7 +58,7 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.GeoFenceProperties;
-import org.traccar.web.client.state.DeviceVisibilityProvider;
+import org.traccar.web.client.state.DeviceVisibilityHandler;
 import org.traccar.web.client.state.GridStateHandler;
 import org.traccar.web.shared.model.Device;
 
@@ -108,10 +108,6 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     public interface CommandHandler {
         void onCommand(Device device);
-    }
-
-    public interface DeviceVisibilityHandler extends DeviceVisibilityProvider {
-        void setVisible(Device device, boolean b);
     }
 
     private static class GroupsHandler extends BaseStoreHandlers {

@@ -35,4 +35,7 @@ public interface DeviceVisibilityState {
 
     Set<Long> getVisibleForced();
     void setVisibleForced(Set<Long> visibleForced);
+
+    Set<Long> getHiddenGroups();
+    void setHiddenGroups(Set<Long> hiddenGroups);
 }

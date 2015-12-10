@@ -25,14 +25,15 @@ import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.UIStateService;
 import org.traccar.web.client.model.UIStateServiceAsync;
 import org.traccar.web.client.state.DeviceVisibilityChangeHandler;
+import org.traccar.web.client.state.DeviceVisibilityHandler;
 import org.traccar.web.client.state.DeviceVisibilityState;
 import org.traccar.web.client.state.StateAutoBeanFactory;
-import org.traccar.web.client.view.DeviceView;
 import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.Group;
 
 import java.util.*;
 
-public class VisibilityController implements ContentController, DeviceView.DeviceVisibilityHandler {
+public class VisibilityController implements ContentController, DeviceVisibilityHandler {
     public static final String STATE_KEY_DEVICE_VISIBILITY = "deviceVisibility";
 
     private final Messages i18n = GWT.create(Messages.class);
@@ -40,7 +41,14 @@ public class VisibilityController implements ContentController, DeviceView.Devic
     private final StateAutoBeanFactory factory = GWT.create(StateAutoBeanFactory.class);
     private final LinkedList<DeviceVisibilityChangeHandler> visibilityChangeHandlers = new LinkedList<>();
     private DeviceVisibilityState deviceVisibility;
-    private Map<Long, Boolean> cachedVisibility = new HashMap<>();
+    private final Map<Long, DeviceState> deviceState = new HashMap<>();
+
+    private static class DeviceState {
+        boolean visible;
+        boolean idle;
+        boolean offline;
+        Group group;
+    }
 
     @Override
     public ContentPanel getView() {
@@ -61,6 +69,20 @@ public class VisibilityController implements ContentController, DeviceView.Devic
         });
     }
 
+    private DeviceState getState(Device device) {
+        return getState(device.getId());
+    }
+
+    private DeviceState getState(Long deviceId) {
+        DeviceState state = deviceState.get(deviceId);
+        if (state == null) {
+            state = new DeviceState();
+            state.visible = calculateVisibility(deviceId);
+            deviceState.put(deviceId, state);
+        }
+        return state;
+    }
+
     private void loadedDeviceVisibility(DeviceVisibilityState deviceVisibility) {
         this.deviceVisibility = deviceVisibility;
         if (deviceVisibility.getHiddenForced() == null) {
@@ -69,31 +91,30 @@ public class VisibilityController implements ContentController, DeviceView.Devic
         if (deviceVisibility.getVisibleForced() == null) {
             deviceVisibility.setVisibleForced(new HashSet<Long>());
         }
-        for (Map.Entry<Long, Boolean> entry : cachedVisibility.entrySet()) {
-            Long deviceId = entry.getKey();
-            boolean calculated = calculateVisibility(deviceId);
-            if (entry.getValue() != calculated) {
-                entry.setValue(calculated);
-                fireChange(deviceId, calculated);
-            }
+        if (deviceVisibility.getHiddenGroups() == null) {
+            deviceVisibility.setHiddenGroups(new HashSet<Long>());
+        }
+        for (Long deviceId : new HashSet<>(deviceState.keySet())) {
+            updateVisibility(deviceId);
         }
     }
 
     @Override
     public boolean isVisible(Device device) {
-        Long deviceId = device.getId();
-        Boolean visibility = cachedVisibility.get(deviceId);
-        if (visibility == null) {
-            visibility = calculateVisibility(deviceId);
-            cachedVisibility.put(deviceId, visibility);
-        }
-        return visibility;
+        return getState(device).visible;
     }
 
     private boolean calculateVisibility(Long deviceId) {
+        DeviceState state = deviceState.get(deviceId);
         return deviceVisibility != null
+                && state != null
                 && (deviceVisibility.getVisibleForced().contains(deviceId)
-                || !deviceVisibility.getHiddenForced().contains(deviceId));
+                    || !deviceVisibility.getHiddenForced().contains(deviceId))
+                && (!state.idle || !deviceVisibility.getHideIdle())
+                && (state.idle || !deviceVisibility.getHideMoving())
+                && (!state.offline || !deviceVisibility.getHideOffline())
+                && (state.offline || !deviceVisibility.getHideOnline())
+                && (state.group == null || !deviceVisibility.getHiddenGroups().contains(state.group.getId()));
     }
 
     @Override
@@ -103,9 +124,9 @@ public class VisibilityController implements ContentController, DeviceView.Devic
         service.setValue(STATE_KEY_DEVICE_VISIBILITY,
                 AutoBeanCodex.encode(AutoBeanUtils.getAutoBean(deviceVisibility)).getPayload(),
                 new BaseAsyncCallback<Void>(i18n));
-        Boolean previous = cachedVisibility.get(device.getId());
-        if (previous == null || previous != b) {
-            cachedVisibility.put(device.getId(), b);
+        DeviceState state = getState(device);
+        if (state.visible != b) {
+            state.visible = b;
             fireChange(device.getId(), b);
         }
     }
@@ -118,6 +139,51 @@ public class VisibilityController implements ContentController, DeviceView.Devic
     private void fireChange(Long deviceId, boolean visibility) {
         for (Iterator<DeviceVisibilityChangeHandler> it = visibilityChangeHandlers.descendingIterator(); it.hasNext(); ) {
             it.next().visibilityChanged(deviceId, visibility);
+        }
+    }
+
+    @Override
+    public void idle(Device device) {
+        if (!getState(device).idle) {
+            getState(device).idle = true;
+            updateVisibility(device);
+        }
+    }
+
+    @Override
+    public void moving(Device device) {
+        if (getState(device).idle) {
+            getState(device).idle = false;
+            updateVisibility(device);
+        }
+    }
+
+    @Override
+    public void offlineStatusChanged(Device device, boolean offline) {
+        if (getState(device).offline != offline) {
+            getState(device).offline = offline;
+            updateVisibility(device);
+        }
+    }
+
+    @Override
+    public void updated(Device device) {
+        if (!Objects.equals(device.getGroup(), getState(device).group)) {
+            getState(device).group = device.getGroup();
+            updateVisibility(device);
+        }
+    }
+
+    private void updateVisibility(Device device) {
+        updateVisibility(device.getId());
+    }
+
+    private void updateVisibility(Long deviceId) {
+        DeviceState state = getState(deviceId);
+        boolean calculated = calculateVisibility(deviceId);
+        if (state.visible != calculated) {
+            state.visible = calculated;
+            fireChange(deviceId, calculated);
         }
     }
 }

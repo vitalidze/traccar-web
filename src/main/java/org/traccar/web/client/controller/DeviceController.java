@@ -21,13 +21,13 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sencha.gxt.data.shared.event.StoreHandlers;
-import com.sencha.gxt.data.shared.event.StoreRecordChangeEvent;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
+import org.traccar.web.client.state.DeviceVisibilityHandler;
 import org.traccar.web.client.view.DeviceDialog;
 import org.traccar.web.client.view.UserShareDialog;
 import org.traccar.web.client.view.DeviceView;
@@ -62,12 +62,14 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     private final ListStore<Group> groupStore;
 
+    private final DeviceVisibilityHandler deviceVisibilityHandler;
+
     private Device selectedDevice;
 
     public DeviceController(MapController mapController,
                             DeviceView.GeoFenceHandler geoFenceHandler,
                             DeviceView.CommandHandler commandHandler,
-                            DeviceView.DeviceVisibilityHandler deviceVisibilityHandler,
+                            DeviceVisibilityHandler deviceVisibilityHandler,
                             final ListStore<Device> deviceStore,
                             StoreHandlers<Device> deviceStoreHandler,
                             ListStore<GeoFence> geoFenceStore,
@@ -81,6 +83,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         this.positionInfo = new PositionInfoPopup(deviceStore);
         this.deviceGeoFences = deviceGeoFences;
         this.groupStore = groupStore;
+        this.deviceVisibilityHandler = deviceVisibilityHandler;
 
         deviceView = new DeviceView(this, geoFenceHandler, commandHandler, deviceVisibilityHandler, deviceStore, geoFenceStore, groupStore);
     }
@@ -180,6 +183,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             }
                         }
                         mapController.updateAlert(result, showAlert);
+                        deviceVisibilityHandler.updated(result);
                     }
                     @Override
                     public void onFailure(Throwable caught) {

@@ -44,7 +44,7 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.state.DeviceVisibilityChangeHandler;
+import org.traccar.web.client.state.DeviceVisibilityHandler;
 import org.traccar.web.client.state.DeviceVisibilityProvider;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
@@ -197,7 +197,7 @@ public class MapView {
 
     public MapView(MapHandler mapHandler,
                    ListStore<Device> deviceStore,
-                   DeviceVisibilityProvider deviceVisibilityProvider) {
+                   DeviceVisibilityHandler deviceVisibilityHandler) {
         this.mapHandler = mapHandler;
         this.popup = new PositionInfoPopup(deviceStore);
         contentPanel = new ContentPanel();
@@ -284,18 +284,14 @@ public class MapView {
             }
         });
 
-        latestPositionRenderer = new MapPositionRenderer(this, latestPositionSelectHandler, positionMouseHandler, deviceVisibilityProvider);
+        latestPositionRenderer = new MapPositionRenderer(this, latestPositionSelectHandler, positionMouseHandler, deviceVisibilityHandler);
         archivePositionRenderer = new MapPositionRenderer(this, archivePositionSelectHandler, positionMouseHandler, new DeviceVisibilityProvider() {
             @Override
             public boolean isVisible(Device device) {
                 return true;
             }
-
-            @Override
-            public void addVisibilityChangeHandler(DeviceVisibilityChangeHandler visibilityChangeHandler) {
-            }
         });
-        latestPositionTrackRenderer = new MapPositionRenderer(this, null, null, deviceVisibilityProvider);
+        latestPositionTrackRenderer = new MapPositionRenderer(this, null, null, deviceVisibilityHandler);
         geoFenceRenderer = new GeoFenceRenderer(this);
     }
 

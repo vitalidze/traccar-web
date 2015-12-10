@@ -17,6 +17,11 @@ package org.traccar.web.client.state;
 
 import org.traccar.web.shared.model.Device;
 
-public interface DeviceVisibilityProvider {
-    boolean isVisible(Device device);
+public interface DeviceVisibilityHandler extends DeviceVisibilityProvider {
+    void setVisible(Device device, boolean b);
+    void idle(Device device);
+    void moving(Device device);
+    void offlineStatusChanged(Device device, boolean offline);
+    void updated(Device device);
+    void addVisibilityChangeHandler(DeviceVisibilityChangeHandler visibilityChangeHandler);
 }

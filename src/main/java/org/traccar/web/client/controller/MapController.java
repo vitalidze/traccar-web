@@ -33,7 +33,7 @@ import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.state.DeviceVisibilityChangeHandler;
-import org.traccar.web.client.state.DeviceVisibilityProvider;
+import org.traccar.web.client.state.DeviceVisibilityHandler;
 import org.traccar.web.client.view.MapView;
 import org.traccar.web.client.view.MarkerIcon;
 import org.traccar.web.shared.model.*;
@@ -52,13 +52,16 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
 
     private final ListStore<Device> deviceStore;
 
+    private final DeviceVisibilityHandler deviceVisibilityHandler;
+
     public MapController(MapHandler mapHandler,
                          ListStore<Device> deviceStore,
-                         DeviceVisibilityProvider deviceVisibilityProvider) {
+                         DeviceVisibilityHandler deviceVisibilityHandler) {
         this.mapHandler = mapHandler;
         this.deviceStore = deviceStore;
-        mapView = new MapView(this, deviceStore, deviceVisibilityProvider);
-        deviceVisibilityProvider.addVisibilityChangeHandler(this);
+        this.deviceVisibilityHandler = deviceVisibilityHandler;
+        mapView = new MapView(this, deviceStore, deviceVisibilityHandler);
+        deviceVisibilityHandler.addVisibilityChangeHandler(this);
         loadMapSettings();
     }
 
@@ -144,16 +147,19 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
                     boolean isOffline = currentTime - position.getTime().getTime() > timeout;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
                     position.setIcon(MarkerIcon.create(position));
+                    deviceVisibilityHandler.offlineStatusChanged(device, isOffline);
                     // check 'idle since'
                     if (position.getSpeed() != null) {
-                        if (position.getSpeed() > position.getDevice().getIdleSpeedThreshold()) {
+                        if (position.getSpeed() > device.getIdleSpeedThreshold()) {
                             latestNonIdlePositionMap.put(device.getId(), position);
+                            deviceVisibilityHandler.moving(device);
                         } else {
                             Position latestNonIdlePosition = latestNonIdlePositionMap.get(device.getId());
                             long minIdleTime = (long) device.getMinIdleTime() * 1000;
                             if (latestNonIdlePosition != null
                                     && position.getTime().getTime() - latestNonIdlePosition.getTime().getTime() > minIdleTime) {
                                 position.setIdleSince(latestNonIdlePosition.getTime());
+                                deviceVisibilityHandler.idle(device);
                             }
                         }
                     }
