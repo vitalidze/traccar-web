@@ -33,6 +33,7 @@ import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.CloseEvent;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.menu.*;
+import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.ArchiveStyle;
 import org.traccar.web.client.i18n.Messages;
@@ -110,7 +111,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     CheckBox snapToRoads;
 
     @UiField(provided = true)
-    Label styleButtonTrackColor;
+    LabelToolItem styleButtonTrackColor;
 
     @UiField
     TextButton styleButton;
@@ -146,7 +147,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 		periodCombo = new PeriodComboBox();
 
         // Element that displays the current track color
-        styleButtonTrackColor = new Label();
+        styleButtonTrackColor = new LabelToolItem();
         styleButtonTrackColor.getElement().getStyle().setProperty("backgroundColor", "#".concat(ArchiveStyle.DEFAULT_COLOR));
         // Menu with the small palette
         smallColorMenu = new ExtColorMenu(ArchiveStyle.COLORS, ArchiveStyle.COLORS);

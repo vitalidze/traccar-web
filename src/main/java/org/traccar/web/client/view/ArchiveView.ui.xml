@@ -46,33 +46,31 @@
                     <toolbar:LabelToolItem width="2" />
                     <form:CheckBox ui:field="snapToRoads" boxLabel="{i18n.snapToRoads}" stateful="true" stateId="snapToRoads" />
 
-                    <toolbar:ToolBar ui:field="styleToolbar">
-                        <g:Label ui:field="styleButtonTrackColor" text="&nbsp;&nbsp;&nbsp;&nbsp;" />
-                        <button:TextButton ui:field="styleButton" text="{i18n.style}">
-                            <button:menu>
-                                <menu:Menu ui:field="menu1">
-                                    <menu:CheckMenuItem ui:field="zoomToTrackMenu" text="{i18n.zoomToTrack}" />
-                                    <menu:SeparatorMenuItem />
-                                    <menu:MenuItem ui:field="markersMenu">
-                                        <menu:submenu>
-                                            <menu:Menu ui:field="routeMarkersType" />
-                                        </menu:submenu>
-                                    </menu:MenuItem>
-                                    <menu:SeparatorMenuItem />
-                                    <menu:MenuItem ui:field="fullPaletteMenu" text="{i18n.fullPalette}">
-                                        <menu:submenu>
-                                            <menu:ColorMenu ui:field="fullColorMenu" />
-                                        </menu:submenu>
-                                    </menu:MenuItem>
-                                    <menu:MenuItem ui:field="smallPaletteMenu" text="{i18n.smallPalette}">
-                                        <menu:submenu>
-                                            <menu:ColorMenu ui:field="smallColorMenu" />
-                                        </menu:submenu>
-                                    </menu:MenuItem>
-                                </menu:Menu>
-                            </button:menu>
-                        </button:TextButton>
-                    </toolbar:ToolBar>
+                    <toolbar:LabelToolItem ui:field="styleButtonTrackColor" label="&nbsp;&nbsp;&nbsp;&nbsp;" />
+                    <button:TextButton ui:field="styleButton" text="{i18n.style}">
+                        <button:menu>
+                            <menu:Menu ui:field="menu1">
+                                <menu:CheckMenuItem ui:field="zoomToTrackMenu" text="{i18n.zoomToTrack}" />
+                                <menu:SeparatorMenuItem />
+                                <menu:MenuItem ui:field="markersMenu">
+                                    <menu:submenu>
+                                        <menu:Menu ui:field="routeMarkersType" />
+                                    </menu:submenu>
+                                </menu:MenuItem>
+                                <menu:SeparatorMenuItem />
+                                <menu:MenuItem ui:field="fullPaletteMenu" text="{i18n.fullPalette}">
+                                    <menu:submenu>
+                                        <menu:ColorMenu ui:field="fullColorMenu" />
+                                    </menu:submenu>
+                                </menu:MenuItem>
+                                <menu:MenuItem ui:field="smallPaletteMenu" text="{i18n.smallPalette}">
+                                    <menu:submenu>
+                                        <menu:ColorMenu ui:field="smallColorMenu" />
+                                    </menu:submenu>
+                                </menu:MenuItem>
+                            </menu:Menu>
+                        </button:menu>
+                    </button:TextButton>
 
                     <toolbar:SeparatorToolItem />
 
