@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 public class CurrentUserProvider implements Provider<User> {
-    static final String ATTRIBUTE_USER_ID = "user";
+    static final String ATTRIBUTE_USER_ID = "userId";
 
     @Inject
     private Provider<HttpServletRequest> request;
