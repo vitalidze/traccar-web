@@ -69,7 +69,9 @@ public abstract class ReportGenerator {
                 : TimeZone.getTimeZone(currentUser.getUserSettings().getTimeZoneId());
         Locale locale = new Locale(getLocale());
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", locale);
+        dateFormat.setTimeZone(timeZone);
         longDateFormat = new SimpleDateFormat("d MMM yyyy", locale);
+        longDateFormat.setTimeZone(timeZone);
 
         renderer.start(report);
         generateImpl(report);
