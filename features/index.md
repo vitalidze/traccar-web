@@ -80,3 +80,5 @@ This project has following features, which don't exist in original `traccar-web`
 * added 'overview' map with the possibility to save it's maximized/minimized state to user's preferences ('take from map' is also working)
 * [commands](commands.html)
 * [device groups](groups.html)
+* device filter/lookup
+* [device visibility management](visibility.html)
