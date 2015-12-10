@@ -28,6 +28,7 @@ This project has following features, which don't exist in original `traccar-web`
     * [danish language](danish.html) (available via ?locale=da URL parameter)
     * [czech language](czech.html) (available via ?locale=cs URL parameter)
     * [serbian language](serbian.html) (available via ?locale=sr URL parameter)
+    * [serbian (latin) language](serbian_latin.html) (available via ?locale=sr_Latn URL parameter)
     * [hebrew language](hebrew.html) (available via ?locale=he URL parameter)
     * [persian language](persian.html) (available via ?locale=fa URL parameter)
     * [greek language](greek.html) (available via ?locale=el_GR URL parameter)
