@@ -442,7 +442,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
             public String getPath() {
                 return "visible";
             }
-        }, 50, "");
+        }, 50, headerTemplate.render(AbstractImagePrototype.create(resources.eye()).getSafeHtml()));
         colVisible.setCell(new CheckBoxCell());
         colVisible.setFixed(true);
         colVisible.setResizable(false);
@@ -730,6 +730,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     }
 
     interface Resources extends ClientBundle {
+        @Source("org/traccar/web/client/theme/icon/eye.png")
+        ImageResource eye();
+
         @Source("org/traccar/web/client/theme/icon/follow.png")
         ImageResource follow();
 
