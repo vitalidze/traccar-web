@@ -18,11 +18,6 @@
   tickets: [174]
   done: false
 
-- id: hide_inactive_offline_devices
-  description: Create an option to hide inactive and/or offline devices from map.
-  tickets: [118, 205]
-  done: false
-
 - id: remove_label_from_marker
   description: Add a new setting to the device (or all devices) - 'hide label from marker on map'.
   tickets: [209]
@@ -37,6 +32,11 @@
   description: Choose color for tracks in archive automatically. This should ne optional and must choose unique color that is not yet used for already drawn tracks.
   tickets: [179]
   done: false
+
+- id: hide_inactive_offline_devices
+  description: Create an option to hide inactive and/or offline devices from map.
+  tickets: [118, 205, 382]
+  done: true
 
 - id: send_commands
   description: Version 3.1 of traccar support sending of commands. But it is not working from this mod. The support will be added after v3.2 of traccar is released.
