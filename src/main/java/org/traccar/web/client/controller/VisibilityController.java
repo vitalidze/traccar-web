@@ -45,8 +45,8 @@ public class VisibilityController implements ContentController, DeviceVisibility
 
     private static class DeviceState {
         boolean visible;
-        boolean idle;
-        boolean offline;
+        boolean idle = true;
+        boolean offline = true;
         Group group;
     }
 
@@ -77,7 +77,7 @@ public class VisibilityController implements ContentController, DeviceVisibility
         DeviceState state = deviceState.get(deviceId);
         if (state == null) {
             state = new DeviceState();
-            state.visible = calculateVisibility(deviceId);
+            state.visible = calculateVisibility(deviceId, state);
             deviceState.put(deviceId, state);
         }
         return state;
@@ -94,9 +94,7 @@ public class VisibilityController implements ContentController, DeviceVisibility
         if (deviceVisibility.getHiddenGroups() == null) {
             deviceVisibility.setHiddenGroups(new HashSet<Long>());
         }
-        for (Long deviceId : new HashSet<>(deviceState.keySet())) {
-            updateVisibility(deviceId);
-        }
+        updateVisibilityOfAllDevices();
     }
 
     @Override
@@ -104,12 +102,20 @@ public class VisibilityController implements ContentController, DeviceVisibility
         return getState(device).visible;
     }
 
-    private boolean calculateVisibility(Long deviceId) {
-        DeviceState state = deviceState.get(deviceId);
-        return deviceVisibility != null
-                && state != null
-                && (deviceVisibility.getVisibleForced().contains(deviceId)
-                    || !deviceVisibility.getHiddenForced().contains(deviceId))
+    private boolean calculateVisibility(Long deviceId, DeviceState state) {
+        if (deviceVisibility == null) {
+            return false;
+        }
+
+        if (deviceVisibility.getVisibleForced().contains(deviceId)) {
+            return true;
+        }
+
+        if (deviceVisibility.getHiddenForced().contains(deviceId)) {
+            return false;
+        }
+
+        return state != null
                 && (!state.idle || !deviceVisibility.getHideIdle())
                 && (state.idle || !deviceVisibility.getHideMoving())
                 && (!state.offline || !deviceVisibility.getHideOffline())
@@ -121,14 +127,18 @@ public class VisibilityController implements ContentController, DeviceVisibility
     public void setVisible(Device device, boolean b) {
         (b ? deviceVisibility.getHiddenForced() : deviceVisibility.getVisibleForced()).remove(device.getId());
         (b ? deviceVisibility.getVisibleForced() : deviceVisibility.getHiddenForced()).add(device.getId());
-        service.setValue(STATE_KEY_DEVICE_VISIBILITY,
-                AutoBeanCodex.encode(AutoBeanUtils.getAutoBean(deviceVisibility)).getPayload(),
-                new BaseAsyncCallback<Void>(i18n));
+        saveDeviceVisibility();
         DeviceState state = getState(device);
         if (state.visible != b) {
             state.visible = b;
             fireChange(device.getId(), b);
         }
+    }
+
+    private void saveDeviceVisibility() {
+        service.setValue(STATE_KEY_DEVICE_VISIBILITY,
+                AutoBeanCodex.encode(AutoBeanUtils.getAutoBean(deviceVisibility)).getPayload(),
+                new BaseAsyncCallback<Void>(i18n));
     }
 
     @Override
@@ -180,10 +190,94 @@ public class VisibilityController implements ContentController, DeviceVisibility
 
     private void updateVisibility(Long deviceId) {
         DeviceState state = getState(deviceId);
-        boolean calculated = calculateVisibility(deviceId);
+        boolean calculated = calculateVisibility(deviceId, state);
         if (state.visible != calculated) {
             state.visible = calculated;
             fireChange(deviceId, calculated);
         }
+    }
+
+    private void updateVisibilityOfAllDevices() {
+        for (Long deviceId : deviceState.keySet()) {
+            updateVisibility(deviceId);
+        }
+    }
+
+    @Override
+    public boolean getHideOnline() {
+        return deviceVisibility.getHideOnline();
+    }
+
+    @Override
+    public void setHideOnline(boolean hideOnline) {
+        deviceVisibility.setHideOnline(hideOnline);
+        clearForcedVisibility();
+        saveDeviceVisibility();
+        updateVisibilityOfAllDevices();
+    }
+
+    @Override
+    public boolean getHideOffline() {
+        return deviceVisibility.getHideOffline();
+    }
+
+    @Override
+    public void setHideOffline(boolean hideOffline) {
+        deviceVisibility.setHideOffline(hideOffline);
+        clearForcedVisibility();
+        saveDeviceVisibility();
+        updateVisibilityOfAllDevices();
+    }
+
+    @Override
+    public boolean getHideIdle() {
+        return deviceVisibility.getHideIdle();
+    }
+
+    @Override
+    public void setHideIdle(boolean hideIdle) {
+        deviceVisibility.setHideIdle(hideIdle);
+        clearForcedVisibility();
+        saveDeviceVisibility();
+        updateVisibilityOfAllDevices();
+    }
+
+    @Override
+    public boolean getHideMoving() {
+        return deviceVisibility.getHideMoving();
+    }
+
+    @Override
+    public void setHideMoving(boolean hideMoving) {
+        deviceVisibility.setHideMoving(hideMoving);
+        clearForcedVisibility();
+        saveDeviceVisibility();
+        updateVisibilityOfAllDevices();
+    }
+
+    @Override
+    public boolean isHiddenGroup(Long groupId) {
+        return deviceVisibility.getHiddenGroups().contains(groupId);
+    }
+
+    @Override
+    public void addHiddenGroup(Long groupId) {
+        deviceVisibility.getHiddenGroups().add(groupId);
+        clearForcedVisibility();
+        saveDeviceVisibility();
+        updateVisibilityOfAllDevices();
+    }
+
+    @Override
+    public void removeHiddenGroup(Long groupId) {
+        deviceVisibility.getHiddenGroups().remove(groupId);
+        clearForcedVisibility();
+        saveDeviceVisibility();
+        updateVisibilityOfAllDevices();
+    }
+
+    private void clearForcedVisibility() {
+        deviceVisibility.getVisibleForced().clear();
+        deviceVisibility.getHiddenForced().clear();
     }
 }

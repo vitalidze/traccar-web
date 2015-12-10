@@ -24,4 +24,20 @@ public interface DeviceVisibilityHandler extends DeviceVisibilityProvider {
     void offlineStatusChanged(Device device, boolean offline);
     void updated(Device device);
     void addVisibilityChangeHandler(DeviceVisibilityChangeHandler visibilityChangeHandler);
+
+    boolean getHideOnline();
+    void setHideOnline(boolean hideOnline);
+
+    boolean getHideOffline();
+    void setHideOffline(boolean hideOffline);
+
+    boolean getHideIdle();
+    void setHideIdle(boolean hideIdle);
+
+    boolean getHideMoving();
+    void setHideMoving(boolean hideMoving);
+
+    boolean isHiddenGroup(Long groupId);
+    void addHiddenGroup(Long groupId);
+    void removeHiddenGroup(Long groupId);
 }

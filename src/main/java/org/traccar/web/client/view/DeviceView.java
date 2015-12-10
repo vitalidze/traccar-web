@@ -24,6 +24,7 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -52,12 +53,17 @@ import com.sencha.gxt.widget.core.client.form.StoreFilterField;
 import com.sencha.gxt.widget.core.client.grid.*;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
+import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
+import com.sencha.gxt.widget.core.client.menu.Item;
+import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.GeoFenceProperties;
+import org.traccar.web.client.state.DeviceVisibilityChangeHandler;
 import org.traccar.web.client.state.DeviceVisibilityHandler;
 import org.traccar.web.client.state.GridStateHandler;
 import org.traccar.web.shared.model.Device;
@@ -219,6 +225,92 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         }
     }
 
+    private static class DeviceGridView extends GroupingView<Device> {
+        Messages i18n = GWT.create(Messages.class);
+
+        final DeviceVisibilityHandler deviceVisibilityHandler;
+        final ListStore<Group> groupStore;
+
+        private DeviceGridView(DeviceVisibilityHandler deviceVisibilityHandler, ListStore<Group> groupStore) {
+            this.deviceVisibilityHandler = deviceVisibilityHandler;
+            this.groupStore = groupStore;
+        }
+
+        @Override
+        protected Menu createContextMenu(int colIndex) {
+            Menu menu = super.createContextMenu(colIndex);
+            if (colIndex == 0) {
+                CheckMenuItem idle = new CheckMenuItem(capitalize(i18n.idle()));
+                idle.setChecked(!deviceVisibilityHandler.getHideIdle());
+                idle.addSelectionHandler(new SelectionHandler<Item>() {
+                    @Override
+                    public void onSelection(SelectionEvent<Item> event) {
+                        deviceVisibilityHandler.setHideIdle(!deviceVisibilityHandler.getHideIdle());
+                    }
+                });
+                menu.add(idle);
+
+                CheckMenuItem moving = new CheckMenuItem(capitalize(i18n.moving()));
+                moving.setChecked(!deviceVisibilityHandler.getHideMoving());
+                moving.addSelectionHandler(new SelectionHandler<Item>() {
+                    @Override
+                    public void onSelection(SelectionEvent<Item> event) {
+                        deviceVisibilityHandler.setHideMoving(!deviceVisibilityHandler.getHideMoving());
+                    }
+                });
+                menu.add(moving);
+
+                CheckMenuItem offline = new CheckMenuItem(capitalize(i18n.offline()));
+                offline.setChecked(!deviceVisibilityHandler.getHideOffline());
+                offline.addSelectionHandler(new SelectionHandler<Item>() {
+                    @Override
+                    public void onSelection(SelectionEvent<Item> event) {
+                        deviceVisibilityHandler.setHideOffline(!deviceVisibilityHandler.getHideOffline());
+                    }
+                });
+                menu.add(offline);
+
+                CheckMenuItem online = new CheckMenuItem(capitalize(i18n.online()));
+                online.setChecked(!deviceVisibilityHandler.getHideOnline());
+                online.addSelectionHandler(new SelectionHandler<Item>() {
+                    @Override
+                    public void onSelection(SelectionEvent<Item> event) {
+                        deviceVisibilityHandler.setHideOnline(!deviceVisibilityHandler.getHideOnline());
+                    }
+                });
+                menu.add(online);
+
+                if (groupStore.size() > 0) {
+                    MenuItem groups = new MenuItem(i18n.groups());
+                    groups.setSubMenu(new Menu());
+                    for (final Group group : groupStore.getAll()) {
+                        CheckMenuItem groupItem = new CheckMenuItem(group.getName());
+                        groupItem.setChecked(!deviceVisibilityHandler.isHiddenGroup(group.getId()));
+                        groupItem.addSelectionHandler(new SelectionHandler<Item>() {
+                            @Override
+                            public void onSelection(SelectionEvent<Item> event) {
+                                if (deviceVisibilityHandler.isHiddenGroup(group.getId())) {
+                                    deviceVisibilityHandler.removeHiddenGroup(group.getId());
+                                } else {
+                                    deviceVisibilityHandler.addHiddenGroup(group.getId());
+                                }
+                            }
+                        });
+                        groups.getSubMenu().add(groupItem);
+                    }
+                    menu.add(groups);
+                }
+            }
+            return menu;
+        }
+
+        private String capitalize(String s) {
+            return Character.isUpperCase(s.charAt(0))
+                    ? s
+                    : (Character.toUpperCase(s.charAt(0)) + s.substring(1, s.length()));
+        }
+    }
+
     private final DeviceHandler deviceHandler;
 
     private final GeoFenceHandler geoFenceHandler;
@@ -357,6 +449,15 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         colVisible.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.visible()).toSafeHtml());
         columnConfigList.add(colVisible);
 
+        // handle visibility change events
+        deviceVisibilityHandler.addVisibilityChangeHandler(new DeviceVisibilityChangeHandler() {
+            @Override
+            public void visibilityChanged(Long deviceId, boolean visible) {
+                Device device = deviceStore.findModelWithKey(deviceId.toString());
+                deviceStore.update(device);
+            }
+        });
+
         // Name column
         ColumnConfig<Device, String> colName = new ColumnConfig<>(deviceProperties.name(), 0, i18n.name());
         colName.setCell(new AbstractCell<String>(BrowserEvents.MOUSEOVER, BrowserEvents.MOUSEOUT) {
@@ -449,7 +550,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         colGroup.setHidden(true);
         columnConfigList.add(colGroup);
 
-        view = new GroupingView<>();
+        view = new DeviceGridView(deviceVisibilityHandler, groupStore);
         view.setStripeRows(true);
         view.setShowGroupedColumn(false);
         view.setEnableNoGroups(true);
