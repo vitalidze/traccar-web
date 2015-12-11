@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN"
+        "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
+<module>
+    <inherits name="com.google.gwt.user.User" />
+    <inherits name="com.google.gwt.json.JSON" />
+
+    <define-configuration-property name="locale.queryparam" is-multi-valued="false"/>
+    <set-configuration-property name="locale.queryparam" value="locale"/>
+
+    <define-configuration-property name="locale.cookie" is-multi-valued="false"/>
+    <set-configuration-property name="locale.cookie" value="GWT_LOCALE" />
+
+    <!-- define property to hold all available locales -->
+    <define-property name="traccar.locale"
+                     values="default" />
+    <set-property-fallback name="traccar.locale" value="default"/>
+    <property-provider name="traccar.locale"
+                       generator="org.traccar.web.i18n.linker.LocalePropertyProviderGenerator"/>
+    <extend-property name="traccar.locale"
+                     values="ru,de,it,es,pl,tl,hu,pt_PT,lt,nl,sv_SE,bg,fr,pt_BR,da,cs,sr,sr_Latn,he,fa,el_GR,mk"/>
+
+    <!-- generator for all 'Messages' interfaces -->
+    <generate-with class="org.traccar.web.i18n.rebind.LocalizableGenerator">
+        <when-type-assignable class="com.google.gwt.i18n.shared.Localizable" />
+    </generate-with>
+
+    <generate-with class="org.traccar.web.i18n.rebind.LocaleInfoGenerator">
+        <when-type-is class="com.google.gwt.i18n.client.impl.LocaleInfoImpl" />
+    </generate-with>
+
+    <source path="client" />
+</module>

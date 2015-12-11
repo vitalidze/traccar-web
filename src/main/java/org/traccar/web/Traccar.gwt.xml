@@ -12,25 +12,12 @@
     <inherits name='com.sencha.gxt.ui.GXT'/>
     <inherits name='org.gwtopenmaps.openlayers.OpenLayers' />
     <inherits name="com.google.gwt.resources.Resources" />
-    <inherits name='com.sencha.gxt.theme.neptune.Theme' />
     <inherits name="com.github.nmorel.gwtjackson.GwtJackson" />
-
-    <!-- theme -->
-    <replace-with class="com.sencha.gxt.theme.neptune.client.base.menu.Css3MenuItemAppearance">
-        <when-type-is class="com.sencha.gxt.widget.core.client.menu.Item.ItemAppearance"/>
-    </replace-with>
-
-    <replace-with class="org.traccar.web.client.theme.WindowAppearance">
-        <when-type-is class="com.sencha.gxt.widget.core.client.Window.WindowAppearance"/>
-    </replace-with>
-
-    <replace-with class="org.traccar.web.client.theme.ToolbarAppearance">
-        <when-type-is class="com.sencha.gxt.widget.core.client.toolbar.ToolBar.ToolBarAppearance"/>
-    </replace-with>
+    <inherits name="org.traccar.web.client.theme.Theme" />
+    <inherits name="org.traccar.web.i18n.I18N" />
 
     <set-property name="gwt.logging.enabled" value="FALSE"/>
     <set-property name="gwt.logging.consoleHandler" value="DISABLED"/>
-    <set-configuration-property name="locale.cookie" value="GWT_LOCALE" />
     <set-configuration-property name="GXT.state.autoBeanFactory"
                                 value="org.traccar.web.client.state.StateAutoBeanFactory" />
 
@@ -38,27 +25,4 @@
 
     <source path='client'/>
     <source path='shared'/>
-
-    <extend-property name="locale" values="ru" />
-    <extend-property name="locale" values="de" />
-    <extend-property name="locale" values="it" />
-    <extend-property name="locale" values="es" />
-    <extend-property name="locale" values="pl" />
-    <extend-property name="locale" values="tl" />
-    <extend-property name="locale" values="hu" />
-    <extend-property name="locale" values="pt_PT" />
-    <extend-property name="locale" values="lt" />
-    <extend-property name="locale" values="nl" />
-    <extend-property name="locale" values="sv_SE" />
-    <extend-property name="locale" values="bg" />
-    <extend-property name="locale" values="fr" />
-    <extend-property name="locale" values="pt_BR" />
-    <extend-property name="locale" values="da" />
-    <extend-property name="locale" values="cs" />
-    <extend-property name="locale" values="sr" />
-    <extend-property name="locale" values="sr_Latn" />
-    <extend-property name="locale" values="he" />
-    <extend-property name="locale" values="fa" />
-    <extend-property name="locale" values="el_GR" />
-    <extend-property name="locale" values="mk" />
 </module>
