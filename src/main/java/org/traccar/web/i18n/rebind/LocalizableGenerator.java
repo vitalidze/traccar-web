@@ -99,7 +99,7 @@ public class LocalizableGenerator extends Generator {
             try {
                 resourceList = ResourceFactory.getBundle(logger, targetClass, locale,
                         assignableToConstants, context);
-                OutputStream os = context.tryCreateResource(logger, resource + "/" + locale.toString());
+                OutputStream os = context.tryCreateResource(logger, resource + "/" + locale.toString() + ".json");
                 if (os != null) {
                     JsonGenerator jg = jsonFactory.createGenerator(os, JsonEncoding.UTF8);
                     jg.writeStartObject();

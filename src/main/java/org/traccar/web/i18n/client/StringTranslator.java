@@ -4,6 +4,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,19 +19,22 @@ public class StringTranslator {
     }
 
     public String translate(String key, Object... args) {
-        String raw = null;//lookup(resource, LocaleInfo.getCurrentLocale().getLocaleName(), key);
-        getStrings();
-        if (raw == null)
-            return "@@@@ " + resource + "/" + key + "@@@@";
-        return format(raw, args);
+        return format(getString(key), args);
     }
 
     public String translateSelect(String key, Object select, Object... args) {
-        String raw = null;//lookup(getStringsURL(), key);
-        getStrings();
-        if (raw == null)
-            return "@@@@ " + resource + "/" + key + "@@@@";
-        return format(raw, args);
+        return format(getString(key), args);
+    }
+
+    private String getString(String key) {
+        JSONValue value = getStrings().get(key);
+        if (value != null) {
+            JSONString string = value.isString();
+            if (string != null) {
+                return string.stringValue();
+            }
+        }
+        return "@@@@ " + key + " @@@@";
     }
 
     public String format(String format, Object... arguments) {
@@ -48,7 +53,7 @@ public class StringTranslator {
     private JSONObject getStrings() {
         JSONObject strings = STRINGS.get(resource);
         if (strings == null) {
-            String str = lookup(GWT.getModuleBaseURL() + resource + "/" + LocaleInfo.getCurrentLocale().getLocaleName());
+            String str = lookup(GWT.getModuleBaseForStaticFiles() + resource + "/" + LocaleInfo.getCurrentLocale().getLocaleName() + ".json");
             strings = JSONParser.parseStrict(str).isObject();
             STRINGS.put(resource, strings);
         }
