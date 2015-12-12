@@ -1,23 +1,21 @@
 /*
- * Copyright 2008 Google Inc.
+ * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.traccar.web.i18n.rebind;
 
 import com.google.gwt.codegen.server.CodeGenUtils;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.ext.*;
 import com.google.gwt.core.ext.impl.ResourceLocatorImpl;
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -96,16 +94,6 @@ public class LocaleInfoGenerator extends Generator {
     public final String generate(TreeLogger logger, final GeneratorContext context,
                                  String typeName) throws UnableToCompleteException {
         TypeOracle typeOracle = context.getTypeOracle();
-        // Get the current locale and interface type.
-        PropertyOracle propertyOracle = context.getPropertyOracle();
-        LocaleParameters params = null;
-        try {
-            params = getLocaleParameters(propertyOracle, logger);
-        } catch (BadPropertyValueException e) {
-            logger.log(TreeLogger.ERROR, "Unable to parse properties", e);
-            throw new UnableToCompleteException();
-        }
-
         JClassType targetClass;
         try {
             targetClass = typeOracle.getType(typeName);
@@ -117,13 +105,23 @@ public class LocaleInfoGenerator extends Generator {
                 targetClass.getQualifiedSourceName()));
 
         String packageName = targetClass.getPackage().getName();
-        String superClassName = targetClass.getName().replace('.', '_') + "_shared";
-        Set<GwtLocale> localeSet = params.allLocales;
-        GwtLocaleImpl[] allLocales = localeSet.toArray(new GwtLocaleImpl[localeSet.size()]);
-        // sort for deterministic output
-        Arrays.sort(allLocales);
-        PrintWriter pw = context.tryCreate(logger, packageName, superClassName);
+        String className = targetClass.getName().replace('.', '_') + "Generated";
+
+        PrintWriter pw = context.tryCreate(logger, packageName, className);
         if (pw != null) {
+            PropertyOracle propertyOracle = context.getPropertyOracle();
+            LocaleParameters params;
+            try {
+                params = getLocaleParameters(propertyOracle, logger);
+            } catch (BadPropertyValueException e) {
+                logger.log(TreeLogger.ERROR, "Unable to parse properties", e);
+                throw new UnableToCompleteException();
+            }
+
+            Set<GwtLocale> localeSet = params.allLocales;
+            GwtLocaleImpl[] allLocales = localeSet.toArray(new GwtLocaleImpl[localeSet.size()]);
+            // sort for deterministic output
+            Arrays.sort(allLocales);
             LocalizedProperties displayNames = new LocalizedProperties();
             LocalizedProperties displayNamesManual = new LocalizedProperties();
             LocalizedProperties displayNamesOverride = new LocalizedProperties();
@@ -154,12 +152,21 @@ public class LocaleInfoGenerator extends Generator {
             }
 
             ClassSourceFileComposerFactory factory = new ClassSourceFileComposerFactory(
-                    packageName, superClassName);
+                    packageName, className);
             factory.setSuperclass(targetClass.getQualifiedSourceName());
-            factory.addImport(GWT.class.getCanonicalName());
-            factory.addImport(JavaScriptObject.class.getCanonicalName());
-            factory.addImport(HashMap.class.getCanonicalName());
+            factory.addImport("com.google.gwt.core.client.GWT");
+            factory.addImport("com.google.gwt.core.client.JavaScriptObject");
+            factory.addImport("com.google.gwt.i18n.client.LocaleInfo");
+            factory.addImport("com.google.gwt.i18n.client.constants.NumberConstants");
+            factory.addImport("com.google.gwt.i18n.client.constants.NumberConstantsImpl");
+            factory.addImport("com.google.gwt.i18n.client.DateTimeFormatInfo");
+            factory.addImport("com.google.gwt.i18n.client.impl.cldr.DateTimeFormatInfoImpl");
+            factory.addImport("java.util.HashMap");
+            factory.addImport("org.traccar.web.i18n.client.LocaleProvider");
+
             SourceWriter writer = factory.createSourceWriter(context, pw);
+            writer.println("private final LocaleProvider localeProvider = new LocaleProvider(\"" +
+                    params.queryParam + "\", \"" + params.cookie + "\");");
             writer.println("private static native String getLocaleNativeDisplayName(");
             writer.println("    JavaScriptObject nativeDisplayNamesNative,String localeName) /*-{");
             writer.println("  return nativeDisplayNamesNative[localeName];");
@@ -244,27 +251,9 @@ public class LocaleInfoGenerator extends Generator {
             }
             writer.println("  };");
             writer.println("}-*/;");
-            writer.commit(logger);
-        }
-        String className = targetClass.getName().replace('.', '_') + "Generated";
-
-        pw = context.tryCreate(logger, packageName, className);
-        if (pw != null) {
-            ClassSourceFileComposerFactory factory = new ClassSourceFileComposerFactory(
-                    packageName, className);
-            factory.setSuperclass(superClassName);
-            factory.addImport("com.google.gwt.core.client.GWT");
-            factory.addImport("com.google.gwt.i18n.client.LocaleInfo");
-            factory.addImport("com.google.gwt.i18n.client.constants.NumberConstants");
-            factory.addImport("com.google.gwt.i18n.client.constants.NumberConstantsImpl");
-            factory.addImport("com.google.gwt.i18n.client.DateTimeFormatInfo");
-            factory.addImport("com.google.gwt.i18n.client.impl.cldr.DateTimeFormatInfoImpl");
-            SourceWriter writer = factory.createSourceWriter(context, pw);
             writer.println("@Override");
             writer.println("public String getLocaleName() {");
-//            TODO
-            writer.println("  return \"default\";");
-//            writer.println("  return \"" + locale + "\";");
+            writer.println("  return localeProvider.getLocale();");
             writer.println("}");
             writer.println();
             String queryParam = params.queryParam;
@@ -324,20 +313,20 @@ public class LocaleInfoGenerator extends Generator {
 
     public static class LocaleParameters {
         final Set<GwtLocale> allLocales;
-        final String cookie;
         final String queryParam;
+        final String cookie;
 
-        LocaleParameters(Set<GwtLocale> allLocales, String cookie, String queryParam) {
+        LocaleParameters(Set<GwtLocale> allLocales, String queryParam, String cookie) {
             this.allLocales = Collections.unmodifiableSet(allLocales);
-            this.cookie = cookie;
             this.queryParam = queryParam;
+            this.cookie = cookie;
         }
     }
 
     static LocaleParameters getLocaleParameters(PropertyOracle propertyOracle, TreeLogger logger) throws BadPropertyValueException{
 
-        SelectionProperty localeProp
-                = propertyOracle.getSelectionProperty(logger, PROP_LOCALE);
+        ConfigurationProperty localeProp
+                = propertyOracle.getConfigurationProperty(PROP_LOCALE);
         ConfigurationProperty queryParamProp
                 = propertyOracle.getConfigurationProperty(PROP_LOCALE_QUERY_PARAM);
         ConfigurationProperty cookieProp
@@ -352,7 +341,7 @@ public class LocaleInfoGenerator extends Generator {
         if (cookie.length() == 0) {
             cookie = null;
         }
-        SortedSet<String> localeValues = localeProp.getPossibleValues();
+        List<String> localeValues = localeProp.getValues();
 
         GwtLocaleFactory factoryInstance = getLocaleFactory();
         for (String localeValue : localeValues) {

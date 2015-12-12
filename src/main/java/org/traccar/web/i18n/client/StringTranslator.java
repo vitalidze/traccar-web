@@ -26,8 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StringTranslator {
-    private final String resource;
     private static final Map<String, JSONObject> STRINGS = new HashMap<>();
+
+    private final String resource;
 
     public StringTranslator(String resource) {
         this.resource = resource;

@@ -13,13 +13,29 @@
     <set-configuration-property name="locale.cookie" value="GWT_LOCALE" />
 
     <!-- define property to hold all available locales -->
-    <define-property name="traccar.locale"
-                     values="default" />
-    <set-property-fallback name="traccar.locale" value="default"/>
-    <property-provider name="traccar.locale"
-                       generator="org.traccar.web.i18n.linker.LocalePropertyProviderGenerator"/>
-    <extend-property name="traccar.locale"
-                     values="ru,de,it,es,pl,tl,hu,pt_PT,lt,nl,sv_SE,bg,fr,pt_BR,da,cs,sr,sr_Latn,he,fa,el_GR,mk"/>
+    <define-configuration-property name="traccar.locale"
+                     is-multi-valued="true"/>
+    <set-configuration-property name="traccar.locale" value="default" />
+    <extend-configuration-property name="traccar.locale" value="ru" />
+    <extend-configuration-property name="traccar.locale" value="de" />
+    <extend-configuration-property name="traccar.locale" value="it" />
+    <extend-configuration-property name="traccar.locale" value="es" />
+    <extend-configuration-property name="traccar.locale" value="pl" />
+    <extend-configuration-property name="traccar.locale" value="tl" />
+    <extend-configuration-property name="traccar.locale" value="hu" />
+    <extend-configuration-property name="traccar.locale" value="pt_PT" />
+    <extend-configuration-property name="traccar.locale" value="sv_SE" />
+    <extend-configuration-property name="traccar.locale" value="bg" />
+    <extend-configuration-property name="traccar.locale" value="fr" />
+    <extend-configuration-property name="traccar.locale" value="pt_BR" />
+    <extend-configuration-property name="traccar.locale" value="da" />
+    <extend-configuration-property name="traccar.locale" value="cs" />
+    <extend-configuration-property name="traccar.locale" value="sr" />
+    <extend-configuration-property name="traccar.locale" value="sr_Latn" />
+    <extend-configuration-property name="traccar.locale" value="he" />
+    <extend-configuration-property name="traccar.locale" value="fa" />
+    <extend-configuration-property name="traccar.locale" value="el_GR" />
+    <extend-configuration-property name="traccar.locale" value="mk" />
 
     <!-- generator for all 'Messages' interfaces -->
     <generate-with class="org.traccar.web.i18n.rebind.LocalizableGenerator">
