@@ -35,21 +35,31 @@ public class StringTranslator {
     }
 
     public String translate(String key, Object... args) {
-        return format(getString(key), args);
+        JSONValue value = getStrings().get(key);
+        JSONString string = value == null ? null : value.isString();
+        return string == null ? na(key) : format(string.stringValue(), args);
     }
 
     public String translateSelect(String key, Object select, Object... args) {
-        return format(getString(key), args);
+        JSONValue value = getStrings().get(key);
+        JSONObject object = value == null ? null : value.isObject();
+        if (object == null) {
+            return na(key);
+        }
+
+        String selectKey = select instanceof Enum ? ((Enum) select).name()
+                : select == null
+                    ? "null" : select.toString();
+        value = object.get(selectKey);
+        if (value == null) {
+            // default
+            value = object.get("null");
+        }
+        JSONString string = value == null ? null : value.isString();
+        return string == null ? na(key + "[" + selectKey + "]") : format(string.stringValue(), args);
     }
 
-    private String getString(String key) {
-        JSONValue value = getStrings().get(key);
-        if (value != null) {
-            JSONString string = value.isString();
-            if (string != null) {
-                return string.stringValue();
-            }
-        }
+    private String na(String key) {
         return "@@@@ " + key + " @@@@";
     }
 
