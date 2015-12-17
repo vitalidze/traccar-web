@@ -31,6 +31,8 @@ import com.google.gwt.user.rebind.SourceWriter;
 import java.io.*;
 import java.util.Collection;
 import java.util.MissingResourceException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LocalizableGenerator extends Generator {
     final com.google.gwt.i18n.rebind.LocalizableGenerator gwtGenerator = new com.google.gwt.i18n.rebind.LocalizableGenerator();
@@ -122,12 +124,12 @@ public class LocalizableGenerator extends Generator {
                         AbstractResource.ResourceEntry entry = resourceList.getEntry(key);
                         Collection<String> forms = entry.getForms();
                         if (forms.isEmpty()) {
-                            jg.writeStringField(key, resourceList.getString(key));
+                            jg.writeStringField(key, process(resourceList.getString(key)));
                         } else {
                             jg.writeObjectFieldStart(key);
                             jg.writeStringField("null", resourceList.getString(key));
                             for (String form : forms) {
-                                jg.writeStringField(form, entry.getForm(form));
+                                jg.writeStringField(form, process(entry.getForm(form)));
                             }
                             jg.writeEndObject();
                         }
@@ -169,5 +171,31 @@ public class LocalizableGenerator extends Generator {
         } else {
             return composer.createSourceWriter(context, printWriter);
         }
+    }
+
+    private static String process(String data) {
+        String utf = removeUTFCharacters(data);
+        return utf.replaceAll("''", "'");
+    }
+
+    private final static Pattern PATTERN_UNICODE_CHAR = Pattern.compile("\\\\u(\\p{XDigit}{4})");
+    private static String removeUTFCharacters(String data) {
+        Matcher m = PATTERN_UNICODE_CHAR.matcher(data);
+        StringBuilder buf = null;
+        int start = 0;
+        while (m.find()) {
+            if (buf == null) {
+                buf = new StringBuilder();
+            }
+            if (start != m.start()) {
+                buf.append(data.substring(start, m.start()));
+            }
+            buf.append((char) Integer.parseInt(m.group(1), 16));
+            start = m.end();
+        }
+        if (buf != null && start < data.length()) {
+            buf.append(data.substring(start, data.length()));
+        }
+        return buf == null ? data : buf.toString();
     }
 }
