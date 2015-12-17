@@ -17,30 +17,27 @@ package org.traccar.web.i18n.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class StringTranslator {
+public class DynamicTranslator {
     private static final Map<String, JSONObject> STRINGS = new HashMap<>();
 
     private final String resource;
 
-    public StringTranslator(String resource) {
+    public DynamicTranslator(String resource) {
         this.resource = resource;
     }
 
-    public String translate(String key, Object... args) {
+    public String string(String key, Object... args) {
         JSONValue value = getStrings().get(key);
         JSONString string = value == null ? null : value.isString();
         return string == null ? na(key) : format(string.stringValue(), args);
     }
 
-    public String translateSelect(String key, Object select, Object... args) {
+    public String stringWithSelect(String key, Object select, Object... args) {
         JSONValue value = getStrings().get(key);
         JSONObject object = value == null ? null : value.isObject();
         if (object == null) {
@@ -57,6 +54,25 @@ public class StringTranslator {
         }
         JSONString string = value == null ? null : value.isString();
         return string == null ? na(key + "[" + selectKey + "]") : format(string.stringValue(), args);
+    }
+
+    public String[] stringArray(String key, Object... args) {
+        JSONValue value = getStrings().get(key);
+        JSONArray array = value == null ? null : value.isArray();
+        if (array == null) {
+            return new String[0];
+        }
+        String[] result = new String[array.size()];
+        for (int i = 0; i < array.size(); i++) {
+            result[i] = array.get(i).isString().stringValue();
+        }
+        return result;
+    }
+
+    public int integer(String key, Object... args) {
+        JSONValue value = getStrings().get(key);
+        JSONNumber number = value == null ? null : value.isNumber();
+        return number == null ? Integer.MIN_VALUE : (int) number.doubleValue();
     }
 
     private String na(String key) {
