@@ -15,7 +15,9 @@
  */
 package org.traccar.web.shared.model;
 
-public enum CommandType {
+import com.google.gwt.user.client.rpc.IsSerializable;
+
+public enum CommandType implements IsSerializable {
     positionSingle,
     positionPeriodic,
     positionStop,

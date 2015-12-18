@@ -82,4 +82,6 @@ public interface DataService extends RemoteService {
     Map<User, Boolean> getGeoFenceShare(GeoFence geoFence);
 
     void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share);
+
+    String sendCommand(Command command) throws AccessDeniedException;
 }

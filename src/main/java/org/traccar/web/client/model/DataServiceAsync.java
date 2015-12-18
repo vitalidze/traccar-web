@@ -80,4 +80,6 @@ public interface DataServiceAsync {
     void getGeoFenceShare(GeoFence geoFence, AsyncCallback<Map<User, Boolean>> async);
 
     void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share, AsyncCallback<Void> async);
+
+    void sendCommand(Command command, AsyncCallback<String> async) throws AccessDeniedException;
 }

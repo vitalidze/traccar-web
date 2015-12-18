@@ -21,11 +21,18 @@ import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.http.client.*;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.model.BaseAsyncCallback;
+import org.traccar.web.client.model.DataService;
+import org.traccar.web.client.model.DataServiceAsync;
 import org.traccar.web.client.view.CommandDialog;
 import org.traccar.web.client.view.DeviceView;
 import org.traccar.web.client.view.LogViewDialog;
+import org.traccar.web.shared.model.Command;
 import org.traccar.web.shared.model.CommandType;
 import org.traccar.web.shared.model.Device;
+
+import java.util.HashMap;
 
 public class CommandController implements ContentController, DeviceView.CommandHandler, CommandDialog.CommandHandler {
     @Override
@@ -57,71 +64,31 @@ public class CommandController implements ContentController, DeviceView.CommandH
         new CommandDialog(device, this).show();
     }
 
-    static class Command extends JavaScriptObject {
-        protected Command() {
-        }
-
-        public final native void setType(String type)  /*-{
-            this.type = type;
-        }-*/;
-
-        public final native void setDeviceId(int deviceId) /*-{
-            this.deviceId = deviceId;
-        }-*/;
-
-        public final native void setCommand(String command) /*-{
-            this.command = command;
-        }-*/;
-
-        public final native void set(String attribute, int value) /*-{
-            if (this.attributes === undefined) {
-                this.attributes = {};
-            }
-            this.attributes[attribute] = value;
-        }-*/;
-    }
-
     @Override
     public void onSend(Device device, CommandType type, int frequency, int timezone, String rawCommand) {
-        Command command = JavaScriptObject.createObject().cast();
-        command.setType(type.name());
+        Command command = new Command();
+        command.setType(type);
         command.setDeviceId((int) device.getId());
+        command.setAttributes(new HashMap<String, Integer>());
         switch (type) {
             case positionPeriodic:
-                command.set(CommandType.KEY_FREQUENCY, frequency);
+                command.getAttributes().put(CommandType.KEY_FREQUENCY, frequency);
                 break;
             case setTimezone:
-                command.set(CommandType.KEY_TIMEZONE, timezone);
+                command.getAttributes().put(CommandType.KEY_TIMEZONE, timezone);
                 break;
             case CUSTOM:
                 command.setCommand(rawCommand);
                 break;
         }
 
-        String url = "api/command/" + (type == CommandType.CUSTOM ? "raw" : "send");
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, url);
-        try {
-            builder.sendRequest(JsonUtils.stringify(command), new RequestCallback() {
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-                    StringBuilder text = new StringBuilder("<h2>Request completed</h2>")
-                            .append("<h3>Status: ").append(response.getStatusText()).append("</h3>")
-                            .append("<h3>Response</h3>")
-                            .append("<pre>")
-                            .append(response.getText())
-                            .append("</pre>");
-                    new LogViewDialog(text.toString()).show();
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
-                    StringBuilder text = new StringBuilder("<h2>Request failed</h2>")
-                            .append("<h3>Error: ").append(exception.getLocalizedMessage()).append("</h3>");
-                    new LogViewDialog(text.toString()).show();
-                }
-            });
-        } catch (RequestException ex) {
-            GWT.log("Unexpected error during command request", ex);
-        }
+        DataServiceAsync service = GWT.create(DataService.class);
+        Messages i18n = GWT.create(Messages.class);
+        service.sendCommand(command, new BaseAsyncCallback<String>(i18n) {
+            @Override
+            public void onSuccess(String result) {
+                new LogViewDialog("<pre>" + result + "</pre>").show();
+            }
+        });
     }
 }

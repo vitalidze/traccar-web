@@ -15,6 +15,10 @@
  */
 package org.traccar.web.server.model;
 
+import java.io.Reader;
+import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.List;
 
@@ -28,6 +32,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 
@@ -978,6 +984,57 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 geoFence.getUsers().remove(user);
             }
             entityManager.merge(user);
+        }
+    }
+
+    @Transactional
+    @RequireUser
+    @RequireWrite
+    @Override
+    public String sendCommand(Command command) throws AccessDeniedException {
+        Device device = getSessionEntityManager().find(Device.class, command.getDeviceId());
+        if (!getSessionUser().hasAccessTo(device)) {
+            throw new AccessDeniedException();
+        }
+
+        ObjectMapper jsonMapper = new ObjectMapper();
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Class<?> contextClass = Class.forName("org.traccar.Context");
+            Method getPermissionsManager = contextClass.getDeclaredMethod("getConnectionManager");
+            Object connectionManager = getPermissionsManager.invoke(null);
+            Object activeDevice = connectionManager.getClass().getDeclaredMethod("getActiveDevice", long.class)
+                    .invoke(connectionManager, command.getDeviceId());
+            if (activeDevice == null) {
+                result.put("success", false);
+                result.put("reason", "The device is not registered on the server");
+            } else {
+                Class<?> backendCommandClass = Class.forName("org.traccar.model.Command");
+                Object backendCommand = backendCommandClass.newInstance();
+                Class<?> backendJsonConverterClass = null;
+                try {
+                    backendJsonConverterClass = Class.forName("org.traccar.web.JsonConverter");
+                } catch (ClassNotFoundException e) {
+                    backendJsonConverterClass = Class.forName("org.traccar.http.JsonConverter");
+                }
+                Class<?> backendFactoryClass = Class.forName("org.traccar.model.Factory");
+                Method objectFromJson = backendJsonConverterClass.getDeclaredMethod("objectFromJson", Reader.class, backendFactoryClass);
+                backendCommand = objectFromJson.invoke(null, new StringReader(jsonMapper.writeValueAsString(command)), backendCommand);
+                Method sendCommand = activeDevice.getClass().getDeclaredMethod("sendCommand", backendCommandClass);
+                sendCommand.invoke(activeDevice, backendCommand);
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
+                | IllegalAccessException | InstantiationException | JsonProcessingException e) {
+            log("Unable to invoke command through reflection", e);
+            result.put("success", false);
+            result.put("reason", e.getLocalizedMessage());
+        }
+
+        try {
+            return jsonMapper.writeValueAsString(result);
+        } catch (JsonProcessingException e) {
+            log("Unable to prepare JSON result", e);
+            return "{success: false, reason: \"Unable to prepare result\"}";
         }
     }
 }
