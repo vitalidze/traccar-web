@@ -1027,7 +1027,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 | IllegalAccessException | InstantiationException | JsonProcessingException e) {
             log("Unable to invoke command through reflection", e);
             result.put("success", false);
-            result.put("reason", e.getLocalizedMessage());
+            result.put("reason", e.getClass().getName() + ": " + e.getLocalizedMessage());
         }
 
         try {
