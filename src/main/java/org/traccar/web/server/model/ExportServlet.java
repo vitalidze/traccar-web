@@ -213,6 +213,11 @@ public class ExportServlet extends HttpServlet {
                 xsw.writeCharacters(p.getPower().toString());
                 xsw.writeEndElement();
             }
+            if (p.getProtocol() != null) {
+                xsw.writeStartElement("traccar:protocol");
+                xsw.writeCharacters(p.getProtocol());
+                xsw.writeEndElement();
+            }
             if (p.getOther() != null && !p.getOther().trim().isEmpty()) {
                 xsw.writeStartElement("traccar:other");
                 xsw.writeCharacters(StringEscapeUtils.escapeXml(p.getOther()));

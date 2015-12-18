@@ -15,6 +15,7 @@
  */
 package org.traccar.web.server.model;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
@@ -22,7 +23,9 @@ import org.traccar.web.shared.model.Position;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,7 +37,7 @@ public class GPXParser {
         List<Position> positions;
     }
 
-    public Result parse(InputStream inputStream, Device device) throws XMLStreamException, ParseException {
+    public Result parse(InputStream inputStream, Device device) throws XMLStreamException, ParseException, IOException {
         Result result = new Result();
 
         TimeZone tz = TimeZone.getTimeZone("UTC");
@@ -45,11 +48,13 @@ public class GPXParser {
         dateFormatWithMS.setTimeZone(tz);
 
         XMLStreamReader xsr = XMLInputFactory.newFactory().createXMLStreamReader(inputStream);
+        ObjectMapper jsonMapper = new ObjectMapper();
 
         result.positions = new LinkedList<>();
         Position position = null;
         Stack<String> extensionsElements = new Stack<>();
         boolean extensionsStarted = false;
+        Map<String, Object> other = null;
 
         while (xsr.hasNext()) {
             xsr.next();
@@ -73,6 +78,8 @@ public class GPXParser {
                     position.setAltitude(Double.parseDouble(xsr.getElementText()));
                 } else if (xsr.getLocalName().equalsIgnoreCase("address") && position != null) {
                     position.setAddress(StringEscapeUtils.unescapeXml(xsr.getElementText()));
+                } else if (xsr.getLocalName().equalsIgnoreCase("protocol") && position != null) {
+                    position.setProtocol(xsr.getElementText());
                 } else if (xsr.getLocalName().equalsIgnoreCase("speed") && position != null) {
                     position.setSpeed(Double.parseDouble(xsr.getElementText()));
                 } else if (xsr.getLocalName().equalsIgnoreCase("power") && position != null) {
@@ -82,47 +89,67 @@ public class GPXParser {
                 } else if (xsr.getLocalName().equalsIgnoreCase("other") && position != null) {
                     position.setOther(StringEscapeUtils.unescapeXml(xsr.getElementText()));
                 } else if (xsr.getLocalName().equalsIgnoreCase("extensions")) {
+                    other = new LinkedHashMap<>();
                     extensionsStarted = true;
-                } else if (position != null && extensionsStarted) {
+                } else if (position != null && extensionsStarted && other != null) {
                     extensionsElements.push(xsr.getLocalName());
                 }
             } else if (xsr.getEventType() == XMLStreamReader.END_ELEMENT) {
                 if (xsr.getLocalName().equalsIgnoreCase("trkpt")) {
-                    if (position.getOther() == null) {
-                        position.setOther("<info><protocol>gpx_import</protocol></info>");
+                    if (other == null) {
+                        other = new HashMap<>();
                     }
 
-                    if (position.getOther().endsWith("</info>")) {
-                        position.setOther(position.getOther().substring(0, position.getOther().length() - 7));
-                    } else {
-                        position.setOther("<info><protocol>gpx_import</protocol>" + position.getOther());
+                    if (position.getOther() != null) {
+                        if (position.getOther().startsWith("<")) {
+                            XMLStreamReader otherReader = XMLInputFactory.newFactory().createXMLStreamReader(new StringReader(position.getOther()));
+                            while (otherReader.hasNext()) {
+                                if (otherReader.next() == XMLStreamReader.START_ELEMENT) {
+                                    if (!otherReader.getLocalName().equals("info")) {
+                                        other.put(otherReader.getLocalName(), otherReader.getElementText());
+                                    }
+                                }
+                            }
+                        } else {
+                            Map<String, Object> parsedOther = jsonMapper.readValue(position.getOther(), LinkedHashMap.class);
+                            other.putAll(parsedOther);
+                        }
                     }
-                    position.setOther(position.getOther() + "<type>" +
-                            (result.positions.isEmpty() ? "import_start" : "import") + "</type></info>");
+
+                    if (!other.containsKey("protocol") && position.getProtocol() == null) {
+                        other.put("protocol", "gpx_import");
+                    }
+                    other.put("import_type", (result.positions.isEmpty() ? "import_start" : "import"));
+
+                    position.setOther(jsonMapper.writeValueAsString(other));
 
                     result.positions.add(position);
                     if (result.latestPosition == null || result.latestPosition.getTime().compareTo(position.getTime()) < 0) {
                         result.latestPosition = position;
                     }
                     position = null;
+                    other = null;
                 } else if (xsr.getLocalName().equalsIgnoreCase("extensions")) {
                     extensionsStarted = false;
                 } else if (extensionsStarted) {
                     extensionsElements.pop();
                 }
-            } else if (extensionsStarted && xsr.getEventType() == XMLStreamReader.CHARACTERS && !xsr.getText().trim().isEmpty() && !extensionsElements.empty()) {
+            } else if (extensionsStarted && other != null
+                    && xsr.getEventType() == XMLStreamReader.CHARACTERS && !xsr.getText().trim().isEmpty() && !extensionsElements.empty()) {
                 String name = "";
                 for (int i = 0; i < extensionsElements.size(); i++) {
                     name += (name.length() > 0 ? "-" : "") + extensionsElements.get(i);
                 }
-                position.setOther((position.getOther() == null ? "" : position.getOther()) +
-                        "<" + name + ">" + xsr.getText() + "</" + name + ">");
+
+                other.put(name, xsr.getText());
             }
         }
 
         if (result.positions.size() > 1) {
             Position last = ((LinkedList<Position>) result.positions).getLast();
-            last.setOther(last.getOther().replaceFirst("<type>import</type>", "<type>import_end</type>"));
+            Map<String, Object> parsedOther = jsonMapper.readValue(last.getOther(), LinkedHashMap.class);
+            parsedOther.put("import_type", "import_end");
+            last.setOther(jsonMapper.writeValueAsString(parsedOther));
         }
 
         return result;

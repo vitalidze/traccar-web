@@ -37,6 +37,7 @@ import org.traccar.web.shared.model.Position;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +76,7 @@ public class StopMoveDetectorTest {
         scanner.positionProvider = positionProvider;
     }
 
-    List<Position> readIdlePositions() throws XMLStreamException, ParseException {
+    List<Position> readIdlePositions() throws XMLStreamException, ParseException, IOException {
         return new GPXParser().parse(getClass().getResourceAsStream("/org/traccar/web/server/model/idle_device.gpx"), null).positions;
     }
 
@@ -141,7 +142,7 @@ public class StopMoveDetectorTest {
         assertEquals(positions.get(0), eventCaptor.getValue().getPosition());
     }
 
-    List<Position> readMovingPositions() throws XMLStreamException, ParseException {
+    List<Position> readMovingPositions() throws XMLStreamException, ParseException, IOException {
         return new GPXParser().parse(getClass().getResourceAsStream("/org/traccar/web/server/model/moving_device.gpx"), null).positions;
     }
 
