@@ -116,9 +116,12 @@ public class GPXParser {
                         }
                     }
 
-                    if (!other.containsKey("protocol") && position.getProtocol() == null) {
-                        other.put("protocol", "gpx_import");
+                    if (other.containsKey("protocol") && position.getProtocol() == null) {
+                        position.setProtocol(other.get("protocol").toString());
+                    } else if (!other.containsKey("protocol") && position.getProtocol() == null) {
+                        position.setProtocol("gpx_import");
                     }
+
                     other.put("import_type", (result.positions.isEmpty() ? "import_start" : "import"));
 
                     position.setOther(jsonMapper.writeValueAsString(other));
