@@ -107,6 +107,9 @@ public class NavView {
     @UiField
     TextButton groupsButton;
 
+    @UiField
+    TextButton importButton;
+
     @UiField(provided = true)
     final Messages i18n = GWT.create(Messages.class);
 
@@ -136,6 +139,9 @@ public class NavView {
         showTrackerServerLog.setVisible(admin);
         settingsUsers.setVisible(!readOnly && (admin || manager));
         settingsNotifications.setVisible(!readOnly && (admin || manager));
+        importButton.setVisible(!readOnly &&
+                (!ApplicationContext.getInstance().getApplicationSettings().isDisallowDeviceManagementByUsers()
+                    || admin || manager));
 
         groupsButton.setVisible(!readOnly);
     }

@@ -55,6 +55,7 @@ public class ImportServlet extends HttpServlet {
 
     @Transactional(rollbackOn = { IOException.class, RuntimeException.class })
     @RequireUser
+    @ManagesDevices
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String importType = req.getPathInfo().substring(1);
