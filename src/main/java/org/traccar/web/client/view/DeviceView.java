@@ -173,6 +173,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                         Device device = deviceStore.get(i);
                         if (device.getGroup() != null && device.getGroup().getId() == group.getId()) {
                             device.setGroup(remove ? null : group);
+                            deviceStore.update(device);
                             needRefresh = true;
                         }
                     }
