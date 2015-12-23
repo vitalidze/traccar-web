@@ -33,6 +33,8 @@ This project has following features, which don't exist in original `traccar-web`
     * [persian language](persian.html) (available via ?locale=fa URL parameter)
     * [greek language](greek.html) (available via ?locale=el_GR URL parameter)
     * [macedonian language](macedonian.html) (available via ?locale=mk parameter)
+    * [arabic language](arabic.html) (available via ?locale=ar parameter)
+    * [vietnamese language](vietnamese.html) (available via ?locale=vi parameter)
 * 'show server log' menu for viewing `tracker-server.log` file on Web
 * 'show wrapper.log' menu for viewing `wrapper.log` file on Web 
 * [archive filtering](archive-filtering.html)
