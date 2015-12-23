@@ -379,7 +379,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                       final GeoFenceHandler geoFenceHandler,
                       final CommandHandler commandHandler,
                       final DeviceVisibilityHandler deviceVisibilityHandler,
-                      final ListStore<Device> deviceStore,
+                      final ListStore<Device> globalDeviceStore,
                       final ListStore<GeoFence> geoFenceStore,
                       ListStore<Group> groupStore) {
         this.deviceHandler = deviceHandler;
@@ -388,11 +388,11 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         this.geoFenceStore = geoFenceStore;
 
         // create a new devices store so the filtering will not affect global store
-        this.deviceStore = new ListStore<>(deviceStore.getKeyProvider());
+        this.deviceStore = new ListStore<>(globalDeviceStore.getKeyProvider());
         this.deviceStore.setAutoCommit(true);
-        this.deviceStore.addAll(deviceStore.getAll());
+        this.deviceStore.addAll(globalDeviceStore.getAll());
         // handle events from global devices store and update local one accordingly
-        deviceStore.addStoreHandlers(new BaseStoreHandlers<Device>() {
+        globalDeviceStore.addStoreHandlers(new BaseStoreHandlers<Device>() {
             @Override
             public void onAdd(StoreAddEvent<Device> event) {
                 DeviceView.this.deviceStore.addAll(event.getIndex(), event.getItems());
@@ -414,9 +414,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         this.deviceStore.addStoreSortHandler(new StoreSortEvent.StoreSortHandler<Device>() {
             @Override
             public void onSort(StoreSortEvent<Device> event) {
-                deviceStore.clearSortInfo();
+                globalDeviceStore.clearSortInfo();
                 for (Store.StoreSortInfo<Device> sortInfo : event.getSource().getSortInfo()) {
-                    deviceStore.addSortInfo(sortInfo);
+                    globalDeviceStore.addSortInfo(sortInfo);
                 }
             }
         });
@@ -454,8 +454,8 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         deviceVisibilityHandler.addVisibilityChangeHandler(new DeviceVisibilityChangeHandler() {
             @Override
             public void visibilityChanged(Long deviceId, boolean visible) {
-                Device device = deviceStore.findModelWithKey(deviceId.toString());
-                deviceStore.update(device);
+                Device device = globalDeviceStore.findModelWithKey(deviceId.toString());
+                globalDeviceStore.update(device);
             }
         });
 
@@ -556,7 +556,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         view.setShowGroupedColumn(false);
         view.setEnableNoGroups(true);
         view.setEnableGroupingMenu(false);
-        groupsHandler = new GroupsHandler(deviceStore, groupStore, view, colGroup);
+        groupsHandler = new GroupsHandler(globalDeviceStore, groupStore, view, colGroup);
 
         columnModel = new ColumnModel<>(columnConfigList);
 
