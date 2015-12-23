@@ -36,6 +36,8 @@
     <extend-configuration-property name="traccar.locale" value="fa" />
     <extend-configuration-property name="traccar.locale" value="el_GR" />
     <extend-configuration-property name="traccar.locale" value="mk" />
+    <extend-configuration-property name="traccar.locale" value="vi" />
+    <extend-configuration-property name="traccar.locale" value="ar" />
 
     <!-- generator for all 'Messages' interfaces -->
     <generate-with class="org.traccar.web.i18n.rebind.LocalizableGenerator">
