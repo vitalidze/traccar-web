@@ -231,14 +231,6 @@ public class MapView {
 
         List<UserSettings.OverlayType> userOverlays = ApplicationContext.getInstance().getUserSettings().overlays();
 
-        map.addLayer(geofenceLayer);
-        map.addLayer(vectorLayer);
-        map.addLayer(markerLayer);
-
-        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.GEO_FENCES));
-        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.VECTOR));
-        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.MARKERS));
-
         TMSOptions seamarkOptions = new TMSOptions();
         seamarkOptions.setType("png");
         seamarkOptions.setGetURL(getTileURL());
@@ -248,6 +240,14 @@ public class MapView {
         seamarkLayer = new TMS(i18n.overlayType(UserSettings.OverlayType.SEAMARK), "http://t1.openseamap.org/seamark/", seamarkOptions);
         map.addLayer(seamarkLayer);
         seamarkLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.SEAMARK));
+
+        map.addLayer(geofenceLayer);
+        map.addLayer(vectorLayer);
+        map.addLayer(markerLayer);
+
+        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.GEO_FENCES));
+        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.VECTOR));
+        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.MARKERS));
 
         map.addControl(new LayerSwitcher());
         map.addControl(new ScaleLine());
