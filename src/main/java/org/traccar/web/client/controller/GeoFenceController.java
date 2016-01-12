@@ -181,6 +181,33 @@ public class GeoFenceController implements ContentController, DeviceView.GeoFenc
             @Override
             public void onDialogHide(DialogHideEvent event) {
                 if (event.getHideButton() == Dialog.PredefinedButton.YES) {
+                    Application.getDataService().isGeoFenceUsedInEventRules(geoFence, new BaseAsyncCallback<Boolean>(i18n) {
+                        @Override
+                        public void onSuccess(Boolean result) {
+                            if (result) {
+                                showExistingEventRulesWarning(geoFence);
+                            } else {
+                                Application.getDataService().removeGeoFence(geoFence, new BaseAsyncCallback<GeoFence>(i18n) {
+                                    @Override
+                                    public void onSuccess(GeoFence geoFence) {
+                                        geoFenceStore.remove(geoFence);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        dialog.show();
+    }
+
+    private void showExistingEventRulesWarning(final GeoFence geoFence) {
+        final ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmGeoFenceRemovalWithExistingEventRules());
+        dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+            @Override
+            public void onDialogHide(DialogHideEvent event) {
+                if (event.getHideButton() == Dialog.PredefinedButton.YES) {
                     Application.getDataService().removeGeoFence(geoFence, new BaseAsyncCallback<GeoFence>(i18n) {
                         @Override
                         public void onSuccess(GeoFence geoFence) {

@@ -379,6 +379,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         } else {
             devices = new LinkedList<>(user.getAllAvailableDevices());
         }
+        for (Device device : devices) {
+            if (device.getOwner() != null) {
+                device.setOwnerId(device.getOwner().getId());
+            }
+        }
         if (full && !devices.isEmpty()) {
             List<Maintenance> maintenaces = getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices ORDER BY m.indexNo ASC", Maintenance.class)
                     .setParameter("devices", devices)
@@ -496,6 +501,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
             tmp_device.setMinIdleTime(device.getMinIdleTime());
             tmp_device.setSpeedLimit(device.getSpeedLimit());
+            tmp_device.setSendNotifications(device.getSendNotifications());
+//            tmp_device.setOwnerId(device.getOwner() != null ? device.getOwner().getId() : device.getOwnerId());
+            tmp_device.setOwnerId(device.getOwnerId());
             tmp_device.setIconType(device.getIconType());
             tmp_device.setIcon(device.getIcon() == null ? null : entityManager.find(DeviceIcon.class, device.getIcon().getId()));
             tmp_device.setPhoto(device.getPhoto() == null ? null : entityManager.find(Picture.class, device.getPhoto().getId()));
@@ -590,6 +598,31 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser
+    @Override
+    public Boolean isDeviceUsedInEventRules(Device device) {
+        EntityManager entityManager = getSessionEntityManager();
+        User user = getSessionUser();
+        device = entityManager.find(Device.class, device.getId());
+
+        Boolean isAdminOrManager = user.getAdmin() || user.getManager();
+        Set<User> usersAndMe = new HashSet<User>();
+        if (isAdminOrManager) {
+            usersAndMe.addAll(getUsers());
+            usersAndMe.add(user);
+        } else {
+            usersAndMe.add(user);
+        }
+        Boolean otherUsers = !usersAndMe.containsAll(device.getUsers());
+
+        Query query = entityManager.createQuery("SELECT COUNT(er) FROM EventRule er WHERE er.device = :device AND er.user != :user");
+        query.setParameter("device", device);
+        query.setParameter("user", user);
+        long eventRuleCount = (Long)query.getSingleResult();
+        return !otherUsers && eventRuleCount > 0;
+    }
+
+    @Transactional
+    @RequireUser
     @RequireWrite
     @ManagesDevices
     @RefreshBackendPermissions
@@ -637,6 +670,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             for (Report report : reports) {
                 report.getDevices().remove(device);
             }
+
+            query = entityManager.createQuery("DELETE FROM EventRule er WHERE er.device = :device");
+            query.setParameter("device", device);
+            query.executeUpdate();
 
             entityManager.remove(device);
         }
@@ -928,6 +965,31 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
     @Transactional
     @RequireUser
+    @Override
+    public Boolean isGeoFenceUsedInEventRules(GeoFence geoFence) {
+        EntityManager entityManager = getSessionEntityManager();
+        User user = getSessionUser();
+        geoFence = getSessionEntityManager().find(GeoFence.class, geoFence.getId());
+
+        Boolean isAdminOrManager = user.getAdmin() || user.getManager();
+        Set<User> usersAndMe = new HashSet<User>();
+        if (isAdminOrManager) {
+            usersAndMe.addAll(getUsers());
+            usersAndMe.add(user);
+        } else {
+            usersAndMe.add(user);
+        }
+        Boolean otherUsers = !usersAndMe.containsAll(geoFence.getUsers());
+
+        Query query = entityManager.createQuery("SELECT COUNT(er) FROM EventRule er WHERE er.geoFence = :geoFence AND er.user != :user");
+        query.setParameter("geoFence", geoFence);
+        query.setParameter("user", user);
+        long eventRuleCount = (Long)query.getSingleResult();
+        return !otherUsers && eventRuleCount > 0;
+    }
+
+    @Transactional
+    @RequireUser
     @RequireWrite
     @Override
     public GeoFence removeGeoFence(GeoFence geoFence) {
@@ -948,6 +1010,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             for (Report report : reports) {
                 report.getGeoFences().remove(geoFence);
             }
+
+            query = entityManager.get().createQuery("DELETE FROM EventRule er WHERE er.geoFence = :geoFence");
+            query.setParameter("geoFence", geoFence);
+            query.executeUpdate();
 
             getSessionEntityManager().remove(geoFence);
         }

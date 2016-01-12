@@ -50,7 +50,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="670, 510" modal="true" headingText="{i18n.device}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="670, 540" modal="true" headingText="{i18n.device}" focusWidget="{saveButton}">
       <gxt:PlainTabPanel ui:field="tabs">
           <gxt:child config="{settingsTabConfig}">
               <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">
@@ -151,6 +151,17 @@
                                                 width="5" />
                           </form:widget>
                       </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <container:VerticalLayoutContainer ui:field="sendNotificationsCont" >
+                          <container:child layoutData="{verticalLayoutData}">
+                              <form:FieldLabel text="{i18n.sendNotifications}" labelWidth="180">
+                                  <form:widget>
+                                      <form:CheckBox ui:field="sendNotifications" enabled="true"/>
+                                  </form:widget>
+                              </form:FieldLabel>
+                          </container:child>
+                      </container:VerticalLayoutContainer>
                   </container:child>
                   <container:child layoutData="{verticalLayoutDataWithButtons}">
                       <form:FieldLabel ui:field="labelMarkers" labelWidth="180">

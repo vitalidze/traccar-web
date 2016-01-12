@@ -51,6 +51,8 @@ public interface DataServiceAsync {
 
     void updateDevice(Device device, AsyncCallback<Device> callback);
 
+    void isDeviceUsedInEventRules(Device device, AsyncCallback<Boolean> callback);
+
     void removeDevice(Device device, AsyncCallback<Device> callback);
 
     void getLatestPositions(AsyncCallback<List<Position>> callback);
@@ -76,6 +78,8 @@ public interface DataServiceAsync {
     void addGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
 
     void removeGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);
+
+    void isGeoFenceUsedInEventRules(GeoFence geoFence, AsyncCallback<Boolean> callback);
 
     void getGeoFenceShare(GeoFence geoFence, AsyncCallback<Map<User, Boolean>> async);
 

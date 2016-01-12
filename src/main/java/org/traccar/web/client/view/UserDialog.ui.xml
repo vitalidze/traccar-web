@@ -5,118 +5,161 @@
   	xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
   	xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
   	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+    xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
     xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid">
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
+    <ui:attributes width="1" height="-1" />
+  </ui:with>
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="margins0">
+    <ui:attributes top="0" right="0" bottom="0" left="0"/>
+  </ui:with>
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="marginsRight20">
+    <ui:attributes top="0" right="0" bottom="0" left="20"/>
+  </ui:with>
+  <ui:with type="com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData" field="boxLayoutDataMargins0">
+    <ui:attributes flex="50" margins="{margins0}"/>
+  </ui:with>
+  <ui:with type="com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData" field="boxLayoutDataMarginsRight">
+    <ui:attributes flex="50" margins="{marginsRight20}"/>
+  </ui:with>
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="toolBarRowData">
     <ui:attributes width="1" height="-1" />
   </ui:with>
 
   <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view" />
   <ui:with type="com.sencha.gxt.data.shared.ListStore" field="notificationEventStore" />
   <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="eventRulesView" />
+  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="eventRulesStore" />
+  <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="eventRulesColumnModel" />
 
+  <ui:with type="com.sencha.gxt.widget.core.client.container.AccordionLayoutContainer.AccordionLayoutAppearance" field="accordionLayoutAppearance" />
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="integerPropertyEditor" />
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
  
-  <gxt:Window ui:field="window" pixelSize="400, 640" modal="true" headingText="{i18n.account}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="760, 640" modal="true" headingText="{i18n.account}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.user}" labelWidth="160">
-          <form:widget>
-            <form:TextField ui:field="login" allowBlank="false" />
-          </form:widget>
-        </form:FieldLabel>
+        <container:HBoxLayoutContainer>
+          <container:child layoutData="{boxLayoutDataMargins0}">
+            <container:VerticalLayoutContainer>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.user}" labelWidth="160">
+                  <form:widget>
+                    <form:TextField ui:field="login" allowBlank="false" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.password}" labelWidth="160">
+                  <form:widget>
+                    <form:PasswordField ui:field="password" allowBlank="false" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.firstName}" labelWidth="160">
+                  <form:widget>
+                    <form:TextField ui:field="firstName" allowBlank="true" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.lastName}" labelWidth="160">
+                  <form:widget>
+                    <form:TextField ui:field="lastName" allowBlank="true" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.companyName}" labelWidth="160">
+                  <form:widget>
+                    <form:TextField ui:field="companyName" allowBlank="true" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.phoneNumber}" labelWidth="160">
+                  <form:widget>
+                    <form:TextField ui:field="phoneNumber" allowBlank="true" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.administrator}" labelWidth="160">
+                  <form:widget>
+                    <form:CheckBox ui:field="admin" enabled="false" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.manager}" labelWidth="160">
+                  <form:widget>
+                    <form:CheckBox ui:field="manager" enabled="false" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.readOnly}" labelWidth="160">
+                  <form:widget>
+                    <form:CheckBox ui:field="readOnly" enabled="false"/>
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.expirationDate}" labelWidth="160">
+                  <form:widget>
+                    <form:DateField ui:field="expirationDate" enabled="false"/>
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+            </container:VerticalLayoutContainer>
+          </container:child>
+          <container:child layoutData="{boxLayoutDataMarginsRight}">
+            <container:VerticalLayoutContainer>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.maxNumOfDevices}" labelWidth="160">
+                  <form:widget>
+                    <form:NumberField editor="{integerPropertyEditor}"
+                                      ui:field="maxNumOfDevices"
+                                      allowNegative="false"
+                                      allowDecimals="false" enabled="false"/>
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.email}" labelWidth="160">
+                  <form:widget>
+                    <form:TextField ui:field="email" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+              <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.notifications}" labelWidth="160">
+                  <form:widget>
+                    <grid:Grid ui:field="grid" store="{notificationEventStore}" cm="{columnModel}" view="{view}" />
+                  </form:widget>
+                </form:FieldLabel>
+              </container:child>
+            </container:VerticalLayoutContainer>
+          </container:child>
+        </container:HBoxLayoutContainer>
+      </container:child>
+      <container:child layoutData="{toolBarRowData}">
+        <toolbar:ToolBar>
+          <button:TextButton ui:field="addButton" text="{i18n.add}" />
+          <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
+        </toolbar:ToolBar>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.password}" labelWidth="160">
-          <form:widget>
-            <form:PasswordField ui:field="password" allowBlank="false" />
-          </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.firstName}" labelWidth="160">
-          <form:widget>
-            <form:TextField ui:field="firstName" allowBlank="true" />
-          </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.lastName}" labelWidth="160">
-          <form:widget>
-            <form:TextField ui:field="lastName" allowBlank="true" />
-          </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.companyName}" labelWidth="160">
-          <form:widget>
-            <form:TextField ui:field="companyName" allowBlank="true" />
-          </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.phoneNumber}" labelWidth="160">
-          <form:widget>
-            <form:TextField ui:field="phoneNumber" allowBlank="true" />
-          </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.administrator}" labelWidth="160">
-          <form:widget>
-            <form:CheckBox ui:field="admin" enabled="false" />
-          </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-          <form:FieldLabel text="{i18n.manager}" labelWidth="160">
-              <form:widget>
-                  <form:CheckBox ui:field="manager" enabled="false" />
-              </form:widget>
-          </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.readOnly}" labelWidth="160">
-          <form:widget>
-            <form:CheckBox ui:field="readOnly" enabled="false"/>
-          </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.expirationDate}" labelWidth="160">
-          <form:widget>
-            <form:DateField ui:field="expirationDate" enabled="false"/>
-          </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.maxNumOfDevices}" labelWidth="160">
-          <form:widget>
-            <form:NumberField editor="{integerPropertyEditor}"
-                              ui:field="maxNumOfDevices"
-                              allowNegative="false"
-                              allowDecimals="false" enabled="false"/>
-          </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.email}" labelWidth="160">
-          <form:widget>
-            <form:TextField ui:field="email" />
-          </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.notifications}" labelWidth="160">
-          <form:widget>
-            <grid:Grid ui:field="grid" store="{notificationEventStore}" cm="{columnModel}" view="{view}" />
-          </form:widget>
-        </form:FieldLabel>
+        <gxt:ContentPanel animCollapse="false" width="100%" height="220px" headingText="{i18n.eventRules}">
+          <grid:Grid ui:field="eventRulesGrid" store="{eventRulesStore}" cm="{eventRulesColumnModel}" view="{eventRulesView}" />
+        </gxt:ContentPanel>
       </container:child>
     </container:VerticalLayoutContainer>
-      
+
     <gxt:button>
       <button:TextButton ui:field="saveButton" text="{i18n.save}" />
     </gxt:button>

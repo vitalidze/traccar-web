@@ -53,6 +53,8 @@ public interface DataService extends RemoteService {
 
     Device updateDevice(Device device) throws TraccarException;
 
+    Boolean isDeviceUsedInEventRules(Device device);
+
     Device removeDevice(Device device);
 
     Map<User, Boolean> getDeviceShare(Device device);
@@ -78,6 +80,8 @@ public interface DataService extends RemoteService {
     GeoFence updateGeoFence(GeoFence geoFence) throws TraccarException;
 
     GeoFence removeGeoFence(GeoFence geoFence);
+
+    Boolean isGeoFenceUsedInEventRules(GeoFence geoFence);
 
     Map<User, Boolean> getGeoFenceShare(GeoFence geoFence);
 
