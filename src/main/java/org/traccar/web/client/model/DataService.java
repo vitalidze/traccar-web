@@ -53,7 +53,7 @@ public interface DataService extends RemoteService {
 
     Device updateDevice(Device device) throws TraccarException;
 
-    Device removeDevice(Device device);
+    Device removeDevice(Device device) throws AccessDeniedException;
 
     Map<User, Boolean> getDeviceShare(Device device);
 

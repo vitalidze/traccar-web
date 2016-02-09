@@ -594,10 +594,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @ManagesDevices
     @RefreshBackendPermissions
     @Override
-    public Device removeDevice(Device device) {
+    public Device removeDevice(Device device) throws AccessDeniedException {
         EntityManager entityManager = getSessionEntityManager();
         User user = getSessionUser();
         device = entityManager.find(Device.class, device.getId());
+        if (!user.hasAccessTo(device)) {
+            throw new AccessDeniedException();
+        }
         if (user.getAdmin() || user.getManager()) {
             device.getUsers().removeAll(getUsers());
         }
