@@ -83,6 +83,13 @@ public class DBMigrations {
                 user.setAdmin(true);
                 user.setManager(false);
                 em.persist(user);
+            } else if (results.size() == 1) {
+                User singleAdmin = results.get(0);
+                if (singleAdmin.getLogin() == null && singleAdmin.getPassword() == null) {
+                    singleAdmin.setLogin("admin");
+                    singleAdmin.setPassword("admin");
+                    singleAdmin.setPasswordHashMethod(PasswordHashMethod.PLAIN);
+                }
             }
         }
     }
