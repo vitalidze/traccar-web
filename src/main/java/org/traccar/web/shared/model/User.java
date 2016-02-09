@@ -22,6 +22,7 @@ import java.util.Set;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -95,10 +96,12 @@ public class User implements IsSerializable, Cloneable {
     @JsonIgnore
     private String password;
 
+    @JsonProperty
     public void setPassword(String password) {
         this.password = password;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
