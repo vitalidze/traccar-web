@@ -29,7 +29,7 @@ Replace `/opt/traccar/traccar-web.war` path with the path to your traccar instal
 
 * update following lines:
 
-  - SQL query to select list of GPS tracking devices
+  - SQL query to select list of GPS tracking devices (does not apply to 3.3)
 
 Old:
 
@@ -52,11 +52,18 @@ Old:
         VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
     </entry>
     
-New:
+New (depending on version of traccar):
 
+    <!-- for 3.0 and 3.1 -->
     <entry key='database.insertPosition'>
         INSERT INTO positions (device_id, protocol, serverTime, time, valid, latitude, longitude, altitude, speed, course, address, other)
         VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
+    </entry>
+    
+    <!-- for 3.2 and 3.3 -->
+    <entry key='database.insertPosition'>
+        INSERT INTO positions (device_id, protocol, serverTime, time, valid, latitude, longitude, altitude, speed, course, address, other)
+        VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
     </entry>
 
   - SQL query to select latest positions
@@ -76,7 +83,7 @@ New (depending on version of traccar):
         FROM positions WHERE id IN (SELECT latestPosition_id FROM devices);
     </entry>
     
-    <!-- for 3.2 -->
+    <!-- for 3.2 and 3.3 -->
     <entry key='database.selectLatestPositions'>
         SELECT id, protocol, device_id AS deviceId, serverTime, time AS deviceTime, time AS fixTime, 
         valid, latitude, longitude, altitude, speed, course, address, other AS attributes 
