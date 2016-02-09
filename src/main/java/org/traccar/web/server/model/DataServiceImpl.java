@@ -1009,19 +1009,33 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 result.put("success", false);
                 result.put("reason", "The device is not registered on the server");
             } else {
-                Class<?> backendCommandClass = Class.forName("org.traccar.model.Command");
-                Object backendCommand = backendCommandClass.newInstance();
-                Class<?> backendJsonConverterClass = null;
-                try {
-                    backendJsonConverterClass = Class.forName("org.traccar.web.JsonConverter");
-                } catch (ClassNotFoundException e) {
-                    backendJsonConverterClass = Class.forName("org.traccar.http.JsonConverter");
+                if(command.getType() == CommandType.CUSTOM) {
+                    Class<?> objectClass = Class.forName("java.lang.Object");
+                    Method sendCommand = activeDevice.getClass().getDeclaredMethod("write", objectClass);
+                    sendCommand.invoke(activeDevice, command.getCommand());
+                } else {
+                    Class<?> backendCommandClass = Class.forName("org.traccar.model.Command");
+                    Object backendCommand = backendCommandClass.newInstance();
+                    Class<?> backendJsonConverterClass = null;
+                    try {
+                        backendJsonConverterClass = Class.forName("org.traccar.web.JsonConverter");
+                    } catch (ClassNotFoundException e) {
+                        backendJsonConverterClass = Class.forName("org.traccar.http.JsonConverter");
+                    }
+
+                    Method objectFromJson;
+                    try {
+                        Class<?> backendFactoryClass = Class.forName("org.traccar.model.Factory");
+                        objectFromJson = backendJsonConverterClass.getDeclaredMethod("objectFromJson", Reader.class, backendFactoryClass);
+                        backendCommand = objectFromJson.invoke(null, new StringReader(jsonMapper.writeValueAsString(command)), backendCommand);
+                    } catch (ClassNotFoundException e) {
+                        objectFromJson = backendJsonConverterClass.getDeclaredMethod("objectFromJson", Reader.class, Class.class);
+                        backendCommand = objectFromJson.invoke(null, new StringReader(jsonMapper.writeValueAsString(command)), backendCommandClass);
+                    }
+
+                    Method sendCommand = activeDevice.getClass().getDeclaredMethod("sendCommand", backendCommandClass);
+                    sendCommand.invoke(activeDevice, backendCommand);
                 }
-                Class<?> backendFactoryClass = Class.forName("org.traccar.model.Factory");
-                Method objectFromJson = backendJsonConverterClass.getDeclaredMethod("objectFromJson", Reader.class, backendFactoryClass);
-                backendCommand = objectFromJson.invoke(null, new StringReader(jsonMapper.writeValueAsString(command)), backendCommand);
-                Method sendCommand = activeDevice.getClass().getDeclaredMethod("sendCommand", backendCommandClass);
-                sendCommand.invoke(activeDevice, backendCommand);
             }
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
                 | IllegalAccessException | InstantiationException | JsonProcessingException e) {
