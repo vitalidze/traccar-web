@@ -679,10 +679,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         query.setParameter("from", from);
         query.setParameter("to", to);
 
-        if (filter) {
-            if (filters.getSpeedModifier() != null && filters.getSpeedForFilter() != null) {
-                query.setParameter("speed", filters.getSpeedUnit().toKnots(filters.getSpeedForFilter()));
-            }
+        if (filter && filters.getSpeedModifier() != null && filters.getSpeedForFilter() != null) {
+            query.setParameter("speed", filters.getSpeedUnit().toKnots(filters.getSpeedForFilter()));
         }
 
         List<Position> queryResult = query.getResultList();
