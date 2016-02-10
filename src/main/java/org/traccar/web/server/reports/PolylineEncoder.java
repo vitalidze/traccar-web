@@ -9,6 +9,10 @@ import java.util.List;
  * See https://developers.google.com/maps/documentation/utilities/polylinealgorithm
  */
 public class PolylineEncoder {
+
+    private PolylineEncoder() {
+    }
+
     private static StringBuilder encodeSignedNumber(int num) {
         int sgn_num = num << 1;
         if (num < 0) {

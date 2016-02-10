@@ -25,6 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MarkerIconFactory {
+
+    private MarkerIconFactory() {
+    }
+
     public static Icon getIcon(PositionIcon icon, boolean selected) {
         if (icon == null) {
             return null;
