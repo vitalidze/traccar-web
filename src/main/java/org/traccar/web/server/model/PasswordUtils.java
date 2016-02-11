@@ -21,6 +21,9 @@ import java.util.Random;
 public class PasswordUtils {
     private static final Random RANDOM = new SecureRandom();
 
+    private PasswordUtils() {
+    }
+
     public static String generateRandomString() {
         return generateRandomString(8);
     }

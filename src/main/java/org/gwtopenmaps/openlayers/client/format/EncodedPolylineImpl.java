@@ -19,6 +19,9 @@ import org.gwtopenmaps.openlayers.client.util.JSObject;
 
 public class EncodedPolylineImpl
 {
+    private EncodedPolylineImpl() {
+    }
+
     public static native JSObject create()
     /*-{
             return new $wnd.OpenLayers.Format.EncodedPolyline();

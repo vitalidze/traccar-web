@@ -21,6 +21,10 @@ import com.sencha.gxt.widget.core.client.form.TimeField;
 import java.util.Date;
 
 public class DateTimeFieldUtil {
+
+    private DateTimeFieldUtil() {
+    }
+
     @SuppressWarnings("deprecation")
     public static Date getCombineDate(DateField dateField, TimeField timeField) {
         Date result = null;

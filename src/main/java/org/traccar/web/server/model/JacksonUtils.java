@@ -24,6 +24,10 @@ import org.traccar.web.shared.model.DeviceIconType;
 import java.text.SimpleDateFormat;
 
 class JacksonUtils {
+
+    private JacksonUtils() {
+    }
+
     static ObjectMapper create() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
