@@ -1,6 +1,7 @@
 package org.traccar.web.shared.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.Column;
@@ -29,7 +30,6 @@ public class UserSettings implements IsSerializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
-    @JsonIgnore
     private long id;
 
     public UserSettings() {
@@ -250,50 +250,62 @@ public class UserSettings implements IsSerializable {
     @JsonIgnore
     private Double speedForFilter;
 
+    @JsonIgnore
     public boolean isHideZeroCoordinates() {
         return hideZeroCoordinates;
     }
 
+    @JsonProperty
     public void setHideZeroCoordinates(boolean hideZeroCoordinates) {
         this.hideZeroCoordinates = hideZeroCoordinates;
     }
 
+    @JsonIgnore
     public boolean isHideInvalidLocations() {
         return hideInvalidLocations;
     }
 
+    @JsonProperty
     public void setHideInvalidLocations(boolean hideInvalidLocations) {
         this.hideInvalidLocations = hideInvalidLocations;
     }
 
+    @JsonIgnore
     public boolean isHideDuplicates() {
         return hideDuplicates;
     }
 
+    @JsonProperty
     public void setHideDuplicates(boolean hideDuplicates) {
         this.hideDuplicates = hideDuplicates;
     }
 
+    @JsonIgnore
     public Double getMinDistance() {
         return minDistance;
     }
 
+    @JsonProperty
     public void setMinDistance(Double minDistance) {
         this.minDistance = minDistance;
     }
 
+    @JsonIgnore
     public String getSpeedModifier() {
         return speedModifier;
     }
 
+    @JsonProperty
     public void setSpeedModifier(String speedModifier) {
         this.speedModifier = speedModifier;
     }
 
+    @JsonIgnore
     public Double getSpeedForFilter() {
         return speedForFilter;
     }
 
+    @JsonProperty
     public void setSpeedForFilter(Double speedForFilter) {
         this.speedForFilter = speedForFilter;
     }
