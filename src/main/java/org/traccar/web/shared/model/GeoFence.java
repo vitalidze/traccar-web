@@ -16,6 +16,7 @@
 package org.traccar.web.shared.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -61,10 +62,12 @@ public class GeoFence implements IsSerializable {
     @JsonIgnore
     private String description;
 
+    @JsonIgnore
     public String getDescription() {
         return description;
     }
 
+    @JsonProperty
     public void setDescription(String description) {
         this.description = description;
     }
@@ -83,10 +86,12 @@ public class GeoFence implements IsSerializable {
     @JsonIgnore
     private GeoFenceType type;
 
+    @JsonIgnore
     public GeoFenceType getType() {
         return type;
     }
 
+    @JsonProperty
     public void setType(GeoFenceType type) {
         this.type = type;
     }
@@ -97,10 +102,12 @@ public class GeoFence implements IsSerializable {
     @JsonIgnore
     private String points;
 
+    @JsonIgnore
     public String getPoints() {
         return points;
     }
 
+    @JsonProperty
     public void setPoints(String points) {
         this.points = points;
     }
@@ -109,10 +116,12 @@ public class GeoFence implements IsSerializable {
     @JsonIgnore
     private float radius;
 
+    @JsonIgnore
     public float getRadius() {
         return radius;
     }
 
+    @JsonProperty
     public void setRadius(float radius) {
         this.radius = radius;
     }
