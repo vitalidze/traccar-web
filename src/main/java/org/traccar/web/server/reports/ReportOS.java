@@ -96,10 +96,8 @@ public class ReportOS extends ReportGenerator {
         for (Iterator<Position> it = positions.iterator(); it.hasNext(); ) {
             Position position = it.next();
 
-            if (!it.hasNext()) {
-                if (start == null && isOverspeed(position)) {
-                    start = position;
-                }
+            if (!it.hasNext() && start == null && isOverspeed(position)) {
+                start = position;
             }
 
             if (start != null && (!it.hasNext() || !isOverspeed(position))) {

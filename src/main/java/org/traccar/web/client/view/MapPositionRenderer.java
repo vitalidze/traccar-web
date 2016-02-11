@@ -360,13 +360,12 @@ public class MapPositionRenderer {
             this.selectedPosition = null;
         }
 
-        if (positions.size() == 1) {
-            if (selectedDeviceId != null && selectedDeviceId.equals(positions.get(0).getDevice().getId())) {
-                if (!selectPosition(null, positions.get(0), false)) {
-                    selectedDeviceId = null;
-                }
-            }
+        
+        if (positions.size() == 1 && selectedDeviceId != null && selectedDeviceId.equals(positions.get(0).getDevice().getId()) 
+                && !selectPosition(null, positions.get(0), false)) {
+            selectedDeviceId = null;
         }
+        
     }
 
     public void showDeviceName(List<Position> positions) {

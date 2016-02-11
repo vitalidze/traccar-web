@@ -104,10 +104,8 @@ public class GPXParser {
                         if (position.getOther().startsWith("<")) {
                             XMLStreamReader otherReader = XMLInputFactory.newFactory().createXMLStreamReader(new StringReader(position.getOther()));
                             while (otherReader.hasNext()) {
-                                if (otherReader.next() == XMLStreamReader.START_ELEMENT) {
-                                    if (!otherReader.getLocalName().equals("info")) {
-                                        other.put(otherReader.getLocalName(), otherReader.getElementText());
-                                    }
+                                if (otherReader.next() == XMLStreamReader.START_ELEMENT && !otherReader.getLocalName().equals("info")) {
+                                    other.put(otherReader.getLocalName(), otherReader.getElementText());
                                 }
                             }
                         } else {
