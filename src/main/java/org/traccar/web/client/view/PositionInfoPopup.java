@@ -164,7 +164,7 @@ public class PositionInfoPopup {
                 "<table height=\"100%\"><tr>" +
                 "<td>" +"<img src=\"" + icon.getURL() + "\">&nbsp;</td>" +
                 "<td valign=\"center\">" + deviceTitle + "</td>" +
-                "<td valign=\"center\" align=\"right\"><img src=\"img/arrow" + (int)(position.getCourse()+45/2)/45 + ".png\"/></td>" +
+                "<td valign=\"center\" align=\"right\"><img src=\"img/arrow" + (int)((position.getCourse()+45/2)%360)/45 + ".png\"/></td>" +
                 "</tr></table>");
 
         config.setBodyHtml(body);
