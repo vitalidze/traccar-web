@@ -43,7 +43,19 @@ public enum ReportType implements IsSerializable {
         public boolean supportsFiltering() {
             return false;
         }
-    };
+    },
+    GRAPH {
+        @Override
+        public boolean supportsGeoFences() {
+            return false;
+        }
+
+        @Override
+        public boolean supportsFiltering() {
+            return false;
+        }
+    };;
+    
 
     public boolean supportsGeoFences() {
         return false;
