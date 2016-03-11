@@ -1,26 +1,11 @@
-/*
- * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.traccar.web.server.reports;
 
 import org.traccar.web.shared.model.*;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 public class ReportGraph extends ReportGenerator {
     @Override
@@ -28,13 +13,13 @@ public class ReportGraph extends ReportGenerator {
         h2(report.getName());
 
         for (Device device : getDevices(report)) {
-            List<DeviceEvent> events = entityManager.createQuery("SELECT e FROM DeviceEvent e" +
-                    " INNER JOIN FETCH e.position" +
-                    " WHERE e.device=:device AND e.time BETWEEN :from AND :to ORDER BY e.time", DeviceEvent.class)
-                    .setParameter("device", device)
-                    .setParameter("from", report.getFromDate())
-                    .setParameter("to", report.getToDate())
-                    .getResultList();
+            List<Position> positions;
+            try {
+                positions = dataService.getPositions(device, report.getFromDate(), report.getToDate(), !report.isDisableFilter());
+            } catch (AccessDeniedException ade) {
+                continue;
+            }
+
             panelStart();
 
             // heading
@@ -52,119 +37,321 @@ public class ReportGraph extends ReportGenerator {
             // device details
             deviceDetails(device);
             // data table
-            if (!events.isEmpty()) {
-                drawTable(getGeoFences(report, device), events);
+            if (!positions.isEmpty()) {
+                drawTable(calculate(positions));
+            } else {
+                drawSummary(0d, 0, 0, 0d, 0d);
             }
 
             panelBodyEnd();
 
             panelEnd();
+        }
+        
+        addGraph();
+        
+    }
 
+    static class Data {
+        final boolean idle;
+
+        Position start;
+        Position end;
+        double topSpeed;
+        double totalSpeed;
+        double distance;
+        int positionsWithSpeed;
+
+        Data(boolean idle, Position start) {
+            this.start = start;
+            this.idle = idle;
+        }
+
+        long getDuration() {
+            return end.getTime().getTime() - start.getTime().getTime();
+        }
+
+        double getAverageSpeed() {
+            return totalSpeed / positionsWithSpeed;
         }
     }
 
-    static class Stats {
-        int offline;
-        Map<GeoFence, Integer> geoFenceEnter = new HashMap<>();
-        Map<GeoFence, Integer> geoFenceExit = new HashMap<>();
-        Map<Maintenance, Integer> maintenances = new HashMap<>();
+    List<Data> calculate(List<Position> positions) {
+        Position prevPosition = null;
+        List<Data> datas = new ArrayList<>();
+        Data currentData = null;
 
-        void update(DeviceEvent event) {
-            switch (event.getType()) {
-                case GEO_FENCE_ENTER:
-                    update(geoFenceEnter, event.getGeoFence());
-                    break;
-                case GEO_FENCE_EXIT:
-                    update(geoFenceExit, event.getGeoFence());
-                    break;
-                case OFFLINE:
-                    offline++;
-                    break;
-                case MAINTENANCE_REQUIRED:
-                    update(maintenances, event.getMaintenance());
-                    break;
+        for (Iterator<Position> it = positions.iterator(); it.hasNext(); ) {
+            Position position = it.next();
+
+            if (currentData == null) {
+                currentData = new Data(isIdle(position), position);
+            }
+
+            if (prevPosition != null && isIdle(position) != isIdle(prevPosition)) {
+                currentData.end = position;
+                datas.add(currentData);
+                currentData = new Data(isIdle(position), position);
+            }
+
+            if (position.getSpeed() != null && !isIdle(position)) {
+                currentData.topSpeed = Math.max(currentData.topSpeed, position.getSpeed());
+                currentData.totalSpeed += position.getSpeed();
+                currentData.positionsWithSpeed++;
+            }
+            currentData.distance += position.getDistance();
+
+            prevPosition = position;
+        }
+        currentData.end = positions.get(positions.size() - 1);
+        datas.add(currentData);
+
+        // filter 'idle' data, which duration is less than the setting from device profile
+        Device device = positions.get(0).getDevice();
+        Data prevData = null;
+        for (Iterator<Data> it = datas.iterator(); it.hasNext(); ) {
+            Data data = it.next();
+            long minIdleTime = (long) device.getMinIdleTime() * 1000;
+            if (isIdle(data.start) && data.getDuration() < minIdleTime) {
+                Data nonIdleData = prevData == null ? it.next() : prevData;
+                if (prevData == null) {
+                    nonIdleData.start = data.start;
+                } else {
+                    nonIdleData.end = data.end;
+                }
+                nonIdleData.distance += data.distance;
+                nonIdleData.positionsWithSpeed += data.positionsWithSpeed;
+                nonIdleData.topSpeed = Math.max(data.topSpeed, nonIdleData.topSpeed);
+                nonIdleData.totalSpeed += data.totalSpeed;
+                it.remove();
+            }
+            if (!data.idle) {
+                prevData = data;
             }
         }
-
-        <T> void update(Map<T, Integer> map, T entity) {
-            if (entity != null) {
-                Integer current = map.get(entity);
-                map.put(entity, current == null ? 1 : (current + 1));
+        // merge sequential 'moving' datas into one
+        prevData = null;
+        for (Iterator<Data> it = datas.iterator(); it.hasNext(); ) {
+            Data data = it.next();
+            if (prevData != null && !prevData.idle && !data.idle) {
+                prevData.distance += data.distance;
+                prevData.positionsWithSpeed += data.positionsWithSpeed;
+                prevData.topSpeed = Math.max(data.topSpeed, prevData.topSpeed);
+                prevData.totalSpeed += data.totalSpeed;
+                prevData.end = data.end;
+                it.remove();
+                continue;
             }
+            prevData = data;
         }
+        return datas;
     }
 
-    void drawTable(List<GeoFence> geoFences, List<DeviceEvent> events) {
+    void drawTable(List<Data> datas) {
         tableStart(hover().condensed());
 
         // header
         tableHeadStart();
         tableRowStart();
 
-        for (String header : new String[] {"time", "event", "eventPosition"}) {
-            tableHeadCellStart();
+        for (String header : new String[] {"status", "start", "end", "duration"}) {
+            tableHeadCellStart(rowspan(2));
             text(message(header));
             tableHeadCellEnd();
         }
 
+        tableHeadCellStart(colspan(3));
+        text(message("stopPosition"));
+        tableHeadCellEnd();
+
         tableRowEnd();
+
+        tableRowStart();
+        for (String header : new String[] {"distance", "topSpeed", "averageSpeed"}) {
+            tableHeadCellStart();
+            text(message(header));
+            tableHeadCellEnd();
+        }
+        tableRowEnd();
+
         tableHeadEnd();
 
-        Stats stats = new Stats();
         // body
         tableBodyStart();
 
-        for (DeviceEvent event : events) {
-            if (event.getGeoFence() != null && !geoFences.contains(event.getGeoFence())) {
-                continue;
-            }
+        long totalStopDuration = 0;
+        long totalMoveDuration = 0;
+        double totalDistance = 0;
+        int totalMovingPositionCount = 0;
+        double totalSpeed = 0;
+        double totalTopSpeed = 0;
 
+        for (Data data : datas) {
             tableRowStart();
-            tableCell(formatDate(event.getTime()));
-            String eventText = message("deviceEventType[" + event.getType() + "]");
-            if (event.getGeoFence() != null) {
-                eventText += " (" + event.getGeoFence().getName() + ")";
+            tableCell(message(data.idle ? "stopped" : "moving"));
+            tableCell(formatDate(data.start.getTime()));
+            tableCell(formatDate(data.end.getTime()));
+            // update total counters
+            if (data.idle) {
+                totalStopDuration += data.getDuration();
+            } else {
+                totalMoveDuration += data.getDuration();
             }
-            if (event.getMaintenance() != null) {
-                eventText += " (" + event.getMaintenance().getName() + ")";
-            }
-            tableCell(eventText);
-            tableCellStart();
-            mapLink(event.getPosition().getLatitude(), event.getPosition().getLongitude());
-            tableCellEnd();
+            tableCell(formatDuration(data.getDuration()));
 
-            stats.update(event);
+            if (data.idle) {
+                tableCellStart(colspan(3));
+                mapLink(data.start.getLatitude(), data.start.getLongitude());
+                if (data.start.getAddress() != null && !data.start.getAddress().isEmpty()) {
+                    text(" - " + data.start.getAddress());
+                }
+                tableCellEnd();
+            } else {
+                tableCell(formatDistance(data.distance));
+                tableCell(formatSpeed(data.topSpeed));
+                tableCell(formatSpeed(data.getAverageSpeed()));
+                // update total counters
+                totalMovingPositionCount += data.positionsWithSpeed;
+                totalSpeed += data.totalSpeed;
+                totalTopSpeed = Math.max(totalTopSpeed, data.topSpeed);
+            }
+            totalDistance += data.distance;
+            tableRowEnd();
         }
 
         tableBodyEnd();
+
         tableEnd();
 
-        // summary
+        drawSummary(totalDistance,
+                totalMoveDuration,
+                totalStopDuration,
+                totalTopSpeed,
+                totalMovingPositionCount == 0 ? 0d : totalSpeed / totalMovingPositionCount);
+    }
+
+    private void drawSummary(double routeLength,
+                             long moveDuration,
+                             long stopDuration,
+                             double topSpeed,
+                             double averageSpeed) {
         tableStart();
         tableBodyStart();
 
-        if (stats.offline > 0) {
-            dataRow(message("totalOffline"), Integer.toString(stats.offline));
-        }
-        for (GeoFence geoFence : geoFences) {
-            Integer enterCount = stats.geoFenceEnter.get(geoFence);
-            if (enterCount != null) {
-                dataRow(message("totalGeoFenceEnters") + " (" + geoFence.getName() + ")", enterCount.toString());
-            }
-        }
-        for (GeoFence geoFence : geoFences) {
-            Integer enterCount = stats.geoFenceExit.get(geoFence);
-            if (enterCount != null) {
-                dataRow(message("totalGeoFenceExits") + " (" + geoFence.getName() + ")", enterCount.toString());
-            }
-        }
-        if (!stats.maintenances.isEmpty()) {
-            for (Map.Entry<Maintenance, Integer> entry : stats.maintenances.entrySet()) {
-                dataRow(message("totalMaintenanceRequired") + " (" + entry.getKey().getName() + ")", entry.getValue().toString());
-            }
-        }
+        dataRow(message("routeLength"), formatDistance(routeLength));
+        dataRow(message("moveDuration"), formatDuration(moveDuration));
+        dataRow(message("stopDuration"), formatDuration(stopDuration));
+        dataRow(message("topSpeed"), formatSpeed(topSpeed));
+        dataRow(message("averageSpeed"), formatSpeed(averageSpeed));
 
         tableBodyEnd();
         tableEnd();
+    }
+
+    private boolean isIdle(Position position) {
+        return position.getSpeed() == null || position.getSpeed() <= position.getDevice().getIdleSpeedThreshold();
+    }
+
+    
+    
+    public void addGraph(){
+        text("<div id=\"graphdiv\"></div>");
+        text("<script type=\"text/javascript\">");
+        text("g = new Dygraph(");
+
+        // containing div
+        text("document.getElementById(\"graphdiv\"),");
+
+        // CSV or path to a CSV file.
+        text("\"Date,Temperature\\n\" +");
+        text("\"2008-05-07,75\\n\" +");
+        text("\"2008-05-08,70\\n\" +");
+        text("\"2008-05-09,80\\n\"");
+
+        text(");");
+        text("</script>");
+    }
+    
+    void getData(List<Data> datas) {
+        tableStart(hover().condensed());
+
+        // header
+        tableHeadStart();
+        tableRowStart();
+
+        for (String header : new String[] {"status", "start", "end", "duration"}) {
+            tableHeadCellStart(rowspan(2));
+            text(message(header));
+            tableHeadCellEnd();
+        }
+
+        tableHeadCellStart(colspan(3));
+        text(message("stopPosition"));
+        tableHeadCellEnd();
+
+        tableRowEnd();
+
+        tableRowStart();
+        for (String header : new String[] {"distance", "topSpeed", "averageSpeed"}) {
+            tableHeadCellStart();
+            text(message(header));
+            tableHeadCellEnd();
+        }
+        tableRowEnd();
+
+        tableHeadEnd();
+
+        // body
+        tableBodyStart();
+
+        long totalStopDuration = 0;
+        long totalMoveDuration = 0;
+        double totalDistance = 0;
+        int totalMovingPositionCount = 0;
+        double totalSpeed = 0;
+        double totalTopSpeed = 0;
+
+        for (Data data : datas) {
+            tableRowStart();
+            tableCell(message(data.idle ? "stopped" : "moving"));
+            tableCell(formatDate(data.start.getTime()));
+            tableCell(formatDate(data.end.getTime()));
+            // update total counters
+            if (data.idle) {
+                totalStopDuration += data.getDuration();
+            } else {
+                totalMoveDuration += data.getDuration();
+            }
+            tableCell(formatDuration(data.getDuration()));
+
+            if (data.idle) {
+                tableCellStart(colspan(3));
+                mapLink(data.start.getLatitude(), data.start.getLongitude());
+                if (data.start.getAddress() != null && !data.start.getAddress().isEmpty()) {
+                    text(" - " + data.start.getAddress());
+                }
+                tableCellEnd();
+            } else {
+                tableCell(formatDistance(data.distance));
+                tableCell(formatSpeed(data.topSpeed));
+                tableCell(formatSpeed(data.getAverageSpeed()));
+                // update total counters
+                totalMovingPositionCount += data.positionsWithSpeed;
+                totalSpeed += data.totalSpeed;
+                totalTopSpeed = Math.max(totalTopSpeed, data.topSpeed);
+            }
+            totalDistance += data.distance;
+            tableRowEnd();
+        }
+
+        tableBodyEnd();
+
+        tableEnd();
+
+        drawSummary(totalDistance,
+                totalMoveDuration,
+                totalStopDuration,
+                totalTopSpeed,
+                totalMovingPositionCount == 0 ? 0d : totalSpeed / totalMovingPositionCount);
     }
 }
