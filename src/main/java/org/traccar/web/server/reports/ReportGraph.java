@@ -2,6 +2,9 @@ package org.traccar.web.server.reports;
 
 import org.traccar.web.shared.model.*;
 
+import java.text.SimpleDateFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,44 +15,38 @@ public class ReportGraph extends ReportGenerator {
     void generateImpl(Report report) throws IOException {
         h2(report.getName());
 
-        for (Device device : getDevices(report)) {
-            List<Position> positions;
-            try {
-                positions = dataService.getPositions(device, report.getFromDate(), report.getToDate(), !report.isDisableFilter());
-            } catch (AccessDeniedException ade) {
-                continue;
-            }
+        //     List<Position> position = entityManager.createQuery("SELECT p FROM Position p WHERE p.device = :device AND p.speed > 0 ORDER BY time DESC", Position.class)
 
-            panelStart();
+        List<Position> positions = entityManager.createQuery("SELECT p FROM Position p" +
+                " WHERE p.device IN :selectedDevices AND p.time BETWEEN :from AND :to ORDER BY p.time", Position.class)
+                .setParameter("selectedDevices", getDevices(report))
+                .setParameter("from", report.getFromDate())
+                .setParameter("to", report.getToDate())
+                .getResultList();
 
-            // heading
-            panelHeadingStart();
-            text(device.getName());
-            panelHeadingEnd();
 
-            // body
-            panelBodyStart();
-            // period
-            paragraphStart();
-            bold(message("timePeriod") + ": ");
-            text(formatDate(report.getFromDate()) + " - " + formatDate(report.getToDate()));
-            paragraphEnd();
-            // device details
-            deviceDetails(device);
-            // data table
-            if (!positions.isEmpty()) {
-                drawTable(calculate(positions));
-            } else {
-                drawSummary(0d, 0, 0, 0d, 0d);
-            }
+        panelStart();
 
-            panelBodyEnd();
+        // heading
+        panelHeadingStart();
+        text("Graph ...");
+        panelHeadingEnd();
 
-            panelEnd();
-        }
-        
-        addGraph();
-        
+        // body
+        panelBodyStart();
+        // period
+        paragraphStart();
+        bold(message("timePeriod") + ": ");
+        text(formatDate(report.getFromDate()) + " - " + formatDate(report.getToDate()));
+        paragraphEnd();
+        addGraph(getDevices(report), positions);
+
+
+        panelBodyEnd();
+
+        panelEnd();
+
+
     }
 
     static class Data {
@@ -76,185 +73,11 @@ public class ReportGraph extends ReportGenerator {
         }
     }
 
-    List<Data> calculate(List<Position> positions) {
-        Position prevPosition = null;
-        List<Data> datas = new ArrayList<>();
-        Data currentData = null;
+ 
 
-        for (Iterator<Position> it = positions.iterator(); it.hasNext(); ) {
-            Position position = it.next();
 
-            if (currentData == null) {
-                currentData = new Data(isIdle(position), position);
-            }
-
-            if (prevPosition != null && isIdle(position) != isIdle(prevPosition)) {
-                currentData.end = position;
-                datas.add(currentData);
-                currentData = new Data(isIdle(position), position);
-            }
-
-            if (position.getSpeed() != null && !isIdle(position)) {
-                currentData.topSpeed = Math.max(currentData.topSpeed, position.getSpeed());
-                currentData.totalSpeed += position.getSpeed();
-                currentData.positionsWithSpeed++;
-            }
-            currentData.distance += position.getDistance();
-
-            prevPosition = position;
-        }
-        currentData.end = positions.get(positions.size() - 1);
-        datas.add(currentData);
-
-        // filter 'idle' data, which duration is less than the setting from device profile
-        Device device = positions.get(0).getDevice();
-        Data prevData = null;
-        for (Iterator<Data> it = datas.iterator(); it.hasNext(); ) {
-            Data data = it.next();
-            long minIdleTime = (long) device.getMinIdleTime() * 1000;
-            if (isIdle(data.start) && data.getDuration() < minIdleTime) {
-                Data nonIdleData = prevData == null ? it.next() : prevData;
-                if (prevData == null) {
-                    nonIdleData.start = data.start;
-                } else {
-                    nonIdleData.end = data.end;
-                }
-                nonIdleData.distance += data.distance;
-                nonIdleData.positionsWithSpeed += data.positionsWithSpeed;
-                nonIdleData.topSpeed = Math.max(data.topSpeed, nonIdleData.topSpeed);
-                nonIdleData.totalSpeed += data.totalSpeed;
-                it.remove();
-            }
-            if (!data.idle) {
-                prevData = data;
-            }
-        }
-        // merge sequential 'moving' datas into one
-        prevData = null;
-        for (Iterator<Data> it = datas.iterator(); it.hasNext(); ) {
-            Data data = it.next();
-            if (prevData != null && !prevData.idle && !data.idle) {
-                prevData.distance += data.distance;
-                prevData.positionsWithSpeed += data.positionsWithSpeed;
-                prevData.topSpeed = Math.max(data.topSpeed, prevData.topSpeed);
-                prevData.totalSpeed += data.totalSpeed;
-                prevData.end = data.end;
-                it.remove();
-                continue;
-            }
-            prevData = data;
-        }
-        return datas;
-    }
-
-    void drawTable(List<Data> datas) {
-        tableStart(hover().condensed());
-
-        // header
-        tableHeadStart();
-        tableRowStart();
-
-        for (String header : new String[] {"status", "start", "end", "duration"}) {
-            tableHeadCellStart(rowspan(2));
-            text(message(header));
-            tableHeadCellEnd();
-        }
-
-        tableHeadCellStart(colspan(3));
-        text(message("stopPosition"));
-        tableHeadCellEnd();
-
-        tableRowEnd();
-
-        tableRowStart();
-        for (String header : new String[] {"distance", "topSpeed", "averageSpeed"}) {
-            tableHeadCellStart();
-            text(message(header));
-            tableHeadCellEnd();
-        }
-        tableRowEnd();
-
-        tableHeadEnd();
-
-        // body
-        tableBodyStart();
-
-        long totalStopDuration = 0;
-        long totalMoveDuration = 0;
-        double totalDistance = 0;
-        int totalMovingPositionCount = 0;
-        double totalSpeed = 0;
-        double totalTopSpeed = 0;
-
-        for (Data data : datas) {
-            tableRowStart();
-            tableCell(message(data.idle ? "stopped" : "moving"));
-            tableCell(formatDate(data.start.getTime()));
-            tableCell(formatDate(data.end.getTime()));
-            // update total counters
-            if (data.idle) {
-                totalStopDuration += data.getDuration();
-            } else {
-                totalMoveDuration += data.getDuration();
-            }
-            tableCell(formatDuration(data.getDuration()));
-
-            if (data.idle) {
-                tableCellStart(colspan(3));
-                mapLink(data.start.getLatitude(), data.start.getLongitude());
-                if (data.start.getAddress() != null && !data.start.getAddress().isEmpty()) {
-                    text(" - " + data.start.getAddress());
-                }
-                tableCellEnd();
-            } else {
-                tableCell(formatDistance(data.distance));
-                tableCell(formatSpeed(data.topSpeed));
-                tableCell(formatSpeed(data.getAverageSpeed()));
-                // update total counters
-                totalMovingPositionCount += data.positionsWithSpeed;
-                totalSpeed += data.totalSpeed;
-                totalTopSpeed = Math.max(totalTopSpeed, data.topSpeed);
-            }
-            totalDistance += data.distance;
-            tableRowEnd();
-        }
-
-        tableBodyEnd();
-
-        tableEnd();
-
-        drawSummary(totalDistance,
-                totalMoveDuration,
-                totalStopDuration,
-                totalTopSpeed,
-                totalMovingPositionCount == 0 ? 0d : totalSpeed / totalMovingPositionCount);
-    }
-
-    private void drawSummary(double routeLength,
-                             long moveDuration,
-                             long stopDuration,
-                             double topSpeed,
-                             double averageSpeed) {
-        tableStart();
-        tableBodyStart();
-
-        dataRow(message("routeLength"), formatDistance(routeLength));
-        dataRow(message("moveDuration"), formatDuration(moveDuration));
-        dataRow(message("stopDuration"), formatDuration(stopDuration));
-        dataRow(message("topSpeed"), formatSpeed(topSpeed));
-        dataRow(message("averageSpeed"), formatSpeed(averageSpeed));
-
-        tableBodyEnd();
-        tableEnd();
-    }
-
-    private boolean isIdle(Position position) {
-        return position.getSpeed() == null || position.getSpeed() <= position.getDevice().getIdleSpeedThreshold();
-    }
-
-    
-    
-    public void addGraph(){
+    public void addGraph(List<Device> list, List<Position> positions){
+        
         text("<div id=\"graphdiv\"></div>");
         text("<script type=\"text/javascript\">");
         text("g = new Dygraph(");
@@ -262,96 +85,66 @@ public class ReportGraph extends ReportGenerator {
         // containing div
         text("document.getElementById(\"graphdiv\"),");
 
-        // CSV or path to a CSV file.
-        text("\"Date,Temperature\\n\" +");
-        text("\"2008-05-07,75\\n\" +");
-        text("\"2008-05-08,70\\n\" +");
-        text("\"2008-05-09,80\\n\"");
+        text("\"");
+        text(getData(list, positions));
+        text("\"");
 
-        text(");");
+        text(","
+                + "{"
+                + "   connectSeparatedPoints: true,"
+                + "   showRangeSelector: true"
+                + " }"
+                + " );");
         text("</script>");
     }
+
     
-    void getData(List<Data> datas) {
-        tableStart(hover().condensed());
-
-        // header
-        tableHeadStart();
-        tableRowStart();
-
-        for (String header : new String[] {"status", "start", "end", "duration"}) {
-            tableHeadCellStart(rowspan(2));
-            text(message(header));
-            tableHeadCellEnd();
+    
+    String getData(List<Device> list, List<Position> positions) {
+        String output="time";
+        
+        
+        List<String> devices =  new ArrayList<String>() ;
+        for (Device device: list) {
+            devices.add(device.getName());
         }
 
-        tableHeadCellStart(colspan(3));
-        text(message("stopPosition"));
-        tableHeadCellEnd();
-
-        tableRowEnd();
-
-        tableRowStart();
-        for (String header : new String[] {"distance", "topSpeed", "averageSpeed"}) {
-            tableHeadCellStart();
-            text(message(header));
-            tableHeadCellEnd();
+        for (String device: devices) {
+            output += ","+device;
         }
-        tableRowEnd();
-
-        tableHeadEnd();
-
-        // body
-        tableBodyStart();
-
-        long totalStopDuration = 0;
-        long totalMoveDuration = 0;
-        double totalDistance = 0;
-        int totalMovingPositionCount = 0;
-        double totalSpeed = 0;
-        double totalTopSpeed = 0;
-
-        for (Data data : datas) {
-            tableRowStart();
-            tableCell(message(data.idle ? "stopped" : "moving"));
-            tableCell(formatDate(data.start.getTime()));
-            tableCell(formatDate(data.end.getTime()));
-            // update total counters
-            if (data.idle) {
-                totalStopDuration += data.getDuration();
-            } else {
-                totalMoveDuration += data.getDuration();
-            }
-            tableCell(formatDuration(data.getDuration()));
-
-            if (data.idle) {
-                tableCellStart(colspan(3));
-                mapLink(data.start.getLatitude(), data.start.getLongitude());
-                if (data.start.getAddress() != null && !data.start.getAddress().isEmpty()) {
-                    text(" - " + data.start.getAddress());
-                }
-                tableCellEnd();
-            } else {
-                tableCell(formatDistance(data.distance));
-                tableCell(formatSpeed(data.topSpeed));
-                tableCell(formatSpeed(data.getAverageSpeed()));
-                // update total counters
-                totalMovingPositionCount += data.positionsWithSpeed;
-                totalSpeed += data.totalSpeed;
-                totalTopSpeed = Math.max(totalTopSpeed, data.topSpeed);
-            }
-            totalDistance += data.distance;
-            tableRowEnd();
+        
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        
+        for (Position position : positions) {
+            String[] arrayData = new String[devices.size()];
+            arrayData[devices.indexOf(position.getDevice().getName())] = getParametar(position.getOther(), "io66");
+            output += "\\n"+dateFormat.format(position.getTime());
+            for(int i = 0; i < devices.size(); i++)
+                output += ","+arrayData[i];
         }
-
-        tableBodyEnd();
-
-        tableEnd();
-
-        drawSummary(totalDistance,
-                totalMoveDuration,
-                totalStopDuration,
-                totalTopSpeed,
-                totalMovingPositionCount == 0 ? 0d : totalSpeed / totalMovingPositionCount);
+        return output;
     }
+
+    
+    public static String getParametar(String otherString, String param){
+        // TODO move this code from this class
+        String regex = "(?:,|\\{)?([^:]*):(\"[^\"]*\"|\\{[^}]*\\}|[^},]*)";
+        Pattern p = Pattern.compile(regex);
+        Matcher match = p.matcher(otherString);
+        while (match.find()) {
+            String value = match.group(2).toString().trim();
+            String name = match.group(1);
+            if (!(value.equals("\"\"") || (value.equals("[]")))) {
+                //System.out.print("Name="+ name);
+                //System.out.println(" Value="+ value);
+                if(name.compareTo("\""+param+"\"") == 0)
+                    return value;
+            } 
+        }
+        return null;
+    }
+
+
 }
+
+
