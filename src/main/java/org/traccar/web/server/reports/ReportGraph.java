@@ -39,6 +39,7 @@ public class ReportGraph extends ReportGenerator {
         bold(message("timePeriod") + ": ");
         text(formatDate(report.getFromDate()) + " - " + formatDate(report.getToDate()));
         paragraphEnd();
+        
         addGraph(getDevices(report), positions);
 
 
@@ -78,7 +79,7 @@ public class ReportGraph extends ReportGenerator {
 
     public void addGraph(List<Device> list, List<Position> positions){
         
-        text("<div id=\"graphdiv\"></div>");
+        text("<div id=\"graphdiv\" style=\"width:900px; height:400px;\"></div>");
         text("<script type=\"text/javascript\">");
         text("g = new Dygraph(");
 
