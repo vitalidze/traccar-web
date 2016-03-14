@@ -105,10 +105,15 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
         columnConfigList.add(parameterNameColumn);
         ColumnConfig<Sensor, String> descriptionColumn = new ColumnConfig<>(sensorProperties.description(), 25, i18n.description());
         columnConfigList.add(descriptionColumn);
-        ColumnConfig<Sensor, Boolean> visibleColumn = new ColumnConfig<>(sensorProperties.visible(), 70, i18n.visible());
+        ColumnConfig<Sensor, Boolean> visibleColumn = new ColumnConfig<>(sensorProperties.visible(), 90, i18n.visible());
         visibleColumn.setCell(new CheckBoxCell());
         visibleColumn.setFixed(true);
         columnConfigList.add(visibleColumn);
+        ColumnConfig<Sensor, Boolean> onGraphColumn = new ColumnConfig<>(sensorProperties.onGraph(), 90, i18n.onGraph());
+        onGraphColumn.setCell(new CheckBoxCell());
+        onGraphColumn.setFixed(true);
+        columnConfigList.add(onGraphColumn);
+        
 
         final ValueProvider<Sensor, String> intervalsProperty = new ValueProvider<Sensor, String>() {
             @Override
@@ -200,6 +205,7 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
         editing.addEditor(parameterNameColumn, new TextField());
         editing.addEditor(descriptionColumn, new TextField());
         editing.addEditor(visibleColumn, new CheckBox());
+        editing.addEditor(onGraphColumn, new CheckBox());
     }
 
     public Container getPanel() {

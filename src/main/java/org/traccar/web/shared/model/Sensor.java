@@ -105,6 +105,17 @@ public class Sensor implements IsSerializable {
         this.visible = visible;
     }
 
+    private boolean onGraph;
+
+    public boolean isOnGraph() {
+        return onGraph;
+    }
+
+    public void setOnGraph(boolean onGraph) {
+        this.onGraph = onGraph;
+    }
+
+    
     @Column(length = 2048)
     private String intervals;
 
@@ -145,6 +156,7 @@ public class Sensor implements IsSerializable {
         parameterName = sensor.parameterName;
         description = sensor.description;
         visible = sensor.visible;
+        onGraph = sensor.onGraph;
         intervals = sensor.intervals;
     }
 }
