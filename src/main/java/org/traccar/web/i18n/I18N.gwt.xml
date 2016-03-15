@@ -22,6 +22,7 @@
     <extend-configuration-property name="traccar.locale" value="es" />
     <extend-configuration-property name="traccar.locale" value="pl" />
     <extend-configuration-property name="traccar.locale" value="tl" />
+    <extend-configuration-property name="traccar.locale" value="nl" />
     <extend-configuration-property name="traccar.locale" value="hu" />
     <extend-configuration-property name="traccar.locale" value="pt_PT" />
     <extend-configuration-property name="traccar.locale" value="sv_SE" />
