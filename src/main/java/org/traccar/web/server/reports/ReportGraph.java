@@ -7,8 +7,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ReportGraph extends ReportGenerator {
     @Override
@@ -39,8 +40,13 @@ public class ReportGraph extends ReportGenerator {
         bold(message("timePeriod") + ": ");
         text(formatDate(report.getFromDate()) + " - " + formatDate(report.getToDate()));
         paragraphEnd();
-        
-        addGraph(getDevices(report), positions);
+
+        try {
+            addGraph(getDevices(report), positions);
+        } catch (TraccarException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
 
         panelBodyEnd();
@@ -74,11 +80,11 @@ public class ReportGraph extends ReportGenerator {
         }
     }
 
- 
 
 
-    public void addGraph(List<Device> list, List<Position> positions){
-        
+
+    public void addGraph(List<Device> list, List<Position> positions) throws TraccarException{
+
         text("<div id=\"graphdiv\" style=\"width:1100px; height:400px;\"></div>");
         text("<script type=\"text/javascript\">");
         text("g = new Dygraph(");
@@ -99,34 +105,64 @@ public class ReportGraph extends ReportGenerator {
         text("</script>");
     }
 
-    
-    
-    String getData(List<Device> list, List<Position> positions) {
+
+
+    String getData(List<Device> listDevices, List<Position> positions) throws TraccarException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
         String output="time";
-        
-        
-        List<String> devices =  new ArrayList<String>() ;
-        for (Device device: list) {
-            devices.add(device.getName());
+
+
+        Map<Long, List<String>> keysMap = new HashMap<>();
+        Map<String, String> deviceSensorMap = new HashMap<>();
+        Map<String, Integer> deviceSensorOrderMap = new HashMap<>();
+System.out.println("broj uredjaja"+listDevices.size());
+        for (Device device: listDevices) {
+            List<String> keys = new ArrayList<String>();
+System.out.println("broj senzora"+device.getName()+" "+device.getSensors());
+
+            if(device.getSensors()==null)
+               device = dataService.loadSensors(device);
+            
+            for (Sensor sensor: device.getSensors()) {
+                if(sensor.isOnGraph()){
+                    String key = device.getName() + "("+sensor.getName()+")";
+                    keys.add(key);
+                    int j = deviceSensorMap.size();
+                    deviceSensorMap.put(key, sensor.getParameterName());
+                    if(deviceSensorMap.size()>j){
+                        deviceSensorOrderMap.put(key, deviceSensorMap.size()-1);
+                        output += ","+key;                        
+                    }
+                }
+            }
+            keysMap.put(device.getId(), keys);
         }
 
-        for (String device: devices) {
-            output += ","+device;
-        }
-        
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        
+
+        String[] arrayData = null;
         for (Position position : positions) {
-            String[] arrayData = new String[devices.size()];
-            arrayData[devices.indexOf(position.getDevice().getName())] = getParametar(position.getOther(), "io66");
+            for (Device device: listDevices) {
+                if(device.getId()==position.getDevice().getId()){
+                    arrayData = new String[deviceSensorMap.size()];
+                    for(String key: keysMap.get(device.getId())){ 
+                        int tmpPos = deviceSensorOrderMap.get(key);
+                        System.out.println( key +"-"+ tmpPos);
+                        arrayData[tmpPos] = getParametar(position.getOther(), deviceSensorMap.get(key));
+                    }
+                }
+            }
             output += "\\n"+dateFormat.format(position.getTime());
-            for(int i = 0; i < devices.size(); i++)
+            for(int i = 0; i < deviceSensorMap.size(); i++){
                 output += ","+arrayData[i];
+            }
         }
+
+
         return output;
     }
 
-    
+
     public static String getParametar(String otherString, String param){
         // TODO move this code from this class
         String regex = "(?:,|\\{)?([^:]*):(\"[^\"]*\"|\\{[^}]*\\}|[^},]*)";
@@ -136,8 +172,6 @@ public class ReportGraph extends ReportGenerator {
             String value = match.group(2).toString().trim();
             String name = match.group(1);
             if (!(value.equals("\"\"") || (value.equals("[]")))) {
-                //System.out.print("Name="+ name);
-                //System.out.println(" Value="+ value);
                 if(name.compareTo("\""+param+"\"") == 0)
                     return value;
             } 

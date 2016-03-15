@@ -50,6 +50,8 @@ public interface DataServiceAsync {
     void addDevice(Device device, AsyncCallback<Device> callback);
 
     void updateDevice(Device device, AsyncCallback<Device> callback);
+    
+    void loadSensors(Device device, AsyncCallback<Device> callback);
 
     void removeDevice(Device device, AsyncCallback<Device> callback);
 
