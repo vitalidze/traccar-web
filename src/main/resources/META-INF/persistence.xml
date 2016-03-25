@@ -9,7 +9,7 @@
       <property name="hibernate.hbm2ddl.auto" value="update"/>
     </properties>
   </persistence-unit>
-  <persistence-unit name="debug">
+<!--  <persistence-unit name="debug">
     <properties>
       <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
       <property name="hibernate.connection.url" value="jdbc:h2:~/Documents/traccar-web/database"/>
@@ -17,6 +17,18 @@
       <property name="hibernate.connection.password" value=""/>
       <property name="hibernate.show_sql" value="true"/>
       <property name="hibernate.hbm2ddl.auto" value="update"/>
+    </properties>
+  </persistence-unit> -->
+  <persistence-unit name="debug">
+    <properties>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/traccarweb" />
+      <property name="javax.persistence.jdbc.user" value="root" />
+      <property name="javax.persistence.jdbc.password" value="4655956" />
+
+      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+      <property name="hibernate.show_sql" value="true" />
+      <property name="hibernate.hbm2ddl.auto" value="update" />
     </properties>
   </persistence-unit>
   <persistence-unit name="test">

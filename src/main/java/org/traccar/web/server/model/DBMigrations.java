@@ -50,7 +50,8 @@ public class DBMigrations {
                 new SetDefaultUserSettings(),
                 new SetArchiveDefaultColumns(),
                 new SetGeoFenceAllDevicesFlag(),
-                new SetReportsFilterAndPreview()
+                new SetReportsFilterAndPreview(),
+                new SetDefaultFollowedDeviceZoomLevel()
         }) {
             em.getTransaction().begin();
             try {
@@ -366,6 +367,15 @@ public class DBMigrations {
                     .executeUpdate();
             em.createQuery("UPDATE " + Report.class.getSimpleName() + " R SET R.disableFilter = :f WHERE R.disableFilter IS NULL")
                     .setParameter("f", false)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultFollowedDeviceZoomLevel implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + UserSettings.class.getName() + " S SET S.followedDeviceZoomLevel = :zlevel WHERE S.followedDeviceZoomLevel IS NULL")
+                    .setParameter("zlevel", UserSettings.DEFAULT_ZOOM_TO_FOLLOWED_DEVICE_LEVEL)
                     .executeUpdate();
         }
     }

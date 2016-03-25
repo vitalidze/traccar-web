@@ -88,6 +88,9 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     @UiField
     NumberField<Short> traceInterval;
 
+    @UiField
+    NumberField<Short> followedDeviceZoomLevel;
+
     @UiField(provided = true)
     NumberPropertyEditor<Short> shortPropertyEditor = new NumberPropertyEditor.ShortPropertyEditor();
 
@@ -185,6 +188,10 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
         traceInterval.addValidator(new MinNumberValidator<>((short) 1));
         traceInterval.addValidator(new MaxNumberValidator<>((short) (60 * 48)));
+
+        followedDeviceZoomLevel.addValidator(new MinNumberValidator<>((short) 1));
+        // FIXME: i have no idea what the max zoom level is..
+        followedDeviceZoomLevel.addValidator(new MaxNumberValidator<>((short) Byte.MAX_VALUE));
 
         driver.initialize(this);
         driver.edit(userSettings);
