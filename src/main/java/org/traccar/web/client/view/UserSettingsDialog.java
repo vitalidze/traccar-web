@@ -190,8 +190,7 @@ public class UserSettingsDialog implements Editor<UserSettings> {
         traceInterval.addValidator(new MaxNumberValidator<>((short) (60 * 48)));
 
         followedDeviceZoomLevel.addValidator(new MinNumberValidator<>((short) 1));
-        // FIXME: i have no idea what the max zoom level is..
-        followedDeviceZoomLevel.addValidator(new MaxNumberValidator<>((short) Byte.MAX_VALUE));
+        followedDeviceZoomLevel.addValidator(new MaxNumberValidator<>((short) 16));
 
         driver.initialize(this);
         driver.edit(userSettings);
