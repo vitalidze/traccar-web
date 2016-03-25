@@ -264,6 +264,10 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
         this.selectedDevice = device;
     }
 
+    public void zoomIn(Device device) {
+        mapView.zoomIn(device);
+    }
+
     public void showArchivePositions(Track track) {
         List<Position> positions = track.getPositions();
         PositionIcon icon = new PositionIcon(track.getStyle().getIconType() == null ?

@@ -33,11 +33,14 @@ import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
+import org.traccar.web.client.Application;
+import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.TrackSegment;
 import org.traccar.web.client.state.DeviceVisibilityProvider;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.UserSettings;
 
 public class MapPositionRenderer {
 
@@ -516,6 +519,20 @@ public class MapPositionRenderer {
         } else {
             selectedDeviceId = null;
         }
+    }
+
+    public void zoomIn(Device device) {
+        if (!visibilityProvider.isVisible(device)) {
+            return;
+        }
+
+        // boolean isFollowed = ApplicationContext.getInstance().isFollowing(device);
+        // if isFollowed {
+        UserSettings userSettings = ApplicationContext.getInstance().getUserSettings();
+        Short zoomLevel = userSettings.getFollowedDeviceZoomLevel();
+        mapView.getMap().zoomTo(zoomLevel);
+        // }
+
     }
 
     private boolean selectPosition(Position oldPosition, Position newPosition, boolean center) {

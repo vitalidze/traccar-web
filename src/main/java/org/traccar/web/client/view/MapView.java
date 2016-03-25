@@ -366,6 +366,10 @@ public class MapView {
         latestPositionRenderer.selectDevice(device, true);
     }
 
+    public void zoomIn(Device device) {
+        latestPositionRenderer.zoomIn(device);
+    }
+
     public void selectArchivePosition(Position position) {
         archivePositionRenderer.selectPosition(position, true);
     }
