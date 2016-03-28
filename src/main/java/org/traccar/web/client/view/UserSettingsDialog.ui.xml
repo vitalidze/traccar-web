@@ -33,7 +33,7 @@
     }
   </ui:style>
 
-  <gxt:Window ui:field="window" pixelSize="445, 560" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="445, 580" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.speedUnits}" labelWidth="160">
@@ -69,6 +69,18 @@
                                       allowNegative="false"
                                       allowDecimals="false"
                                       allowBlank="true"
+                                      width="4" />
+                </form:widget>
+            </form:FieldLabel>
+        </container:child>
+        <container:child layoutData="{verticalLayoutData}">
+            <form:FieldLabel text="{i18n.followedDeviceZoomLevel}" labelWidth="160">
+                <form:widget>
+                    <form:NumberField editor="{shortPropertyEditor}"
+                                      ui:field="followedDeviceZoomLevel"
+                                      allowNegative="false"
+                                      allowDecimals="false"
+                                      allowBlank="false"
                                       width="4" />
                 </form:widget>
             </form:FieldLabel>
@@ -137,7 +149,7 @@
           </gxt:FramedPanel>
       </container:child>
     </container:VerticalLayoutContainer>
-      
+
     <gxt:button>
       <button:TextButton ui:field="saveButton" text="{i18n.save}" />
     </gxt:button>

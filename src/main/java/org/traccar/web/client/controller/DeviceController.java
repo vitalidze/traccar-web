@@ -111,9 +111,17 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     @Override
     public void onSelected(Device device) {
+        onSelected(device, false);
+    }
+
+    @Override
+    public void onSelected(Device device, boolean zoomIn) {
         mapController.selectDevice(device);
         updateGeoFences(device);
         selectedDevice = device;
+        if(zoomIn) {
+            mapController.zoomIn(device);
+        }
     }
 
     @Override
@@ -126,6 +134,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                     public void onSuccess(Device result) {
                         deviceStore.add(result);
                     }
+
                     @Override
                     public void onFailure(Throwable caught) {
                         MessageBox msg = null;
@@ -153,8 +162,8 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
         User user = ApplicationContext.getInstance().getUser();
         if (!user.getAdmin() &&
-            user.getMaxNumOfDevices() != null &&
-            deviceStore.size() >= user.getMaxNumOfDevices()) {
+                user.getMaxNumOfDevices() != null &&
+                deviceStore.size() >= user.getMaxNumOfDevices()) {
             new AlertMessageBox(i18n.error(), i18n.errMaxNumberDevicesReached(user.getMaxNumOfDevices().toString())).show();
             return;
         }
@@ -185,6 +194,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                         mapController.updateAlert(result, showAlert);
                         deviceVisibilityHandler.updated(result);
                     }
+
                     @Override
                     public void onFailure(Throwable caught) {
                         MessageBox msg = null;

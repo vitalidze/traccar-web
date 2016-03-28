@@ -27,6 +27,8 @@ public class UserSettings implements IsSerializable {
     public static final double DEFAULT_CENTER_LONGITUDE = 12.5;
     public static final double DEFAULT_CENTER_LATITUDE = 41.9;
 
+    public static final short DEFAULT_ZOOM_TO_FOLLOWED_DEVICE_LEVEL = 16;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -40,6 +42,7 @@ public class UserSettings implements IsSerializable {
         centerLatitude = DEFAULT_CENTER_LATITUDE;
         mapType = MapType.OSM;
         overlays = "GEO_FENCES,VECTOR,MARKERS";
+        followedDeviceZoomLevel = DEFAULT_ZOOM_TO_FOLLOWED_DEVICE_LEVEL;
     }
 
     public enum SpeedUnit implements IsSerializable {
@@ -162,6 +165,19 @@ public class UserSettings implements IsSerializable {
 
     public void setTraceInterval(Short traceInterval) {
         this.traceInterval = traceInterval;
+    }
+
+    /**
+     *
+     */
+    private Short followedDeviceZoomLevel;
+
+    public Short getFollowedDeviceZoomLevel() {
+        return followedDeviceZoomLevel;
+    }
+
+    public void setFollowedDeviceZoomLevel(Short followedDeviceZoomLevel) {
+        this.followedDeviceZoomLevel = followedDeviceZoomLevel;
     }
 
     @JsonIgnore
@@ -363,6 +379,7 @@ public class UserSettings implements IsSerializable {
         speedUnit = userSettings.speedUnit;
         timePrintInterval = userSettings.timePrintInterval;
         traceInterval = userSettings.traceInterval;
+        followedDeviceZoomLevel = userSettings.followedDeviceZoomLevel;
         timeZoneId = userSettings.timeZoneId;
         zoomLevel = userSettings.zoomLevel;
         centerLongitude = userSettings.centerLongitude;
