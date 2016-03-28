@@ -111,10 +111,17 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
 
     @Override
     public void onSelected(Device device) {
+        onSelected(device, false);
+    }
+
+    @Override
+    public void onSelected(Device device, boolean zoomIn) {
         mapController.selectDevice(device);
-        mapController.zoomIn(device);
         updateGeoFences(device);
         selectedDevice = device;
+        if(zoomIn) {
+            mapController.zoomIn(device);
+        }
     }
 
     @Override

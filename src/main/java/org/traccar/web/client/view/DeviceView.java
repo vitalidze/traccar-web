@@ -93,6 +93,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     public interface DeviceHandler {
         void onSelected(Device device);
+        void onSelected(Device device, boolean zoomIn);
         void onAdd();
         void onEdit(Device device);
         void onShare(Device device);
@@ -642,7 +643,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     public void onRowMouseDown(RowMouseDownEvent event) {
         Device device = grid.getSelectionModel().getSelectedItem();
         if (device != null) {
-            deviceHandler.onSelected(device);
+            deviceHandler.onSelected(device, true);
         }
     }
 
