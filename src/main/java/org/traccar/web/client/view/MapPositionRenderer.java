@@ -526,13 +526,12 @@ public class MapPositionRenderer {
             return;
         }
 
-        // boolean isFollowed = ApplicationContext.getInstance().isFollowing(device);
-        // if isFollowed {
-        UserSettings userSettings = ApplicationContext.getInstance().getUserSettings();
-        Short zoomLevel = userSettings.getFollowedDeviceZoomLevel();
-        mapView.getMap().zoomTo(zoomLevel);
-        // }
-
+        DeviceData deviceData = getDeviceData(device);
+        if(deviceData.positions.size() > 0) {
+            UserSettings userSettings = ApplicationContext.getInstance().getUserSettings();
+            Short zoomLevel = userSettings.getFollowedDeviceZoomLevel();
+            mapView.getMap().zoomTo(zoomLevel);
+        }
     }
 
     private boolean selectPosition(Position oldPosition, Position newPosition, boolean center) {

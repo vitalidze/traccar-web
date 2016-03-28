@@ -193,6 +193,7 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
                     if (prevPosition != null && prevPosition.getId() != position.getId()) {
                         if (ApplicationContext.getInstance().isFollowing(device)) {
                             mapView.catchPosition(position);
+                            mapView.zoomIn(device);
                         }
                         if (ApplicationContext.getInstance().isRecordingTrace(device)) {
                             mapView.showLatestTrackPositions(Collections.singletonList(prevPosition));
