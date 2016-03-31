@@ -132,7 +132,7 @@ or
     
 This is because necessary tables will be created after the initialisation of `ConnectionManager` on Traccar's backend. To solve it please **restart the Traccar service twice**.
  
-4.2) **Specific to v3.2 of traccar**
+4.2) **Specific to v3.2 (and higher: 3.3, 3.4, etc.) of traccar**
 
 To enable 'Send commands' functionality it is necessary to update the configuration file entries as follows
 
@@ -181,6 +181,28 @@ New: ( **comment out or remove this query** )
     <!-- entry key='database.linkDevice'>
         INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
     </entry -->
+    
+4.3) **Specific to v. 3.3 (and higher: 3.4, etc.) of traccar**
+
+For new installation over Traccar 3.3 (and higher: 3.4, etc.) and after upgrade of Traccar backend (i.e. from 3.2 to 3.3/3.4) there are two additional steps:
+
+a) Disable database migrations made by the backend by commenting out the following configuration file entry:
+
+Old:
+
+    <entry key='database.changelog'>./database/changelog-master.xml</entry>
+    
+New: ( **comment out or remove this entry** )
+
+    <!-- entry key='database.changelog'>./database/changelog-master.xml</entry -->
+    
+b) Database must be empty before first startup. To ensure this please drop and re-create existing database:
+
+* for default H2 database this can be done by removing contents of `data` folder under the traccar installation folder. This database will be created automatically when service starts.
+
+* for any other databases like MySQL there are queries to drop and create them. Also this can be done via GUI management tools (like MySQL workbench).
+
+**IMPORTANT NOTE** : this will delete all existing data. If it needed to be preserved, then instead of dropping database just use a brand new database with a different name. Then data can be copied between databases using SQL queries or some scripts.
 
     
 5) Start Traccar service
