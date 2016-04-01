@@ -527,10 +527,12 @@ public class MapPositionRenderer {
         }
 
         DeviceData deviceData = getDeviceData(device);
-        if(deviceData.positions.size() > 0) {
+        if (deviceData.positions.size() > 0) {
             UserSettings userSettings = ApplicationContext.getInstance().getUserSettings();
             Short zoomLevel = userSettings.getFollowedDeviceZoomLevel();
-            mapView.getMap().zoomTo(zoomLevel);
+            if (zoomLevel != null) {
+                mapView.getMap().zoomTo(zoomLevel);
+            }
         }
     }
 

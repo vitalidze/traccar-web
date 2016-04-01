@@ -103,7 +103,7 @@
                                               ui:field="followedDeviceZoomLevel"
                                               allowNegative="false"
                                               allowDecimals="false"
-                                              allowBlank="false"
+                                              allowBlank="true"
                                               width="4" />
                         </container:child>
                         <container:child layoutData="{horizontalLayoutDataTwoWidgets}">
