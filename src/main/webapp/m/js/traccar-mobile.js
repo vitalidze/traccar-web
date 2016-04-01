@@ -491,6 +491,7 @@ function catchPosition(position) {
     var point = createPoint(position.longitude, position.latitude);
     if (!ol.extent.containsCoordinate(mapExtent, point)) {
         map.getView().setCenter(point);
+        autoZoom();
     }
 }
 
@@ -659,6 +660,7 @@ function drawDeviceDetails(deviceId, position) {
                     }
                 });
                 map.getView().setCenter(createPoint(position.longitude, position.latitude));
+                autoZoom();
                 myApp.closePanel();
             });
 
@@ -823,6 +825,13 @@ function getIconURL(position) {
             pictureId = position.offline ? position.device.icon.offlineIcon.id : position.device.icon.defaultIcon.id;
         }
         return '../traccar/p/' + pictureId;
+    }
+}
+
+function autoZoom() {
+    if (appState.userSettings.followedDeviceZoomLevel != null
+        && appState.userSettings.followedDeviceZoomLevel != map.getView().getZoom()) {
+        map.getView().setZoom(appState.userSettings.followedDeviceZoomLevel);
     }
 }
 
