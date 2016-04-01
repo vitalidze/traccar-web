@@ -68,6 +68,7 @@ public class UserSettingsDialog implements Editor<UserSettings> {
                                           NumberField<Integer> zoomLevel,
                                           CheckBox maximizeOverviewMap,
                                           GridSelectionModel<UserSettings.OverlayType> overlays);
+        void onSetZoomLevelToCurrent(NumberField<Short> followedDeviceZoomLevel);
     }
 
     private UserSettingsHandler userSettingsHandler;
@@ -226,5 +227,10 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     @UiHandler("takeFromMapButton")
     public void onSaveDefaultMapSateClicked(SelectEvent event) {
         userSettingsHandler.onTakeCurrentMapState(mapType, centerLongitude, centerLatitude, zoomLevel, maximizeOverviewMap, grid.getSelectionModel());
+    }
+
+    @UiHandler("setZoomLevelToCurrentButton")
+    public void onSetZoomLevelToCurrentClicked(SelectEvent event) {
+        userSettingsHandler.onSetZoomLevelToCurrent(followedDeviceZoomLevel);
     }
 }

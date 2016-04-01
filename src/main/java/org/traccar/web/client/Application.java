@@ -251,6 +251,11 @@ public class Application {
                 }
             }
         }
+
+        @Override
+        public void onSetZoomLevelToCurrent(NumberField<Short> field) {
+            field.setValue((short) mapController.getMap().getZoom());
+        }
     }
 
     private UserSettingsHandlerImpl userSettingsHandler = new UserSettingsHandlerImpl();

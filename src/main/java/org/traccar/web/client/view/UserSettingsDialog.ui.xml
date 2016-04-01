@@ -15,6 +15,22 @@
     <ui:attributes width="-1" height="-1" />
   </ui:with>
 
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="bottomMargin10">
+    <ui:attributes bottom="10" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutDataWithButton">
+    <ui:attributes width="1" height="-1"  margins="{bottomMargin10}" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="rightMargin4">
+    <ui:attributes right="4" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutDataTwoWidgets">
+    <ui:attributes width="0.5" height="-1" margins="{rightMargin4}" />
+  </ui:with>
+
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="shortPropertyEditor" />
@@ -31,9 +47,14 @@
     .pad3 {
         padding: 3px 3px 0px 3px;
     }
+
+    .removeVerticalPaddings {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
   </ui:style>
 
-  <gxt:Window ui:field="window" pixelSize="445, 580" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="445, 590" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.speedUnits}" labelWidth="160">
@@ -73,15 +94,25 @@
                 </form:widget>
             </form:FieldLabel>
         </container:child>
-        <container:child layoutData="{verticalLayoutData}">
+        <container:child layoutData="{verticalLayoutDataWithButton}">
             <form:FieldLabel text="{i18n.followedDeviceZoomLevel}" labelWidth="160">
                 <form:widget>
-                    <form:NumberField editor="{shortPropertyEditor}"
-                                      ui:field="followedDeviceZoomLevel"
-                                      allowNegative="false"
-                                      allowDecimals="false"
-                                      allowBlank="false"
-                                      width="4" />
+                    <container:HorizontalLayoutContainer>
+                        <container:child layoutData="{horizontalLayoutDataTwoWidgets}">
+                            <form:NumberField editor="{shortPropertyEditor}"
+                                              ui:field="followedDeviceZoomLevel"
+                                              allowNegative="false"
+                                              allowDecimals="false"
+                                              allowBlank="false"
+                                              width="4" />
+                        </container:child>
+                        <container:child layoutData="{horizontalLayoutDataTwoWidgets}">
+                            <!-- FIXME textButton ignores CSS class setZoomLevelToCurrentButton -->
+                            <button:TextButton ui:field="setZoomLevelToCurrentButton"
+                                               text="{i18n.useCurrentZoomLevel}"
+                                               styleName='{style.removeVerticalPaddings}' />
+                        </container:child>
+                    </container:HorizontalLayoutContainer>
                 </form:widget>
             </form:FieldLabel>
         </container:child>

@@ -405,6 +405,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
 
     String followedDeviceZoomLevel();
 
+    String useCurrentZoomLevel();
+
     String errAccessDenied();
 
     String errMaxNumOfDevicesExceeded(int maxNumOfDevices);
