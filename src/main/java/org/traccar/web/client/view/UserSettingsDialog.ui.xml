@@ -104,7 +104,8 @@
                                               allowNegative="false"
                                               allowDecimals="false"
                                               allowBlank="true"
-                                              width="4" />
+                                              width="4"
+                                              title="{i18n.followedDeviceZoomLevelToolTip}"/>
                         </container:child>
                         <container:child layoutData="{horizontalLayoutDataTwoWidgets}">
                             <button:TextButton ui:field="setZoomLevelToCurrentButton"
