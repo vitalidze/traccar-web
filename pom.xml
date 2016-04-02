@@ -26,6 +26,16 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <repositories>
+    <repository>
+      <!-- ~/.m2/settings.xml add <server/> with the support portal credentials -->
+      <id>sencha-gxt-repository</id>
+      <name>Sencha GXT Repository</name>
+      <!-- GPL -->
+       <url>https://maven.sencha.com/repo/gxt-gpl-release</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <!-- GWT dependencies -->
     <dependency>
@@ -111,13 +121,13 @@
     <dependency>
        <groupId>com.sencha.gxt</groupId>
        <artifactId>gxt</artifactId>
-       <version>3.1.1</version>
+       <version>4.0.0</version>
        <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.sencha.gxt</groupId>
       <artifactId>gxt-theme-neptune</artifactId>
-      <version>3.1.1</version>
+      <version>4.0.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

@@ -12,7 +12,7 @@
 
     <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <gxt:Window ui:field="window" pixelSize="300, -1" modal="true" headingText="{i18n.importData}" focusWidget="{saveButton}">
+    <gxt:Window ui:field="window" pixelSize="300, -1" modal="true" heading="{i18n.importData}" focusWidget="{saveButton}">
         <form:FormPanel action="traccar/import/gpx" method="POST" encoding="MULTIPART" ui:field="form">
             <container:VerticalLayoutContainer>
                 <container:child layoutData="{verticalLayoutData}">

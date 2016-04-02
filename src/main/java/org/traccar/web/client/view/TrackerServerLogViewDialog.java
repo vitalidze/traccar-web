@@ -62,7 +62,7 @@ public class TrackerServerLogViewDialog {
 
         uiBinder.createAndBindUi(this);
 
-        window.setHeadingText(title);
+        window.setHeading(title);
 
         logSize.addValidator(new MinNumberValidator<>((short) 1));
         logSize.addValidator(new MaxNumberValidator<>((short) 16384));

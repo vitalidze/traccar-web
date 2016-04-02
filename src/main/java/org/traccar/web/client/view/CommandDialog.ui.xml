@@ -18,7 +18,7 @@
 
     <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <gxt:Window ui:field="window" pixelSize="400, -1" modal="true" headingText="{i18n.command}" focusWidget="{sendButton}">
+    <gxt:Window ui:field="window" pixelSize="400, -1" modal="true" heading="{i18n.command}" focusWidget="{sendButton}">
         <container:VerticalLayoutContainer>
             <container:child layoutData="{verticalLayoutData}">
                 <form:FieldLabel text="{i18n.type}" labelWidth="120">

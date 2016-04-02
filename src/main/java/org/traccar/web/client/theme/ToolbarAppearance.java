@@ -29,10 +29,10 @@ public class ToolbarAppearance extends Css3ToolBarAppearance {
     }
 
     public interface ToolBarResources extends Css3ToolBarResources {
-        @ClientBundle.Source({"com/sencha/gxt/theme/base/client/container/BoxLayout.css",
-                "com/sencha/gxt/theme/neptune/client/base/container/Css3HBoxLayoutContainer.css",
-                "com/sencha/gxt/theme/neptune/client/base/toolbar/Css3ToolBar.css",
-                "ToolBar.css"})
+        @ClientBundle.Source({"com/sencha/gxt/theme/base/client/container/BoxLayout.gss",
+                "com/sencha/gxt/theme/neptune/client/base/container/Css3HBoxLayoutContainer.gss",
+                "com/sencha/gxt/theme/neptune/client/base/toolbar/Css3ToolBar.gss",
+                "ToolBar.gss"})
         @Override
         Css3ToolBarStyle style();
     }

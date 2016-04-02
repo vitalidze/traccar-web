@@ -213,7 +213,7 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
 
         period.init(fromDateField, fromTimeField, toDateField, toTimeField);
 
-        geoFencesPanel.setHeadingText(i18n.overlayType(UserSettings.OverlayType.GEO_FENCES));
+        geoFencesPanel.setHeading(i18n.overlayType(UserSettings.OverlayType.GEO_FENCES));
         geoFences = new ListViewEditor<>(geoFencesList);
         devices = new ListViewEditor<>(devicesList);
         fromDate = new DateTimeEditor(fromDateField, fromTimeField);

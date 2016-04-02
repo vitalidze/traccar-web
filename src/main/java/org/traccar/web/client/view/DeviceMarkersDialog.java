@@ -65,7 +65,7 @@ public class DeviceMarkersDialog {
     }
 
     interface Resources extends ClientBundle {
-        @ClientBundle.Source("PicturesListView.css")
+        @ClientBundle.Source("PicturesListView.gss")
         Style css();
     }
 
@@ -237,7 +237,7 @@ public class DeviceMarkersDialog {
 
         uiBinder.createAndBindUi(this);
 
-        window.setHeadingText(i18n.overlayType(UserSettings.OverlayType.MARKERS));
+        window.setHeading(i18n.overlayType(UserSettings.OverlayType.MARKERS));
 
         selected = selectedIcon;
         store.addStoreHandlers(new BaseStoreHandlers<MarkerIcon>() {

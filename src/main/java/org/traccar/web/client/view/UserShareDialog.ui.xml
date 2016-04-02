@@ -26,7 +26,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="640, 480" modal="true" headingText="{i18n.users}">
+  <gxt:Window ui:field="window" pixelSize="640, 480" modal="true" heading="{i18n.users}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{layoutData}">
         <gxt:ContentPanel ui:field="contentPanel" headerVisible="false">

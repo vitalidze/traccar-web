@@ -18,7 +18,7 @@
 
     <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <gxt:ContentPanel ui:field="contentPanel" headingText="{i18n.archive}">
+    <gxt:ContentPanel ui:field="contentPanel" heading="{i18n.archive}">
         <container:VerticalLayoutContainer>
 
             <container:child layoutData="{toolBarRowData}">

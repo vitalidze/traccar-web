@@ -29,7 +29,7 @@ public class WindowAppearance extends Css3WindowAppearance {
     }
 
     public interface WindowResources extends Css3WindowResources {
-        @ClientBundle.Source({"com/sencha/gxt/theme/neptune/client/base/window/Css3Window.css", "Window.css"})
+        @ClientBundle.Source({"com/sencha/gxt/theme/neptune/client/base/window/Css3Window.gss", "Window.gss"})
         @Override
         Css3WindowStyle style();
     }

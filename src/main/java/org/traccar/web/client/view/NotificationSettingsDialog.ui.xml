@@ -31,13 +31,13 @@
     <ui:attributes text="{i18n.messageTemplates}" />
   </ui:with>
 
-  <ui:style>
+  <ui:style gss="true">
     .tabBody {
         padding: 5px;
     }
   </ui:style>
 
-  <gxt:Window ui:field="window" pixelSize="450, 550" modal="true" headingText="{i18n.notificationSettings}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="450, 550" modal="true" heading="{i18n.notificationSettings}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
         <container:child layoutData="{verticalLayoutData}">
           <gxt:PlainTabPanel>

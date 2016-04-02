@@ -15,7 +15,7 @@
 
   <gxt:Window ui:field="window" pixelSize="320, -1" modal="true" closable="false"
                 resizable="false" draggable="false"
-                headingText="{i18n.authentication}" focusWidget="{login}">
+                heading="{i18n.authentication}" focusWidget="{login}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.language}" labelWidth="120">

@@ -24,7 +24,7 @@
     <ui:attributes text="{i18n.devices}" />
   </ui:with>
 
-  <ui:style>
+  <ui:style gss="true">
       .tabBody {
           padding: 5px;
       }
@@ -37,7 +37,7 @@
     <ui:attributes stripeRows="true" autoFill="true" />
   </ui:with>
 
-  <gxt:Window ui:field="window" pixelSize="300, 410" position="6, 60" modal="false" closable="false" headingText="{i18n.geoFence}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="300, 410" position="6, 60" modal="false" closable="false" heading="{i18n.geoFence}" focusWidget="{saveButton}">
       <gxt:PlainTabPanel ui:field="tabs">
           <gxt:child config="{settingsTabConfig}">
             <container:VerticalLayoutContainer addStyleNames="{style.tabBody}">

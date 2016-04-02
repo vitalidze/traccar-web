@@ -71,7 +71,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <ui:style>
+  <ui:style gss="true">
     .pad3 {
         padding: 3px 3px 0px 3px;
     }
@@ -80,7 +80,7 @@
     }
   </ui:style>
 
-  <gxt:Window ui:field="window" pixelSize="700, 614" modal="true" headingText="{i18n.reports}">
+  <gxt:Window ui:field="window" pixelSize="700, 614" modal="true" heading="{i18n.reports}">
     <container:VerticalLayoutContainer>
         <container:child layoutData="{toolBarRowData}">
             <toolbar:ToolBar>
@@ -97,7 +97,7 @@
         <container:child layoutData="{reportParamsLayoutData}">
             <container:HBoxLayoutContainer padding="{padding5}" hBoxLayoutAlign="STRETCH">
                 <container:child layoutData="{boxLayoutDataMargins0500Flex1}">
-                    <gxt:ContentPanel headingText="{i18n.report}" bodyStyleName="{style.pad3}">
+                    <gxt:ContentPanel heading="{i18n.report}" bodyStyleName="{style.pad3}">
                         <container:VerticalLayoutContainer>
                             <container:child layoutData="{verticalLayoutData}">
                                 <form:FieldLabel text="{i18n.name}">
@@ -126,19 +126,19 @@
                     </gxt:ContentPanel>
                 </container:child>
                 <container:child layoutData="{boxLayoutDataMargins0500Flex3}">
-                    <gxt:ContentPanel headingText="{i18n.devices}" bodyStyleName="{style.pad3}">
+                    <gxt:ContentPanel heading="{i18n.devices}" bodyStyleName="{style.pad3}">
                         <gxt:ListView ui:field="devicesList" store="{deviceStore}" />
                     </gxt:ContentPanel>
                 </container:child>
                 <container:child layoutData="{boxLayoutDataMargins0Flex3}">
-                    <gxt:ContentPanel headingText="{i18n.geoFence}" bodyStyleName="{style.pad3}" ui:field="geoFencesPanel">
+                    <gxt:ContentPanel heading="{i18n.geoFence}" bodyStyleName="{style.pad3}" ui:field="geoFencesPanel">
                         <gxt:ListView ui:field="geoFencesList" store="{geoFenceStore}" enabled="false" />
                     </gxt:ContentPanel>
                 </container:child>
             </container:HBoxLayoutContainer>
         </container:child>
         <container:child layoutData="{timePeriodLayoutData}">
-            <gxt:ContentPanel headingText="{i18n.timePeriod}" bodyStyleName="{style.pad3}" styleName="{style.pad5}">
+            <gxt:ContentPanel heading="{i18n.timePeriod}" bodyStyleName="{style.pad3}" styleName="{style.pad5}">
                 <container:VerticalLayoutContainer layoutData="{toolBarRowData}">
                     <toolbar:ToolBar>
                         <form:ComboBox ui:field="period" editable="false" triggerAction="ALL" />

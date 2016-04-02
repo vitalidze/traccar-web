@@ -160,14 +160,14 @@ public class PositionInfoPopup {
         PositionIcon icon = position.getIcon() == null ? MarkerIcon.create(position) : position.getIcon();
         String deviceTitle = position.getDevice().getName() + (position.getStatus() == Position.Status.OFFLINE ? " (" + i18n.offline() + ")" : "");
 
-        config.setTitleHtml(
+        config.setTitle(
                 "<table height=\"100%\"><tr>" +
                 "<td>" +"<img src=\"" + icon.getURL() + "\">&nbsp;</td>" +
                 "<td valign=\"center\">" + deviceTitle + "</td>" +
                 "<td valign=\"center\" align=\"right\"><img src=\"img/arrow" + (int)((position.getCourse()+45/2)%360)/45 + ".png\"/></td>" +
                 "</tr></table>");
 
-        config.setBodyHtml(body);
+        config.setBody(body);
         config.setAutoHide(false);
         config.setDismissDelay(0);
 

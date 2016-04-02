@@ -19,7 +19,7 @@
 
   <ui:with field='log' type='java.lang.String' />
 
-  <gxt:Window ui:field="window" pixelSize="640, 480" modal="true" headingText="{i18n.log}">
+  <gxt:Window ui:field="window" pixelSize="640, 480" modal="true" heading="{i18n.log}">
     <g:ScrollPanel ui:field="logScroll">
       <g:HTML ui:field="logArea" HTML="{log}" />
     </g:ScrollPanel>
