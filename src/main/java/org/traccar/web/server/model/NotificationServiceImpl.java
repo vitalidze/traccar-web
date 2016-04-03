@@ -91,6 +91,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 return;
             }
 
+            ApplicationSettings appSettings = applicationSettings.get();
             Map<User, Set<DeviceEvent>> events = new HashMap<>();
             List<User> admins = null;
             Map<User, List<User>> managers = new HashMap<>();
@@ -151,7 +152,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                     NotificationTemplate template = settings.findTemplate(deviceEvent.getType());
                     if (template == null) {
                         template = new NotificationTemplate();
-                        template.setBody(defaultBody(deviceEvent.getType(), applicationSettings.get().getLanguage()));
+                        template.setBody(defaultBody(deviceEvent.getType(), appSettings.getLanguage()));
                     }
 
                     Engine engine = getTemplateEngine(getTimeZone(user));
