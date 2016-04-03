@@ -26,7 +26,7 @@ import java.util.Map;
 
 @RemoteServiceRelativePath("groupService")
 public interface GroupService extends RemoteService {
-    List<Group> getGroups();
+    Map<Group, List<Group>> getGroups();
     Group addGroup(Group group);
     Group updateGroup(Group group) throws AccessDeniedException;
     void removeGroup(Group group) throws AccessDeniedException;

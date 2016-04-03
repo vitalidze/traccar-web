@@ -18,6 +18,7 @@ package org.traccar.web.client.view;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.*;
@@ -129,14 +130,15 @@ public class DeviceDialog implements Editor<Device> {
 
     final Device device;
 
-    public DeviceDialog(Device device, ListStore<Device> deviceStore, ListStore<Group> groupStore, DeviceHandler deviceHandler) {
+    public DeviceDialog(Device device, ListStore<Device> deviceStore, TreeStore<Group> groupStore, DeviceHandler deviceHandler) {
         this.device = device;
         this.deviceHandler = deviceHandler;
         this.selectedIcon = MarkerIcon.create(device);
 
-        GroupProperties groupProperties = GWT.create(GroupProperties.class);
-        this.group = new ComboBox<>(groupStore, groupProperties.label());
-        this.group.setForceSelection(false);
+//        TODO
+//        GroupProperties groupProperties = GWT.create(GroupProperties.class);
+//        this.group = new ComboBox<>(groupStore, groupProperties.label());
+//        this.group.setForceSelection(false);
 
         uiBinder.createAndBindUi(this);
 

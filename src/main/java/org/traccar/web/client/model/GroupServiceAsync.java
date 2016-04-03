@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface GroupServiceAsync {
-    void getGroups(AsyncCallback<List<Group>> async);
+    void getGroups(AsyncCallback<Map<Group, List<Group>>> async);
 
     void addGroup(Group group, AsyncCallback<Group> async);
 

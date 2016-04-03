@@ -37,6 +37,7 @@ import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.XTemplates;
 import com.sencha.gxt.data.shared.Store;
+import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.event.StoreAddEvent;
 import com.sencha.gxt.data.shared.event.StoreRemoveEvent;
 import com.sencha.gxt.data.shared.event.StoreSortEvent;
@@ -119,13 +120,13 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     private static class GroupsHandler extends BaseStoreHandlers {
         private final ListStore<Device> deviceStore;
-        private final ListStore<Group> groupStore;
+        private final TreeStore<Group> groupStore;
         private final GroupingView<Device> view;
         private final ColumnConfig<Device, ?> groupColumn;
         private boolean grouped;
 
         private GroupsHandler(ListStore<Device> deviceStore,
-                              ListStore<Group> groupStore,
+                              TreeStore<Group> groupStore,
                               final GroupingView<Device> view,
                               final ColumnConfig<Device, ?> groupColumn) {
             this.deviceStore = deviceStore;
@@ -190,40 +191,41 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         }
 
         void refreshView() {
-            if (groupStore.size() == 0) {
-                if (grouped) {
-                    view.groupBy(null);
-                    grouped = false;
-                }
-            } else {
-                boolean doGroup = false;
-                for (int i = 0; i < groupStore.size(); i++) {
-                    Group group = groupStore.get(i);
-                    for (int j = 0; j < deviceStore.size(); j++) {
-                        if (group.equals(deviceStore.get(j).getGroup())) {
-                            doGroup = true;
-                            break;
-                        }
-                    }
-                    if (doGroup) {
-                        break;
-                    }
-                }
-                if (doGroup) {
-                    if (grouped) {
-                        view.refresh(true);
-                    }
-                    view.groupBy(groupColumn);
-                    grouped = true;
-                } else {
-                    if (grouped) {
-                        view.groupBy(null);
-                        groupColumn.setHidden(true);
-                        view.refresh(true);
-                        grouped = false;
-                    }
-                }
-            }
+//            TODO
+//            if (groupStore.size() == 0) {
+//                if (grouped) {
+//                    view.groupBy(null);
+//                    grouped = false;
+//                }
+//            } else {
+//                boolean doGroup = false;
+//                for (int i = 0; i < groupStore.size(); i++) {
+//                    Group group = groupStore.get(i);
+//                    for (int j = 0; j < deviceStore.size(); j++) {
+//                        if (group.equals(deviceStore.get(j).getGroup())) {
+//                            doGroup = true;
+//                            break;
+//                        }
+//                    }
+//                    if (doGroup) {
+//                        break;
+//                    }
+//                }
+//                if (doGroup) {
+//                    if (grouped) {
+//                        view.refresh(true);
+//                    }
+//                    view.groupBy(groupColumn);
+//                    grouped = true;
+//                } else {
+//                    if (grouped) {
+//                        view.groupBy(null);
+//                        groupColumn.setHidden(true);
+//                        view.refresh(true);
+//                        grouped = false;
+//                    }
+//                }
+//            }
         }
     }
 
@@ -231,9 +233,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         Messages i18n = GWT.create(Messages.class);
 
         final DeviceVisibilityHandler deviceVisibilityHandler;
-        final ListStore<Group> groupStore;
+        final TreeStore<Group> groupStore;
 
-        private DeviceGridView(DeviceVisibilityHandler deviceVisibilityHandler, ListStore<Group> groupStore) {
+        private DeviceGridView(DeviceVisibilityHandler deviceVisibilityHandler, TreeStore<Group> groupStore) {
             this.deviceVisibilityHandler = deviceVisibilityHandler;
             this.groupStore = groupStore;
         }
@@ -282,26 +284,27 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                 });
                 menu.add(online);
 
-                if (groupStore.size() > 0) {
-                    MenuItem groups = new MenuItem(i18n.groups());
-                    groups.setSubMenu(new Menu());
-                    for (final Group group : groupStore.getAll()) {
-                        CheckMenuItem groupItem = new CheckMenuItem(group.getName());
-                        groupItem.setChecked(!deviceVisibilityHandler.isHiddenGroup(group.getId()));
-                        groupItem.addSelectionHandler(new SelectionHandler<Item>() {
-                            @Override
-                            public void onSelection(SelectionEvent<Item> event) {
-                                if (deviceVisibilityHandler.isHiddenGroup(group.getId())) {
-                                    deviceVisibilityHandler.removeHiddenGroup(group.getId());
-                                } else {
-                                    deviceVisibilityHandler.addHiddenGroup(group.getId());
-                                }
-                            }
-                        });
-                        groups.getSubMenu().add(groupItem);
-                    }
-                    menu.add(groups);
-                }
+//                TODO
+//                if (groupStore.size() > 0) {
+//                    MenuItem groups = new MenuItem(i18n.groups());
+//                    groups.setSubMenu(new Menu());
+//                    for (final Group group : groupStore.getAll()) {
+//                        CheckMenuItem groupItem = new CheckMenuItem(group.getName());
+//                        groupItem.setChecked(!deviceVisibilityHandler.isHiddenGroup(group.getId()));
+//                        groupItem.addSelectionHandler(new SelectionHandler<Item>() {
+//                            @Override
+//                            public void onSelection(SelectionEvent<Item> event) {
+//                                if (deviceVisibilityHandler.isHiddenGroup(group.getId())) {
+//                                    deviceVisibilityHandler.removeHiddenGroup(group.getId());
+//                                } else {
+//                                    deviceVisibilityHandler.addHiddenGroup(group.getId());
+//                                }
+//                            }
+//                        });
+//                        groups.getSubMenu().add(groupItem);
+//                    }
+//                    menu.add(groups);
+//                }
             }
             return menu;
         }
@@ -382,7 +385,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                       final DeviceVisibilityHandler deviceVisibilityHandler,
                       final ListStore<Device> globalDeviceStore,
                       final ListStore<GeoFence> geoFenceStore,
-                      ListStore<Group> groupStore) {
+                      TreeStore<Group> groupStore) {
         this.deviceHandler = deviceHandler;
         this.geoFenceHandler = geoFenceHandler;
         this.commandHandler = commandHandler;

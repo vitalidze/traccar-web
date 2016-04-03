@@ -4,7 +4,7 @@
         xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
         xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
         xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
-        xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
+        xmlns:treegrid="urn:import:com.sencha.gxt.widget.core.client.treegrid"
         xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
 
     <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="toolBarRowData">
@@ -12,13 +12,6 @@
     </ui:with>
     <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="layoutData">
         <ui:attributes width="1" height="1" />
-    </ui:with>
-
-    <ui:with type="com.sencha.gxt.data.shared.ListStore" field="groupStore" />
-    <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
-
-    <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view">
-        <ui:attributes stripeRows="true" autoFill="true" />
     </ui:with>
 
     <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
@@ -38,7 +31,7 @@
                         </container:child>
 
                         <container:child layoutData="{layoutData}">
-                            <grid:Grid ui:field="grid" store="{groupStore}" cm="{columnModel}" view="{view}" />
+                            <treegrid:TreeGrid ui:field="grid" />
                         </container:child>
 
                     </container:VerticalLayoutContainer>

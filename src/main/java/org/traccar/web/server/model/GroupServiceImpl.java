@@ -43,7 +43,7 @@ public class GroupServiceImpl extends RemoteServiceServlet implements GroupServi
     @Transactional
     @RequireUser
     @Override
-    public List<Group> getGroups() {
+    public Map<Group, List<Group>> getGroups() {
         List<Group> groups;
 
         if (sessionUser.get().getAdmin()) {
@@ -52,7 +52,24 @@ public class GroupServiceImpl extends RemoteServiceServlet implements GroupServi
             groups = new ArrayList<>(sessionUser.get().getAllAvailableGroups());
         }
 
-        return new ArrayList<>(groups);
+        Map<Group, List<Group>> result = new HashMap<>();
+        for (Group group : groups) {
+            List<Group> children = result.get(group.getParent());
+            if (children == null) {
+                children = new ArrayList<>();
+                result.put(group.getParent(), children);
+            }
+            children.add(group);
+        }
+        for (List<Group> children : result.values()) {
+            Collections.sort(children, new Comparator<Group>() {
+                @Override
+                public int compare(Group o1, Group o2) {
+                    return o1.getName().compareToIgnoreCase(o2.getName());
+                }
+            });
+        }
+        return result;
     }
 
     @Transactional

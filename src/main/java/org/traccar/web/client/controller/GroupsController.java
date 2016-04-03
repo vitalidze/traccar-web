@@ -16,8 +16,8 @@
 package org.traccar.web.client.controller;
 
 import com.google.gwt.core.client.GWT;
-import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
+import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.Window;
 import org.traccar.web.client.i18n.Messages;
@@ -33,11 +33,11 @@ import java.util.Map;
 
 public class GroupsController implements NavView.GroupsHandler, ContentController {
     private final Messages i18n = GWT.create(Messages.class);
-    private final ListStore<Group> groupStore;
+    private final TreeStore<Group> groupStore;
 
     public GroupsController() {
         GroupProperties groupProperties = GWT.create(GroupProperties.class);
-        this.groupStore = new ListStore<>(groupProperties.id());
+        this.groupStore = new TreeStore<>(groupProperties.id());
     }
 
     @Override
@@ -48,10 +48,18 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
     @Override
     public void run() {
         final GroupServiceAsync service = GWT.create(GroupService.class);
-        service.getGroups(new BaseAsyncCallback<List<Group>>(i18n) {
+        service.getGroups(new BaseAsyncCallback<Map<Group, List<Group>>>(i18n) {
             @Override
-            public void onSuccess(List<Group> result) {
-                groupStore.addAll(result);
+            public void onSuccess(Map<Group, List<Group>> result) {
+                for (Map.Entry<Group, List<Group>> entry : result.entrySet()) {
+                    Group parent = entry.getKey();
+                    List<Group> children = entry.getValue();
+                    if (parent == null) {
+                        groupStore.add(parent);
+                    } else {
+                        groupStore.add(parent, children);
+                    }
+                }
             }
         });
     }
@@ -126,7 +134,7 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
         new GroupsDialog(groupStore, handler).show();
     }
 
-    public ListStore<Group> getGroupStore() {
+    public TreeStore<Group> getGroupStore() {
         return groupStore;
     }
 }

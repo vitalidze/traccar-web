@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
@@ -60,7 +61,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     // geo-fences per device
     private final Map<Long, Set<GeoFence>> deviceGeoFences;
 
-    private final ListStore<Group> groupStore;
+    private final TreeStore<Group> groupStore;
 
     private final DeviceVisibilityHandler deviceVisibilityHandler;
 
@@ -74,7 +75,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             StoreHandlers<Device> deviceStoreHandler,
                             ListStore<GeoFence> geoFenceStore,
                             Map<Long, Set<GeoFence>> deviceGeoFences,
-                            ListStore<Group> groupStore,
+                            TreeStore<Group> groupStore,
                             Application application) {
         this.application = application;
         this.mapController = mapController;
