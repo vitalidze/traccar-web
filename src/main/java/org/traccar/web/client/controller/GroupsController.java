@@ -55,7 +55,9 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
                     Group parent = entry.getKey();
                     List<Group> children = entry.getValue();
                     if (parent == null) {
-                        groupStore.add(parent);
+                        for (Group child : children) {
+                            groupStore.add(child);
+                        }
                     } else {
                         groupStore.add(parent, children);
                     }
