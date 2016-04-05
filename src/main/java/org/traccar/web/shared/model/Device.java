@@ -68,7 +68,7 @@ public class Device implements IsSerializable {
                 sensors.add(new Sensor(sensor));
             }
         }
-        group = device.group == null ? null : new Group(device.group.getId(), null).copyFrom(device.group);
+        group = device.group == null ? null : new Group(device.group.getId()).copyFrom(device.group);
     }
 
     @Id

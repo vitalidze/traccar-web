@@ -30,7 +30,15 @@ public class Group implements IsSerializable {
     }
 
     public Group(long id, String name) {
+        this(id);
+        this.name = name;
+    }
+
+    public Group(long id) {
         this.id = id;
+    }
+
+    public Group(String name) {
         this.name = name;
     }
 
@@ -83,6 +91,7 @@ public class Group implements IsSerializable {
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "groups_fkey_parent_id"))
     @JsonIgnore
+    @GwtTransient
     private Group parent;
 
     public Group getParent() {

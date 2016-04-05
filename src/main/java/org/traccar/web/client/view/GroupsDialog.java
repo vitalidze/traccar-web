@@ -28,7 +28,7 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
-import com.sencha.gxt.widget.core.client.treegrid.TreeGridView;
+import org.traccar.web.client.controller.GroupsController;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.GroupProperties;
 import org.traccar.web.shared.model.Group;
@@ -54,8 +54,10 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
     }
 
     public interface GroupsHandler {
-        void onSave();
+        void onAdd(Group parent, Group group, GroupsController.GroupAddHandler groupsHandler);
+        void onSave(GroupsController.ChangesSaveHandler groupsHandler);
         void onRemove(Group group);
+        void onCancelSaving(List<Group> newGroups);
         void onShare(Group group);
     }
 
@@ -129,6 +131,7 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
     TextButton shareButton;
 
     final TreeStore<Group> groupStore;
+    private List<Group> newGroups;
 
     @UiField(provided = true)
     TreeGrid<Group> grid;
@@ -138,9 +141,10 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
 
     GroupProperties groupProperties = GWT.create(GroupProperties.class);
 
-    public GroupsDialog(final TreeStore<Group> groupStore, GroupsHandler groupsHandler) {
+    public GroupsDialog(final TreeStore<Group> groupStore, final GroupsHandler groupsHandler) {
         this.groupStore = groupStore;
         this.groupsHandler = groupsHandler;
+        this.newGroups = new ArrayList<>();
 
         List<ColumnConfig<Group, ?>> columnConfigList = new LinkedList<>();
         ColumnConfig<Group, String> colName = new ColumnConfig<>(groupProperties.name(), 50, i18n.name());
@@ -149,15 +153,12 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
         columnConfigList.add(colDescription);
         ColumnModel<Group> columnModel = new ColumnModel<>(columnConfigList);
 
-        TreeGridView<Group> gridView = new TreeGridView<>();
-        gridView.setAutoFill(true);
-        gridView.setStripeRows(true);
-
         grid = new TreeGrid<>(groupStore, columnModel, colName);
         grid.getSelectionModel().addSelectionChangedHandler(this);
         grid.getSelectionModel().setSelectionMode(Style.SelectionMode.SINGLE);
-        grid.setView(gridView);
-        grid.expandAll();
+        grid.getTreeView().setAutoFill(true);
+        grid.getTreeView().setStripeRows(true);
+        grid.setAutoExpand(true);
 
         DragHandler dragHandler = new DragHandler();
         TreeGridDragSource<Group> dragSource = new TreeGridDragSource<>(grid);
@@ -180,11 +181,7 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
         window.addHideHandler(new HideEvent.HideHandler() {
             @Override
             public void onHide(HideEvent event) {
-                for (Group group : groupStore.getAll()) {
-                    if (group.getId() < 0) {
-                        groupStore.remove(group);
-                    }
-                }
+                groupsHandler.onCancelSaving(newGroups);
                 // workaround to remove relation between grid and current tree store
                 grid.reconfigure(null, grid.getColumnModel(), grid.getTreeColumn());
             }
@@ -206,16 +203,22 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
     }
     @UiHandler("addButton")
     public void onAddClicked(SelectEvent event) {
-        Group selected = grid.getSelectionModel().getSelectedItem();
-        Group newGroup = new Group(-groupStore.getAllItemsCount() - 1, "");
-        if (selected == null) {
-            groupStore.add(newGroup);
-        } else {
-            newGroup.setParent(selected);
-            groupStore.add(selected, newGroup);
-            grid.setExpanded(selected, true);
-        }
-        groupStore.getRecord(newGroup).addChange(groupProperties.name(), i18n.newGroup());
+        final Group parent = grid.getSelectionModel().getSelectedItem();
+        Group newGroup = new Group(i18n.newGroup());
+
+        groupsHandler.onAdd(parent, newGroup, new GroupsController.GroupAddHandler() {
+            @Override
+            public void groupAdded(Group group) {
+                if (parent == null) {
+                    groupStore.add(group);
+                } else {
+                    groupStore.add(parent, group);
+                    grid.setExpanded(parent, true);
+                }
+                newGroups.add(group);
+                groupStore.getRecord(group).addChange(groupProperties.name(), i18n.newGroup());
+            }
+        });
     }
 
     @UiHandler("removeButton")
@@ -240,7 +243,12 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
 
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
-        groupsHandler.onSave();
+        groupsHandler.onSave(new GroupsController.ChangesSaveHandler() {
+            @Override
+            public void changesSaved() {
+                newGroups.clear();
+            }
+        });
     }
 
     @UiHandler("cancelButton")
