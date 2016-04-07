@@ -146,7 +146,7 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
             }
 
             @Override
-            public void onCancelSaving(List<Group> newGroups) {
+            public void onCancelSaving(final List<Group> newGroups) {
                 // Move updated nodes to the original parents
                 for (Map.Entry<Group, List<Group>> entry : originalParents.entrySet()) {
                     Group originalParent = entry.getKey();
@@ -163,8 +163,15 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
                         }
                     }
                 }
-                service.removeGroups(newGroups, new BaseAsyncCallback<Void>(i18n));
-                groupStore.rejectChanges();
+                service.removeGroups(newGroups, new BaseAsyncCallback<Void>(i18n) {
+                    @Override
+                    public void onSuccess(Void result) {
+                        for (Group group : newGroups) {
+                            groupStore.remove(group);
+                        }
+                        groupStore.rejectChanges();
+                    }
+                });
             }
 
             @Override
