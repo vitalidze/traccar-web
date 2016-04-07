@@ -101,7 +101,7 @@ public class GroupServiceImpl extends RemoteServiceServlet implements GroupServi
                     throw new AccessDeniedException();
                 }
                 toSave.copyFrom(group);
-                group.setParent(parent == null ? null : entityManager.get().find(Group.class, parent.getId()));
+                toSave.setParent(parent == null ? null : entityManager.get().find(Group.class, parent.getId()));
             }
         }
     }
