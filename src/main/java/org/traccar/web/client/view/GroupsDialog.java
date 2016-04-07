@@ -148,8 +148,10 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
 
         List<ColumnConfig<Group, ?>> columnConfigList = new LinkedList<>();
         ColumnConfig<Group, String> colName = new ColumnConfig<>(groupProperties.name(), 50, i18n.name());
+        colName.setSortable(false);
         columnConfigList.add(colName);
         ColumnConfig<Group, String> colDescription = new ColumnConfig<>(groupProperties.description(), 100, i18n.description());
+        colDescription.setSortable(false);
         columnConfigList.add(colDescription);
         ColumnModel<Group> columnModel = new ColumnModel<>(columnConfigList);
 
@@ -158,6 +160,7 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
         grid.getSelectionModel().setSelectionMode(Style.SelectionMode.SINGLE);
         grid.getTreeView().setAutoFill(true);
         grid.getTreeView().setStripeRows(true);
+        grid.getTreeView().setSortingEnabled(false);
         grid.setAutoExpand(true);
 
         DragHandler dragHandler = new DragHandler();
