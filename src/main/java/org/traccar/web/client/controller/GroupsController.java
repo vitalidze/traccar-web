@@ -58,7 +58,6 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
         service.getGroups(new BaseAsyncCallback<Map<Group, List<Group>>>(i18n) {
             @Override
             public void onSuccess(Map<Group, List<Group>> result) {
-                // TODO sort result somehow to add hierarchy sequentially
                 for (Map.Entry<Group, List<Group>> entry : result.entrySet()) {
                     Group parent = entry.getKey();
                     List<Group> children = entry.getValue();
