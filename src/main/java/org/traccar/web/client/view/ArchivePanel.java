@@ -264,6 +264,7 @@ public class ArchivePanel implements SelectionChangedEvent.SelectionChangedHandl
 
         new GridStateHandler<>(grid).loadState();
 
+        grid.setAllowTextSelection(true);
         grid.getSelectionModel().addSelectionChangedHandler(this);
         grid.getSelectionModel().setSelectionMode(Style.SelectionMode.SINGLE);
     }
