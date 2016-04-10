@@ -64,6 +64,7 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.model.GeoFenceProperties;
+import org.traccar.web.client.model.GroupStore;
 import org.traccar.web.client.state.DeviceVisibilityChangeHandler;
 import org.traccar.web.client.state.DeviceVisibilityHandler;
 import org.traccar.web.client.state.GridStateHandler;
@@ -233,9 +234,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         Messages i18n = GWT.create(Messages.class);
 
         final DeviceVisibilityHandler deviceVisibilityHandler;
-        final TreeStore<Group> groupStore;
+        final GroupStore groupStore;
 
-        private DeviceGridView(DeviceVisibilityHandler deviceVisibilityHandler, TreeStore<Group> groupStore) {
+        private DeviceGridView(DeviceVisibilityHandler deviceVisibilityHandler, GroupStore groupStore) {
             this.deviceVisibilityHandler = deviceVisibilityHandler;
             this.groupStore = groupStore;
         }
@@ -284,27 +285,33 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                 });
                 menu.add(online);
 
-//                TODO
-//                if (groupStore.size() > 0) {
-//                    MenuItem groups = new MenuItem(i18n.groups());
-//                    groups.setSubMenu(new Menu());
-//                    for (final Group group : groupStore.getAll()) {
-//                        CheckMenuItem groupItem = new CheckMenuItem(group.getName());
-//                        groupItem.setChecked(!deviceVisibilityHandler.isHiddenGroup(group.getId()));
-//                        groupItem.addSelectionHandler(new SelectionHandler<Item>() {
-//                            @Override
-//                            public void onSelection(SelectionEvent<Item> event) {
-//                                if (deviceVisibilityHandler.isHiddenGroup(group.getId())) {
-//                                    deviceVisibilityHandler.removeHiddenGroup(group.getId());
-//                                } else {
-//                                    deviceVisibilityHandler.addHiddenGroup(group.getId());
-//                                }
-//                            }
-//                        });
-//                        groups.getSubMenu().add(groupItem);
-//                    }
-//                    menu.add(groups);
-//                }
+                List<Group> groupsList = groupStore.toList();
+                if (!groupsList.isEmpty()) {
+                    MenuItem groups = new MenuItem(i18n.groups());
+                    groups.setSubMenu(new Menu());
+                    for (final Group group : groupsList) {
+                        SafeHtmlBuilder name = new SafeHtmlBuilder();
+                        for (int i = 0; i < groupStore.getDepth(group); i++) {
+                            name.appendHtmlConstant("&nbsp;&nbsp;");
+                        }
+                        name.appendEscaped(group.getName());
+                        CheckMenuItem groupItem = new CheckMenuItem();
+                        groupItem.setHTML(name.toSafeHtml());
+                        groupItem.setChecked(!deviceVisibilityHandler.isHiddenGroup(group.getId()));
+                        groupItem.addSelectionHandler(new SelectionHandler<Item>() {
+                            @Override
+                            public void onSelection(SelectionEvent<Item> event) {
+                                if (deviceVisibilityHandler.isHiddenGroup(group.getId())) {
+                                    deviceVisibilityHandler.removeHiddenGroup(group.getId());
+                                } else {
+                                    deviceVisibilityHandler.addHiddenGroup(group.getId());
+                                }
+                            }
+                        });
+                        groups.getSubMenu().add(groupItem);
+                    }
+                    menu.add(groups);
+                }
             }
             return menu;
         }
@@ -385,7 +392,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                       final DeviceVisibilityHandler deviceVisibilityHandler,
                       final ListStore<Device> globalDeviceStore,
                       final ListStore<GeoFence> geoFenceStore,
-                      TreeStore<Group> groupStore) {
+                      GroupStore groupStore) {
         this.deviceHandler = deviceHandler;
         this.geoFenceHandler = geoFenceHandler;
         this.commandHandler = commandHandler;
