@@ -207,19 +207,19 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
     @UiHandler("addButton")
     public void onAddClicked(SelectEvent event) {
         final Group parent = grid.getSelectionModel().getSelectedItem();
-        Group newGroup = new Group(i18n.newGroup());
+        Group newGroup = new Group();
 
         groupsHandler.onAdd(parent, newGroup, new GroupsController.GroupAddHandler() {
             @Override
-            public void groupAdded(Group group) {
+            public void groupAdded(Group addedGroup) {
                 if (parent == null) {
-                    groupStore.add(group);
+                    groupStore.add(addedGroup);
                 } else {
-                    groupStore.add(parent, group);
+                    groupStore.add(parent, addedGroup);
                     grid.setExpanded(parent, true);
                 }
-                newGroups.add(group);
-                groupStore.getRecord(group).addChange(groupProperties.name(), i18n.newGroup());
+                newGroups.add(addedGroup);
+                groupStore.getRecord(addedGroup).addChange(groupProperties.name(), i18n.newGroup());
             }
         });
     }
