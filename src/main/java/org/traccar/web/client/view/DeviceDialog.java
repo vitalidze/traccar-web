@@ -43,8 +43,6 @@ import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.TextField;
 
-import java.util.List;
-
 public class DeviceDialog implements Editor<Device> {
 
     private static DeviceDialogUiBinder uiBinder = GWT.create(DeviceDialogUiBinder.class);
@@ -143,16 +141,10 @@ public class DeviceDialog implements Editor<Device> {
         GroupProperties groupProperties = GWT.create(GroupProperties.class);
 
         this.group = new ComboBox<>(groupStore.toListStore(), groupProperties.label(), new AbstractSafeHtmlRenderer<Group>() {
-
-            private int getLevel(Group group) {
-                Group parent = groupStore.getParent(group);
-                return parent == null ? 0 : (1 + getLevel(parent));
-            }
-
             @Override
             public SafeHtml render(Group group) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                for (int i = 0; i < getLevel(group); i++) {
+                for (int i = 0; i < groupStore.getDepth(group); i++) {
                     builder.appendHtmlConstant("&nbsp;&nbsp;&nbsp;");
                 }
                 return builder.appendEscaped(group.getName() == null ? "" : group.getName()).toSafeHtml();
