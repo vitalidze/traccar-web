@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface GroupServiceAsync {
-    void getGroups(AsyncCallback<Map<Group, List<Group>>> async);
+    void getGroups(AsyncCallback<Map<Group, Group>> async);
 
     void addGroup(Group parent, Group group, AsyncCallback<Group> async);
 
