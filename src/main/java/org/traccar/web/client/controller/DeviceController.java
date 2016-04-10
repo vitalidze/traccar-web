@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.MessageBox;
@@ -28,6 +27,7 @@ import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
+import org.traccar.web.client.model.GroupStore;
 import org.traccar.web.client.state.DeviceVisibilityHandler;
 import org.traccar.web.client.view.DeviceDialog;
 import org.traccar.web.client.view.UserShareDialog;
@@ -61,7 +61,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
     // geo-fences per device
     private final Map<Long, Set<GeoFence>> deviceGeoFences;
 
-    private final TreeStore<Group> groupStore;
+    private final GroupStore groupStore;
 
     private final DeviceVisibilityHandler deviceVisibilityHandler;
 
@@ -75,7 +75,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             StoreHandlers<Device> deviceStoreHandler,
                             ListStore<GeoFence> geoFenceStore,
                             Map<Long, Set<GeoFence>> deviceGeoFences,
-                            TreeStore<Group> groupStore,
+                            GroupStore groupStore,
                             Application application) {
         this.application = application;
         this.mapController = mapController;

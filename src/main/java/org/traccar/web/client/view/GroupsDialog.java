@@ -31,6 +31,7 @@ import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 import org.traccar.web.client.controller.GroupsController;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.GroupProperties;
+import org.traccar.web.client.model.GroupStore;
 import org.traccar.web.shared.model.Group;
 
 import com.google.gwt.core.client.GWT;
@@ -130,7 +131,7 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
     @UiField
     TextButton shareButton;
 
-    final TreeStore<Group> groupStore;
+    final GroupStore groupStore;
     private List<Group> newGroups;
 
     @UiField(provided = true)
@@ -141,7 +142,7 @@ public class GroupsDialog implements SelectionChangedEvent.SelectionChangedHandl
 
     GroupProperties groupProperties = GWT.create(GroupProperties.class);
 
-    public GroupsDialog(final TreeStore<Group> groupStore, final GroupsHandler groupsHandler) {
+    public GroupsDialog(final GroupStore groupStore, final GroupsHandler groupsHandler) {
         this.groupStore = groupStore;
         this.groupsHandler = groupsHandler;
         this.newGroups = new ArrayList<>();

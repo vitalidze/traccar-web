@@ -21,7 +21,6 @@ import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.*;
@@ -30,6 +29,7 @@ import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.GroupProperties;
+import org.traccar.web.client.model.GroupStore;
 import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
@@ -135,14 +135,14 @@ public class DeviceDialog implements Editor<Device> {
 
     final Device device;
 
-    public DeviceDialog(Device device, ListStore<Device> deviceStore, final TreeStore<Group> groupStore, DeviceHandler deviceHandler) {
+    public DeviceDialog(Device device, ListStore<Device> deviceStore, final GroupStore groupStore, DeviceHandler deviceHandler) {
         this.device = device;
         this.deviceHandler = deviceHandler;
         this.selectedIcon = MarkerIcon.create(device);
 
         GroupProperties groupProperties = GWT.create(GroupProperties.class);
 
-        this.group = new ComboBox<>(toListStore(groupStore), groupProperties.label(), new AbstractSafeHtmlRenderer<Group>() {
+        this.group = new ComboBox<>(groupStore.toListStore(), groupProperties.label(), new AbstractSafeHtmlRenderer<Group>() {
 
             private int getLevel(Group group) {
                 Group parent = groupStore.getParent(group);
@@ -255,18 +255,5 @@ public class DeviceDialog implements Editor<Device> {
             photo.setUrl(Picture.URL_PREFIX + device.getPhoto().getId());
             photo.setVisible(true);
         }
-    }
-
-    private static <T> void addChildren(TreeStore<T> treeStore, ListStore<T> listStore, List<T> children) {
-        for (T child : children) {
-            listStore.add(child);
-            addChildren(treeStore, listStore, treeStore.getChildren(child));
-        }
-    }
-
-    private static <T> ListStore<T> toListStore(TreeStore<T> treeStore) {
-        ListStore<T> result = new ListStore<>(treeStore.getKeyProvider());
-        addChildren(treeStore, result, treeStore.getRootItems());
-        return result;
     }
 }

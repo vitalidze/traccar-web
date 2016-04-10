@@ -32,7 +32,7 @@ import java.util.*;
 
 public class GroupsController implements NavView.GroupsHandler, ContentController {
     private final Messages i18n = GWT.create(Messages.class);
-    private final TreeStore<Group> groupStore;
+    private final GroupStore groupStore;
 
     public interface GroupAddHandler {
         void groupAdded(Group group);
@@ -43,8 +43,7 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
     }
 
     public GroupsController() {
-        GroupProperties groupProperties = GWT.create(GroupProperties.class);
-        this.groupStore = new TreeStore<>(groupProperties.id());
+        this.groupStore = new GroupStore();
     }
 
     @Override
@@ -244,7 +243,7 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
         return result;
     }
 
-    public TreeStore<Group> getGroupStore() {
+    public GroupStore getGroupStore() {
         return groupStore;
     }
 }
