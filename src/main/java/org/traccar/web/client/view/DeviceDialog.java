@@ -15,6 +15,9 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sencha.gxt.data.shared.ListStore;
@@ -39,6 +42,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.TextField;
+
+import java.util.List;
 
 public class DeviceDialog implements Editor<Device> {
 
@@ -130,15 +135,30 @@ public class DeviceDialog implements Editor<Device> {
 
     final Device device;
 
-    public DeviceDialog(Device device, ListStore<Device> deviceStore, TreeStore<Group> groupStore, DeviceHandler deviceHandler) {
+    public DeviceDialog(Device device, ListStore<Device> deviceStore, final TreeStore<Group> groupStore, DeviceHandler deviceHandler) {
         this.device = device;
         this.deviceHandler = deviceHandler;
         this.selectedIcon = MarkerIcon.create(device);
 
-//        TODO
-//        GroupProperties groupProperties = GWT.create(GroupProperties.class);
-//        this.group = new ComboBox<>(groupStore, groupProperties.label());
-//        this.group.setForceSelection(false);
+        GroupProperties groupProperties = GWT.create(GroupProperties.class);
+
+        this.group = new ComboBox<>(toListStore(groupStore), groupProperties.label(), new AbstractSafeHtmlRenderer<Group>() {
+
+            private int getLevel(Group group) {
+                Group parent = groupStore.getParent(group);
+                return parent == null ? 0 : (1 + getLevel(parent));
+            }
+
+            @Override
+            public SafeHtml render(Group group) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                for (int i = 0; i < getLevel(group); i++) {
+                    builder.appendHtmlConstant("&nbsp;&nbsp;&nbsp;");
+                }
+                return builder.appendEscaped(group.getName() == null ? "" : group.getName()).toSafeHtml();
+            }
+        });
+        this.group.setForceSelection(false);
 
         uiBinder.createAndBindUi(this);
 
@@ -235,5 +255,18 @@ public class DeviceDialog implements Editor<Device> {
             photo.setUrl(Picture.URL_PREFIX + device.getPhoto().getId());
             photo.setVisible(true);
         }
+    }
+
+    private static <T> void addChildren(TreeStore<T> treeStore, ListStore<T> listStore, List<T> children) {
+        for (T child : children) {
+            listStore.add(child);
+            addChildren(treeStore, listStore, treeStore.getChildren(child));
+        }
+    }
+
+    private static <T> ListStore<T> toListStore(TreeStore<T> treeStore) {
+        ListStore<T> result = new ListStore<>(treeStore.getKeyProvider());
+        addChildren(treeStore, result, treeStore.getRootItems());
+        return result;
     }
 }
