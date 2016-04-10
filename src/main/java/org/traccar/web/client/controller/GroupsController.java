@@ -107,26 +107,26 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
 
             @Override
             public void onSave(final ChangesSaveHandler groupsHandler) {
-                final List<Group> listToSave = new ArrayList<>();
+                final Set<Group> setToSave = new HashSet<>();
                 for (Store<Group>.Record record : groupStore.getModifiedRecords()) {
                     Group originalGroup = record.getModel();
                     Group group = new Group(originalGroup.getId()).copyFrom(originalGroup);
                     for (Store.Change<Group, ?> change : record.getChanges()) {
                         change.modify(group);
                     }
-                    listToSave.add(group);
+                    setToSave.add(group);
                 }
 
                 for (Group group : groupStore.getAll()) {
                     Group originalParent = getOriginalParent(group);
                     Group newParent = groupStore.getParent(group);
                     if (!Objects.equals(originalParent, newParent)) {
-                        listToSave.add(group);
+                        setToSave.add(group);
                     }
                 }
 
                 Map<Group, List<Group>> groupsWithParents = new HashMap<>();
-                for (Group group : listToSave) {
+                for (Group group : setToSave) {
                     Group parent = groupStore.getParent(group);
                     List<Group> subGroups = groupsWithParents.get(parent);
                     if (subGroups == null) {
