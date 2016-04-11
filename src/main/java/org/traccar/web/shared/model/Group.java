@@ -25,7 +25,7 @@ import java.util.Set;
 @Entity
 @Table(name = "groups",
        indexes = { @Index(name = "groups_pkey", columnList = "id") })
-public class Group implements IsSerializable {
+public class Group implements IsSerializable, GroupedDevice {
     public Group() {
     }
 

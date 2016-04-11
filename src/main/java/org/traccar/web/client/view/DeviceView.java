@@ -59,16 +59,16 @@ import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
+import com.sencha.gxt.widget.core.client.tree.TreeView;
+import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
+import com.sencha.gxt.widget.core.client.treegrid.TreeGridView;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseStoreHandlers;
-import org.traccar.web.client.model.DeviceProperties;
-import org.traccar.web.client.model.GeoFenceProperties;
-import org.traccar.web.client.model.GroupStore;
+import org.traccar.web.client.model.*;
 import org.traccar.web.client.state.DeviceVisibilityChangeHandler;
 import org.traccar.web.client.state.DeviceVisibilityHandler;
 import org.traccar.web.client.state.GridStateHandler;
-import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -82,9 +82,6 @@ import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
-import org.traccar.web.shared.model.GeoFence;
-import org.traccar.web.shared.model.Group;
-import org.traccar.web.shared.model.UserSettings;
 
 public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDoubleClickEvent.CellDoubleClickHandler {
 
@@ -122,13 +119,13 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     private static class GroupsHandler extends BaseStoreHandlers {
         private final ListStore<Device> deviceStore;
         private final TreeStore<Group> groupStore;
-        private final GroupingView<Device> view;
+        private final TreeGridView<GroupedDevice> view;
         private final ColumnConfig<Device, ?> groupColumn;
         private boolean grouped;
 
         private GroupsHandler(ListStore<Device> deviceStore,
                               TreeStore<Group> groupStore,
-                              final GroupingView<Device> view,
+                              final TreeGridView<GroupedDevice> view,
                               final ColumnConfig<Device, ?> groupColumn) {
             this.deviceStore = deviceStore;
             this.groupStore = groupStore;
@@ -183,7 +180,8 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                 }
                 else if (!remove && item instanceof Device) {
                     if (grouped) {
-                        view.groupBy(null);
+//                        TODO
+//                        view.groupBy(null);
                     }
                     needRefresh = true;
                 }
@@ -230,7 +228,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         }
     }
 
-    private static class DeviceGridView extends GroupingView<Device> {
+    private static class DeviceGridView extends TreeGridView<GroupedDevice> {
         Messages i18n = GWT.create(Messages.class);
 
         final DeviceVisibilityHandler deviceVisibilityHandler;
@@ -359,20 +357,17 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     @UiField(provided = true)
     TabPanel objectsTabs;
 
-    @UiField(provided = true)
-    ColumnModel<Device> columnModel;
+    ColumnModel<GroupedDevice> columnModel;
+
+    final DeviceStore deviceStore;
 
     @UiField(provided = true)
-    final ListStore<Device> deviceStore;
+    StoreFilterField<GroupedDevice> deviceFilter;
 
     @UiField(provided = true)
-    StoreFilterField<Device> deviceFilter;
+    TreeGrid<GroupedDevice> grid;
 
-    @UiField
-    Grid<Device> grid;
-
-    @UiField(provided = true)
-    GroupingView<Device> view;
+    TreeGridView<GroupedDevice> view;
 
     @UiField(provided = true)
     TabItemConfig geoFencesTabConfig;
@@ -399,55 +394,83 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         this.geoFenceStore = geoFenceStore;
 
         // create a new devices store so the filtering will not affect global store
-        this.deviceStore = new ListStore<>(globalDeviceStore.getKeyProvider());
+        this.deviceStore = new DeviceStore();
         this.deviceStore.setAutoCommit(true);
-        this.deviceStore.addAll(globalDeviceStore.getAll());
+        for (Group group : groupStore.toList()) {
+            Group parent = groupStore.getParent(group);
+            if (parent == null) {
+                this.deviceStore.add(group);
+            } else {
+                this.deviceStore.add(parent, group);
+            }
+        }
+        for (Device device : globalDeviceStore.getAll()) {
+            if (device.getGroup() == null) {
+                this.deviceStore.add(device);
+            } else {
+                this.deviceStore.add(device.getGroup(), device);
+            }
+        }
         // handle events from global devices store and update local one accordingly
         globalDeviceStore.addStoreHandlers(new BaseStoreHandlers<Device>() {
             @Override
             public void onAdd(StoreAddEvent<Device> event) {
-                DeviceView.this.deviceStore.addAll(event.getIndex(), event.getItems());
+                for (Device device : event.getItems()) {
+                    if (device.getGroup() == null) {
+                        deviceStore.add(device);
+                    } else {
+                        deviceStore.add(device.getGroup(), device);
+                    }
+                }
             }
 
             @Override
             public void onUpdate(StoreUpdateEvent<Device> event) {
                 for (Device device : event.getItems()) {
-                    DeviceView.this.deviceStore.update(device);
+                    deviceStore.update(device);
                 }
             }
 
             @Override
             public void onRemove(StoreRemoveEvent<Device> event) {
-                DeviceView.this.deviceStore.remove(event.getIndex());
+                deviceStore.remove(event.getItem());
             }
         });
         // handle sort events from local devices store and sort global one accordingly
-        this.deviceStore.addStoreSortHandler(new StoreSortEvent.StoreSortHandler<Device>() {
-            @Override
-            public void onSort(StoreSortEvent<Device> event) {
-                globalDeviceStore.clearSortInfo();
-                for (Store.StoreSortInfo<Device> sortInfo : event.getSource().getSortInfo()) {
-                    globalDeviceStore.addSortInfo(sortInfo);
-                }
-            }
-        });
+//        TODO
+//        this.deviceStore.addStoreSortHandler(new StoreSortEvent.StoreSortHandler<Device>() {
+//            @Override
+//            public void onSort(StoreSortEvent<Device> event) {
+//                globalDeviceStore.clearSortInfo();
+//                for (Store.StoreSortInfo<Device> sortInfo : event.getSource().getSortInfo()) {
+//                    globalDeviceStore.addSortInfo(sortInfo);
+//                }
+//            }
+//        });
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         Resources resources = GWT.create(Resources.class);
         HeaderIconTemplate headerTemplate = GWT.create(HeaderIconTemplate.class);
 
-        List<ColumnConfig<Device, ?>> columnConfigList = new LinkedList<>();
+        List<ColumnConfig<GroupedDevice, ?>> columnConfigList = new LinkedList<>();
 
         // 'Visible' column
-        ColumnConfig<Device, Boolean> colVisible = new ColumnConfig<>(new ValueProvider<Device, Boolean>() {
+        ColumnConfig<GroupedDevice, Boolean> colVisible = new ColumnConfig<>(new ValueProvider<GroupedDevice, Boolean>() {
             @Override
-            public Boolean getValue(Device device) {
-                return deviceVisibilityHandler.isVisible(device);
+            public Boolean getValue(GroupedDevice node) {
+                if (deviceStore.isDevice(node)) {
+                    Device device = deviceStore.getDevice(node);
+                    return deviceVisibilityHandler.isVisible(device);
+                }
+                return true;
             }
 
             @Override
-            public void setValue(Device device, Boolean value) {
-                deviceVisibilityHandler.setVisible(device, value);
+            public void setValue(GroupedDevice node, Boolean value) {
+                if (deviceStore.isDevice(node)) {
+                    Device device = deviceStore.getDevice(node);
+                    deviceVisibilityHandler.setVisible(device, value);
+                }
             }
 
             @Override
@@ -471,7 +494,17 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         });
 
         // Name column
-        ColumnConfig<Device, String> colName = new ColumnConfig<>(deviceProperties.name(), 0, i18n.name());
+        ColumnConfig<GroupedDevice, String> colName = new ColumnConfig<>(new ToStringValueProvider<GroupedDevice>() {
+            @Override
+            public String getValue(GroupedDevice object) {
+                return object.getName();
+            }
+
+            @Override
+            public String getPath() {
+                return "name";
+            }
+        }, 0, i18n.name());
         colName.setCell(new AbstractCell<String>(BrowserEvents.MOUSEOVER, BrowserEvents.MOUSEOUT) {
             @Override
             public void render(Context context, String value, SafeHtmlBuilder sb) {
@@ -486,9 +519,11 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                     int rowIndex = grid.getView().findRowIndex(target);
                     if (rowIndex != -1) {
                         if (event.getType().equals(BrowserEvents.MOUSEOVER)) {
-                            deviceHandler.onMouseOver(event.getClientX(), event.getClientY(), deviceStore.get(rowIndex));
+//                            TODO
+//                            deviceHandler.onMouseOver(event.getClientX(), event.getClientY(), deviceStore.get(rowIndex));
                         } else {
-                            deviceHandler.onMouseOut(event.getClientX(), event.getClientY(), deviceStore.get(rowIndex));
+//                            TODO
+//                            deviceHandler.onMouseOut(event.getClientX(), event.getClientY(), deviceStore.get(rowIndex));
                         }
                     }
                 } else {
@@ -499,19 +534,26 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         columnConfigList.add(colName);
 
         // 'Follow' column
-        ColumnConfig<Device, Boolean> colFollow = new ColumnConfig<>(new ValueProvider<Device, Boolean>() {
+        ColumnConfig<GroupedDevice, Boolean> colFollow = new ColumnConfig<>(new ValueProvider<GroupedDevice, Boolean>() {
 
             @Override
-            public Boolean getValue(Device device) {
-                return ApplicationContext.getInstance().isFollowing(device);
+            public Boolean getValue(GroupedDevice node) {
+                if (deviceStore.isDevice(node)) {
+                    Device device = deviceStore.getDevice(node);
+                    return ApplicationContext.getInstance().isFollowing(deviceStore.getDevice(device));
+                }
+                return false;
             }
 
             @Override
-            public void setValue(Device device, Boolean value) {
-                if (value) {
-                    ApplicationContext.getInstance().follow(device);
-                } else {
-                    ApplicationContext.getInstance().stopFollowing(device);
+            public void setValue(GroupedDevice node, Boolean value) {
+                if (deviceStore.isDevice(node)) {
+                    Device device = deviceStore.getDevice(node);
+                    if (value) {
+                        ApplicationContext.getInstance().follow(device);
+                    } else {
+                        ApplicationContext.getInstance().stopFollowing(device);
+                    }
                 }
             }
 
@@ -527,18 +569,25 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         columnConfigList.add(colFollow);
 
         // 'Record trace' column
-        ColumnConfig<Device, Boolean> colRecordTrace = new ColumnConfig<>(new ValueProvider<Device, Boolean>() {
+        ColumnConfig<GroupedDevice, Boolean> colRecordTrace = new ColumnConfig<>(new ValueProvider<GroupedDevice, Boolean>() {
             @Override
-            public Boolean getValue(Device device) {
-                return ApplicationContext.getInstance().isRecordingTrace(device);
+            public Boolean getValue(GroupedDevice node) {
+                if (deviceStore.isDevice(node)) {
+                    Device device = deviceStore.getDevice(node);
+                    return ApplicationContext.getInstance().isRecordingTrace(device);
+                }
+                return false;
             }
 
             @Override
-            public void setValue(Device device, Boolean value) {
-                if (value) {
-                    ApplicationContext.getInstance().recordTrace(device);
-                } else {
-                    ApplicationContext.getInstance().stopRecordingTrace(device);
+            public void setValue(GroupedDevice node, Boolean value) {
+                if (deviceStore.isDevice(node)) {
+                    Device device = deviceStore.getDevice(node);
+                    if (value) {
+                        ApplicationContext.getInstance().recordTrace(device);
+                    } else {
+                        ApplicationContext.getInstance().stopRecordingTrace(device);
+                    }
                 }
             }
 
@@ -553,29 +602,21 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         colRecordTrace.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.recordTrace()).toSafeHtml());
         columnConfigList.add(colRecordTrace);
 
-        ColumnConfig<Device, String> colGroup = new ColumnConfig<>(new ToStringValueProvider<Device>() {
-            @Override
-            public String getValue(Device device) {
-                return device.getGroup() == null ? i18n.noGroup() : device.getGroup().getName();
-            }
-        }, 0, i18n.group());
-        colGroup.setHidden(true);
-        columnConfigList.add(colGroup);
-
         view = new DeviceGridView(deviceVisibilityHandler, groupStore);
         view.setStripeRows(true);
-        view.setShowGroupedColumn(false);
-        view.setEnableNoGroups(true);
-        view.setEnableGroupingMenu(false);
-        groupsHandler = new GroupsHandler(globalDeviceStore, groupStore, view, colGroup);
+        groupsHandler = new GroupsHandler(globalDeviceStore, groupStore, view, null);
 
         columnModel = new ColumnModel<>(columnConfigList);
 
+        grid = new TreeGrid<>(deviceStore, columnModel, colName);
+        grid.setView(view);
+
         // configure device store filtering
-        deviceFilter = new StoreFilterField<Device>() {
+        deviceFilter = new StoreFilterField<GroupedDevice>() {
             @Override
-            protected boolean doSelect(Store<Device> store, Device parent, Device item, String filter) {
+            protected boolean doSelect(Store<GroupedDevice> store, GroupedDevice parent, GroupedDevice item, String filter) {
                 return filter.trim().isEmpty() ||
+                        deviceStore.isGroup(item) ||
                         item.getName().toLowerCase().contains(filter.toLowerCase());
             }
         };
@@ -616,10 +657,11 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         new GridStateHandler<>(grid).loadState();
 
-        GridEditing<Device> editing = new GridInlineEditing<>(grid);
-        view.setShowDirtyCells(false);
-        editing.addEditor(colFollow, new CheckBox());
-        editing.addEditor(colRecordTrace, new CheckBox());
+//        TODO
+//        GridEditing<Device> editing = new GridInlineEditing<>(grid);
+//        view.setShowDirtyCells(false);
+//        editing.addEditor(colFollow, new CheckBox());
+//        editing.addEditor(colRecordTrace, new CheckBox());
 
         boolean readOnly = ApplicationContext.getInstance().getUser().getReadOnly();
         boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
@@ -634,9 +676,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         toggleManagementButtons(null);
     }
 
-    final SelectionChangedEvent.SelectionChangedHandler<Device> deviceSelectionHandler = new SelectionChangedEvent.SelectionChangedHandler<Device>() {
+    final SelectionChangedEvent.SelectionChangedHandler<GroupedDevice> deviceSelectionHandler = new SelectionChangedEvent.SelectionChangedHandler<GroupedDevice>() {
         @Override
-        public void onSelectionChanged(SelectionChangedEvent<Device> event) {
+        public void onSelectionChanged(SelectionChangedEvent<GroupedDevice> event) {
             toggleManagementButtons(event.getSelection().isEmpty() ? null : event.getSelection().get(0));
         }
     };
@@ -651,15 +693,18 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @Override
     public void onRowMouseDown(RowMouseDownEvent event) {
-        Device device = grid.getSelectionModel().getSelectedItem();
-        if (device != null) {
-            deviceHandler.onSelected(device, true);
+        GroupedDevice node = grid.getSelectionModel().getSelectedItem();
+        if (node != null && deviceStore.isDevice(node)) {
+            deviceHandler.onSelected(deviceStore.getDevice(node), true);
         }
     }
 
     @Override
     public void onCellClick(CellDoubleClickEvent cellDoubleClickEvent) {
-        deviceHandler.doubleClicked(grid.getSelectionModel().getSelectedItem());
+        GroupedDevice node = grid.getSelectionModel().getSelectedItem();
+        if (deviceStore.isDevice(node)) {
+            deviceHandler.doubleClicked(deviceStore.getDevice(node));
+        }
     }
 
     @UiHandler("addButton")
@@ -676,7 +721,10 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         if (editingGeoFences()) {
             geoFenceHandler.onEdit(geoFenceList.getSelectionModel().getSelectedItem());
         } else {
-            deviceHandler.onEdit(grid.getSelectionModel().getSelectedItem());
+            GroupedDevice node = grid.getSelectionModel().getSelectedItem();
+            if (deviceStore.isDevice(node)) {
+                deviceHandler.onEdit(deviceStore.getDevice(node));
+            }
         }
     }
 
@@ -685,7 +733,10 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         if (editingGeoFences()) {
             geoFenceHandler.onShare(geoFenceList.getSelectionModel().getSelectedItem());
         } else {
-            deviceHandler.onShare(grid.getSelectionModel().getSelectedItem());
+            GroupedDevice node = grid.getSelectionModel().getSelectedItem();
+            if (deviceStore.isDevice(node)) {
+                deviceHandler.onShare(deviceStore.getDevice(node));
+            }
         }
     }
 
@@ -694,18 +745,23 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         if (editingGeoFences()) {
             geoFenceHandler.onRemove(geoFenceList.getSelectionModel().getSelectedItem());
         } else {
-            deviceHandler.onRemove(grid.getSelectionModel().getSelectedItem());
+            GroupedDevice node = grid.getSelectionModel().getSelectedItem();
+            if (deviceStore.isDevice(node)) {
+                deviceHandler.onRemove(deviceStore.getDevice(node));
+            }
         }
     }
 
     @UiHandler("commandButton")
     public void onCommandClicked(SelectEvent event) {
-        commandHandler.onCommand(grid.getSelectionModel().getSelectedItem());
+//        TODO
+//        commandHandler.onCommand(grid.getSelectionModel().getSelectedItem());
     }
 
     public void selectDevice(Device device) {
-        grid.getSelectionModel().select(deviceStore.findModel(device), false);
-        deviceHandler.onSelected(grid.getSelectionModel().getSelectedItem());
+//        TODO
+//        grid.getSelectionModel().select(deviceStore.findModel(device), false);
+//        deviceHandler.onSelected(grid.getSelectionModel().getSelectedItem());
     }
 
     @UiHandler("objectsTabs")

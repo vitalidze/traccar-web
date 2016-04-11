@@ -6,6 +6,7 @@
     xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
     xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
     xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
+    xmlns:treegrid="urn:import:com.sencha.gxt.widget.core.client.treegrid"
     xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
     xmlns:menu="urn:import:com.sencha.gxt.widget.core.client.menu">
 
@@ -19,11 +20,6 @@
   <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="devicesTabConfig">
     <ui:attributes text="{i18n.devices}" />
   </ui:with>
-
-  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="deviceStore" />
-  <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
-
-  <ui:with type="com.sencha.gxt.widget.core.client.grid.GroupingView" field="view" />
 
   <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="geoFencesTabConfig" />
 
@@ -52,7 +48,7 @@
                 <form:StoreFilterField ui:field="deviceFilter" emptyText="{i18n.filter}..."/>
               </container:child>
               <container:child layoutData="{layoutData}">
-                <grid:Grid ui:field="grid" store="{deviceStore}" cm="{columnModel}" view="{view}" stateful="true" stateId="deviceGrid" />
+                <treegrid:TreeGrid ui:field="grid" stateful="true" stateId="deviceGrid" />
               </container:child>
             </container:VerticalLayoutContainer>
           </gxt:child>
