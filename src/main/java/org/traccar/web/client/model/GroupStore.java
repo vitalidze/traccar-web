@@ -46,4 +46,8 @@ public class GroupStore extends TreeStore<Group> {
         addChildren(result, getRootItems());
         return result;
     }
+
+    public boolean contains(Group item) {
+        return getModelMap().containsKey(getKeyProvider().getKey(item));
+    }
 }

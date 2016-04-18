@@ -15,73 +15,72 @@
  */
 package org.traccar.web.client.view;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.form.CheckBoxCell;
+import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.XTemplates;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
-import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.data.shared.event.StoreAddEvent;
 import com.sencha.gxt.data.shared.event.StoreRemoveEvent;
 import com.sencha.gxt.data.shared.event.StoreSortEvent;
 import com.sencha.gxt.data.shared.event.StoreUpdateEvent;
 import com.sencha.gxt.theme.neptune.client.base.tabs.Css3TabPanelBottomAppearance;
-import com.sencha.gxt.widget.core.client.TabItemConfig;
-import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
+import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.ListView;
+import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
+import com.sencha.gxt.widget.core.client.TabPanel.TabPanelAppearance;
+import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
+import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.StoreFilterField;
-import com.sencha.gxt.widget.core.client.grid.*;
+import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
+import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.menu.CheckMenuItem;
 import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
+import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
-import com.sencha.gxt.widget.core.client.tree.TreeView;
+import com.sencha.gxt.widget.core.client.tree.Tree;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGrid;
 import com.sencha.gxt.widget.core.client.treegrid.TreeGridView;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.*;
+import org.traccar.web.client.model.BaseStoreHandlers;
+import org.traccar.web.client.model.DeviceStore;
+import org.traccar.web.client.model.GeoFenceProperties;
+import org.traccar.web.client.model.GroupStore;
 import org.traccar.web.client.state.DeviceVisibilityChangeHandler;
 import org.traccar.web.client.state.DeviceVisibilityHandler;
 import org.traccar.web.client.state.GridStateHandler;
 import org.traccar.web.shared.model.*;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Widget;
-import com.sencha.gxt.core.client.Style.SelectionMode;
-import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.widget.core.client.ContentPanel;
-import com.sencha.gxt.widget.core.client.button.TextButton;
-import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
+import java.util.*;
 
 public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDoubleClickEvent.CellDoubleClickHandler {
 
@@ -117,114 +116,151 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     }
 
     private static class GroupsHandler extends BaseStoreHandlers {
-        private final ListStore<Device> deviceStore;
-        private final TreeStore<Group> groupStore;
-        private final TreeGridView<GroupedDevice> view;
-        private final ColumnConfig<Device, ?> groupColumn;
-        private boolean grouped;
+        private final ListStore<Device> globalDeviceStore;
+        private final DeviceStore deviceStore;
+        private final GroupStore groupStore;
+        private final List<Device> pendingDevices = new ArrayList<>();
 
-        private GroupsHandler(ListStore<Device> deviceStore,
-                              TreeStore<Group> groupStore,
-                              final TreeGridView<GroupedDevice> view,
-                              final ColumnConfig<Device, ?> groupColumn) {
+        private GroupsHandler(ListStore<Device> globalDeviceStore,
+                              DeviceStore deviceStore,
+                              GroupStore groupStore) {
+            this.globalDeviceStore = globalDeviceStore;
             this.deviceStore = deviceStore;
             this.groupStore = groupStore;
-            this.view = view;
-            this.groupColumn = groupColumn;
-        }
 
-        public void init() {
-            this.deviceStore.addStoreHandlers(this);
+            this.globalDeviceStore.addStoreHandlers(this);
             this.groupStore.addStoreHandlers(this);
-            if (refreshDevices(this.groupStore.getAll(), false)) {
-                refreshView();
-            }
-            view.refresh(true);
-            view.refresh(false);
         }
 
         @Override
         public void onAdd(StoreAddEvent event) {
-            if (refreshDevices(event.getItems(), false)) {
-                refreshView();
-            }
+            groupsAdded(groups(event.getItems()));
+            devicesAdded(devices(event.getItems()));
         }
 
         @Override
         public void onUpdate(StoreUpdateEvent event) {
-            if (refreshDevices(event.getItems(), false)) {
-                refreshView();
-            }
+            groupsUpdated(groups(event.getItems()));
+            devicesUpdated(devices(event.getItems()));
         }
 
         @Override
         public void onRemove(StoreRemoveEvent event) {
-            if (refreshDevices(Collections.singletonList(event.getItem()), true)) {
-                refreshView();
+            pendingDevices.addAll(devices((GroupedDevice) event.getItem()));
+            Group parent = (Group) deviceStore.getParent((GroupedDevice) event.getItem());
+            deviceStore.remove((GroupedDevice) event.getItem());
+            if (parent != null) {
+                removeGroupsIfEmpty(parent);
             }
         }
 
-        boolean refreshDevices(List items, boolean remove) {
-            boolean needRefresh = false;
-            for (Object item : items) {
-                if (item instanceof Group) {
-                    Group group = (Group) item;
-                    for (int i = 0; i < deviceStore.size(); i++) {
-                        Device device = deviceStore.get(i);
-                        if (device.getGroup() != null && device.getGroup().getId() == group.getId()) {
-                            device.setGroup(remove ? null : group);
-                            deviceStore.update(device);
-                            needRefresh = true;
-                        }
-                    }
-                }
-                else if (!remove && item instanceof Device) {
-                    if (grouped) {
-//                        TODO
-//                        view.groupBy(null);
-                    }
-                    needRefresh = true;
-                }
-            }
-            return needRefresh;
+        List<Group> groups(List items) {
+            return items.isEmpty() || !(items.get(0) instanceof Group) ? Collections.<Group>emptyList() : (List<Group>) items;
         }
 
-        void refreshView() {
-//            TODO
-//            if (groupStore.size() == 0) {
-//                if (grouped) {
-//                    view.groupBy(null);
-//                    grouped = false;
-//                }
-//            } else {
-//                boolean doGroup = false;
-//                for (int i = 0; i < groupStore.size(); i++) {
-//                    Group group = groupStore.get(i);
-//                    for (int j = 0; j < deviceStore.size(); j++) {
-//                        if (group.equals(deviceStore.get(j).getGroup())) {
-//                            doGroup = true;
-//                            break;
-//                        }
-//                    }
-//                    if (doGroup) {
-//                        break;
-//                    }
-//                }
-//                if (doGroup) {
-//                    if (grouped) {
-//                        view.refresh(true);
-//                    }
-//                    view.groupBy(groupColumn);
-//                    grouped = true;
-//                } else {
-//                    if (grouped) {
-//                        view.groupBy(null);
-//                        groupColumn.setHidden(true);
-//                        view.refresh(true);
-//                        grouped = false;
-//                    }
-//                }
-//            }
+        List<Device> devices(List items) {
+            return items.isEmpty() || !(items.get(0) instanceof Device) ? Collections.<Device>emptyList() : (List<Device>) items;
+        }
+
+        void groupsAdded(List<Group> groups) {
+            for (Iterator<Device> it = pendingDevices.iterator(); it.hasNext(); ) {
+                Device device = it.next();
+                if (addDeviceGroups(device)) {
+                    deviceStore.add(device.getGroup(), device);
+                    it.remove();
+                }
+            }
+        }
+
+        void groupsUpdated(List<Group> groups) {
+            Set<Device> devicesToUpdate = new HashSet<>();
+            for (Group group : groups) {
+                if (!deviceStore.contains(group)) {
+                    continue;
+                }
+                // check parents
+                Group oldParent = (Group) deviceStore.getParent(group);
+                Group newParent = groupStore.getParent(group);
+                if (Objects.equals(oldParent, newParent)) {
+                    deviceStore.update(group);
+                } else {
+                    devicesToUpdate.addAll(devices(group));
+                    groupStore.remove(group);
+                }
+            }
+
+            devicesAdded(new ArrayList<>(devicesToUpdate));
+        }
+
+        List<Device> devices(GroupedDevice node) {
+            List<Device> result = new ArrayList<>();
+            for (GroupedDevice child : deviceStore.getAllChildren(node)) {
+                if (child instanceof Device) {
+                    result.add((Device) child);
+                }
+            }
+            return result;
+        }
+
+        boolean addDeviceGroups(Device device) {
+            List<Group> deviceGroups = new ArrayList<>();
+            Group nextParent = device.getGroup();
+            while (nextParent != null) {
+                if (!groupStore.contains(nextParent)) {
+                    return false;
+                }
+                deviceGroups.add(0, nextParent);
+                nextParent = groupStore.getParent(nextParent);
+            }
+            for (Group group : deviceGroups) {
+                if (!deviceStore.contains(group)) {
+                    Group parent = groupStore.getParent(group);
+                    if (parent == null) {
+                        deviceStore.add(group);
+                    } else {
+                        deviceStore.add(parent, group);
+                    }
+                }
+            }
+            return true;
+        }
+
+        void devicesAdded(List<Device> devices) {
+            for (Device device : devices) {
+                Group group = device.getGroup();
+                if (group == null) {
+                    deviceStore.add(device);
+                } else {
+                    if (addDeviceGroups(device)) {
+                        deviceStore.add(group, device);
+                    } else {
+                        pendingDevices.add(device);
+                    }
+                }
+            }
+        }
+
+        void devicesUpdated(List<Device> devices) {
+            for (Device device : devices) {
+                Group oldGroup = (Group) deviceStore.getParent(device);
+                Group newGroup = device.getGroup();
+                if (Objects.equals(oldGroup, newGroup)) {
+                    deviceStore.update(device);
+                } else {
+                    deviceStore.remove(device);
+                    devicesAdded(Collections.singletonList(device));
+                    removeGroupsIfEmpty(oldGroup);
+                }
+            }
+        }
+
+        void removeGroupsIfEmpty(Group group) {
+            Group parent = group;
+            while (parent != null && devices(parent).isEmpty()) {
+                Group nextParent = (Group) deviceStore.getParent(parent);
+                deviceStore.remove(parent);
+                parent = nextParent;
+            }
         }
     }
 
@@ -394,61 +430,20 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         this.geoFenceStore = geoFenceStore;
 
         // create a new devices store so the filtering will not affect global store
-        this.deviceStore = new DeviceStore();
+        this.deviceStore = new DeviceStore(groupStore, globalDeviceStore);
         this.deviceStore.setAutoCommit(true);
-        for (Group group : groupStore.toList()) {
-            Group parent = groupStore.getParent(group);
-            if (parent == null) {
-                this.deviceStore.add(group);
-            } else {
-                this.deviceStore.add(parent, group);
-            }
-        }
-        for (Device device : globalDeviceStore.getAll()) {
-            if (device.getGroup() == null) {
-                this.deviceStore.add(device);
-            } else {
-                this.deviceStore.add(device.getGroup(), device);
-            }
-        }
-        // handle events from global devices store and update local one accordingly
-        globalDeviceStore.addStoreHandlers(new BaseStoreHandlers<Device>() {
-            @Override
-            public void onAdd(StoreAddEvent<Device> event) {
-                for (Device device : event.getItems()) {
-                    if (device.getGroup() == null) {
-                        deviceStore.add(device);
-                    } else {
-                        deviceStore.add(device.getGroup(), device);
-                    }
-                }
-            }
 
+        // handle sort events from local devices store and sort global one accordingly
+        this.deviceStore.addStoreSortHandler(new StoreSortEvent.StoreSortHandler<GroupedDevice>() {
             @Override
-            public void onUpdate(StoreUpdateEvent<Device> event) {
-                for (Device device : event.getItems()) {
-                    deviceStore.update(device);
+            public void onSort(StoreSortEvent<GroupedDevice> event) {
+                globalDeviceStore.clearSortInfo();
+                for (Store.StoreSortInfo<GroupedDevice> sortInfo : event.getSource().getSortInfo()) {
+                    globalDeviceStore.addSortInfo((Store.StoreSortInfo) sortInfo);
                 }
-            }
-
-            @Override
-            public void onRemove(StoreRemoveEvent<Device> event) {
-                deviceStore.remove(event.getItem());
             }
         });
-        // handle sort events from local devices store and sort global one accordingly
-//        TODO
-//        this.deviceStore.addStoreSortHandler(new StoreSortEvent.StoreSortHandler<Device>() {
-//            @Override
-//            public void onSort(StoreSortEvent<Device> event) {
-//                globalDeviceStore.clearSortInfo();
-//                for (Store.StoreSortInfo<Device> sortInfo : event.getSource().getSortInfo()) {
-//                    globalDeviceStore.addSortInfo(sortInfo);
-//                }
-//            }
-//        });
 
-        DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         Resources resources = GWT.create(Resources.class);
         HeaderIconTemplate headerTemplate = GWT.create(HeaderIconTemplate.class);
 
@@ -516,14 +511,13 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
             public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event, ValueUpdater<String> valueUpdater) {
                 if (event.getType().equals(BrowserEvents.MOUSEOVER) || event.getType().equals(BrowserEvents.MOUSEOUT)) {
                     Element target = Element.as(event.getEventTarget());
-                    int rowIndex = grid.getView().findRowIndex(target);
-                    if (rowIndex != -1) {
+                    Tree.TreeNode<GroupedDevice> node = grid.findNode(target);
+                    if (node != null && node.getModel() instanceof Device) {
+                        Device device = (Device) node.getModel();
                         if (event.getType().equals(BrowserEvents.MOUSEOVER)) {
-//                            TODO
-//                            deviceHandler.onMouseOver(event.getClientX(), event.getClientY(), deviceStore.get(rowIndex));
+                            deviceHandler.onMouseOver(event.getClientX(), event.getClientY(), device);
                         } else {
-//                            TODO
-//                            deviceHandler.onMouseOut(event.getClientX(), event.getClientY(), deviceStore.get(rowIndex));
+                            deviceHandler.onMouseOut(event.getClientX(), event.getClientY(), device);
                         }
                     }
                 } else {
@@ -604,7 +598,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         view = new DeviceGridView(deviceVisibilityHandler, groupStore);
         view.setStripeRows(true);
-        groupsHandler = new GroupsHandler(globalDeviceStore, groupStore, view, null);
+        groupsHandler = new GroupsHandler(globalDeviceStore, deviceStore, groupStore);
 
         columnModel = new ColumnModel<>(columnConfigList);
 
@@ -651,17 +645,17 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         grid.addRowMouseDownHandler(this);
         grid.addCellDoubleClickHandler(this);
+        grid.setAutoExpand(true);
 
         view.setAutoFill(true);
         view.setForceFit(true);
 
         new GridStateHandler<>(grid).loadState();
 
-//        TODO
-//        GridEditing<Device> editing = new GridInlineEditing<>(grid);
-//        view.setShowDirtyCells(false);
-//        editing.addEditor(colFollow, new CheckBox());
-//        editing.addEditor(colRecordTrace, new CheckBox());
+        GridEditing<GroupedDevice> editing = new GridInlineEditing<>(grid);
+        view.setShowDirtyCells(false);
+        editing.addEditor(colFollow, new CheckBox());
+        editing.addEditor(colRecordTrace, new CheckBox());
 
         boolean readOnly = ApplicationContext.getInstance().getUser().getReadOnly();
         boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
@@ -754,13 +748,12 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
     @UiHandler("commandButton")
     public void onCommandClicked(SelectEvent event) {
-//        TODO
-//        commandHandler.onCommand(grid.getSelectionModel().getSelectedItem());
+        commandHandler.onCommand(deviceStore.getDevice(grid.getSelectionModel().getSelectedItem()));
     }
 
     public void selectDevice(Device device) {
 //        TODO
-//        grid.getSelectionModel().select(deviceStore.findModel(device), false);
+//        grid.getSelectionModel().select(globalDeviceStore.findModel(device), false);
 //        deviceHandler.onSelected(grid.getSelectionModel().getSelectedItem());
     }
 
@@ -780,6 +773,10 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     }
 
     private void toggleManagementButtons(Object selection) {
+        if (selection instanceof Group) {
+            selection = null;
+        }
+
         boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
         boolean manager = ApplicationContext.getInstance().getUser().getManager();
         boolean allowDeviceManagement = !ApplicationContext.getInstance().getApplicationSettings().isDisallowDeviceManagementByUsers();
@@ -806,17 +803,5 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         @Source("org/traccar/web/client/theme/icon/footprints.png")
         ImageResource footprints();
-    }
-
-    public void groupDevices() {
-        groupsHandler.init();
-        // ugly workaround to deal with wrong sizes of columns after grouping
-        Timer t = new Timer() {
-            @Override
-            public void run() {
-                view.refresh(true);
-            }
-        };
-        t.schedule(500);
     }
 }

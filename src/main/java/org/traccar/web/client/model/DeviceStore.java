@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.model;
 
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.TreeStore;
 import org.traccar.web.shared.model.Device;
@@ -22,13 +23,28 @@ import org.traccar.web.shared.model.Group;
 import org.traccar.web.shared.model.GroupedDevice;
 
 public class DeviceStore extends TreeStore<GroupedDevice> {
-    public DeviceStore() {
+    public DeviceStore(GroupStore groupStore, ListStore<Device> deviceStore) {
         super(new ModelKeyProvider<GroupedDevice>() {
             @Override
             public String getKey(GroupedDevice item) {
                 return (item.getClass() == Group.class ? "g" : "d") + item.getId();
             }
         });
+        for (Group group : groupStore.toList()) {
+            Group parent = groupStore.getParent(group);
+            if (parent == null) {
+                add(group);
+            } else {
+                add(parent, group);
+            }
+        }
+        for (Device device : deviceStore.getAll()) {
+            if (device.getGroup() == null) {
+                add(device);
+            } else {
+                add(device.getGroup(), device);
+            }
+        }
     }
 
     public Device getDevice(GroupedDevice node) {
@@ -41,5 +57,9 @@ public class DeviceStore extends TreeStore<GroupedDevice> {
 
     public boolean isGroup(GroupedDevice item) {
         return item.getClass() == Group.class;
+    }
+
+    public boolean contains(GroupedDevice item) {
+        return getModelMap().containsKey(getKeyProvider().getKey(item));
     }
 }

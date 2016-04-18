@@ -105,7 +105,6 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
             public void onSuccess(List<Device> result) {
                 deviceStore.addAll(result);
                 deviceStore.addStoreHandlers(deviceStoreHandler);
-                deviceView.groupDevices();
             }
         });
     }
