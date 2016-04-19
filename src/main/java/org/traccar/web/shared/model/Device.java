@@ -194,7 +194,7 @@ public class Device implements IsSerializable, GroupedDevice {
     }
 
     @GwtTransient
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_owner_id"))
     @JsonIgnore
     private User owner;
