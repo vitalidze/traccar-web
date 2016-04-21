@@ -60,10 +60,16 @@ New (depending on version of traccar):
         VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :other);
     </entry>
     
-    <!-- for 3.2 and 3.3 -->
+    <!-- for 3.2 and 3.3 and 3.4 -->
     <entry key='database.insertPosition'>
         INSERT INTO positions (device_id, protocol, serverTime, time, valid, latitude, longitude, altitude, speed, course, address, other)
         VALUES (:deviceId, :protocol, CURRENT_TIMESTAMP(), :time, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
+    </entry>
+    
+    <!-- for 3.5 -->
+    <entry key='database.insertPosition'>
+        INSERT INTO positions (device_id, protocol, serverTime, time, valid, latitude, longitude, altitude, speed, course, address, other)
+        VALUES (:deviceId, :protocol, :now, :deviceTime, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
     </entry>
 
   - SQL query to select latest positions
@@ -83,7 +89,7 @@ New (depending on version of traccar):
         FROM positions WHERE id IN (SELECT latestPosition_id FROM devices);
     </entry>
     
-    <!-- for 3.2 and 3.3 -->
+    <!-- for 3.2 and 3.3 and 3.4 and 3.5 -->
     <entry key='database.selectLatestPositions'>
         SELECT id, protocol, device_id AS deviceId, serverTime, time AS deviceTime, time AS fixTime, 
         valid, latitude, longitude, altitude, speed, course, address, other AS attributes 
@@ -132,7 +138,7 @@ or
     
 This is because necessary tables will be created after the initialisation of `ConnectionManager` on Traccar's backend. To solve it please **restart the Traccar service twice**.
  
-4.2) **Specific to v3.2 (and higher: 3.3, 3.4, etc.) of traccar**
+4.2) **Specific to v3.2 (and higher: 3.3, 3.4, 3.5, etc.) of traccar**
 
 To enable 'Send commands' functionality it is necessary to update the configuration file entries as follows
 
@@ -182,9 +188,9 @@ New: ( **comment out or remove this query** )
         INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
     </entry -->
     
-4.3) **Specific to v. 3.3 (and higher: 3.4, etc.) of traccar**
+4.3) **Specific to v. 3.3 (and higher: 3.4, 3.5, etc.) of traccar**
 
-For new installation over Traccar 3.3 (and higher: 3.4, etc.) and after upgrade of Traccar backend (i.e. from 3.2 to 3.3/3.4) there are two additional steps:
+For new installation over Traccar 3.3 (and higher: 3.4, 3.5, etc.) and after upgrade of Traccar backend (i.e. from 3.2 to 3.3/3.4/3.5) there are two additional steps:
 
 a) Disable database migrations made by the backend by commenting out the following configuration file entry:
 
