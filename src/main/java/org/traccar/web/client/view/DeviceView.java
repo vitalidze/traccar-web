@@ -394,6 +394,23 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         }
     }
 
+    private static class DeviceOnlyCheckBoxCell extends CheckBoxCell {
+        private final DeviceStore deviceStore;
+
+        private DeviceOnlyCheckBoxCell(DeviceStore deviceStore) {
+            this.deviceStore = deviceStore;
+        }
+
+        @Override
+        public void render(Context context, Boolean value, SafeHtmlBuilder sb) {
+            GroupedDevice item = deviceStore.findModelWithKey((String) context.getKey());
+
+            if (item instanceof Device) {
+                super.render(context, value, sb);
+            }
+        }
+    }
+
     private final DeviceHandler deviceHandler;
 
     private final GeoFenceHandler geoFenceHandler;
@@ -497,7 +514,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                 return "visible";
             }
         }, 50, headerTemplate.render(AbstractImagePrototype.create(resources.eye()).getSafeHtml()));
-        colVisible.setCell(new CheckBoxCell());
+        colVisible.setCell(new DeviceOnlyCheckBoxCell(deviceStore));
         colVisible.setFixed(true);
         colVisible.setResizable(false);
         colVisible.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.visible()).toSafeHtml());
@@ -580,7 +597,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                 return "follow";
             }
         }, 50, headerTemplate.render(AbstractImagePrototype.create(resources.follow()).getSafeHtml()));
-        colFollow.setCell(new CheckBoxCell());
+        colFollow.setCell(new DeviceOnlyCheckBoxCell(deviceStore));
         colFollow.setFixed(true);
         colFollow.setResizable(false);
         colFollow.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.follow()).toSafeHtml());
@@ -614,7 +631,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                 return "recordTrace";
             }
         }, 50, headerTemplate.render(AbstractImagePrototype.create(resources.footprints()).getSafeHtml()));
-        colRecordTrace.setCell(new CheckBoxCell());
+        colRecordTrace.setCell(new DeviceOnlyCheckBoxCell(deviceStore));
         colRecordTrace.setFixed(true);
         colRecordTrace.setResizable(false);
         colRecordTrace.setToolTip(new SafeHtmlBuilder().appendEscaped(i18n.recordTrace()).toSafeHtml());
