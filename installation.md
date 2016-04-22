@@ -164,9 +164,19 @@ Old:
         SELECT userId, deviceId FROM user_device;
     </entry>
 
-New:
+New (depending on version of traccar):
 
+    <!-- for 3.2, 3.3 and 3.4 -->
     <entry key='database.getPermissionsAll'>
+        SELECT u.id AS userId, d.id AS deviceId FROM users u, devices d WHERE u.admin=1
+        UNION
+        SELECT ud.users_id AS userId, ud.devices_id AS deviceId FROM users_devices ud
+        INNER JOIN users u ON ud.users_id=u.id
+        WHERE u.admin=0 AND u.readOnly=0
+    </entry>
+    
+    <!-- for 3.5 -->
+    <entry key='database.selectDevicePermissions'>
         SELECT u.id AS userId, d.id AS deviceId FROM users u, devices d WHERE u.admin=1
         UNION
         SELECT ud.users_id AS userId, ud.devices_id AS deviceId FROM users_devices ud
