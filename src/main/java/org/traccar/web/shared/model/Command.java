@@ -15,6 +15,7 @@
  */
 package org.traccar.web.shared.model;
 
+import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.Map;
@@ -23,7 +24,9 @@ public class Command implements IsSerializable {
     private long deviceId;
     private CommandType type;
     private String command;
-    private Map<String, Integer> attributes;
+    @SuppressWarnings("GwtInconsistentSerializableClass")
+    @GwtTransient
+    private Map<String, Object> attributes;
 
     public Command() {
     }
@@ -52,11 +55,11 @@ public class Command implements IsSerializable {
         this.command = command;
     }
 
-    public Map<String, Integer> getAttributes() {
+    public Map<String, Object> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Map<String, Integer> attributes) {
+    public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 }

@@ -15,16 +15,13 @@
  */
 package org.traccar.web.client.controller;
 
+import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.http.client.*;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseAsyncCallback;
-import org.traccar.web.client.model.DataService;
-import org.traccar.web.client.model.DataServiceAsync;
 import org.traccar.web.client.view.CommandDialog;
 import org.traccar.web.client.view.DeviceView;
 import org.traccar.web.client.view.LogViewDialog;
@@ -35,6 +32,11 @@ import org.traccar.web.shared.model.Device;
 import java.util.HashMap;
 
 public class CommandController implements ContentController, DeviceView.CommandHandler, CommandDialog.CommandHandler {
+
+    interface CommandMapper extends ObjectMapper<Command> {}
+
+    private final CommandMapper commandMapper = GWT.create(CommandMapper.class);
+
     @Override
     public ContentPanel getView() {
         return null;
@@ -65,11 +67,17 @@ public class CommandController implements ContentController, DeviceView.CommandH
     }
 
     @Override
-    public void onSend(Device device, CommandType type, int frequency, int timezone, String rawCommand) {
+    public void onSend(Device device,
+                       CommandType type,
+                       int frequency,
+                       int timezone,
+                       int radius,
+                       String phoneNumber, String message,
+                       String rawCommand) {
         Command command = new Command();
         command.setType(type);
         command.setDeviceId((int) device.getId());
-        command.setAttributes(new HashMap<String, Integer>());
+        command.setAttributes(new HashMap<String, Object>());
         switch (type) {
             case positionPeriodic:
                 command.getAttributes().put(CommandType.KEY_FREQUENCY, frequency);
@@ -77,18 +85,37 @@ public class CommandController implements ContentController, DeviceView.CommandH
             case setTimezone:
                 command.getAttributes().put(CommandType.KEY_TIMEZONE, timezone);
                 break;
+            case movementAlarm:
+                command.getAttributes().put(CommandType.KEY_RADIUS, radius);
+                break;
+            case sendSms:
+                command.getAttributes().put(CommandType.KEY_PHONE_NUMBER, phoneNumber);
+                command.getAttributes().put(CommandType.KEY_MESSAGE, message);
+                break;
             case CUSTOM:
                 command.setCommand(rawCommand);
                 break;
         }
 
-        DataServiceAsync service = GWT.create(DataService.class);
-        Messages i18n = GWT.create(Messages.class);
-        service.sendCommand(command, new BaseAsyncCallback<String>(i18n) {
-            @Override
-            public void onSuccess(String result) {
-                new LogViewDialog("<pre>" + result + "</pre>").show();
-            }
-        });
+        final Messages i18n = GWT.create(Messages.class);
+
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "traccar/rest/sendCommand");
+
+        try {
+            builder.sendRequest("[" + commandMapper.write(command) + "]", new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    new LogViewDialog("<pre>" + response.getText() + "</pre>").show();
+                }
+
+                @Override
+                public void onError(Request request, Throwable exception) {
+                    new AlertMessageBox(i18n.error(), i18n.errRemoteCall());
+                }
+            });
+        } catch (RequestException e) {
+            new AlertMessageBox(i18n.error(), e.getLocalizedMessage());
+            e.printStackTrace();
+        }
     }
 }

@@ -45,7 +45,13 @@ public class CommandDialog {
     }
 
     public interface CommandHandler {
-        void onSend(Device device, CommandType type, int frequency, int timeZone, String rawCommand);
+        void onSend(Device device,
+                    CommandType type,
+                    int frequency,
+                    int timeZone,
+                    int radius,
+                    String phoneNumber, String message,
+                    String rawCommand);
     }
 
     @UiField
@@ -76,7 +82,25 @@ public class CommandDialog {
     ComboBox<TimeZoneInfo> timeZone;
 
     @UiField
+    FieldLabel lblRadius;
+
+    @UiField
+    NumberField<Integer> radius;
+
+    @UiField
     FieldLabel lblCustomMessage;
+
+    @UiField
+    FieldLabel lblPhoneNumber;
+
+    @UiField
+    TextField phoneNumber;
+
+    @UiField
+    FieldLabel lblMessage;
+
+    @UiField
+    TextField message;
 
     @UiField
     TextField customMessage;
@@ -130,6 +154,14 @@ public class CommandDialog {
         lblTimeZone.setVisible(type == CommandType.setTimezone);
         timeZone.setVisible(type == CommandType.setTimezone);
 
+        lblRadius.setVisible(type == CommandType.movementAlarm);
+        radius.setVisible(type == CommandType.movementAlarm);
+
+        lblPhoneNumber.setVisible(type == CommandType.sendSms);
+        phoneNumber.setVisible(type == CommandType.sendSms);
+        lblMessage.setVisible(type == CommandType.sendSms);
+        message.setVisible(type == CommandType.sendSms);
+
         window.forceLayout();
     }
 
@@ -155,7 +187,18 @@ public class CommandDialog {
         if (this.timeZone.getCurrentValue() != null) {
             timezone = timeZone.getCurrentValue().getStandardOffset() * 60;
         }
-        commandHandler.onSend(device, typeCombo.getCurrentValue(), frequency, timezone, customMessage.getCurrentValue());
+        int radius = -1;
+        if (this.radius.getCurrentValue() != null) {
+            radius = this.radius.getCurrentValue();
+        }
+        commandHandler.onSend(device,
+                typeCombo.getCurrentValue(),
+                frequency,
+                timezone,
+                radius,
+                phoneNumber.getCurrentValue(),
+                message.getCurrentValue(),
+                customMessage.getCurrentValue());
     }
 
     @UiHandler("cancelButton")

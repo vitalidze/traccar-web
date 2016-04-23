@@ -27,8 +27,14 @@ public enum CommandType implements IsSerializable {
     alarmDisarm,
     setTimezone,
     requestPhoto,
+    rebootDevice,
+    movementAlarm,
+    sendSms,
     CUSTOM;
 
     public static final String KEY_FREQUENCY = "frequency";
     public static final String KEY_TIMEZONE = "timezone";
+    public static final String KEY_RADIUS = "radius";
+    public static final String KEY_PHONE_NUMBER = "phoneNumber";
+    public static final String KEY_MESSAGE = "message";
 }

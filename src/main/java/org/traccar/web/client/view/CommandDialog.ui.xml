@@ -55,6 +55,33 @@
                 </form:FieldLabel>
             </container:child>
             <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.radius}" ui:field="lblRadius" visible="false" labelWidth="120">
+                    <form:widget>
+                        <form:NumberField editor="{integerPropertyEditor}"
+                                          ui:field="radius"
+                                          allowNegative="false"
+                                          allowDecimals="false"
+                                          allowBlank="false"
+                                          visible="false"
+                                          width="70"/>
+                    </form:widget>
+                </form:FieldLabel>
+            </container:child>
+            <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.phoneNumber}" ui:field="lblPhoneNumber" visible="false" labelWidth="120">
+                    <form:widget>
+                        <form:TextField ui:field="phoneNumber" />
+                    </form:widget>
+                </form:FieldLabel>
+            </container:child>
+            <container:child layoutData="{verticalLayoutData}">
+                <form:FieldLabel text="{i18n.message}" ui:field="lblMessage" visible="false" labelWidth="120">
+                    <form:widget>
+                        <form:TextField ui:field="message" />
+                    </form:widget>
+                </form:FieldLabel>
+            </container:child>
+            <container:child layoutData="{verticalLayoutData}">
                 <form:FieldLabel text="{i18n.customMessage}" ui:field="lblCustomMessage" visible="false" labelWidth="120">
                     <form:widget>
                         <form:TextField ui:field="customMessage" />
