@@ -143,7 +143,13 @@ myApp.onPageInit('login-screen', function (page) {
 
     // set up open desktop version action
     pageContainer.find('.open-desktop-version').on('click', function() {
-        window.location = '../?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
+        var localeParam = locale == null ? ''
+            : locale == 'en' ? 'default'
+            : locale;
+        if (localeParam != '') {
+            localeParam = 'locale=' + localeParam + '&';
+        }
+        window.location = '../?' + localeParam + 'nomobileredirect=1';
     });
 
     pageContainer.find('#form-login').on('submit', function(e) {
