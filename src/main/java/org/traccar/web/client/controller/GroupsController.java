@@ -33,17 +33,23 @@ import java.util.*;
 public class GroupsController implements NavView.GroupsHandler, ContentController {
     private final Messages i18n = GWT.create(Messages.class);
     private final GroupStore groupStore;
+    private final GroupRemoveHandler removeHandler;
 
     public interface GroupAddHandler {
         void groupAdded(Group group);
+    }
+
+    public interface GroupRemoveHandler {
+        void groupRemoved(Group group);
     }
 
     public interface ChangesSaveHandler {
         void changesSaved();
     }
 
-    public GroupsController() {
-        this.groupStore = new GroupStore();
+    public GroupsController(GroupStore groupStore, GroupRemoveHandler removeHandler) {
+        this.removeHandler = removeHandler;
+        this.groupStore = groupStore;
     }
 
     @Override
@@ -155,6 +161,7 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
                     public void onSuccess(Void result) {
                         groupStore.remove(group);
                         syncOriginalParents();
+                        removeHandler.groupRemoved(group);
                     }
                 });
             }
@@ -241,9 +248,5 @@ public class GroupsController implements NavView.GroupsHandler, ContentControlle
         }
 
         return result;
-    }
-
-    public GroupStore getGroupStore() {
-        return groupStore;
     }
 }

@@ -290,14 +290,22 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         void devicesUpdated(List<Device> devices) {
             for (Device device : devices) {
-                Group oldGroup = (Group) deviceStore.getParent(device);
-                Group newGroup = device.getGroup();
-                if (Objects.equals(oldGroup, newGroup)) {
-                    deviceStore.update(device);
+                if (deviceStore.contains(device)) {
+                    Group oldGroup = (Group) deviceStore.getParent(device);
+                    Group newGroup = device.getGroup();
+                    if (Objects.equals(oldGroup, newGroup)) {
+                        deviceStore.update(device);
+                    } else {
+                        deviceStore.remove(device);
+                        devicesAdded(Collections.singletonList(device));
+                        removeGroupsIfEmpty(oldGroup);
+                    }
                 } else {
-                    deviceStore.remove(device);
-                    devicesAdded(Collections.singletonList(device));
-                    removeGroupsIfEmpty(oldGroup);
+                    if (device.getGroup() == null) {
+                        deviceStore.add(device);
+                    } else {
+                        devicesAdded(Collections.singletonList(device));
+                    }
                 }
             }
         }

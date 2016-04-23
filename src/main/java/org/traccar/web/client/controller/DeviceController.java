@@ -15,10 +15,7 @@
  */
 package org.traccar.web.client.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.widget.core.client.Window;
@@ -43,7 +40,7 @@ import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 
-public class DeviceController implements ContentController, DeviceView.DeviceHandler {
+public class DeviceController implements ContentController, DeviceView.DeviceHandler, GroupsController.GroupRemoveHandler {
     private final MapController mapController;
 
     private final Application application;
@@ -304,5 +301,17 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
             }
         }
         selectedDevice = null;
+    }
+
+    @Override
+    public void groupRemoved(Group group) {
+        for (int i = 0; i < deviceStore.size(); i++) {
+            Device device = deviceStore.get(i);
+            if (Objects.equals(device.getGroup(), group)) {
+                device.setGroup(null);
+                deviceStore.update(device);
+                deviceVisibilityHandler.updated(device);
+            }
+        }
     }
 }
