@@ -68,6 +68,7 @@ public class ApplicationContext {
     }
 
     private Set<Long> followedDeviceIds;
+
     public void follow(Device device) {
         if (followedDeviceIds == null) {
             followedDeviceIds = new HashSet<>();
@@ -86,6 +87,7 @@ public class ApplicationContext {
     }
 
     private Set<Long> recordTraceDeviceIds;
+
     public void recordTrace(Device device) {
         if (recordTraceDeviceIds == null) {
             recordTraceDeviceIds = new HashSet<>();
@@ -101,15 +103,5 @@ public class ApplicationContext {
 
     public boolean isRecordingTrace(Device device) {
         return recordTraceDeviceIds != null && recordTraceDeviceIds.contains(device.getId());
-    }
-
-    private boolean backendApiAvailable;
-
-    public boolean isBackendApiAvailable() {
-        return backendApiAvailable;
-    }
-
-    public void setBackendApiAvailable(boolean backendApiAvailable) {
-        this.backendApiAvailable = backendApiAvailable;
     }
 }

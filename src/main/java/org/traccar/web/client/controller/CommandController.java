@@ -44,21 +44,6 @@ public class CommandController implements ContentController, DeviceView.CommandH
 
     @Override
     public void run() {
-        try {
-            new RequestBuilder(RequestBuilder.GET, "api").sendRequest(null, new RequestCallback() {
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-                    ApplicationContext.getInstance().setBackendApiAvailable(response.getStatusCode() != 404);
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
-                    GWT.log("Error during backend API check", exception);
-                }
-            });
-        } catch (RequestException requestException) {
-            GWT.log("Unexpected error during backend API check", requestException);
-        }
     }
 
     @Override
