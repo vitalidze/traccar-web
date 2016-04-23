@@ -161,12 +161,23 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         }
 
         void groupsAdded(List<Group> groups) {
+            List<Device> withoutGroups = new ArrayList<>();
             for (Iterator<Device> it = pendingDevices.iterator(); it.hasNext(); ) {
                 Device device = it.next();
-                if (addDeviceGroups(device)) {
-                    deviceStore.add(device.getGroup(), device);
-                    it.remove();
+                if (device.getGroup() == null) {
+                    withoutGroups.add(device);
+                } else {
+                    if (addDeviceGroups(device)) {
+                        deviceStore.add(device.getGroup(), device);
+                        it.remove();
+                    }
                 }
+            }
+            if (withoutGroups.size() == pendingDevices.size()) {
+                for (Device device : pendingDevices) {
+                    deviceStore.add(device);
+                }
+                pendingDevices.clear();
             }
         }
 
