@@ -246,8 +246,8 @@ public class MapView {
         map.addLayer(markerLayer);
 
         geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.GEO_FENCES));
-        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.VECTOR));
-        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.MARKERS));
+        vectorLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.VECTOR));
+        markerLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.MARKERS));
 
         map.addControl(new LayerSwitcher());
         map.addControl(new ScaleLine());
