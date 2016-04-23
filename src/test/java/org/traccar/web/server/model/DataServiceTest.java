@@ -41,6 +41,7 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -144,6 +145,28 @@ public class DataServiceTest {
         NotificationService notificationService = injector.getInstance(NotificationService.class);
         currentUserId = user.getId();
         notificationService.saveSettings(new NotificationSettings());
+
+        currentUserId = originalUserId;
+        dataService.removeUser(user);
+
+        assertEquals(1, dataService.getUsers().size());
+        assertEquals(originalUserId.longValue(), dataService.getUsers().get(0).getId());
+    }
+
+    @Test
+    public void testDeleteUserWithNotificationSettingsAndTemplate() throws TraccarException {
+        Long originalUserId = injector.getProvider(User.class).get().getId();
+
+        User user = new User("test", "test");
+        user.setManager(true);
+        user = dataService.addUser(user);
+
+        NotificationService notificationService = injector.getInstance(NotificationService.class);
+        currentUserId = user.getId();
+        NotificationSettings settings = new NotificationSettings();
+        settings.setTransferTemplates(new HashMap<DeviceEventType, NotificationTemplate>());
+        settings.getTransferTemplates().put(DeviceEventType.OFFLINE, new NotificationTemplate());
+        notificationService.saveSettings(settings);
 
         currentUserId = originalUserId;
         dataService.removeUser(user);

@@ -346,6 +346,14 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             throw new AccessDeniedException();
         }
         entityManager.createQuery("DELETE FROM UIStateEntry s WHERE s.user=:user").setParameter("user", user).executeUpdate();
+        for (NotificationSettings settings : entityManager
+                .createQuery("SELECT S FROM " + NotificationSettings.class.getName() + " S WHERE S.user = :user", NotificationSettings.class)
+                .setParameter("user", user)
+                .getResultList()) {
+            entityManager.createQuery("DELETE FROM NotificationTemplate T WHERE T.settings = :settings")
+                    .setParameter("settings", settings)
+                    .executeUpdate();
+        }
         entityManager.createQuery("DELETE FROM NotificationSettings s WHERE s.user=:user").setParameter("user", user).executeUpdate();
         entityManager.createQuery("UPDATE Device d SET d.owner=null WHERE d.owner=:user").setParameter("user", user).executeUpdate();
         for (Device device : user.getDevices()) {
