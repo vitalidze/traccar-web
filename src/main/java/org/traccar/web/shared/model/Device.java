@@ -20,6 +20,7 @@ import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -334,6 +335,29 @@ public class Device implements IsSerializable, GroupedDevice {
 
     public void setGroup(Group group) {
         this.group = group;
+    }
+
+    @Column(nullable = true, length = 128)
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @Column(name = "lastupdate", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdate;
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
     @Override
