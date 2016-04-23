@@ -47,7 +47,7 @@ public class VisibilityController implements ContentController, DeviceVisibility
         boolean visible;
         boolean idle = true;
         boolean offline = true;
-        Group group;
+        Long groupId;
     }
 
     @Override
@@ -70,17 +70,18 @@ public class VisibilityController implements ContentController, DeviceVisibility
     }
 
     private DeviceState getState(Device device) {
+        DeviceState state = deviceState.get(device.getId());
+        if (state == null) {
+            state = new DeviceState();
+            state.groupId = device.getGroup() == null ? null : device.getGroup().getId();
+            state.visible = calculateVisibility(device.getId(), state);
+            deviceState.put(device.getId(), state);
+        }
         return getState(device.getId());
     }
 
     private DeviceState getState(Long deviceId) {
-        DeviceState state = deviceState.get(deviceId);
-        if (state == null) {
-            state = new DeviceState();
-            state.visible = calculateVisibility(deviceId, state);
-            deviceState.put(deviceId, state);
-        }
-        return state;
+        return deviceState.get(deviceId);
     }
 
     private void loadedDeviceVisibility(DeviceVisibilityState deviceVisibility) {
@@ -120,7 +121,7 @@ public class VisibilityController implements ContentController, DeviceVisibility
                 && (state.idle || !deviceVisibility.getHideMoving())
                 && (!state.offline || !deviceVisibility.getHideOffline())
                 && (state.offline || !deviceVisibility.getHideOnline())
-                && (state.group == null || !deviceVisibility.getHiddenGroups().contains(state.group.getId()));
+                && (state.groupId == null || !deviceVisibility.getHiddenGroups().contains(state.groupId));
     }
 
     @Override
@@ -178,8 +179,9 @@ public class VisibilityController implements ContentController, DeviceVisibility
 
     @Override
     public void updated(Device device) {
-        if (!Objects.equals(device.getGroup(), getState(device).group)) {
-            getState(device).group = device.getGroup();
+        Long newGroupId = device.getGroup() == null ? null : device.getGroup().getId();
+        if (!Objects.equals(newGroupId, getState(device).groupId)) {
+            getState(device).groupId = newGroupId;
             updateVisibility(device);
         }
     }
