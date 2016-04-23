@@ -31,6 +31,8 @@ public interface ApplicationSettingsProperties extends PropertyAccess<Applicatio
 
     ValueProvider<ApplicationSettings, Short> updateInterval();
 
+    ValueProvider<ApplicationSettings, Integer> notificationExpirationPeriod();
+
     ValueProvider<ApplicationSettings, Boolean> disallowDeviceManagementByUsers();
 
     ValueProvider<ApplicationSettings, Boolean> eventRecordingEnabled();

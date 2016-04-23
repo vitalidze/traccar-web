@@ -82,7 +82,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         @Transactional
         @Override
         public void doWork() throws Exception {
-            Set<DeviceEventType> eventTypes = new HashSet<DeviceEventType>();
+            Set<DeviceEventType> eventTypes = new HashSet<>();
             for (User user : entityManager.get().createQuery("SELECT u FROM User u INNER JOIN FETCH u.notificationEvents", User.class).getResultList()) {
                 eventTypes.addAll(user.getNotificationEvents());
             }
@@ -95,11 +95,22 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             Map<User, Set<DeviceEvent>> events = new HashMap<>();
             List<User> admins = null;
             Map<User, List<User>> managers = new HashMap<>();
+            Date currentDate = new Date();
 
-            for (DeviceEvent event : entityManager.get().createQuery("SELECT e FROM DeviceEvent e INNER JOIN FETCH e.position WHERE e.notificationSent = :false AND e.type IN (:types)", DeviceEvent.class)
+            for (DeviceEvent event : entityManager.get().createQuery(
+                    "SELECT e FROM DeviceEvent e INNER JOIN FETCH e.position" +
+                            " WHERE e.notificationSent = :false" +
+                            " AND e.expired = :false" +
+                            " AND e.type IN (:types)", DeviceEvent.class)
                                     .setParameter("false", false)
                                     .setParameter("types", eventTypes)
                                     .getResultList()) {
+                // check whether event is expired
+                if (currentDate.getTime() - event.getTime().getTime() > appSettings.getNotificationExpirationPeriod() * 1000 * 60) {
+                    event.setExpired(true);
+                    continue;
+                }
+
                 Device device = event.getDevice();
 
                 for (User user : device.getUsers()) {

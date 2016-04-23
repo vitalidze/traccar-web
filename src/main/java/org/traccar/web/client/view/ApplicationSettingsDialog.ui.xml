@@ -13,6 +13,8 @@
 
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="shortPropertyEditor" />
 
+  <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="integerPropertyEditor" />
+
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
     <gxt:Window ui:field="window" pixelSize="340, -1" modal="true" headingText="{i18n.globalSettings}" focusWidget="{saveButton}">
@@ -28,13 +30,6 @@
         <form:FieldLabel text="{i18n.disallowDeviceManagementByUsers}" labelWidth="210">
             <form:widget>
                 <form:CheckBox ui:field="disallowDeviceManagementByUsers" />
-            </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.eventRecordingEnabled}" labelWidth="210">
-            <form:widget>
-                <form:CheckBox ui:field="eventRecordingEnabled" />
             </form:widget>
         </form:FieldLabel>
       </container:child>
@@ -71,6 +66,26 @@
             </form:widget>
         </form:FieldLabel>
       </container:child>
+        <container:child layoutData="{verticalLayoutData}">
+            <form:FieldLabel text="{i18n.eventRecordingEnabled}" labelWidth="210">
+                <form:widget>
+                    <form:CheckBox ui:field="eventRecordingEnabled" />
+                </form:widget>
+            </form:FieldLabel>
+        </container:child>
+        <container:child layoutData="{verticalLayoutData}">
+            <form:FieldLabel text="{i18n.notificationExpiryPeriod} ({i18n.minute})" labelWidth="210">
+                <form:widget>
+                    <form:NumberField editor="{shortPropertyEditor}"
+                                      ui:field="notificationExpirationPeriod"
+                                      allowNegative="false"
+                                      allowDecimals="false"
+                                      allowBlank="false"
+                                      width="4" />
+                </form:widget>
+            </form:FieldLabel>
+        </container:child>
+
     </container:VerticalLayoutContainer>
       
     <gxt:button>

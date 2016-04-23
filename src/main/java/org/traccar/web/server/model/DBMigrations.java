@@ -51,7 +51,9 @@ public class DBMigrations {
                 new SetArchiveDefaultColumns(),
                 new SetGeoFenceAllDevicesFlag(),
                 new SetReportsFilterAndPreview(),
-                new SetDefaultFollowedDeviceZoomLevel()
+                new SetDefaultFollowedDeviceZoomLevel(),
+                new SetDefaultNotificationExpirationPeriod(),
+                new SetDefaultExpiredFlagForEvents()
         }) {
             em.getTransaction().begin();
             try {
@@ -376,6 +378,24 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + UserSettings.class.getName() + " S SET S.followedDeviceZoomLevel = :zlevel WHERE S.followedDeviceZoomLevel IS NULL")
                     .setParameter("zlevel", UserSettings.DEFAULT_ZOOM_TO_FOLLOWED_DEVICE_LEVEL)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultNotificationExpirationPeriod implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.notificationExpirationPeriod = :period WHERE S.notificationExpirationPeriod IS NULL")
+                    .setParameter("period", Integer.valueOf(ApplicationSettings.DEFAULT_NOTIFICATION_EXPIRATION_PERIOD))
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultExpiredFlagForEvents implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + DeviceEvent.class.getName() + " E SET E.expired=:false WHERE E.expired IS NULL")
+                    .setParameter("false", false)
                     .executeUpdate();
         }
     }

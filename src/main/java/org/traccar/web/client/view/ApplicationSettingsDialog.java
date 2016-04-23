@@ -69,6 +69,12 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     CheckBox eventRecordingEnabled;
 
     @UiField(provided = true)
+    NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
+
+    @UiField
+    NumberField<Integer> notificationExpirationPeriod;
+
+    @UiField(provided = true)
     NumberPropertyEditor<Short> shortPropertyEditor = new NumberPropertyEditor.ShortPropertyEditor();
 
     @UiField
