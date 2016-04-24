@@ -18,6 +18,7 @@ package org.traccar.web.client.view;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
 import com.sencha.gxt.widget.core.client.grid.*;
@@ -182,10 +183,12 @@ public class UserDialog implements Editor<User> {
 
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
-        window.hide();
-        User user = driver.flush();
-        user.setTransferNotificationEvents(new HashSet<>(grid.getSelectionModel().getSelectedItems()));
-        userHandler.onSave(user);
+        if (validate()) {
+            window.hide();
+            User user = driver.flush();
+            user.setTransferNotificationEvents(new HashSet<>(grid.getSelectionModel().getSelectedItems()));
+            userHandler.onSave(user);
+        }
     }
 
     @UiHandler("cancelButton")
@@ -193,4 +196,13 @@ public class UserDialog implements Editor<User> {
         window.hide();
     }
 
+    private boolean validate() {
+        String login = this.login.getCurrentValue();
+        String password = this.password.getCurrentValue();
+        if (login == null || login.isEmpty() || password == null || password.isEmpty()) {
+            new AlertMessageBox(i18n.error(), i18n.errUsernameOrPasswordEmpty()).show();
+            return false;
+        }
+        return true;
+    }
 }
