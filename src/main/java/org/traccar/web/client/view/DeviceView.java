@@ -144,11 +144,14 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         @Override
         public void onRemove(StoreRemoveEvent event) {
-            pendingDevices.addAll(devices((GroupedDevice) event.getItem()));
-            Group parent = (Group) deviceStore.getParent((GroupedDevice) event.getItem());
-            deviceStore.remove((GroupedDevice) event.getItem());
-            if (parent != null) {
-                removeGroupsIfEmpty(parent);
+            GroupedDevice node = (GroupedDevice) event.getItem();
+            if (deviceStore.contains(node)) {
+                pendingDevices.addAll(devices(node));
+                Group parent = (Group) deviceStore.getParent(node);
+                deviceStore.remove(node);
+                if (parent != null) {
+                    removeGroupsIfEmpty(parent);
+                }
             }
         }
 
@@ -202,13 +205,17 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         }
 
         List<Device> devices(GroupedDevice node) {
-            List<Device> result = new ArrayList<>();
-            for (GroupedDevice child : deviceStore.getAllChildren(node)) {
-                if (child instanceof Device) {
-                    result.add((Device) child);
+            if (deviceStore.contains(node)) {
+                List<Device> result = new ArrayList<>();
+                for (GroupedDevice child : deviceStore.getAllChildren(node)) {
+                    if (child instanceof Device) {
+                        result.add((Device) child);
+                    }
                 }
+                return result;
+            } else {
+                return Collections.emptyList();
             }
-            return result;
         }
 
         boolean addDeviceGroups(Device device) {
