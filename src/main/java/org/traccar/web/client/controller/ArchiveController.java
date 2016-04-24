@@ -20,6 +20,7 @@ import java.util.*;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.http.client.*;
+import com.sencha.gxt.widget.core.client.box.AutoProgressMessageBox;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.format.EncodedPolyline;
 import org.traccar.web.client.*;
@@ -87,11 +88,15 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
     @Override
     public void onLoad(final Device device, Date from, Date to, boolean filter, final ArchiveStyle style) {
         if (device != null && from != null && to != null) {
+            final AutoProgressMessageBox progress = new AutoProgressMessageBox(i18n.archive(), i18n.loadingData());
+            progress.auto();
+            progress.show();
             Application.getDataService().getPositions(device, from, to, filter, new BaseAsyncCallback<List<Position>>(i18n) {
                 @Override
                 public void onSuccess(List<Position> result) {
                     archiveHandler.onClear(device);
                     if (result.isEmpty()) {
+                        progress.hide();
                         new AlertMessageBox(i18n.error(), i18n.errNoResults()).show();
                     }
                     originalTracks.put(device.getId(), new Track(result, style));
@@ -101,6 +106,13 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
                     } else {
                         showArchive(device);
                     }
+                    progress.hide();
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    progress.hide();
+                    super.onFailure(caught);
                 }
             });
         } else {
