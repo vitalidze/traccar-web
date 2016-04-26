@@ -20,26 +20,25 @@ import java.util.Map;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import org.gwtopenmaps.openlayers.client.Bounds;
-import org.gwtopenmaps.openlayers.client.Icon;
 import org.gwtopenmaps.openlayers.client.LonLat;
-import org.gwtopenmaps.openlayers.client.Marker;
 import org.gwtopenmaps.openlayers.client.Pixel;
 import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.event.EventHandler;
 import org.gwtopenmaps.openlayers.client.event.EventObject;
+import org.gwtopenmaps.openlayers.client.event.VectorFeatureSelectedListener;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.LineString;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
-import org.gwtopenmaps.openlayers.client.layer.Markers;
 import org.gwtopenmaps.openlayers.client.layer.Vector;
+import org.gwtopenmaps.openlayers.client.util.Attributes;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
-import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.TrackSegment;
 import org.traccar.web.client.state.DeviceVisibilityProvider;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.PositionIcon;
 import org.traccar.web.shared.model.UserSettings;
 
 public class MapPositionRenderer {
@@ -59,7 +58,7 @@ public class MapPositionRenderer {
         return mapView.getVectorLayer();
     }
 
-    protected Markers getMarkerLayer() {
+    protected Vector getMarkerLayer() {
         return mapView.getMarkerLayer();
     }
 
@@ -68,52 +67,85 @@ public class MapPositionRenderer {
     private final DeviceVisibilityProvider visibilityProvider;
 
     public MapPositionRenderer(MapView mapView,
-                               SelectHandler selectHandler,
-                               MouseHandler mouseHandler,
+                               final SelectHandler selectHandler,
+                               final MouseHandler mouseHandler,
                                DeviceVisibilityProvider visibilityProvider) {
         this.mapView = mapView;
         this.selectHandler = selectHandler;
         this.mouseHandler = mouseHandler;
         this.visibilityProvider = visibilityProvider;
-    }
 
-    private void addSelectEvent(Marker marker, final Position position) {
         if (selectHandler != null) {
-            marker.getEvents().register("click", marker, new EventHandler() {
+            getMarkerLayer().addVectorFeatureSelectedListener(new VectorFeatureSelectedListener() {
                 @Override
-                public void onHandle(EventObject eventObject) {
-                    selectHandler.onSelected(position);
+                public void onFeatureSelected(FeatureSelectedEvent eventObject) {
+                    Position position = getMouseEventPosition(eventObject.getVectorFeature());
+                    if (position != null) {
+                        selectHandler.onSelected(position);
+                    }
                 }
             });
         }
-    }
-
-    private void addMouseEvent(final Marker marker, final Position position) {
         if (mouseHandler != null) {
-            marker.getEvents().register("mouseover", marker, new EventHandler() {
+            getMarkerLayer().getEvents().register("featureover", getMarkerLayer(), new EventHandler() {
                 @Override
                 public void onHandle(EventObject eventObject) {
-                mouseHandler.onMouseOver(position);
+                    Position position = getMouseEventPosition(eventObject);
+                    if (position != null) {
+                        mouseHandler.onMouseOver(position);
+                    }
                 }
             });
-            marker.getEvents().register("mouseout", marker, new EventHandler() {
+            getMarkerLayer().getEvents().register("featureout", getMarkerLayer(), new EventHandler() {
                 @Override
                 public void onHandle(EventObject eventObject) {
-                    mouseHandler.onMouseOut(position);
+                    Position position = getMouseEventPosition(eventObject);
+                    if (position != null) {
+                        mouseHandler.onMouseOut(position);
+                    }
                 }
             });
         }
     }
 
-    private void changeMarkerIcon(Position position, Icon icon) {
+    private Position getMouseEventPosition(EventObject eventObject) {
+        JSObject object = eventObject.getJSObject().getProperty("feature");
+        VectorFeature marker = object == null ? null : VectorFeature.narrowToVectorFeature(object);
+        return marker == null ? null : getMouseEventPosition(marker);
+    }
+
+    private Position getMouseEventPosition(VectorFeature marker) {
+        Attributes attributes = marker.getAttributes();
+        Long deviceId = Long.valueOf(attributes.getAttributeAsString("d_id"));
+        DeviceData deviceData = deviceMap.get(deviceId);
+        if (deviceData != null) {
+            Long positionId = Long.valueOf(attributes.getAttributeAsString("p_id"));
+            for (Position position : deviceData.positions) {
+                if (position.getId() == positionId) {
+                    return position;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void setUpEvents(VectorFeature marker, Position position) {
+        if (selectHandler != null || mouseHandler != null) {
+            Attributes attributes = marker.getAttributes();
+            attributes.setAttribute("d_id", Long.toString(position.getDevice().getId()));
+            attributes.setAttribute("p_id", Long.toString(position.getId()));
+        }
+    }
+
+    private void changeMarkerIcon(Position position, PositionIcon icon, boolean selected) {
         DeviceData deviceData = getDeviceData(position.getDevice());
-        Marker oldMarker = deviceData.markerMap.get(position.getId());
-        Marker newMarker = new Marker(oldMarker.getLonLat(), icon);
-        addSelectEvent(newMarker, position);
-        addMouseEvent(newMarker, position);
+        VectorFeature oldMarker = deviceData.markerMap.get(position.getId());
+        Point point = Point.narrowToPoint(oldMarker.getJSObject().getProperty("geometry"));
+        VectorFeature newMarker = new VectorFeature(point, createIconStyle(icon, selected));
+        setUpEvents(newMarker, position);
         deviceData.markerMap.put(position.getId(), newMarker);
-        getMarkerLayer().addMarker(newMarker);
-        getMarkerLayer().removeMarker(oldMarker);
+        getMarkerLayer().removeFeature(oldMarker);
+        getMarkerLayer().addFeature(newMarker);
     }
 
     private static class SnappingHandler extends EventHandler {
@@ -232,7 +264,7 @@ public class MapPositionRenderer {
     }
 
     private static class DeviceData {
-        Map<Long, Marker> markerMap = new HashMap<>(); // Position.id -> Marker
+        Map<Long, VectorFeature> markerMap = new HashMap<>(); // Position.id -> Marker
         List<Position> positions;
         VectorFeature title;
         VectorFeature track;
@@ -285,8 +317,8 @@ public class MapPositionRenderer {
     }
 
     private void clearMarkersAndTitleAndAlert(DeviceData deviceData) {
-        for (Marker marker : deviceData.markerMap.values()) {
-            getMarkerLayer().removeMarker(marker);
+        for (VectorFeature marker : deviceData.markerMap.values()) {
+            getMarkerLayer().removeFeature(marker);
         }
         deviceData.markerMap.clear();
         if (deviceData.title != null) {
@@ -349,13 +381,12 @@ public class MapPositionRenderer {
         deviceData.positions = positions;
         for (Position position : positions) {
             if (visibilityProvider.isVisible(position.getDevice())) {
-                Marker marker = new Marker(
-                        mapView.createLonLat(position.getLongitude(), position.getLatitude()),
-                        MarkerIconFactory.getIcon(position.getIcon(), false));
+                VectorFeature marker = new VectorFeature(
+                        mapView.createPoint(position.getLongitude(), position.getLatitude()),
+                        createIconStyle(position.getIcon(), false));
                 deviceData.markerMap.put(position.getId(), marker);
-                addSelectEvent(marker, position);
-                addMouseEvent(marker, position);
-                getMarkerLayer().addMarker(marker);
+                setUpEvents(marker, position);
+                getMarkerLayer().addFeature(marker);
             }
         }
 
@@ -363,12 +394,10 @@ public class MapPositionRenderer {
             this.selectedPosition = null;
         }
 
-        
-        if (positions.size() == 1 && selectedDeviceId != null && selectedDeviceId.equals(positions.get(0).getDevice().getId()) 
+        if (positions.size() == 1 && selectedDeviceId != null && selectedDeviceId.equals(positions.get(0).getDevice().getId())
                 && !selectPosition(null, positions.get(0), false)) {
             selectedDeviceId = null;
         }
-        
     }
 
     public void showDeviceName(List<Position> positions) {
@@ -540,15 +569,17 @@ public class MapPositionRenderer {
         if (oldPosition != null) {
             DeviceData deviceData = getDeviceData(oldPosition.getDevice());
             if (deviceData.markerMap.containsKey(oldPosition.getId())) {
-                changeMarkerIcon(oldPosition, MarkerIconFactory.getIcon(oldPosition.getIcon(), false));
+                changeMarkerIcon(oldPosition, oldPosition.getIcon(), false);
             }
         }
         if (newPosition != null) {
             DeviceData deviceData = getDeviceData(newPosition.getDevice());
             if (deviceData.markerMap.containsKey(newPosition.getId())) {
-                changeMarkerIcon(newPosition, MarkerIconFactory.getIcon(newPosition.getIcon(), true));
+                changeMarkerIcon(newPosition, newPosition.getIcon(), true);
                 if (center) {
-                    mapView.getMap().panTo(deviceData.markerMap.get(newPosition.getId()).getLonLat());
+                    VectorFeature marker = deviceData.markerMap.get(newPosition.getId());
+                    Point point = Point.narrowToPoint(marker.getJSObject().getProperty("geometry"));
+                    mapView.getMap().panTo(new LonLat(point.getX(), point.getY()));
                 }
                 return true;
             }
@@ -625,7 +656,7 @@ public class MapPositionRenderer {
                 position.setDevice(device);
                 position.setIcon(MarkerIcon.create(position));
                 boolean selected = selectedPosition != null && selectedPosition.getId() == position.getId();
-                changeMarkerIcon(position, MarkerIconFactory.getIcon(position.getIcon(), selected));
+                changeMarkerIcon(position, position.getIcon(), selected);
             }
         }
     }
@@ -669,5 +700,15 @@ public class MapPositionRenderer {
                 drawAlert(latestPosition);
             }
         }
+    }
+
+    private Style createIconStyle(PositionIcon icon, boolean selected) {
+        Style style = new Style();
+        style.setExternalGraphic(selected ? icon.getSelectedURL() : icon.getURL());
+        style.setGraphicSize(selected ? icon.getSelectedWidth() : icon.getWidth(),
+                selected ? icon.getSelectedHeight() : icon.getHeight());
+        style.setGraphicOffset(-style.getGraphicWidth() / 2, -style.getGraphicHeight());
+        style.setGraphicOpacity(1.0);
+        return style;
     }
 }

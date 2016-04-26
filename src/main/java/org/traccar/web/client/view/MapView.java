@@ -30,10 +30,7 @@ import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.StyleMap;
 import org.gwtopenmaps.openlayers.client.StyleOptions;
 import org.gwtopenmaps.openlayers.client.StyleRules;
-import org.gwtopenmaps.openlayers.client.control.LayerSwitcher;
-import org.gwtopenmaps.openlayers.client.control.OverviewMap;
-import org.gwtopenmaps.openlayers.client.control.OverviewMapOptions;
-import org.gwtopenmaps.openlayers.client.control.ScaleLine;
+import org.gwtopenmaps.openlayers.client.control.*;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
@@ -76,7 +73,7 @@ public class MapView {
     private Map map;
     private OverviewMap overviewMap;
     private Vector vectorLayer;
-    private Markers markerLayer;
+    private Vector markerLayer;
     private Vector geofenceLayer;
     private TMS seamarkLayer;
 
@@ -98,7 +95,7 @@ public class MapView {
         return geofenceLayer;
     }
 
-    public Markers getMarkerLayer() {
+    public Vector getMarkerLayer() {
         return markerLayer;
     }
 
@@ -218,8 +215,8 @@ public class MapView {
         vectorOptions.setStyle(style);
         vectorLayer = new Vector(i18n.overlayType(UserSettings.OverlayType.VECTOR), vectorOptions);
 
-        MarkersOptions markersOptions = new MarkersOptions();
-        markerLayer = new Markers(i18n.overlayType(UserSettings.OverlayType.MARKERS), markersOptions);
+        VectorOptions markersOptions = new VectorOptions();
+        markerLayer = new Vector(i18n.overlayType(UserSettings.OverlayType.MARKERS), markersOptions);
 
         vectorOptions = new VectorOptions();
         OpenLayersStyle defaultStyle = new OpenLayersStyle(new StyleRules(), new StyleOptions());
@@ -248,6 +245,10 @@ public class MapView {
         geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.GEO_FENCES));
         vectorLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.VECTOR));
         markerLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.MARKERS));
+
+        final SelectFeature selectFeature = new SelectFeature(markerLayer);
+        selectFeature.setAutoActivate(true);
+        map.addControl(selectFeature);
 
         map.addControl(new LayerSwitcher());
         map.addControl(new ScaleLine());
