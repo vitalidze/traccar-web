@@ -322,12 +322,12 @@ public class MapPositionRenderer {
         }
         deviceData.markerMap.clear();
         if (deviceData.title != null) {
-            getVectorLayer().removeFeature(deviceData.title);
+            getMarkerLayer().removeFeature(deviceData.title);
             deviceData.title.destroy();
             deviceData.title = null;
         }
         if (deviceData.alert != null) {
-            getVectorLayer().removeFeature(deviceData.alert);
+            getMarkerLayer().removeFeature(deviceData.alert);
             deviceData.alert.destroy();
             deviceData.alert = null;
         }
@@ -415,7 +415,7 @@ public class MapPositionRenderer {
                 st.setStroke(false);
 
                 final VectorFeature deviceName = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), st);
-                getVectorLayer().addFeature(deviceName);
+                getMarkerLayer().addFeature(deviceName);
                 deviceData.title = deviceName;
             }
         }
@@ -684,14 +684,14 @@ public class MapPositionRenderer {
         alertCircleStyle.setStrokeColor("#ff0000");
 
         VectorFeature alertCircle = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), alertCircleStyle);
-        getVectorLayer().addFeature(alertCircle);
+        getMarkerLayer().addFeature(alertCircle);
         deviceData.alert = alertCircle;
     }
 
     public void updateAlert(Device device, boolean show) {
         DeviceData deviceData = getDeviceData(device);
         if (deviceData.alert != null) {
-            getVectorLayer().removeFeature(deviceData.alert);
+            getMarkerLayer().removeFeature(deviceData.alert);
             deviceData.alert.destroy();
         }
         if (show && visibilityProvider.isVisible(device)) {
