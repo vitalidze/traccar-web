@@ -232,9 +232,9 @@ public class Position implements IsSerializable, Cloneable {
         this.status = status;
     }
 
-    @GwtTransient
+    @Transient
     @JsonIgnore
-    private transient IdleStatus idleStatus;
+    private IdleStatus idleStatus;
 
     public IdleStatus getIdleStatus() {
         return idleStatus;
@@ -256,9 +256,9 @@ public class Position implements IsSerializable, Cloneable {
         this.icon = icon;
     }
 
-    @GwtTransient
+    @Transient
     @JsonIgnore
-    private transient Date idleSince;
+    private Date idleSince;
 
     public Date getIdleSince() {
         return idleSince;

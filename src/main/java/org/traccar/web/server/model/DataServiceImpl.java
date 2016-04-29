@@ -662,6 +662,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             throw new AccessDeniedException();
         }
 
+        // refresh device
+        device = entityManager.get().find(Device.class, device.getId());
+
         EntityManager entityManager = getSessionEntityManager();
         UserSettings filters = getSessionUser().getUserSettings();
 
@@ -693,11 +696,23 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
 
         List<Position> queryResult = query.getResultList();
 
+        List<Position> lastNonIdlePositionsQueryResult =  entityManager
+                .createQuery("SELECT p FROM Position p WHERE p.device = :device AND p.speed > :threshold ORDER BY time DESC", Position.class)
+                .setParameter("device", device)
+                .setParameter("threshold", device.getIdleSpeedThreshold())
+                .setMaxResults(1)
+                .getResultList();
+        Position latestNonIdlePosition = lastNonIdlePositionsQueryResult.isEmpty()
+                ? null
+                : lastNonIdlePositionsQueryResult.get(0);
+        final long MIN_IDLE_TIME = (long) device.getMinIdleTime() * 1000;
+
         for (int i = 0; i < queryResult.size(); i++) {
             boolean add = true;
+            Position position = queryResult.get(i);
             if (i > 0) {
                 Position positionA = queryResult.get(i - 1);
-                Position positionB = queryResult.get(i);
+                Position positionB = position;
 
                 positionB.setDistance(GeoFenceCalculator.getDistance(positionA.getLongitude(), positionA.getLatitude(), positionB.getLongitude(), positionB.getLatitude()));
 
@@ -706,6 +721,24 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 }
                 if (add && filter && filters.getMinDistance() != null) {
                     add = positionB.getDistance() >= filters.getMinDistance();
+                }
+            }
+            // calculate Idle state
+            if (position.getSpeed() != null) {
+                if (position.getSpeed() > position.getDevice().getIdleSpeedThreshold()) {
+                    latestNonIdlePosition = position;
+                } else {
+                    if (latestNonIdlePosition == null) {
+                        position.setIdleStatus(Position.IdleStatus.PAUSED);
+                        latestNonIdlePosition = position;
+                    } else {
+                        if (position.getTime().getTime() - latestNonIdlePosition.getTime().getTime() > MIN_IDLE_TIME) {
+                            position.setIdleSince(latestNonIdlePosition.getTime());
+                            position.setIdleStatus(Position.IdleStatus.IDLE);
+                        } else {
+                            position.setIdleStatus(Position.IdleStatus.PAUSED);
+                        }
+                    }
                 }
             }
             if (add) positions.add(queryResult.get(i));
