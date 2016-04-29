@@ -120,10 +120,9 @@ public class MapPositionRenderer {
         DeviceData deviceData = deviceMap.get(deviceId);
         if (deviceData != null) {
             Long positionId = Long.valueOf(attributes.getAttributeAsString("p_id"));
-            for (Position position : deviceData.positions) {
-                if (position.getId() == positionId) {
-                    return position;
-                }
+            DeviceMarker deviceMarker = deviceData.markerMap.get(positionId);
+            if (deviceMarker != null) {
+                return deviceMarker.position;
             }
         }
         return null;
@@ -139,12 +138,12 @@ public class MapPositionRenderer {
 
     private void changeMarkerIcon(Position position, PositionIcon icon, boolean selected) {
         DeviceData deviceData = getDeviceData(position.getDevice());
-        VectorFeature oldMarker = deviceData.markerMap.get(position.getId());
-        Point point = Point.narrowToPoint(oldMarker.getJSObject().getProperty("geometry"));
-        VectorFeature newMarker = new VectorFeature(point, createIconStyle(icon, selected));
+        DeviceMarker oldMarker = deviceData.markerMap.get(position.getId());
+        Point point = Point.narrowToPoint(oldMarker.marker.getJSObject().getProperty("geometry"));
+        VectorFeature newMarker = new VectorFeature(point, createIconStyle(position, selected));
         setUpEvents(newMarker, position);
-        deviceData.markerMap.put(position.getId(), newMarker);
-        getMarkerLayer().removeFeature(oldMarker);
+        deviceData.markerMap.put(position.getId(), new DeviceMarker(oldMarker.position, newMarker, oldMarker.icon));
+        getMarkerLayer().removeFeature(oldMarker.marker);
         getMarkerLayer().addFeature(newMarker);
     }
 
@@ -263,8 +262,20 @@ public class MapPositionRenderer {
         }
     }
 
+    private static class DeviceMarker {
+        final Position position;
+        final VectorFeature marker;
+        final VectorFeature icon;
+
+        private DeviceMarker(Position position, VectorFeature marker, VectorFeature icon) {
+            this.position = position;
+            this.marker = marker;
+            this.icon = icon;
+        }
+    }
+
     private static class DeviceData {
-        Map<Long, VectorFeature> markerMap = new HashMap<>(); // Position.id -> Marker
+        Map<Long, DeviceMarker> markerMap = new HashMap<>(); // Position.id -> Marker
         List<Position> positions;
         VectorFeature title;
         VectorFeature track;
@@ -317,8 +328,11 @@ public class MapPositionRenderer {
     }
 
     private void clearMarkersAndTitleAndAlert(DeviceData deviceData) {
-        for (VectorFeature marker : deviceData.markerMap.values()) {
-            getMarkerLayer().removeFeature(marker);
+        for (DeviceMarker marker : deviceData.markerMap.values()) {
+            getMarkerLayer().removeFeature(marker.marker);
+            if (marker.icon != null) {
+                getMarkerLayer().removeFeature(marker.icon);
+            }
         }
         deviceData.markerMap.clear();
         if (deviceData.title != null) {
@@ -383,8 +397,9 @@ public class MapPositionRenderer {
             if (visibilityProvider.isVisible(position.getDevice())) {
                 VectorFeature marker = new VectorFeature(
                         mapView.createPoint(position.getLongitude(), position.getLatitude()),
-                        createIconStyle(position.getIcon(), false));
-                deviceData.markerMap.put(position.getId(), marker);
+                        createIconStyle(position, false));
+                deviceData.markerMap.put(position.getId(), new DeviceMarker(position, marker, null));
+
                 setUpEvents(marker, position);
                 getMarkerLayer().addFeature(marker);
             }
@@ -577,8 +592,8 @@ public class MapPositionRenderer {
             if (deviceData.markerMap.containsKey(newPosition.getId())) {
                 changeMarkerIcon(newPosition, newPosition.getIcon(), true);
                 if (center) {
-                    VectorFeature marker = deviceData.markerMap.get(newPosition.getId());
-                    Point point = Point.narrowToPoint(marker.getJSObject().getProperty("geometry"));
+                    DeviceMarker marker = deviceData.markerMap.get(newPosition.getId());
+                    Point point = Point.narrowToPoint(marker.marker.getJSObject().getProperty("geometry"));
                     mapView.getMap().panTo(new LonLat(point.getX(), point.getY()));
                 }
                 return true;
@@ -702,13 +717,37 @@ public class MapPositionRenderer {
         }
     }
 
-    private Style createIconStyle(PositionIcon icon, boolean selected) {
+    private Style createIconStyle(Position position, boolean selected) {
+        PositionIcon icon = position.getIcon();
+
         Style style = new Style();
+        int width = selected ? icon.getSelectedWidth() : icon.getWidth();
+        int height = selected ? icon.getSelectedHeight() : icon.getHeight();
+
         style.setExternalGraphic(selected ? icon.getSelectedURL() : icon.getURL());
-        style.setGraphicSize(selected ? icon.getSelectedWidth() : icon.getWidth(),
-                selected ? icon.getSelectedHeight() : icon.getHeight());
-        style.setGraphicOffset(-style.getGraphicWidth() / 2, -style.getGraphicHeight());
+        style.setGraphicSize(width, height);
+        style.setGraphicOffset(-width / 2, -height);
         style.setGraphicOpacity(1.0);
+        style.setGraphicZIndex(10);
+
+        if (position.getIdleStatus() != null
+                && position.getIdleStatus() != Position.IdleStatus.MOVING) {
+            String graphic = "";
+            switch (position.getIdleStatus()) {
+                case PAUSED:
+                    graphic = "img/paused.svg";
+                    break;
+                case IDLE:
+                    graphic = "img/stopped.svg";
+                    break;
+            }
+
+            style.setBackgroundGraphic(graphic);
+            style.setBackgroundGraphicSize(10, 10);
+            style.setBackgroundOffset(width / 2 - 5, -height - 2);
+            style.setBackgroundGraphicZIndex(11);
+        }
+
         return style;
     }
 }

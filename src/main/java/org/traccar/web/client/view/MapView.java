@@ -216,6 +216,9 @@ public class MapView {
         vectorLayer = new Vector(i18n.overlayType(UserSettings.OverlayType.VECTOR), vectorOptions);
 
         VectorOptions markersOptions = new VectorOptions();
+        RendererOptions rendererOptions = new RendererOptions();
+        rendererOptions.setZIndexing(true);
+        markersOptions.setRendererOptions(rendererOptions);
         markerLayer = new Vector(i18n.overlayType(UserSettings.OverlayType.MARKERS), markersOptions);
 
         vectorOptions = new VectorOptions();

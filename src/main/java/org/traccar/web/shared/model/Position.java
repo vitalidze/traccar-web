@@ -50,6 +50,10 @@ public class Position implements IsSerializable, Cloneable {
         OFFLINE, LATEST;
     }
 
+    public enum IdleStatus {
+        MOVING, IDLE, PAUSED;
+    }
+
     public Position() {
     }
 
@@ -226,6 +230,18 @@ public class Position implements IsSerializable, Cloneable {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    @GwtTransient
+    @JsonIgnore
+    private transient IdleStatus idleStatus;
+
+    public IdleStatus getIdleStatus() {
+        return idleStatus;
+    }
+
+    public void setIdleStatus(IdleStatus idleStatus) {
+        this.idleStatus = idleStatus;
     }
 
     @GwtTransient
