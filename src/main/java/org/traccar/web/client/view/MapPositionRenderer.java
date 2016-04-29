@@ -136,14 +136,15 @@ public class MapPositionRenderer {
         }
     }
 
-    private void changeMarkerIcon(Position position, PositionIcon icon, boolean selected) {
+    private void changeMarkerIcon(Position position, boolean selected) {
         DeviceData deviceData = getDeviceData(position.getDevice());
         DeviceMarker oldMarker = deviceData.markerMap.get(position.getId());
         Point point = Point.narrowToPoint(oldMarker.marker.getJSObject().getProperty("geometry"));
         VectorFeature newMarker = new VectorFeature(point, createIconStyle(position, selected));
         setUpEvents(newMarker, position);
-        deviceData.markerMap.put(position.getId(), new DeviceMarker(oldMarker.position, newMarker, oldMarker.icon));
+        deviceData.markerMap.put(position.getId(), new DeviceMarker(oldMarker.position, newMarker));
         getMarkerLayer().removeFeature(oldMarker.marker);
+        oldMarker.marker.destroy();
         getMarkerLayer().addFeature(newMarker);
     }
 
@@ -265,12 +266,10 @@ public class MapPositionRenderer {
     private static class DeviceMarker {
         final Position position;
         final VectorFeature marker;
-        final VectorFeature icon;
 
-        private DeviceMarker(Position position, VectorFeature marker, VectorFeature icon) {
+        private DeviceMarker(Position position, VectorFeature marker) {
             this.position = position;
             this.marker = marker;
-            this.icon = icon;
         }
     }
 
@@ -330,9 +329,7 @@ public class MapPositionRenderer {
     private void clearMarkersAndTitleAndAlert(DeviceData deviceData) {
         for (DeviceMarker marker : deviceData.markerMap.values()) {
             getMarkerLayer().removeFeature(marker.marker);
-            if (marker.icon != null) {
-                getMarkerLayer().removeFeature(marker.icon);
-            }
+            marker.marker.destroy();
         }
         deviceData.markerMap.clear();
         if (deviceData.title != null) {
@@ -398,7 +395,7 @@ public class MapPositionRenderer {
                 VectorFeature marker = new VectorFeature(
                         mapView.createPoint(position.getLongitude(), position.getLatitude()),
                         createIconStyle(position, false));
-                deviceData.markerMap.put(position.getId(), new DeviceMarker(position, marker, null));
+                deviceData.markerMap.put(position.getId(), new DeviceMarker(position, marker));
 
                 setUpEvents(marker, position);
                 getMarkerLayer().addFeature(marker);
@@ -584,13 +581,13 @@ public class MapPositionRenderer {
         if (oldPosition != null) {
             DeviceData deviceData = getDeviceData(oldPosition.getDevice());
             if (deviceData.markerMap.containsKey(oldPosition.getId())) {
-                changeMarkerIcon(oldPosition, oldPosition.getIcon(), false);
+                changeMarkerIcon(oldPosition, false);
             }
         }
         if (newPosition != null) {
             DeviceData deviceData = getDeviceData(newPosition.getDevice());
             if (deviceData.markerMap.containsKey(newPosition.getId())) {
-                changeMarkerIcon(newPosition, newPosition.getIcon(), true);
+                changeMarkerIcon(newPosition, true);
                 if (center) {
                     DeviceMarker marker = deviceData.markerMap.get(newPosition.getId());
                     Point point = Point.narrowToPoint(marker.marker.getJSObject().getProperty("geometry"));
@@ -671,7 +668,7 @@ public class MapPositionRenderer {
                 position.setDevice(device);
                 position.setIcon(MarkerIcon.create(position));
                 boolean selected = selectedPosition != null && selectedPosition.getId() == position.getId();
-                changeMarkerIcon(position, position.getIcon(), selected);
+                changeMarkerIcon(position, selected);
             }
         }
     }
