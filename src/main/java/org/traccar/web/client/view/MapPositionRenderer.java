@@ -341,7 +341,7 @@ public class MapPositionRenderer {
             deviceData.title = null;
         }
         if (deviceData.alert != null) {
-            getMarkerLayer().removeFeature(deviceData.alert);
+            getVectorLayer().removeFeature(deviceData.alert);
             deviceData.alert.destroy();
             deviceData.alert = null;
         }
@@ -699,14 +699,14 @@ public class MapPositionRenderer {
         alertCircleStyle.setStrokeColor("#ff0000");
 
         VectorFeature alertCircle = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), alertCircleStyle);
-        getMarkerLayer().addFeature(alertCircle);
+        getVectorLayer().addFeature(alertCircle);
         deviceData.alert = alertCircle;
     }
 
     public void updateAlert(Device device, boolean show) {
         DeviceData deviceData = getDeviceData(device);
         if (deviceData.alert != null) {
-            getMarkerLayer().removeFeature(deviceData.alert);
+            getVectorLayer().removeFeature(deviceData.alert);
             deviceData.alert.destroy();
         }
         if (show && visibilityProvider.isVisible(device)) {
