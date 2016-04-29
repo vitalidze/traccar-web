@@ -282,6 +282,7 @@ public class MapPositionRenderer {
         LineString trackLine;
         List<VectorFeature> trackPoints = new ArrayList<>();
         List<VectorFeature> labels = new ArrayList<>();
+        Map<Position, VectorFeature> pauseAndStops = new HashMap<>();
         Map<Position, VectorFeature> timeLabels = new HashMap<>();
 
         SnappingHandler snappingHandler;
@@ -371,6 +372,13 @@ public class MapPositionRenderer {
             trackPoint.destroy();
         }
         deviceData.trackPoints.clear();
+        // clear pause and stop icons
+        for (VectorFeature pauseOrStop : deviceData.pauseAndStops.values()) {
+            getVectorLayer().removeFeature(pauseOrStop);
+            pauseOrStop.destroy();
+        }
+        deviceData.pauseAndStops.clear();
+
         setSnapToTrack(deviceData, false);
     }
 
@@ -627,6 +635,12 @@ public class MapPositionRenderer {
                     getVectorLayer().removeFeature(timeLabel);
                     timeLabel.destroy();
                 }
+
+                VectorFeature pauseOrStop = deviceData.pauseAndStops.remove(position);
+                if (pauseOrStop != null) {
+                    getVectorLayer().removeFeature(pauseOrStop);
+                    pauseOrStop.destroy();
+                }
             }
             if (updated) {
                 getVectorLayer().removeFeature(deviceData.track);
@@ -714,6 +728,9 @@ public class MapPositionRenderer {
         }
     }
 
+    private static final int IDLE_ICON_WIDTH = 10;
+    private static final int IDLE_ICON_HEIGHT = 10;
+
     private Style createIconStyle(Position position, boolean selected) {
         PositionIcon icon = position.getIcon();
 
@@ -727,24 +744,44 @@ public class MapPositionRenderer {
         style.setGraphicOpacity(1.0);
         style.setGraphicZIndex(10);
 
-        if (position.getIdleStatus() != null
-                && position.getIdleStatus() != Position.IdleStatus.MOVING) {
-            String graphic = "";
-            switch (position.getIdleStatus()) {
-                case PAUSED:
-                    graphic = "img/paused.svg";
-                    break;
-                case IDLE:
-                    graphic = "img/stopped.svg";
-                    break;
-            }
-
+        String graphic = getIdleIcon(position);
+        if (graphic != null) {
             style.setBackgroundGraphic(graphic);
-            style.setBackgroundGraphicSize(10, 10);
-            style.setBackgroundOffset(width / 2 - 5, -height - 2);
+            style.setBackgroundGraphicSize(IDLE_ICON_WIDTH, IDLE_ICON_HEIGHT);
+            style.setBackgroundOffset(width / 2 - IDLE_ICON_WIDTH / 2, -height - 2);
             style.setBackgroundGraphicZIndex(11);
         }
 
         return style;
+    }
+
+    private String getIdleIcon(Position position) {
+        if (position.getIdleStatus() != null && position.getIdleStatus() != Position.IdleStatus.MOVING) {
+            switch (position.getIdleStatus()) {
+                case PAUSED:
+                    return "img/paused.svg";
+                case IDLE:
+                    return "img/stopped.svg";
+            }
+        }
+        return null;
+    }
+
+    public void showPauseAndStops(List<Position> positions) {
+        DeviceData deviceData = getDeviceData(positions);
+        for (Position position : positions) {
+            String graphic = getIdleIcon(position);
+            if (graphic != null) {
+                Style style = new Style();
+                style.setExternalGraphic(graphic);
+                style.setGraphicSize(IDLE_ICON_WIDTH * 3 / 2, IDLE_ICON_HEIGHT * 3 / 2);
+                style.setGraphicOpacity(1.0);
+                VectorFeature pauseOrStop = new VectorFeature(
+                        mapView.createPoint(position.getLongitude(), position.getLatitude()),
+                        style);
+                getVectorLayer().addFeature(pauseOrStop);
+                deviceData.pauseAndStops.put(position, pauseOrStop);
+            }
+        }
     }
 }

@@ -362,6 +362,10 @@ public class MapView {
         }
     }
 
+    public void showPauseAndStops(List<Position> positions) {
+        archivePositionRenderer.showPauseAndStops(positions);
+    }
+
     public void showArchiveTime(List<Position> positions) {
         archivePositionRenderer.showTime(positions, false);
     }

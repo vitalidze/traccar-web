@@ -284,6 +284,7 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
 
         if (track.getStyle().getIconType() == null) {
             mapView.setArchiveSnapToTrack(positions);
+            mapView.showPauseAndStops(positions);
         } else {
             mapView.showArchivePositions(positions);
         }
