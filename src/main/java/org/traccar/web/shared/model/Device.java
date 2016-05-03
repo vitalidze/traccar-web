@@ -36,8 +36,18 @@ public class Device implements IsSerializable, GroupedDevice {
     public static final short DEFAULT_TIMEOUT = 5 * 60;
     public static final short DEFAULT_MIN_IDLE_TIME = 1 * 60;
 
+    public static final String DEFAULT_MOVING_ARROW_COLOR = "90EE90";
+    public static final String DEFAULT_PAUSED_ARROW_COLOR = "F3F500";
+    public static final String DEFAULT_STOPPED_ARROW_COLOR = "FF0000";
+    public static final String DEFAULT_OFFLINE_ARROW_COLOR = "DEDEDE";
+
     public Device() {
         iconType = DeviceIconType.DEFAULT;
+        iconMode = DeviceIconMode.ICON;
+        iconArrowMovingColor = DEFAULT_MOVING_ARROW_COLOR;
+        iconArrowPausedColor = DEFAULT_PAUSED_ARROW_COLOR;
+        iconArrowStoppedColor = DEFAULT_STOPPED_ARROW_COLOR;
+        iconArrowOfflineColor = DEFAULT_OFFLINE_ARROW_COLOR;
     }
 
     public Device(Device device) {
@@ -70,6 +80,13 @@ public class Device implements IsSerializable, GroupedDevice {
             }
         }
         group = device.group == null ? null : new Group(device.group.getId()).copyFrom(device.group);
+
+        iconMode = device.iconMode;
+        iconRotation = device.iconRotation;
+        iconArrowMovingColor = device.iconArrowMovingColor;
+        iconArrowPausedColor = device.iconArrowPausedColor;
+        iconArrowStoppedColor = device.iconArrowStoppedColor;
+        iconArrowOfflineColor = device.iconArrowOfflineColor;
     }
 
     @Id
@@ -358,6 +375,65 @@ public class Device implements IsSerializable, GroupedDevice {
 
     public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    @Enumerated(EnumType.STRING)
+    private DeviceIconMode iconMode;
+
+    public DeviceIconMode getIconMode() {
+        return iconMode;
+    }
+
+    public void setIconMode(DeviceIconMode iconMode) {
+        this.iconMode = iconMode;
+    }
+
+    private String iconArrowMovingColor;
+    private String iconArrowPausedColor;
+    private String iconArrowStoppedColor;
+    private String iconArrowOfflineColor;
+
+    public String getIconArrowMovingColor() {
+        return iconArrowMovingColor;
+    }
+
+    public void setIconArrowMovingColor(String iconArrowMovingColor) {
+        this.iconArrowMovingColor = iconArrowMovingColor;
+    }
+
+    public String getIconArrowPausedColor() {
+        return iconArrowPausedColor;
+    }
+
+    public void setIconArrowPausedColor(String iconArrowPausedColor) {
+        this.iconArrowPausedColor = iconArrowPausedColor;
+    }
+
+    public String getIconArrowStoppedColor() {
+        return iconArrowStoppedColor;
+    }
+
+    public void setIconArrowStoppedColor(String iconArrowStoppedColor) {
+        this.iconArrowStoppedColor = iconArrowStoppedColor;
+    }
+
+    public String getIconArrowOfflineColor() {
+        return iconArrowOfflineColor;
+    }
+
+    public void setIconArrowOfflineColor(String iconArrowOfflineColor) {
+        this.iconArrowOfflineColor = iconArrowOfflineColor;
+    }
+
+    @Column(nullable = true)
+    private boolean iconRotation;
+
+    public boolean isIconRotation() {
+        return iconRotation;
+    }
+
+    public void setIconRotation(boolean iconRotation) {
+        this.iconRotation = iconRotation;
     }
 
     @Override

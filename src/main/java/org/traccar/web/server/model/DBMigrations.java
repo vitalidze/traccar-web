@@ -15,11 +15,18 @@
  */
 package org.traccar.web.server.model;
 
+import static org.traccar.web.shared.model.Device.DEFAULT_MOVING_ARROW_COLOR;
+import static org.traccar.web.shared.model.Device.DEFAULT_PAUSED_ARROW_COLOR;
+import static org.traccar.web.shared.model.Device.DEFAULT_STOPPED_ARROW_COLOR;
+import static org.traccar.web.shared.model.Device.DEFAULT_OFFLINE_ARROW_COLOR;
+
 import org.traccar.web.shared.model.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DBMigrations {
     public void migrate(EntityManager em) throws Exception {
@@ -45,6 +52,8 @@ public class DBMigrations {
                 new SetDefaultMapType(),
                 new CreateAdmin(),
                 new SetDefaultDeviceIconType(),
+                new SetDefaultDeviceIconModeAndRotation(),
+                new SetDefaultArrowIconSettings(),
                 new SetDefaultHashImplementation(),
                 new SetGlobalHashSalt(),
                 new SetDefaultUserSettings(),
@@ -397,6 +406,35 @@ public class DBMigrations {
             em.createQuery("UPDATE " + DeviceEvent.class.getName() + " E SET E.expired=:false WHERE E.expired IS NULL")
                     .setParameter("false", false)
                     .executeUpdate();
+        }
+    }
+
+    static class SetDefaultDeviceIconModeAndRotation implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.iconRotation=:false WHERE D.iconRotation IS NULL")
+                    .setParameter("false", false)
+                    .executeUpdate();
+            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.iconMode=:icon WHERE D.iconMode IS NULL")
+                    .setParameter("icon", DeviceIconMode.ICON)
+                    .executeUpdate();
+        }
+    }
+
+    static class SetDefaultArrowIconSettings implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            Map<String, String> defaultColors = new HashMap<>();
+            defaultColors.put("iconArrowMovingColor", DEFAULT_MOVING_ARROW_COLOR);
+            defaultColors.put("iconArrowPausedColor", DEFAULT_PAUSED_ARROW_COLOR);
+            defaultColors.put("iconArrowStoppedColor", DEFAULT_STOPPED_ARROW_COLOR);
+            defaultColors.put("iconArrowOfflineColor", DEFAULT_OFFLINE_ARROW_COLOR);
+
+            for (Map.Entry<String, String> e : defaultColors.entrySet()) {
+                em.createQuery("UPDATE " + Device.class.getName() + " D SET D." + e.getKey() + "=:color WHERE D." + e.getKey() + " IS NULL")
+                        .setParameter("color", e.getValue())
+                        .executeUpdate();
+            }
         }
     }
 }

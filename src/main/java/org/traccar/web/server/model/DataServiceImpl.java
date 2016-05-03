@@ -509,6 +509,13 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setPhoto(device.getPhoto() == null ? null : entityManager.find(Picture.class, device.getPhoto().getId()));
             tmp_device.setGroup(newGroup);
 
+            tmp_device.setIconMode(device.getIconMode());
+            tmp_device.setIconRotation(device.isIconRotation());
+            tmp_device.setIconArrowMovingColor(device.getIconArrowMovingColor());
+            tmp_device.setIconArrowPausedColor(device.getIconArrowPausedColor());
+            tmp_device.setIconArrowStoppedColor(device.getIconArrowStoppedColor());
+            tmp_device.setIconArrowOfflineColor(device.getIconArrowOfflineColor());
+
             double prevOdometer = tmp_device.getOdometer();
             tmp_device.setOdometer(device.getOdometer());
             tmp_device.setAutoUpdateOdometer(device.isAutoUpdateOdometer());
