@@ -782,6 +782,10 @@ public class MapPositionRenderer {
             style.setBackgroundGraphicZIndex(11);
         }
 
+        if (position.getDevice().isIconRotation() && position.getCourse() != null) {
+            style.setRotation(position.getCourse().toString());
+        }
+
         return style;
     }
 
