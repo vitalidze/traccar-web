@@ -303,6 +303,7 @@ public class MapPositionRenderer {
         List<VectorFeature> labels = new ArrayList<>();
         Map<Position, VectorFeature> pauseAndStops = new HashMap<>();
         Map<Position, VectorFeature> timeLabels = new HashMap<>();
+        Map<Position, VectorFeature> arrows = new HashMap<>();
 
         SnappingHandler snappingHandler;
 
@@ -379,6 +380,12 @@ public class MapPositionRenderer {
             label.destroy();
         }
         deviceData.timeLabels.clear();
+        // clear arrows
+        for (VectorFeature arrow : deviceData.arrows.values()) {
+            getVectorLayer().removeFeature(arrow);
+            arrow.destroy();
+        }
+        deviceData.arrows.clear();
         // clear tracks
         if (deviceData.track != null) {
             getVectorLayer().removeFeature(deviceData.track);
@@ -446,9 +453,7 @@ public class MapPositionRenderer {
                 org.gwtopenmaps.openlayers.client.Style st = new org.gwtopenmaps.openlayers.client.Style();
                 st.setLabel(position.getDevice().getName());
                 st.setLabelXOffset(0);
-                st.setLabelYOffset(position.getDevice().getIconMode() == DeviceIconMode.ICON
-                        ? -12
-                        : -20);
+                st.setLabelYOffset(position.getIcon().isArrow() ? -20 : -12);
                 st.setLabelAlign("cb");
                 st.setFontColor("#0000FF");
                 st.setFontSize("12");
@@ -657,6 +662,12 @@ public class MapPositionRenderer {
                     timeLabel.destroy();
                 }
 
+                VectorFeature arrow = deviceData.arrows.remove(position);
+                if (arrow != null) {
+                    getVectorLayer().removeFeature(arrow);
+                    arrow.destroy();
+                }
+
                 VectorFeature pauseOrStop = deviceData.pauseAndStops.remove(position);
                 if (pauseOrStop != null) {
                     getVectorLayer().removeFeature(pauseOrStop);
@@ -721,12 +732,12 @@ public class MapPositionRenderer {
     private void drawAlert(Position position) {
         DeviceData deviceData = getDeviceData(position.getDevice());
 
-        int iconWidthHalf = position.getDevice().getIconMode() == DeviceIconMode.ICON
-                ? position.getIcon().getWidth() / 2
-                : (DeviceIconType.DEFAULT.getPositionIconType(Position.Status.LATEST).getWidth() / 2);
-        int iconHeight = position.getDevice().getIconMode() == DeviceIconMode.ICON
-                ? position.getIcon().getHeight()
-                : (DeviceIconType.DEFAULT.getPositionIconType(Position.Status.LATEST).getHeight() / 2);
+        int iconWidthHalf = position.getIcon().isArrow()
+                ? (DeviceIconType.DEFAULT.getPositionIconType(Position.Status.LATEST).getWidth() / 2)
+                : position.getIcon().getWidth() / 2;
+        int iconHeight = position.getIcon().isArrow()
+                ? (DeviceIconType.DEFAULT.getPositionIconType(Position.Status.LATEST).getHeight() / 2)
+                : position.getIcon().getHeight();
 
         Style alertCircleStyle = new org.gwtopenmaps.openlayers.client.Style();
         alertCircleStyle.setPointRadius(Math.sqrt(iconWidthHalf * iconWidthHalf + iconHeight * iconHeight) + 1);
@@ -757,8 +768,9 @@ public class MapPositionRenderer {
     private static final int IDLE_ICON_HEIGHT = 10;
 
     private Style createStyle(Position position, boolean selected) {
-        return position.getDevice().getIconMode() == DeviceIconMode.ICON ? createIconStyle(position, selected)
-                : createArrowStyle(position);
+        return position.getIcon().isArrow()
+                ? createArrowStyle(position, getBgColor(position))
+                : createIconStyle(position, selected);
     }
 
     private Style createIconStyle(Position position, boolean selected) {
@@ -819,16 +831,11 @@ public class MapPositionRenderer {
         }
     }
 
-    private Style createArrowStyle(Position position) {
-        Style style = new Style();
-        style.setGraphicName("arrow");
-        style.setStrokeColor("black");
-        style.setStrokeWidth(0.5);
-        style.setFillOpacity(1.0);
+    private String getBgColor(Position position) {
         String bgColor = position.getDevice().getIconArrowStoppedColor();
         if (position.getStatus() == Position.Status.OFFLINE || position.getIdleStatus() == null) {
             bgColor = position.getDevice().getIconArrowOfflineColor();
-        } else if (position.getIdleStatus() != null) {
+        } else {
             switch (position.getIdleStatus()) {
                 case MOVING:
                     bgColor = position.getDevice().getIconArrowMovingColor();
@@ -841,6 +848,16 @@ public class MapPositionRenderer {
                     break;
             }
         }
+        return bgColor;
+    }
+
+    private Style createArrowStyle(Position position, String bgColor) {
+        Style style = new Style();
+        style.setGraphicName("arrow");
+        style.setStrokeColor("black");
+        style.setStrokeWidth(0.5);
+        style.setFillOpacity(1.0);
+
         style.setFillColor("#" + bgColor);
         style.setFill(true);
         style.setPointRadius(10);
@@ -848,5 +865,18 @@ public class MapPositionRenderer {
             style.setRotation(position.getCourse().toString());
         }
         return style;
+    }
+
+    public void showArrows(List<Position> positions, String color) {
+        DeviceData deviceData = getDeviceData(positions);
+        for (Position position : positions) {
+            if (visibilityProvider.isVisible(position.getDevice())) {
+                VectorFeature arrow = new VectorFeature(
+                        mapView.createPoint(position.getLongitude(), position.getLatitude()),
+                        createArrowStyle(position, color));
+                deviceData.arrows.put(position, arrow);
+                getMarkerLayer().addFeature(arrow);
+            }
+        }
     }
 }

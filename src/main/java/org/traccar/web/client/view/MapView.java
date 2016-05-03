@@ -386,6 +386,10 @@ public class MapView {
         archivePositionRenderer.showTime(positions, false);
     }
 
+    public void showArchiveArrows(List<Position> positions, String color) {
+        archivePositionRenderer.showArrows(positions, color);
+    }
+
     public void selectDevice(Device device) {
         latestPositionRenderer.selectDevice(device, true);
     }

@@ -24,7 +24,10 @@ public class PositionIcon {
     final int selectedWidth;
     final int selectedHeight;
 
-    public PositionIcon(String url,
+    final boolean arrow;
+
+    public PositionIcon(boolean arrow,
+                        String url,
                         int width,
                         int height,
                         String selectedURL,
@@ -36,10 +39,11 @@ public class PositionIcon {
         this.selectedURL = selectedURL;
         this.selectedWidth = selectedWidth;
         this.selectedHeight = selectedHeight;
+        this.arrow = arrow;
     }
 
-    public PositionIcon(PositionIconType iconType) {
-        this(iconType.getURL(true), iconType.getWidth(), iconType.getHeight(),
+    public PositionIcon(boolean arrow, PositionIconType iconType) {
+        this(arrow, iconType.getURL(true), iconType.getWidth(), iconType.getHeight(),
              iconType.getURL(false), iconType.getWidth(), iconType.getHeight());
     }
 
@@ -65,5 +69,9 @@ public class PositionIcon {
 
     public int getSelectedHeight() {
         return selectedHeight;
+    }
+
+    public boolean isArrow() {
+        return arrow;
     }
 }

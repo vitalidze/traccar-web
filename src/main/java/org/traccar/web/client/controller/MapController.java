@@ -275,7 +275,7 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
 
     public void showArchivePositions(Track track) {
         List<Position> positions = track.getPositions();
-        PositionIcon icon = new PositionIcon(track.getStyle().getIconType() == null ?
+        PositionIcon icon = new PositionIcon(false, track.getStyle().getIconType() == null ?
                 PositionIconType.dotArchive : track.getStyle().getIconType());
         for (Position position : positions) {
             position.setIcon(icon);
@@ -290,6 +290,7 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
         }
         List<Position> withTime = track.getTimePositions(ApplicationContext.getInstance().getUserSettings().getTimePrintInterval());
         mapView.showArchiveTime(withTime);
+        mapView.showArchiveArrows(withTime, track.getStyle().getTrackColor());
     }
 
     public void selectArchivePosition(Position position) {
