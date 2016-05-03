@@ -5,7 +5,8 @@
         xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
         xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
         xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
-        xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar">
+        xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
+        xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form">
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="imageLayoutData">
     <ui:attributes width="-1" height="-1" />
@@ -26,31 +27,104 @@
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
   <container:SimpleContainer ui:field="panel">
-    <container:BorderLayoutContainer ui:field="mainContainer" borders="false">
-      <container:north layoutData="{northData}">
-          <toolbar:ToolBar>
-              <button:TextButton ui:field="addButton" text="{i18n.add}" />
-              <button:TextButton ui:field="editButton" text="{i18n.edit}" enabled="false" />
-              <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
-          </toolbar:ToolBar>
-      </container:north>
-      <container:center layoutData="{centerData}">
-        <gxt:ListView ui:field="view"/>
-      </container:center>
-      <container:east layoutData="{eastData}">
-        <container:VerticalLayoutContainer ui:field="panelImages">
-            <container:child layoutData="{imageLayoutData}">
-                <g:HTML ui:field="defaultImage" />
-            </container:child>
-            <container:child layoutData="{imageLayoutData}">
-                <g:HTML ui:field="selectedImage" />
-            </container:child>
-            <container:child layoutData="{imageLayoutData}">
-                <g:HTML ui:field="offlineImage" />
-            </container:child>
-        </container:VerticalLayoutContainer>
-      </container:east>
-    </container:BorderLayoutContainer>
+      <container:VerticalLayoutContainer>
+          <container:child layoutData="{imageLayoutData}">
+              <g:HorizontalPanel>
+                  <container:VerticalLayoutContainer>
+                      <container:child layoutData="{imageLayoutData}">
+                          <form:FieldLabel text="{i18n.showOnMap}">
+                              <form:widget>
+                                  <g:HorizontalPanel>
+                                      <form:Radio ui:field="iconModeIcon" />
+                                      <form:Radio ui:field="iconModeArrow" />
+                                  </g:HorizontalPanel>
+                              </form:widget>
+                          </form:FieldLabel>
+                      </container:child>
+                      <container:child layoutData="{imageLayoutData}">
+                          <form:FieldLabel text="{i18n.iconRotation}">
+                              <form:widget>
+                                  <form:CheckBox ui:field="iconRotation" />
+                              </form:widget>
+                          </form:FieldLabel>
+                      </container:child>
+                  </container:VerticalLayoutContainer>
+                  <container:VerticalLayoutContainer>
+                      <container:child layoutData="{toolBarRowData}">
+                          <form:FieldLabel text="{i18n.arrowColorMoving}" labelWidth="130">
+                              <form:widget>
+                                  <g:HorizontalPanel>
+                                      <g:Label text="&nbsp;&nbsp;&nbsp;&nbsp;" ui:field="iconArrowMovingColor" />
+                                      <g:Label text="&nbsp;&nbsp;&nbsp;" />
+                                      <button:TextButton ui:field="selectIconArrowMovingColor" text="{i18n.select}" />
+                                  </g:HorizontalPanel>
+                              </form:widget>
+                          </form:FieldLabel>
+                      </container:child>
+                      <container:child layoutData="{imageLayoutData}">
+                          <form:FieldLabel text="{i18n.arrowColorPaused}" labelWidth="130">
+                              <form:widget>
+                                  <g:HorizontalPanel>
+                                      <g:Label text="&nbsp;&nbsp;&nbsp;&nbsp;" ui:field="iconArrowPausedColor" />
+                                      <g:Label text="&nbsp;&nbsp;&nbsp;" />
+                                      <button:TextButton ui:field="selectIconArrowPausedColor" text="{i18n.select}" />
+                                  </g:HorizontalPanel>
+                              </form:widget>
+                          </form:FieldLabel>
+                      </container:child>
+                      <container:child layoutData="{imageLayoutData}">
+                          <form:FieldLabel text="{i18n.arrowColorStopped}" labelWidth="130">
+                              <form:widget>
+                                  <g:HorizontalPanel>
+                                      <g:Label text="&nbsp;&nbsp;&nbsp;&nbsp;" ui:field="iconArrowStoppedColor" />
+                                      <g:Label text="&nbsp;&nbsp;&nbsp;" />
+                                      <button:TextButton ui:field="selectIconArrowStoppedColor" text="{i18n.select}" />
+                                  </g:HorizontalPanel>
+                              </form:widget>
+                          </form:FieldLabel>
+                      </container:child>
+                      <container:child layoutData="{imageLayoutData}">
+                          <form:FieldLabel text="{i18n.arrowColorOffline}" labelWidth="130">
+                              <form:widget>
+                                  <g:HorizontalPanel>
+                                      <g:Label text="&nbsp;&nbsp;&nbsp;&nbsp;" ui:field="iconArrowOfflineColor" />
+                                      <g:Label text="&nbsp;&nbsp;&nbsp;" />
+                                      <button:TextButton ui:field="selectIconArrowOfflineColor" text="{i18n.select}" />
+                                  </g:HorizontalPanel>
+                              </form:widget>
+                          </form:FieldLabel>
+                      </container:child>
+                  </container:VerticalLayoutContainer>
+              </g:HorizontalPanel>
+          </container:child>
+          <container:child layoutData="{verticalLayoutData}">
+            <container:BorderLayoutContainer ui:field="mainContainer" borders="false">
+              <container:north layoutData="{northData}">
+                  <toolbar:ToolBar>
+                      <button:TextButton ui:field="addButton" text="{i18n.add}" />
+                      <button:TextButton ui:field="editButton" text="{i18n.edit}" enabled="false" />
+                      <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
+                  </toolbar:ToolBar>
+              </container:north>
+              <container:center layoutData="{centerData}">
+                <gxt:ListView ui:field="view"/>
+              </container:center>
+              <container:east layoutData="{eastData}">
+                <container:VerticalLayoutContainer ui:field="panelImages">
+                    <container:child layoutData="{imageLayoutData}">
+                        <g:HTML ui:field="defaultImage" />
+                    </container:child>
+                    <container:child layoutData="{imageLayoutData}">
+                        <g:HTML ui:field="selectedImage" />
+                    </container:child>
+                    <container:child layoutData="{imageLayoutData}">
+                        <g:HTML ui:field="offlineImage" />
+                    </container:child>
+                </container:VerticalLayoutContainer>
+              </container:east>
+            </container:BorderLayoutContainer>
+          </container:child>
+      </container:VerticalLayoutContainer>
   </container:SimpleContainer>
 
 </ui:UiBinder>

@@ -18,6 +18,8 @@ package org.traccar.web.client.view;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -28,12 +30,15 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.cell.core.client.SimpleSafeHtmlCell;
 import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.XTemplates;
 import com.sencha.gxt.core.client.resources.CommonStyles;
 import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.core.client.util.ToggleGroup;
 import com.sencha.gxt.data.client.loader.RpcProxy;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
@@ -49,11 +54,11 @@ import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.form.CheckBox;
+import com.sencha.gxt.widget.core.client.form.Radio;
+import com.sencha.gxt.widget.core.client.menu.ColorMenu;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseAsyncCallback;
-import org.traccar.web.client.model.BaseStoreHandlers;
-import org.traccar.web.client.model.PicturesService;
-import org.traccar.web.client.model.PicturesServiceAsync;
+import org.traccar.web.client.model.*;
 import org.traccar.web.shared.model.*;
 
 import java.util.ArrayList;
@@ -94,11 +99,81 @@ public class DeviceIconEditor {
         SafeHtml pictureView(Style style, String text, String pictureURL);
     }
 
+    static class ColorSelector {
+        final TextButton selectButton;
+        final ColorMenu menu;
+        final Label label;
+        String selection;
+        final ValueProvider<Device, String> valueProvider;
+
+        ColorSelector(TextButton selectButton, Label label, ValueProvider<Device, String> valueProvider) {
+            this.selectButton = selectButton;
+            this.menu = new ColorMenu();
+            this.label = label;
+            this.valueProvider = valueProvider;
+        }
+
+        void install(Device device) {
+            selection = valueProvider.getValue(device);
+            selectButton.setMenu(menu);
+            menu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<String> event) {
+                    selection = event.getValue();
+                    menu.hide(true);
+                    selectionChanged();
+                }
+            });
+            selectionChanged();
+        }
+
+        void selectionChanged() {
+            label.getElement().getStyle().setProperty("backgroundColor", "#" + selection);
+        }
+
+        void flush(Device device) {
+            valueProvider.setValue(device, selection);
+        }
+    }
+
     @UiField
     SimpleContainer panel;
 
     @UiField
     BorderLayoutContainer mainContainer;
+
+    @UiField
+    Radio iconModeIcon;
+
+    @UiField
+    Radio iconModeArrow;
+
+    @UiField
+    CheckBox iconRotation;
+
+    @UiField
+    Label iconArrowMovingColor;
+
+    @UiField
+    TextButton selectIconArrowMovingColor;
+
+    @UiField
+    Label iconArrowPausedColor;
+
+    @UiField
+    TextButton selectIconArrowPausedColor;
+
+    @UiField
+    Label iconArrowStoppedColor;
+
+    @UiField
+    TextButton selectIconArrowStoppedColor;
+
+    @UiField
+    Label iconArrowOfflineColor;
+
+    @UiField
+    TextButton selectIconArrowOfflineColor;
 
     @UiField(provided = true)
     ListView<MarkerIcon, MarkerIcon> view;
@@ -175,6 +250,8 @@ public class DeviceIconEditor {
 
     final Device device;
 
+    final ColorSelector[] arrowColors;
+
     public DeviceIconEditor(final Device device) {
         this.device = device;
 
@@ -249,6 +326,33 @@ public class DeviceIconEditor {
                 }
             }
         });
+
+        // set up 'Icon Mode' radio buttons
+        ToggleGroup iconModeRadibuttons = new ToggleGroup();
+        iconModeRadibuttons.add(iconModeIcon);
+        iconModeRadibuttons.add(iconModeArrow);
+
+        iconModeIcon.setBoxLabel(i18n.deviceIconMode(DeviceIconMode.ICON));
+        iconModeArrow.setBoxLabel(i18n.deviceIconMode(DeviceIconMode.ARROW));
+
+        iconModeIcon.setValue(device.getIconMode() == DeviceIconMode.ICON);
+        iconModeArrow.setValue(device.getIconMode() == DeviceIconMode.ARROW);
+
+        iconRotation.setValue(device.isIconRotation());
+
+        // set up color buttons
+        DeviceProperties properties = GWT.create(DeviceProperties.class);
+
+        arrowColors = new ColorSelector[] {
+                new ColorSelector(selectIconArrowMovingColor, iconArrowMovingColor, properties.iconArrowMovingColor()),
+                new ColorSelector(selectIconArrowPausedColor, iconArrowPausedColor, properties.iconArrowPausedColor()),
+                new ColorSelector(selectIconArrowStoppedColor, iconArrowStoppedColor, properties.iconArrowStoppedColor()),
+                new ColorSelector(selectIconArrowOfflineColor, iconArrowOfflineColor, properties.iconArrowOfflineColor())
+        };
+
+        for (ColorSelector colorSelector : arrowColors) {
+            colorSelector.install(device);
+        }
     }
 
     public void loadIcons() {
@@ -259,6 +363,16 @@ public class DeviceIconEditor {
     }
 
     public void flush() {
+        if (iconModeIcon.getValue()) {
+            device.setIconMode(DeviceIconMode.ICON);
+        } else if (iconModeArrow.getValue()) {
+            device.setIconMode(DeviceIconMode.ARROW);
+        }
+        device.setIconRotation(iconRotation.getValue());
+        for (ColorSelector colorSelector : arrowColors) {
+            colorSelector.flush(device);
+        }
+
         selected = view.getSelectionModel().getSelectedItem();
         device.setIconType(selected.getBuiltInIcon());
         device.setIcon(selected.getDatabaseIcon());

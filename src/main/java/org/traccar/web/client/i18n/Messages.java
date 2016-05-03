@@ -528,4 +528,18 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String loadingData();
 
     String icon();
+
+    String showOnMap();
+
+    String deviceIconMode(@Select DeviceIconMode mode);
+
+    String iconRotation();
+
+    String arrowColorMoving();
+
+    String arrowColorPaused();
+
+    String arrowColorStopped();
+
+    String arrowColorOffline();
 }
