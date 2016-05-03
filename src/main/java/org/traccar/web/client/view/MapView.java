@@ -24,6 +24,7 @@ import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
+import org.gwtopenmaps.openlayers.client.OpenLayers;
 import org.gwtopenmaps.openlayers.client.OpenLayersStyle;
 import org.gwtopenmaps.openlayers.client.Projection;
 import org.gwtopenmaps.openlayers.client.Style;
@@ -249,10 +250,22 @@ public class MapView {
         vectorLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.VECTOR));
         markerLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.MARKERS));
 
-        final SelectFeature selectFeature = new SelectFeature(markerLayer);
+        // mouse click
+        SelectFeature selectFeature = new SelectFeature(markerLayer);
         selectFeature.setAutoActivate(true);
-        map.addControl(selectFeature);
 
+        // mouse over/out
+        SelectFeatureOptions selectFeatureHoverOptions = new SelectFeatureOptions();
+        selectFeatureHoverOptions.setHighlightOnly(true);
+        selectFeatureHoverOptions.setHover();
+
+        SelectFeature selectFeatureHover = new SelectFeature(markerLayer, selectFeatureHoverOptions);
+        selectFeatureHover.setAutoActivate(true);
+        selectFeatureHover.setHover(true);
+        selectFeatureHover.setClickOut(false);
+
+        map.addControl(selectFeatureHover);
+        map.addControl(selectFeature);
         map.addControl(new LayerSwitcher());
         map.addControl(new ScaleLine());
         OverviewMapOptions options = new OverviewMapOptions();
@@ -288,15 +301,18 @@ public class MapView {
             }
         });
 
-        latestPositionRenderer = new MapPositionRenderer(this, latestPositionSelectHandler, positionMouseHandler, deviceVisibilityHandler);
+        latestPositionRenderer = new MapPositionRenderer(this, latestPositionSelectHandler, positionMouseHandler, deviceVisibilityHandler, selectFeatureHover);
         archivePositionRenderer = new MapPositionRenderer(this, archivePositionSelectHandler, positionMouseHandler, new DeviceVisibilityProvider() {
             @Override
             public boolean isVisible(Device device) {
                 return true;
             }
-        });
-        latestPositionTrackRenderer = new MapPositionRenderer(this, null, null, deviceVisibilityHandler);
+        }, null);
+        latestPositionTrackRenderer = new MapPositionRenderer(this, null, null, deviceVisibilityHandler, null);
         geoFenceRenderer = new GeoFenceRenderer(this);
+
+        // register arrow graphic
+        OpenLayers.addWellKnownGraphic(new int[] {0,10, 4,8, 7,10, 4,0, 0,10}, "arrow");
     }
 
     private final MapPositionRenderer latestPositionRenderer;

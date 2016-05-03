@@ -23,9 +23,9 @@ import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Pixel;
 import org.gwtopenmaps.openlayers.client.Style;
-import org.gwtopenmaps.openlayers.client.event.EventHandler;
+import org.gwtopenmaps.openlayers.client.control.SelectFeature;
+import org.gwtopenmaps.openlayers.client.event.*;
 import org.gwtopenmaps.openlayers.client.event.EventObject;
-import org.gwtopenmaps.openlayers.client.event.VectorFeatureSelectedListener;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.LineString;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
@@ -36,10 +36,7 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.TrackSegment;
 import org.traccar.web.client.state.DeviceVisibilityProvider;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
-import org.traccar.web.shared.model.PositionIcon;
-import org.traccar.web.shared.model.UserSettings;
+import org.traccar.web.shared.model.*;
 
 public class MapPositionRenderer {
 
@@ -69,7 +66,8 @@ public class MapPositionRenderer {
     public MapPositionRenderer(MapView mapView,
                                final SelectHandler selectHandler,
                                final MouseHandler mouseHandler,
-                               DeviceVisibilityProvider visibilityProvider) {
+                               DeviceVisibilityProvider visibilityProvider,
+                               SelectFeature selectFeatureHover) {
         this.mapView = mapView;
         this.selectHandler = selectHandler;
         this.mouseHandler = mouseHandler;
@@ -87,24 +85,45 @@ public class MapPositionRenderer {
             });
         }
         if (mouseHandler != null) {
-            getMarkerLayer().getEvents().register("featureover", getMarkerLayer(), new EventHandler() {
-                @Override
-                public void onHandle(EventObject eventObject) {
-                    Position position = getMouseEventPosition(eventObject);
-                    if (position != null) {
-                        mouseHandler.onMouseOver(position);
+            if (selectFeatureHover == null) {
+                getMarkerLayer().getEvents().register("featureover", getMarkerLayer(), new EventHandler() {
+                    @Override
+                    public void onHandle(EventObject eventObject) {
+                        Position position = getMouseEventPosition(eventObject);
+                        if (position != null) {
+                            mouseHandler.onMouseOver(position);
+                        }
                     }
-                }
-            });
-            getMarkerLayer().getEvents().register("featureout", getMarkerLayer(), new EventHandler() {
-                @Override
-                public void onHandle(EventObject eventObject) {
-                    Position position = getMouseEventPosition(eventObject);
-                    if (position != null) {
-                        mouseHandler.onMouseOut(position);
+                });
+                getMarkerLayer().getEvents().register("featureout", getMarkerLayer(), new EventHandler() {
+                    @Override
+                    public void onHandle(EventObject eventObject) {
+                        Position position = getMouseEventPosition(eventObject);
+                        if (position != null) {
+                            mouseHandler.onMouseOut(position);
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                selectFeatureHover.addFeatureHighlightedListener(new FeatureHighlightedListener() {
+                    @Override
+                    public void onFeatureHighlighted(VectorFeature vectorFeature) {
+                        Position position = getMouseEventPosition(vectorFeature);
+                        if (position != null) {
+                            mouseHandler.onMouseOver(position);
+                        }
+                    }
+                });
+                selectFeatureHover.addFeatureUnhighlightedListener(new FeatureUnhighlightedListener() {
+                    @Override
+                    public void onFeatureUnhighlighted(VectorFeature vectorFeature) {
+                        Position position = getMouseEventPosition(vectorFeature);
+                        if (position != null) {
+                            mouseHandler.onMouseOut(position);
+                        }
+                    }
+                });
+            }
         }
     }
 
@@ -140,7 +159,7 @@ public class MapPositionRenderer {
         DeviceData deviceData = getDeviceData(position.getDevice());
         DeviceMarker oldMarker = deviceData.markerMap.get(position.getId());
         Point point = Point.narrowToPoint(oldMarker.marker.getJSObject().getProperty("geometry"));
-        VectorFeature newMarker = new VectorFeature(point, createIconStyle(position, selected));
+        VectorFeature newMarker = new VectorFeature(point, createStyle(position, selected));
         setUpEvents(newMarker, position);
         deviceData.markerMap.put(position.getId(), new DeviceMarker(oldMarker.position, newMarker));
         getMarkerLayer().removeFeature(oldMarker.marker);
@@ -402,7 +421,7 @@ public class MapPositionRenderer {
             if (visibilityProvider.isVisible(position.getDevice())) {
                 VectorFeature marker = new VectorFeature(
                         mapView.createPoint(position.getLongitude(), position.getLatitude()),
-                        createIconStyle(position, false));
+                        createStyle(position, false));
                 deviceData.markerMap.put(position.getId(), new DeviceMarker(position, marker));
 
                 setUpEvents(marker, position);
@@ -427,7 +446,9 @@ public class MapPositionRenderer {
                 org.gwtopenmaps.openlayers.client.Style st = new org.gwtopenmaps.openlayers.client.Style();
                 st.setLabel(position.getDevice().getName());
                 st.setLabelXOffset(0);
-                st.setLabelYOffset(-12);
+                st.setLabelYOffset(position.getDevice().getIconMode() == DeviceIconMode.ICON
+                        ? -12
+                        : -20);
                 st.setLabelAlign("cb");
                 st.setFontColor("#0000FF");
                 st.setFontSize("12");
@@ -700,8 +721,12 @@ public class MapPositionRenderer {
     private void drawAlert(Position position) {
         DeviceData deviceData = getDeviceData(position.getDevice());
 
-        int iconWidthHalf = position.getIcon().getWidth() / 2;
-        int iconHeight = position.getIcon().getHeight();
+        int iconWidthHalf = position.getDevice().getIconMode() == DeviceIconMode.ICON
+                ? position.getIcon().getWidth() / 2
+                : (DeviceIconType.DEFAULT.getPositionIconType(Position.Status.LATEST).getWidth() / 2);
+        int iconHeight = position.getDevice().getIconMode() == DeviceIconMode.ICON
+                ? position.getIcon().getHeight()
+                : (DeviceIconType.DEFAULT.getPositionIconType(Position.Status.LATEST).getHeight() / 2);
 
         Style alertCircleStyle = new org.gwtopenmaps.openlayers.client.Style();
         alertCircleStyle.setPointRadius(Math.sqrt(iconWidthHalf * iconWidthHalf + iconHeight * iconHeight) + 1);
@@ -730,6 +755,11 @@ public class MapPositionRenderer {
 
     private static final int IDLE_ICON_WIDTH = 10;
     private static final int IDLE_ICON_HEIGHT = 10;
+
+    private Style createStyle(Position position, boolean selected) {
+        return position.getDevice().getIconMode() == DeviceIconMode.ICON ? createIconStyle(position, selected)
+                : createArrowStyle(position);
+    }
 
     private Style createIconStyle(Position position, boolean selected) {
         PositionIcon icon = position.getIcon();
@@ -783,5 +813,36 @@ public class MapPositionRenderer {
                 deviceData.pauseAndStops.put(position, pauseOrStop);
             }
         }
+    }
+
+    private Style createArrowStyle(Position position) {
+        Style style = new Style();
+        style.setGraphicName("arrow");
+        style.setStrokeColor("black");
+        style.setStrokeWidth(0.5);
+        style.setFillOpacity(1.0);
+        String bgColor = position.getDevice().getIconArrowStoppedColor();
+        if (position.getStatus() == Position.Status.OFFLINE || position.getIdleStatus() == null) {
+            bgColor = position.getDevice().getIconArrowOfflineColor();
+        } else if (position.getIdleStatus() != null) {
+            switch (position.getIdleStatus()) {
+                case MOVING:
+                    bgColor = position.getDevice().getIconArrowMovingColor();
+                    break;
+                case PAUSED:
+                    bgColor = position.getDevice().getIconArrowPausedColor();
+                    break;
+                case IDLE:
+                    bgColor = position.getDevice().getIconArrowStoppedColor();
+                    break;
+            }
+        }
+        style.setFillColor("#" + bgColor);
+        style.setFill(true);
+        style.setPointRadius(10);
+        if (position.getCourse() != null) {
+            style.setRotation(position.getCourse().toString());
+        }
+        return style;
     }
 }
