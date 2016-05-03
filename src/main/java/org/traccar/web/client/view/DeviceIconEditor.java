@@ -41,10 +41,11 @@ import com.sencha.gxt.data.shared.loader.*;
 import com.sencha.gxt.theme.base.client.listview.ListViewCustomAppearance;
 import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.ListView;
-import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.Container;
+import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
@@ -58,10 +59,10 @@ import org.traccar.web.shared.model.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeviceMarkersDialog {
-    private static DeviceMarkersDialogUiBinder uiBinder = GWT.create(DeviceMarkersDialogUiBinder.class);
+public class DeviceIconEditor {
+    private static final DeviceIconEditorUiBinder uiBinder = GWT.create(DeviceIconEditorUiBinder.class);
 
-    interface DeviceMarkersDialogUiBinder extends UiBinder<Widget, DeviceMarkersDialog> {
+    interface DeviceIconEditorUiBinder extends UiBinder<Widget, DeviceIconEditor> {
     }
 
     interface Resources extends ClientBundle {
@@ -93,12 +94,11 @@ public class DeviceMarkersDialog {
         SafeHtml pictureView(Style style, String text, String pictureURL);
     }
 
-    public interface DeviceMarkerHandler {
-        void onSave(MarkerIcon icon);
-    }
+    @UiField
+    SimpleContainer panel;
 
     @UiField
-    Window window;
+    BorderLayoutContainer mainContainer;
 
     @UiField(provided = true)
     ListView<MarkerIcon, MarkerIcon> view;
@@ -138,8 +138,6 @@ public class DeviceMarkersDialog {
 
     final PicturesServiceAsync picturesService = GWT.create(PicturesService.class);
 
-    final DeviceMarkerHandler handler;
-
     static class MergingCallback extends BaseAsyncCallback<List<DeviceIcon>> {
         final AsyncCallback<List<MarkerIcon>> markerLoaderCallback;
 
@@ -175,8 +173,10 @@ public class DeviceMarkersDialog {
     final Resources resources = GWT.create(Resources.class);
     final MarkerListItemTemplate renderer = GWT.create(MarkerListItemTemplate.class);
 
-    public DeviceMarkersDialog(final MarkerIcon selectedIcon, DeviceMarkerHandler handler) {
-        this.handler = handler;
+    final Device device;
+
+    public DeviceIconEditor(final Device device) {
+        this.device = device;
 
         ModelKeyProvider<MarkerIcon> keyProvider = new ModelKeyProvider<MarkerIcon>() {
             @Override
@@ -201,8 +201,6 @@ public class DeviceMarkersDialog {
         };
 
         store = new ListStore<>(keyProvider);
-        Loader<Object, List<MarkerIcon>> loader = new Loader<>(hybridProxy);
-        loader.addLoadHandler(new ListStoreBinding<>(store));
 
         view = new ListView<>(store, new IdentityValueProvider<MarkerIcon>() {
             @Override
@@ -237,9 +235,7 @@ public class DeviceMarkersDialog {
 
         uiBinder.createAndBindUi(this);
 
-        window.setHeadingText(i18n.overlayType(UserSettings.OverlayType.MARKERS));
-
-        selected = selectedIcon;
+        selected = MarkerIcon.create(device);
         store.addStoreHandlers(new BaseStoreHandlers<MarkerIcon>() {
             @Override
             public void onAnything() {
@@ -253,28 +249,19 @@ public class DeviceMarkersDialog {
                 }
             }
         });
+    }
+
+    public void loadIcons() {
+        store.clear();
+        Loader<Object, List<MarkerIcon>> loader = new Loader<>(hybridProxy);
+        loader.addLoadHandler(new ListStoreBinding<>(store));
         loader.load();
-
-        selectionChanged();
     }
 
-    public void show() {
-        window.show();
-    }
-
-    public void hide() {
-        window.hide();
-    }
-
-    @UiHandler("saveButton")
-    public void onOKClicked(SelectEvent event) {
-        handler.onSave(view.getSelectionModel().getSelectedItem());
-        hide();
-    }
-
-    @UiHandler("cancelButton")
-    public void onCancelClicked(SelectEvent event) {
-        hide();
+    public void flush() {
+        selected = view.getSelectionModel().getSelectedItem();
+        device.setIconType(selected.getBuiltInIcon());
+        device.setIcon(selected.getDatabaseIcon());
     }
 
     private void selectionChanged() {
@@ -358,5 +345,9 @@ public class DeviceMarkersDialog {
             }
         });
         dialog.show();
+    }
+
+    public Container getPanel() {
+        return panel;
     }
 }

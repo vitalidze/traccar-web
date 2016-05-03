@@ -34,6 +34,10 @@
         <ui:attributes text="{i18n.settings}" />
     </ui:with>
 
+    <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="iconTabConfig">
+        <ui:attributes text="{i18n.icon}" />
+    </ui:with>
+
     <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="sensorsTabConfig">
         <ui:attributes text="{i18n.sensors}" />
     </ui:with>
@@ -153,20 +157,6 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutDataWithButtons}">
-                      <form:FieldLabel ui:field="labelMarkers" labelWidth="180">
-                          <form:widget>
-                              <container:HorizontalLayoutContainer ui:field="panelMarkers">
-                                  <container:child layoutData="{horizontalLayoutData}">
-                                      <g:Image ui:field="markerImage" />
-                                  </container:child>
-                                  <container:child layoutData="{horizontalLayoutData}">
-                                      <button:TextButton ui:field="selectButton" text="{i18n.select}..." />
-                                  </container:child>
-                              </container:HorizontalLayoutContainer>
-                          </form:widget>
-                      </form:FieldLabel>
-                  </container:child>
-                  <container:child layoutData="{verticalLayoutDataWithButtons}">
                       <form:FieldLabel text="{i18n.photo}" labelWidth="180">
                           <form:widget>
                               <container:HorizontalLayoutContainer>
@@ -185,6 +175,10 @@
                           <g:Image ui:field="photo" />
                       </g:ScrollPanel>
                   </container:child>
+              </container:VerticalLayoutContainer>
+          </gxt:child>
+          <gxt:child config="{iconTabConfig}">
+              <container:VerticalLayoutContainer ui:field="iconTab" addStyleNames="{style.tabBody}">
               </container:VerticalLayoutContainer>
           </gxt:child>
           <gxt:child config="{sensorsTabConfig}">

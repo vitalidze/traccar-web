@@ -7,17 +7,17 @@
         xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
         xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar">
 
-  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
-    <ui:attributes width="1" height="-1" />
-  </ui:with>
-
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="imageLayoutData">
     <ui:attributes width="-1" height="-1" />
   </ui:with>
 
-  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutData">
-    <ui:attributes width="-1" height="-1" />
-  </ui:with>
+    <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="toolBarRowData">
+        <ui:attributes width="1" height="-1" />
+    </ui:with>
+
+    <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
+        <ui:attributes width="1" height="1" />
+    </ui:with>
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="northData" />
   <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="centerData" />
@@ -25,8 +25,8 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <gxt:Window ui:field="window" pixelSize="494, 370" modal="true" focusWidget="{saveButton}">
-    <container:BorderLayoutContainer ui:field="con" borders="true">
+  <container:SimpleContainer ui:field="panel">
+    <container:BorderLayoutContainer ui:field="mainContainer" borders="false">
       <container:north layoutData="{northData}">
           <toolbar:ToolBar>
               <button:TextButton ui:field="addButton" text="{i18n.add}" />
@@ -51,13 +51,6 @@
         </container:VerticalLayoutContainer>
       </container:east>
     </container:BorderLayoutContainer>
-
-    <gxt:button>
-      <button:TextButton ui:field="saveButton" text="OK" />
-    </gxt:button>
-    <gxt:button>
-      <button:TextButton ui:field="cancelButton" text="{i18n.cancel}" />
-    </gxt:button>
-  </gxt:Window>
+  </container:SimpleContainer>
 
 </ui:UiBinder>
