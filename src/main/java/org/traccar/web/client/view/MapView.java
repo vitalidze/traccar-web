@@ -333,11 +333,6 @@ public class MapView {
             latestPositionRenderer.showPositions(Collections.singletonList(position));
         }
         showAlerts(alerts);
-        showDeviceName(positions);
-    }
-
-    public void showDeviceName(List<Position> positions) {
-        latestPositionRenderer.showDeviceName(positions);
     }
 
     public void showAlerts(Collection<Position> positions) {

@@ -26,6 +26,8 @@ public class PositionIcon {
 
     final boolean arrow;
 
+    private boolean name;
+
     public PositionIcon(boolean arrow,
                         String url,
                         int width,
@@ -73,5 +75,14 @@ public class PositionIcon {
 
     public boolean isArrow() {
         return arrow;
+    }
+
+    public boolean isName() {
+        return name;
+    }
+
+    public PositionIcon withName() {
+        this.name = true;
+        return this;
     }
 }

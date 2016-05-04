@@ -295,7 +295,6 @@ public class MapPositionRenderer {
     private static class DeviceData {
         Map<Long, DeviceMarker> markerMap = new HashMap<>(); // Position.id -> Marker
         List<Position> positions;
-        VectorFeature title;
         VectorFeature track;
         VectorFeature alert;
         LineString trackLine;
@@ -353,11 +352,6 @@ public class MapPositionRenderer {
             marker.marker.destroy();
         }
         deviceData.markerMap.clear();
-        if (deviceData.title != null) {
-            getMarkerLayer().removeFeature(deviceData.title);
-            deviceData.title.destroy();
-            deviceData.title = null;
-        }
         if (deviceData.alert != null) {
             getVectorLayer().removeFeature(deviceData.alert);
             deviceData.alert.destroy();
@@ -443,27 +437,6 @@ public class MapPositionRenderer {
         if (positions.size() == 1 && selectedDeviceId != null && selectedDeviceId.equals(positions.get(0).getDevice().getId())
                 && !selectPosition(null, positions.get(0), false)) {
             selectedDeviceId = null;
-        }
-    }
-
-    public void showDeviceName(List<Position> positions) {
-        for (Position position : positions) {
-            if (visibilityProvider.isVisible(position.getDevice())) {
-                DeviceData deviceData = getDeviceData(position.getDevice());
-                org.gwtopenmaps.openlayers.client.Style st = new org.gwtopenmaps.openlayers.client.Style();
-                st.setLabel(position.getDevice().getName());
-                st.setLabelXOffset(0);
-                st.setLabelYOffset(position.getIcon().isArrow() ? -20 : -12);
-                st.setLabelAlign("cb");
-                st.setFontColor("#0000FF");
-                st.setFontSize("12");
-                st.setFill(false);
-                st.setStroke(false);
-
-                final VectorFeature deviceName = new VectorFeature(mapView.createPoint(position.getLongitude(), position.getLatitude()), st);
-                getMarkerLayer().addFeature(deviceName);
-                deviceData.title = deviceName;
-            }
         }
     }
 
@@ -712,7 +685,11 @@ public class MapPositionRenderer {
             Position position = deviceData.positions == null || deviceData.positions.size() != 1 ? null : deviceData.positions.get(0);
             if (position != null) {
                 position.setDevice(device);
+                boolean withName = position.getIcon() != null && position.getIcon().isName();
                 position.setIcon(MarkerIcon.create(position));
+                if (withName) {
+                    position.getIcon().withName();
+                }
                 boolean selected = selectedPosition != null && selectedPosition.getId() == position.getId();
                 changeMarkerIcon(position, selected);
             }
@@ -768,9 +745,20 @@ public class MapPositionRenderer {
     private static final int IDLE_ICON_HEIGHT = 10;
 
     private Style createStyle(Position position, boolean selected) {
-        return position.getIcon().isArrow()
+        Style style = position.getIcon().isArrow()
                 ? createArrowStyle(position, getBgColor(position))
                 : createIconStyle(position, selected);
+
+        if (position.getIcon().isName()) {
+            style.setLabel(position.getDevice().getName());
+            style.setLabelXOffset(0);
+            style.setLabelYOffset(position.getIcon().isArrow() ? -20 : -12);
+            style.setLabelAlign("cb");
+            style.setFontColor("#0000FF");
+            style.setFontSize("12");
+        }
+
+        return style;
     }
 
     private Style createIconStyle(Position position, boolean selected) {

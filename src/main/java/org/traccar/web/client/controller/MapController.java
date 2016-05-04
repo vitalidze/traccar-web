@@ -146,7 +146,7 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
                     long timeout = (long) position.getDevice().getTimeout() * 1000;
                     boolean isOffline = currentTime - position.getTime().getTime() > timeout;
                     position.setStatus(isOffline ? Position.Status.OFFLINE : Position.Status.LATEST);
-                    position.setIcon(MarkerIcon.create(position));
+                    position.setIcon(MarkerIcon.create(position).withName());
                     deviceVisibilityHandler.offlineStatusChanged(device, isOffline);
                     // check 'idle since'
                     if (position.getSpeed() != null) {
