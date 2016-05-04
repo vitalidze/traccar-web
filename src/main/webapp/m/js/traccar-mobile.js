@@ -783,18 +783,12 @@ function drawMarker(position) {
     });
 
     var markerStyle = new ol.style.Style({
-        image: new ol.style.Icon({
-            anchor: [0.5, 1.0],
-            anchorXUnits: 'fraction',
-            anchorYUnits: 'fraction',
-            opacity: 0.9,
-            src: getIconURL(position)
-        }),
+        image: createMarkerImage(position),
         text: new ol.style.Text({
             text: position.device.name,
             textAlign: 'center',
             offsetX: 0,
-            offsetY: 8,
+            offsetY: isArrow(position) ? 18 : 8,
             font: '12px Arial',
             fill: new ol.style.Fill({
                 color: '#0000FF'
@@ -813,6 +807,35 @@ function drawMarker(position) {
     }
     position.marker = markerFeature;
     vectorLayer.getSource().addFeature(markerFeature);
+}
+
+function createMarkerImage(position) {
+    if (isArrow(position)) {
+        return new ol.style.Arrow({
+            radius: 10,
+            fill: new ol.style.Fill({
+                color: '#' + getArrowColor(position)
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'black',
+                width: 0.5
+            }),
+            rotation: getRotation(position)
+        });
+    } else {
+        return new ol.style.Icon({
+            anchor: [0.5, 1.0],
+            anchorXUnits: 'fraction',
+            anchorYUnits: 'fraction',
+            opacity: 0.9,
+            src: getIconURL(position),
+            rotation: position.device.iconRotation ? getRotation(position) : 0
+        });
+    }
+}
+
+function isArrow(position) {
+    return position.device.iconMode == 'ARROW';
 }
 
 function getIconURL(position) {
@@ -834,6 +857,22 @@ function getIconURL(position) {
     }
 }
 
+function getArrowColor(position) {
+    if (position.offline || position.speed == null) {
+        return position.device.iconArrowOfflineColor;
+    } else {
+        if (position.speed > position.device.idleSpeedThreshold) {
+            return position.device.iconArrowMovingColor;
+        } else {
+            return position.device.iconArrowStoppedColor;
+        }
+    }
+}
+
+function getRotation(position) {
+    return (position.course == null ? 0 : position.course) * Math.PI/ 180;
+}
+
 function autoZoom() {
     if (appState.userSettings.followedDeviceZoomLevel != null
         && appState.userSettings.followedDeviceZoomLevel != map.getView().getZoom()) {
@@ -842,12 +881,12 @@ function autoZoom() {
 }
 
 function callGet(options) {
-    options.httpMethod = 'GET'
+    options.httpMethod = 'GET';
     invoke(options);
 }
 
 function callPost(options) {
-    options.httpMethod = 'POST'
+    options.httpMethod = 'POST';
     invoke(options);
 }
 
