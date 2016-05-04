@@ -17,6 +17,8 @@ package org.traccar.web.client;
 
 import com.google.gwt.i18n.client.TimeZoneInfo;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.SortDir;
+import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
@@ -64,6 +66,8 @@ public class Application {
     public Application() {
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         final ListStore<Device> deviceStore = new ListStore<>(deviceProperties.id());
+        deviceStore.clearSortInfo();
+        deviceStore.addSortInfo(new Store.StoreSortInfo<>(deviceProperties.name(), SortDir.ASC));
         final GroupStore groupStore = new GroupStore();
 
         settingsController = new SettingsController(userSettingsHandler);
