@@ -81,8 +81,8 @@ public class PositionIcon {
         return name;
     }
 
-    public PositionIcon withName() {
-        this.name = true;
+    public PositionIcon setName(boolean name) {
+        this.name = name;
         return this;
     }
 }

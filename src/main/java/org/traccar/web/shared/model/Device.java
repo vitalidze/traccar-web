@@ -48,6 +48,7 @@ public class Device implements IsSerializable, GroupedDevice {
         iconArrowPausedColor = DEFAULT_PAUSED_ARROW_COLOR;
         iconArrowStoppedColor = DEFAULT_STOPPED_ARROW_COLOR;
         iconArrowOfflineColor = DEFAULT_OFFLINE_ARROW_COLOR;
+        showName = true;
     }
 
     public Device(Device device) {
@@ -87,6 +88,7 @@ public class Device implements IsSerializable, GroupedDevice {
         iconArrowPausedColor = device.iconArrowPausedColor;
         iconArrowStoppedColor = device.iconArrowStoppedColor;
         iconArrowOfflineColor = device.iconArrowOfflineColor;
+        showName = device.showName;
     }
 
     @Id
@@ -434,6 +436,17 @@ public class Device implements IsSerializable, GroupedDevice {
 
     public void setIconRotation(boolean iconRotation) {
         this.iconRotation = iconRotation;
+    }
+
+    @Column(nullable = true)
+    private boolean showName;
+
+    public boolean isShowName() {
+        return showName;
+    }
+
+    public void setShowName(boolean showName) {
+        this.showName = showName;
     }
 
     @Override

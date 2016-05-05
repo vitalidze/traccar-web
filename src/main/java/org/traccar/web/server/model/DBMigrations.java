@@ -54,6 +54,7 @@ public class DBMigrations {
                 new SetDefaultDeviceIconType(),
                 new SetDefaultDeviceIconModeAndRotation(),
                 new SetDefaultArrowIconSettings(),
+                new SetDefaultDeviceShowName(),
                 new SetDefaultHashImplementation(),
                 new SetGlobalHashSalt(),
                 new SetDefaultUserSettings(),
@@ -435,6 +436,15 @@ public class DBMigrations {
                         .setParameter("color", e.getValue())
                         .executeUpdate();
             }
+        }
+    }
+
+    static class SetDefaultDeviceShowName implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.showName=:true WHERE D.showName IS NULL")
+                    .setParameter("true", true)
+                    .executeUpdate();
         }
     }
 }

@@ -152,6 +152,9 @@ public class DeviceIconEditor {
     CheckBox iconRotation;
 
     @UiField
+    CheckBox showName;
+
+    @UiField
     Label iconArrowMovingColor;
 
     @UiField
@@ -339,6 +342,7 @@ public class DeviceIconEditor {
         iconModeArrow.setValue(device.getIconMode() == DeviceIconMode.ARROW);
 
         iconRotation.setValue(device.isIconRotation());
+        showName.setValue(device.isShowName());
 
         // set up color buttons
         DeviceProperties properties = GWT.create(DeviceProperties.class);
@@ -369,6 +373,7 @@ public class DeviceIconEditor {
             device.setIconMode(DeviceIconMode.ARROW);
         }
         device.setIconRotation(iconRotation.getValue());
+        device.setShowName(showName.getValue());
         for (ColorSelector colorSelector : arrowColors) {
             colorSelector.flush(device);
         }

@@ -542,4 +542,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String arrowColorStopped();
 
     String arrowColorOffline();
+
+    String showName();
 }

@@ -685,11 +685,7 @@ public class MapPositionRenderer {
             Position position = deviceData.positions == null || deviceData.positions.size() != 1 ? null : deviceData.positions.get(0);
             if (position != null) {
                 position.setDevice(device);
-                boolean withName = position.getIcon() != null && position.getIcon().isName();
-                position.setIcon(MarkerIcon.create(position));
-                if (withName) {
-                    position.getIcon().withName();
-                }
+                position.setIcon(MarkerIcon.create(position).setName(device.isShowName()));
                 boolean selected = selectedPosition != null && selectedPosition.getId() == position.getId();
                 changeMarkerIcon(position, selected);
             }

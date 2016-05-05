@@ -48,6 +48,13 @@
                               </form:widget>
                           </form:FieldLabel>
                       </container:child>
+                      <container:child layoutData="{imageLayoutData}">
+                          <form:FieldLabel text="{i18n.showName}">
+                              <form:widget>
+                                  <form:CheckBox ui:field="showName" />
+                              </form:widget>
+                          </form:FieldLabel>
+                      </container:child>
                   </container:VerticalLayoutContainer>
                   <container:VerticalLayoutContainer>
                       <container:child layoutData="{toolBarRowData}">
