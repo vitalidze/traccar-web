@@ -787,14 +787,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                         if (position.getSpeed() > device.getIdleSpeedThreshold()) {
                             position.setIdleStatus(Position.IdleStatus.MOVING);
                         } else {
-                            Long latestNonIdlePositionId = movementDetector.getNonIdlePositionId(device);
-                            Position latestNonIdlePosition = latestNonIdlePositionId == null
-                                    ? null
-                                    : getSessionEntityManager().find(Position.class, latestNonIdlePositionId);
+                            Date latestNonIdlePositionTime = movementDetector.getNonIdlePositionTime(device);
                             long minIdleTime = (long) device.getMinIdleTime() * 1000;
-                            if (latestNonIdlePosition != null
-                                    && position.getTime().getTime() - latestNonIdlePosition.getTime().getTime() > minIdleTime) {
-                                position.setIdleSince(latestNonIdlePosition.getTime());
+                            if (latestNonIdlePositionTime != null
+                                    && position.getTime().getTime() - latestNonIdlePositionTime.getTime() > minIdleTime) {
+                                position.setIdleSince(latestNonIdlePositionTime);
                                 position.setIdleStatus(Position.IdleStatus.IDLE);
                             } else {
                                 position.setIdleStatus(Position.IdleStatus.PAUSED);

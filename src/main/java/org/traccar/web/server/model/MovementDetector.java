@@ -22,6 +22,7 @@ import org.traccar.web.shared.model.Position;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ import java.util.concurrent.*;
 public class MovementDetector extends ScheduledTask {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    private final Map<Long, Long> nonIdlePositions = new ConcurrentHashMap<>();
+    private final Map<Long, Date> nonIdlePositions = new ConcurrentHashMap<>();
     private final Map<Long, Double> speedThresholds = new HashMap<>();
     private final Provider<EntityManager> entityManagerProvider;
     /**
@@ -58,7 +59,7 @@ public class MovementDetector extends ScheduledTask {
             for (Device device : getDevices()) {
                 Position position = getNonIdlePosition(device);
                 if (position != null) {
-                    nonIdlePositions.put(device.getId(), position.getId());
+                    nonIdlePositions.put(device.getId(), position.getTime());
                 }
                 speedThresholds.put(device.getId(), device.getIdleSpeedThreshold());
             }
@@ -70,7 +71,7 @@ public class MovementDetector extends ScheduledTask {
                     Math.abs(device.getIdleSpeedThreshold() - storedThreshold) > 0.01) {
                 Position position = getNonIdlePosition(device);
                 if (position != null) {
-                    nonIdlePositions.put(device.getId(), position.getId());
+                    nonIdlePositions.put(device.getId(), position.getTime());
                 }
                 speedThresholds.put(device.getId(), device.getIdleSpeedThreshold());
             }
@@ -86,7 +87,7 @@ public class MovementDetector extends ScheduledTask {
             Device device = position.getDevice();
             if (position.getSpeed() != null
                     && position.getSpeed() > device.getIdleSpeedThreshold()) {
-                nonIdlePositions.put(device.getId(), position.getId());
+                nonIdlePositions.put(device.getId(), position.getTime());
             }
             lastScannedPositionId = Math.max(lastScannedPositionId, position.getId());
         }
@@ -110,7 +111,7 @@ public class MovementDetector extends ScheduledTask {
 
     private List<Device> getDevices() {
         return entityManager().createQuery(
-                "SELECT D FROM Device D", Device.class)
+                "SELECT D FROM Device D LEFT JOIN FETCH D.latestPosition", Device.class)
                 .getResultList();
     }
 
@@ -118,7 +119,7 @@ public class MovementDetector extends ScheduledTask {
         return entityManagerProvider.get();
     }
 
-    public Long getNonIdlePositionId(Device device) {
+    public Date getNonIdlePositionTime(Device device) {
         return nonIdlePositions.get(device.getId());
     }
 }
