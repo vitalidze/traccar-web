@@ -88,6 +88,7 @@ public class MovementDetector extends ScheduledTask {
                     && position.getSpeed() > device.getIdleSpeedThreshold()) {
                 nonIdlePositions.put(device.getId(), position.getId());
             }
+            lastScannedPositionId = Math.max(lastScannedPositionId, position.getId());
         }
     }
 
