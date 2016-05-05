@@ -67,8 +67,6 @@ public interface DataServiceAsync {
 
     void saveDeviceShare(Device device, Map<User, Boolean> share, AsyncCallback<Void> async);
 
-    void getLatestNonIdlePositions(AsyncCallback<List<Position>> async);
-
     void getGeoFences(AsyncCallback<List<GeoFence>> async);
 
     void updateGeoFence(GeoFence geoFence, AsyncCallback<GeoFence> async);

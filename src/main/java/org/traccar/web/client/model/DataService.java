@@ -63,8 +63,6 @@ public interface DataService extends RemoteService {
 
     List<Position> getLatestPositions();
 
-    List<Position> getLatestNonIdlePositions();
-
     ApplicationSettings getApplicationSettings();
 
     void updateApplicationSettings(ApplicationSettings applicationSettings);

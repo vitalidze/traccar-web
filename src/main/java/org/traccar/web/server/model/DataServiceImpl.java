@@ -61,6 +61,9 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Inject
     private EventService eventService;
 
+    @Inject
+    private MovementDetector movementDetector;
+
     @Override
     public void init() throws ServletException {
         super.init();
@@ -778,37 +781,28 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     }
 
                     position.setDistance(device.getOdometer());
+
+                    // calculate 'idle since'
+                    if (position.getSpeed() != null) {
+                        if (position.getSpeed() > device.getIdleSpeedThreshold()) {
+                            position.setIdleStatus(Position.IdleStatus.MOVING);
+                        } else {
+                            Long latestNonIdlePositionId = movementDetector.getNonIdlePositionId(device);
+                            Position latestNonIdlePosition = latestNonIdlePositionId == null
+                                    ? null
+                                    : getSessionEntityManager().find(Position.class, latestNonIdlePositionId);
+                            long minIdleTime = (long) device.getMinIdleTime() * 1000;
+                            if (latestNonIdlePosition != null
+                                    && position.getTime().getTime() - latestNonIdlePosition.getTime().getTime() > minIdleTime) {
+                                position.setIdleSince(latestNonIdlePosition.getTime());
+                                position.setIdleStatus(Position.IdleStatus.IDLE);
+                            } else {
+                                position.setIdleStatus(Position.IdleStatus.PAUSED);
+                            }
+                        }
+                    }
+
                     positions.add(position);
-                }
-            }
-        }
-        return positions;
-    }
-
-    @RequireUser
-    @Transactional
-    @Override
-    public List<Position> getLatestNonIdlePositions() {
-        List<Position> positions = new LinkedList<>();
-        List<Device> devices = getDevices(false);
-        if (devices != null && !devices.isEmpty()) {
-            EntityManager entityManager = getSessionEntityManager();
-
-            for (Device device : devices) {
-                List<Position> position = entityManager.createQuery("SELECT p FROM Position p WHERE p.device = :device AND p.speed > 0 ORDER BY time DESC", Position.class)
-                        .setParameter("device", device)
-                        .setMaxResults(1)
-                        .getResultList();
-
-                if (position.isEmpty()) {
-                    position = entityManager.createQuery("SELECT p FROM Position p WHERE p.device = :device ORDER BY time ASC", Position.class)
-                        .setParameter("device", device)
-                        .setMaxResults(1)
-                        .getResultList();
-                }
-
-                if (!position.isEmpty()) {
-                    positions.add(position.get(0));
                 }
             }
         }
