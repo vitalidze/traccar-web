@@ -386,9 +386,17 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         User user = getSessionUser();
         List<Device> devices;
         if (user.getAdmin()) {
-            devices = getSessionEntityManager().createQuery("SELECT x FROM Device x LEFT JOIN FETCH x.latestPosition", Device.class).getResultList();
+            devices = getSessionEntityManager().createQuery("SELECT x FROM Device x LEFT JOIN FETCH x.latestPosition ORDER BY x.name", Device.class).getResultList();
         } else {
-            devices = new LinkedList<>(user.getAllAvailableDevices());
+            devices = new ArrayList<>(user.getAllAvailableDevices());
+            Collections.sort(devices, new Comparator<Device>() {
+                @Override
+                public int compare(Device o1, Device o2) {
+                    String n1 = o1.getName() == null ? "" : o1.getName();
+                    String n2 = o2.getName() == null ? "" : o2.getName();
+                    return n1.compareTo(n2);
+                }
+            });
         }
         if (full && !devices.isEmpty()) {
             List<Maintenance> maintenaces = getSessionEntityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices ORDER BY m.indexNo ASC", Maintenance.class)

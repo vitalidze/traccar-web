@@ -67,7 +67,6 @@ public class Application {
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
         final ListStore<Device> deviceStore = new ListStore<>(deviceProperties.id());
         deviceStore.clearSortInfo();
-        deviceStore.addSortInfo(new Store.StoreSortInfo<>(deviceProperties.name(), SortDir.ASC));
         final GroupStore groupStore = new GroupStore();
 
         settingsController = new SettingsController(userSettingsHandler);
