@@ -138,13 +138,15 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
                     } else if (position.getIdleStatus() == Position.IdleStatus.IDLE) {
                         deviceVisibilityHandler.idle(device);
                     }
-                    device = deviceStore.findModelWithKey(Long.toString(device.getId()));
-                    device.setOdometer(position.getDistance());
-                    // check maintenances
-                    for (Maintenance maintenance : device.getMaintenances()) {
-                        if (device.getOdometer() >= maintenance.getLastService() + maintenance.getServiceInterval()) {
-                            alertsMap.put(device.getId(), position);
-                            break;
+                    Device storedDevice = deviceStore.findModelWithKey(Long.toString(device.getId()));
+                    if (storedDevice != null) {
+                        storedDevice.setOdometer(position.getDistance());
+                        // check maintenances
+                        for (Maintenance maintenance : storedDevice.getMaintenances()) {
+                            if (storedDevice.getOdometer() >= maintenance.getLastService() + maintenance.getServiceInterval()) {
+                                alertsMap.put(device.getId(), position);
+                                break;
+                            }
                         }
                     }
                 }
