@@ -1086,11 +1086,19 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     sendCommand.invoke(activeDevice, backendCommand);
                 }
             }
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
-                | IllegalAccessException | InstantiationException | JsonProcessingException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException
+                | InstantiationException | JsonProcessingException e) {
             log("Unable to invoke command through reflection", e);
             result.put("success", false);
             result.put("reason", e.getClass().getName() + ": " + e.getLocalizedMessage());
+        } catch (InvocationTargetException ite) {
+            log("Error invoking command through reflection", ite);
+            result.put("success", false);
+            if (ite.getCause() == null) {
+                result.put("reason", ite.getClass().getName() + ": " + ite.getLocalizedMessage());
+            } else {
+                result.put("reason", ite.getCause().getClass().getName() + ": " + ite.getCause().getLocalizedMessage());
+            }
         }
 
         try {
