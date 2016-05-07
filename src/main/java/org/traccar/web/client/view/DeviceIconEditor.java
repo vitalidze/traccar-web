@@ -379,8 +379,10 @@ public class DeviceIconEditor {
         }
 
         selected = view.getSelectionModel().getSelectedItem();
-        device.setIconType(selected.getBuiltInIcon());
-        device.setIcon(selected.getDatabaseIcon());
+        if (selected != null) {
+            device.setIconType(selected.getBuiltInIcon());
+            device.setIcon(selected.getDatabaseIcon());
+        }
     }
 
     private void selectionChanged() {
