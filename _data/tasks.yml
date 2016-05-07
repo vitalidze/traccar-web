@@ -8,11 +8,6 @@
   tickets: [207, 291]
   done: false
 
-- id: direction_on_map
-  description: Display direction of device on map. This should work both in archive and in live data.
-  tickets: [159]
-  done: false
-
 - id: remember_me
   description: Add check box 'Remember me', which will allow to save session for mobile devices and survive application server restarts
   tickets: [174]
@@ -32,6 +27,11 @@
   description: Choose color for tracks in archive automatically. This should ne optional and must choose unique color that is not yet used for already drawn tracks.
   tickets: [179]
   done: false
+
+- id: direction_on_map
+  description: Display direction of device on map. This should work both in archive and in live data.
+  tickets: [159]
+  done: true
 
 - id: hide_inactive_offline_devices
   description: Create an option to hide inactive and/or offline devices from map.
