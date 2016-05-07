@@ -43,6 +43,9 @@ public class MovementDetector extends ScheduledTask {
     @Inject
     public MovementDetector(Provider<EntityManager> entityManagerProvider) {
         this.entityManagerProvider = entityManagerProvider;
+    }
+
+    public void start() {
         scheduler.scheduleWithFixedDelay(this, 0, 1, TimeUnit.MINUTES);
     }
 

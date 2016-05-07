@@ -76,6 +76,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         } catch (Exception e) {
             throw new RuntimeException("Unable to perform DB migrations", e);
         }
+
+        /**
+         * Start movement detector
+         */
+        movementDetector.start();
     }
 
     EntityManager getSessionEntityManager() {
