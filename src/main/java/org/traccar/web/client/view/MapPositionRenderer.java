@@ -748,7 +748,27 @@ public class MapPositionRenderer {
         if (position.getIcon().isName()) {
             style.setLabel(position.getDevice().getName());
             style.setLabelXOffset(0);
-            style.setLabelYOffset(position.getIcon().isArrow() ? -20 : -12);
+            // Calculate Y offset
+            int yOffset;
+            if (position.getIcon().isArrow()) {
+                yOffset = -20;
+            } else {
+                yOffset = -12;
+                if (position.getCourse() != null
+                    && position.getDevice().isIconRotation()) {
+                    double sin = Math.sin(position.getCourse() * Math.PI / 180);
+                    double cos = Math.cos(position.getCourse() * Math.PI / 180);
+                    double yIconTop = cos * (selected ? position.getIcon().getSelectedHeight() : position.getIcon().getHeight());
+                    double yHalfWidth = sin * (selected ? position.getIcon().getSelectedWidth() : position.getIcon().getWidth()) / 2;
+
+                    if (yIconTop >= 0) {
+                        yOffset -= Math.abs(yHalfWidth);
+                    } else {
+                        yOffset += yIconTop - Math.abs(yHalfWidth);
+                    }
+                }
+            }
+            style.setLabelYOffset(yOffset);
             style.setLabelAlign("cb");
             style.setFontColor("#0000FF");
             style.setFontSize("12");
