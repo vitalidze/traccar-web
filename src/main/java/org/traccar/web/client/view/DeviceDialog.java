@@ -106,6 +106,12 @@ public class DeviceDialog implements Editor<Device> {
     NumberField<Double> speedLimit;
 
     @UiField
+    CheckBox showProtocol;
+
+    @UiField
+    CheckBox showOdometer;
+
+    @UiField
     ScrollPanel panelPhoto;
 
     @UiField

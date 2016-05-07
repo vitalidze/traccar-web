@@ -49,6 +49,8 @@ public class Device implements IsSerializable, GroupedDevice {
         iconArrowStoppedColor = DEFAULT_STOPPED_ARROW_COLOR;
         iconArrowOfflineColor = DEFAULT_OFFLINE_ARROW_COLOR;
         showName = true;
+        showProtocol = true;
+        showOdometer = true;
     }
 
     public Device(Device device) {
@@ -89,6 +91,8 @@ public class Device implements IsSerializable, GroupedDevice {
         iconArrowStoppedColor = device.iconArrowStoppedColor;
         iconArrowOfflineColor = device.iconArrowOfflineColor;
         showName = device.showName;
+        showProtocol = device.showProtocol;
+        showOdometer = device.showOdometer;
     }
 
     @Id
@@ -447,6 +451,27 @@ public class Device implements IsSerializable, GroupedDevice {
 
     public void setShowName(boolean showName) {
         this.showName = showName;
+    }
+
+    @Column(nullable = true)
+    private boolean showProtocol;
+    @Column(nullable = true)
+    private boolean showOdometer;
+
+    public boolean isShowProtocol() {
+        return showProtocol;
+    }
+
+    public void setShowProtocol(boolean showProtocol) {
+        this.showProtocol = showProtocol;
+    }
+
+    public boolean isShowOdometer() {
+        return showOdometer;
+    }
+
+    public void setShowOdometer(boolean showOdometer) {
+        this.showOdometer = showOdometer;
     }
 
     @Override

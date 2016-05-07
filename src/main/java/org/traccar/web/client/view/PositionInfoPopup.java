@@ -58,15 +58,16 @@ public class PositionInfoPopup {
                 (position.getAltitude() == null ? "" : ("<td style=\"font-size: 10pt; border-bottom: 1px solid #000000; padding: 3px 10px 3px 10px;\" valign=\"bottom\"" + (position.getSpeed() == null ? " colspan=\"2\" align=\"right\"" : "") + ">" + position.getAltitude() + " " + i18n.meter() + "</td>")) +
                 "</tr>";
 
-        if (position.getDevice().getOdometer() > 0) {
+        Device device = deviceStore.findModelWithKey(Long.toString(position.getDevice().getId()));
+
+        if (position.getDevice().getOdometer() > 0 && device.isShowOdometer()) {
             body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + i18n.odometer() + "</td><td>" + ApplicationContext.getInstance().getFormatterUtil().getDistanceFormat().format(position.getDevice().getOdometer()) + "</td></tr>";
         }
-        if (position.getProtocol() != null) {
+        if (position.getProtocol() != null && device.isShowProtocol()) {
             body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + i18n.protocol() + "</td><td>" + position.getProtocol() + "</td></tr>";
         }
         String other = position.getOther();
         if (other != null) {
-            Device device = deviceStore.findModelWithKey(Long.toString(position.getDevice().getId()));
             Map<String, Sensor> sensors = new HashMap<>(device.getSensors().size());
             for (Sensor sensor : device.getSensors()) {
                 sensors.put(sensor.getParameterName(), sensor);
@@ -104,6 +105,10 @@ public class PositionInfoPopup {
                     }
                 } catch (Exception error) {
                 }
+            }
+
+            if (!device.isShowProtocol()) {
+                sensorData.remove("protocol");
             }
 
             // write values

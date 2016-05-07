@@ -156,6 +156,20 @@
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.showProtocol}" labelWidth="180">
+                          <form:widget>
+                              <form:CheckBox ui:field="showProtocol" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.showOdometer}" labelWidth="180">
+                          <form:widget>
+                              <form:CheckBox ui:field="showOdometer" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
                   <container:child layoutData="{verticalLayoutDataWithButtons}">
                       <form:FieldLabel text="{i18n.photo}" labelWidth="180">
                           <form:widget>

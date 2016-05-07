@@ -54,7 +54,7 @@ public class DBMigrations {
                 new SetDefaultDeviceIconType(),
                 new SetDefaultDeviceIconModeAndRotation(),
                 new SetDefaultArrowIconSettings(),
-                new SetDefaultDeviceShowName(),
+                new SetDefaultDeviceShowNameProtocolAndOdometer(),
                 new SetDefaultHashImplementation(),
                 new SetGlobalHashSalt(),
                 new SetDefaultUserSettings(),
@@ -439,12 +439,14 @@ public class DBMigrations {
         }
     }
 
-    static class SetDefaultDeviceShowName implements Migration {
+    static class SetDefaultDeviceShowNameProtocolAndOdometer implements Migration {
         @Override
         public void migrate(EntityManager em) throws Exception {
-            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.showName=:true WHERE D.showName IS NULL")
-                    .setParameter("true", true)
-                    .executeUpdate();
+            for (String prop : new String[] { "showName", "showProtocol", "showOdometer" }) {
+                em.createQuery("UPDATE " + Device.class.getName() + " D SET D." + prop + "=:true WHERE D." + prop + " IS NULL")
+                        .setParameter("true", true)
+                        .executeUpdate();
+            }
         }
     }
 }
