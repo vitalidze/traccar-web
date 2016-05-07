@@ -13,11 +13,6 @@
   tickets: [174]
   done: false
 
-- id: remove_label_from_marker
-  description: Add a new setting to the device (or all devices) - 'hide label from marker on map'.
-  tickets: [209]
-  done: false
-
 - id: measurement_tools
   description: Add a way to measure distance with tools on map.
   tickets: [151]
@@ -31,6 +26,11 @@
 - id: direction_on_map
   description: Display direction of device on map. This should work both in archive and in live data.
   tickets: [159]
+  done: true
+
+- id: remove_label_from_marker
+  description: Add a new setting to the device (or all devices) - 'hide label from marker on map'.
+  tickets: [209]
   done: true
 
 - id: hide_inactive_offline_devices
