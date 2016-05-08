@@ -30,6 +30,7 @@ public class UIStateEntry {
     private long id;
 
     private String name;
+    @Column(length = 1024)
     private String value;
 
     @ManyToOne(fetch = FetchType.LAZY)
