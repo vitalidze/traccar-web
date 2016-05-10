@@ -62,7 +62,8 @@ public class DBMigrations {
                 new SetGeoFenceAllDevicesFlag(),
                 new SetReportsFilterAndPreview(),
                 new SetDefaultNotificationExpirationPeriod(),
-                new SetDefaultExpiredFlagForEvents()
+                new SetDefaultExpiredFlagForEvents(),
+                new SetDefaultMatchServiceURL()
         }) {
             em.getTransaction().begin();
             try {
@@ -437,6 +438,15 @@ public class DBMigrations {
                         .setParameter("true", true)
                         .executeUpdate();
             }
+        }
+    }
+
+    static class SetDefaultMatchServiceURL implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.matchServiceURL = :url WHERE S.matchServiceURL IS NULL")
+                    .setParameter("url", ApplicationSettings.DEFAULT_MATCH_SERVICE_URL)
+                    .executeUpdate();
         }
     }
 }

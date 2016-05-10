@@ -209,7 +209,7 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
                     .append("&t=").append(position.getTime().getTime() / 1000);
         }
 
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, "https://router.project-osrm.org/match");
+        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, ApplicationContext.getInstance().getApplicationSettings().getMatchServiceURL());
         builder.setHeader("Content-type", "application/x-www-form-urlencoded");
         try {
             builder.sendRequest(body.toString(), new RequestCallback() {

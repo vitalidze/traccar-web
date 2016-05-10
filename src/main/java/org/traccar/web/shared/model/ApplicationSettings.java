@@ -19,6 +19,7 @@ public class ApplicationSettings implements IsSerializable {
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_UPDATE_INTERVAL = 15000;
     public static final short DEFAULT_NOTIFICATION_EXPIRATION_PERIOD = 12 * 60;
+    public static final String DEFAULT_MATCH_SERVICE_URL = "https://router.project-osrm.org/match";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +34,7 @@ public class ApplicationSettings implements IsSerializable {
         eventRecordingEnabled = true;
         language = "default";
         notificationExpirationPeriod = DEFAULT_NOTIFICATION_EXPIRATION_PERIOD;
+        matchServiceURL = DEFAULT_MATCH_SERVICE_URL;
     }
 
     private boolean registrationEnabled;
@@ -131,6 +133,16 @@ public class ApplicationSettings implements IsSerializable {
 
     public void setNotificationExpirationPeriod(int notificationExpirationPeriod) {
         this.notificationExpirationPeriod = notificationExpirationPeriod;
+    }
+
+    private String matchServiceURL;
+
+    public String getMatchServiceURL() {
+        return matchServiceURL;
+    }
+
+    public void setMatchServiceURL(String matchServiceURL) {
+        this.matchServiceURL = matchServiceURL;
     }
 
     @Override
