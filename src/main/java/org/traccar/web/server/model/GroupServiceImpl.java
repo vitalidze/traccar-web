@@ -20,6 +20,7 @@ import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.DataService;
 import org.traccar.web.client.model.GroupService;
 import org.traccar.web.shared.model.AccessDeniedException;
+import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Group;
 import org.traccar.web.shared.model.User;
 
@@ -50,6 +51,11 @@ public class GroupServiceImpl extends RemoteServiceServlet implements GroupServi
             groups = entityManager.get().createQuery("SELECT x FROM Group x", Group.class).getResultList();
         } else {
             groups = new ArrayList<>(sessionUser.get().getAllAvailableGroups());
+            for (Device device : dataService.getDevices()) {
+                if (device.getGroup() != null && !groups.contains(device.getGroup())) {
+                    groups.add(device.getGroup());
+                }
+            }
         }
 
         Map<Group, Group> result = new HashMap<>();
