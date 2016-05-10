@@ -246,13 +246,13 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
                         snappedTracks.put(device.getId(), snappedTrack);
                         showArchive(device);
                     } else {
-                        GWT.log("Incorrect response code: " + response.getStatusCode());
+                        new AlertMessageBox(i18n.error(), i18n.errSnapToRoads(response.getStatusCode(), response.getText())).show();
                     }
                 }
 
                 @Override
                 public void onError(Request request, Throwable exception) {
-                    GWT.log("Request error", exception);
+                    new AlertMessageBox(i18n.error(), i18n.errSnapToRoads(-1, exception.getLocalizedMessage())).show();
                 }
             });
         } catch (RequestException re) {
