@@ -55,6 +55,7 @@ import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.ShowEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.StoreFilterField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
@@ -503,7 +504,8 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                       final DeviceVisibilityHandler deviceVisibilityHandler,
                       final ListStore<Device> globalDeviceStore,
                       final ListStore<GeoFence> geoFenceStore,
-                      GroupStore groupStore) {
+                      GroupStore groupStore,
+                      final ListStore<Report> reportStore) {
         this.deviceHandler = deviceHandler;
         this.geoFenceHandler = geoFenceHandler;
         this.commandHandler = commandHandler;
@@ -698,7 +700,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
             }
         };
         grid.setView(view);
-        grid.setContextMenu(createDeviceGridContextMenu());
+        grid.setContextMenu(createDeviceGridContextMenu(reportStore));
 
         // configure device store filtering
         deviceFilter = new StoreFilterField<GroupedDevice>() {
@@ -913,7 +915,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         ImageResource footprints();
     }
 
-    private Menu createDeviceGridContextMenu() {
+    private Menu createDeviceGridContextMenu(ListStore<Report> reportStore) {
         Menu menu = new Menu();
         MenuItem edit = new MenuItem(i18n.edit());
         edit.addSelectionHandler(new SelectionHandler<Item>() {
@@ -947,6 +949,11 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
             }
         });
         menu.add(command);
+
+        MenuItem report = new MenuItem(i18n.report());
+        report.setSubMenu(new ReportsMenu(reportStore));
+        menu.add(report);
+
         return menu;
     }
 }

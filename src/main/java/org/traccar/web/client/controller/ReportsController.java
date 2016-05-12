@@ -23,9 +23,9 @@ import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.ContentPanel;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
-import org.traccar.web.client.model.ReportProperties;
 import org.traccar.web.client.model.ReportService;
 import org.traccar.web.client.model.ReportServiceAsync;
 import org.traccar.web.client.view.NavView;
@@ -36,9 +36,10 @@ import org.traccar.web.shared.model.Report;
 
 import java.util.List;
 
-public class ReportsController implements NavView.ReportsHandler {
+public class ReportsController implements NavView.ReportsHandler, ContentController {
     private final Messages i18n = GWT.create(Messages.class);
     private final ReportMapper reportMapper = GWT.create(ReportMapper.class);
+    private final ListStore<Report> reportStore;
     private final ListStore<Device> deviceStore;
     private final ListStore<GeoFence> geoFenceStore;
 
@@ -50,58 +51,67 @@ public class ReportsController implements NavView.ReportsHandler {
         void reportRemoved(Report report);
     }
 
-    public ReportsController(ListStore<Device> deviceStore, ListStore<GeoFence> geoFenceStore) {
+    public ReportsController(ListStore<Report> reportStore, ListStore<Device> deviceStore, ListStore<GeoFence> geoFenceStore) {
+        this.reportStore = reportStore;
         this.deviceStore = deviceStore;
         this.geoFenceStore = geoFenceStore;
     }
 
     @Override
-    public void onShowReports() {
+    public ContentPanel getView() {
+        return null;
+    }
+
+    @Override
+    public void run() {
         final ReportServiceAsync service = GWT.create(ReportService.class);
         service.getReports(new BaseAsyncCallback<List<Report>>(i18n) {
+                               @Override
+                               public void onSuccess(List<Report> result) {
+                                   reportStore.addAll(result);
+                               }
+                           });
+    }
+
+    @Override
+    public void onShowReports() {
+        final ReportServiceAsync service = GWT.create(ReportService.class);
+        new ReportsDialog(reportStore, deviceStore, geoFenceStore, new ReportsDialog.ReportHandler() {
             @Override
-            public void onSuccess(List<Report> result) {
-                ReportProperties reportProperties = GWT.create(ReportProperties.class);
-                ListStore<Report> reportStore = new ListStore<>(reportProperties.id());
-                reportStore.addAll(result);
-                new ReportsDialog(reportStore, deviceStore, geoFenceStore, new ReportsDialog.ReportHandler() {
+            public void onAdd(Report report, final ReportHandler handler) {
+                service.addReport(report, new BaseAsyncCallback<Report>(i18n) {
                     @Override
-                    public void onAdd(Report report, final ReportHandler handler) {
-                        service.addReport(report, new BaseAsyncCallback<Report>(i18n) {
-                            @Override
-                            public void onSuccess(Report result) {
-                                handler.reportAdded(result);
-                            }
-                        });
+                    public void onSuccess(Report result) {
+                        handler.reportAdded(result);
                     }
-
-                    @Override
-                    public void onUpdate(Report report, final ReportHandler handler) {
-                        service.updateReport(report, new BaseAsyncCallback<Report>(i18n) {
-                            @Override
-                            public void onSuccess(Report result) {
-                                handler.reportUpdated(result);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onRemove(final Report report, final ReportHandler handler) {
-                        service.removeReport(report, new BaseAsyncCallback<Void>(i18n) {
-                            @Override
-                            public void onSuccess(Void result) {
-                                handler.reportRemoved(report);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onGenerate(Report report) {
-                        generate(report);
-                    }
-                }).show();
+                });
             }
-        });
+
+            @Override
+            public void onUpdate(Report report, final ReportHandler handler) {
+                service.updateReport(report, new BaseAsyncCallback<Report>(i18n) {
+                    @Override
+                    public void onSuccess(Report result) {
+                        handler.reportUpdated(result);
+                    }
+                });
+            }
+
+            @Override
+            public void onRemove(final Report report, final ReportHandler handler) {
+                service.removeReport(report, new BaseAsyncCallback<Void>(i18n) {
+                    @Override
+                    public void onSuccess(Void result) {
+                        handler.reportRemoved(report);
+                    }
+                });
+            }
+
+            @Override
+            public void onGenerate(Report report) {
+                generate(report);
+            }
+        }).show();
     }
 
     private void generate(Report report) {

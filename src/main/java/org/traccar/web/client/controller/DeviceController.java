@@ -73,6 +73,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             ListStore<GeoFence> geoFenceStore,
                             Map<Long, Set<GeoFence>> deviceGeoFences,
                             GroupStore groupStore,
+                            final ListStore<Report> reportStore,
                             Application application) {
         this.application = application;
         this.mapController = mapController;
@@ -83,7 +84,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         this.groupStore = groupStore;
         this.deviceVisibilityHandler = deviceVisibilityHandler;
 
-        deviceView = new DeviceView(this, geoFenceHandler, commandHandler, deviceVisibilityHandler, deviceStore, geoFenceStore, groupStore);
+        deviceView = new DeviceView(this, geoFenceHandler, commandHandler, deviceVisibilityHandler, deviceStore, geoFenceStore, groupStore, reportStore);
     }
 
     public ListStore<Device> getDeviceStore() {

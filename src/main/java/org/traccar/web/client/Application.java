@@ -17,8 +17,6 @@ package org.traccar.web.client;
 
 import com.google.gwt.i18n.client.TimeZoneInfo;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.data.shared.SortDir;
-import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.ComboBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
@@ -68,6 +66,8 @@ public class Application {
         final ListStore<Device> deviceStore = new ListStore<>(deviceProperties.id());
         deviceStore.clearSortInfo();
         final GroupStore groupStore = new GroupStore();
+        ReportProperties reportProperties = GWT.create(ReportProperties.class);
+        final ListStore<Report> reportStore = new ListStore<>(reportProperties.id());
 
         settingsController = new SettingsController(userSettingsHandler);
         visibilityController = new VisibilityController();
@@ -84,9 +84,10 @@ public class Application {
                 geoFenceController.getGeoFenceStore(),
                 geoFenceController.getDeviceGeoFences(),
                 groupStore,
+                reportStore,
                 this);
         groupsController = new GroupsController(groupStore, deviceController);
-        reportsController = new ReportsController(deviceController.getDeviceStore(), geoFenceController.getGeoFenceStore());
+        reportsController = new ReportsController(reportStore, deviceController.getDeviceStore(), geoFenceController.getGeoFenceStore());
         importController = new ImportController(deviceController.getDeviceStore());
         logController = new LogController();
         navController = new NavController(settingsController, reportsController, importController, logController, groupsController);
@@ -107,6 +108,7 @@ public class Application {
         commandController.run();
         groupsController.run();
         visibilityController.run();
+        reportsController.run();
         setupTimeZone();
     }
 
