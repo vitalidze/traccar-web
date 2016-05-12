@@ -20,6 +20,7 @@ import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -38,6 +39,7 @@ import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.ToStringValueProvider;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.core.client.XTemplates;
+import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.data.shared.event.StoreAddEvent;
@@ -673,8 +675,30 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         columnModel = new ColumnModel<>(columnConfigList);
 
-        grid = new TreeGrid<>(deviceStore, columnModel, colName);
+        grid = new TreeGrid<GroupedDevice>(deviceStore, columnModel, colName) {
+            @Override
+            protected void onRightClick(Event event) {
+                EventTarget eventTarget = event.getEventTarget();
+                List<GroupedDevice> selectedItems = getSelectionModel().getSelectedItems();
+                boolean onSelectedRow = false;
+                for (GroupedDevice selectedItem : selectedItems) {
+                    if (deviceStore.isDevice(selectedItem)) {
+                        int index = store.indexOf(selectedItem);
+                        Element selectedRow = getView().getRow(index);
+                        if (selectedRow.isOrHasChild(XElement.as(eventTarget))) {
+                            onSelectedRow = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (onSelectedRow) {
+                    super.onRightClick(event);
+                }
+            }
+        };
         grid.setView(view);
+        grid.setContextMenu(createDeviceGridContextMenu());
 
         // configure device store filtering
         deviceFilter = new StoreFilterField<GroupedDevice>() {
@@ -785,10 +809,14 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         if (editingGeoFences()) {
             geoFenceHandler.onEdit(geoFenceList.getSelectionModel().getSelectedItem());
         } else {
-            GroupedDevice node = grid.getSelectionModel().getSelectedItem();
-            if (deviceStore.isDevice(node)) {
-                deviceHandler.onEdit(deviceStore.getDevice(node));
-            }
+            editDevice();
+        }
+    }
+
+    private void editDevice() {
+        GroupedDevice node = grid.getSelectionModel().getSelectedItem();
+        if (deviceStore.isDevice(node)) {
+            deviceHandler.onEdit(deviceStore.getDevice(node));
         }
     }
 
@@ -797,10 +825,14 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         if (editingGeoFences()) {
             geoFenceHandler.onShare(geoFenceList.getSelectionModel().getSelectedItem());
         } else {
-            GroupedDevice node = grid.getSelectionModel().getSelectedItem();
-            if (deviceStore.isDevice(node)) {
-                deviceHandler.onShare(deviceStore.getDevice(node));
-            }
+            shareDevice();
+        }
+    }
+
+    private void shareDevice() {
+        GroupedDevice node = grid.getSelectionModel().getSelectedItem();
+        if (deviceStore.isDevice(node)) {
+            deviceHandler.onShare(deviceStore.getDevice(node));
         }
     }
 
@@ -809,15 +841,23 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         if (editingGeoFences()) {
             geoFenceHandler.onRemove(geoFenceList.getSelectionModel().getSelectedItem());
         } else {
-            GroupedDevice node = grid.getSelectionModel().getSelectedItem();
-            if (deviceStore.isDevice(node)) {
-                deviceHandler.onRemove(deviceStore.getDevice(node));
-            }
+           removeDevice();
+        }
+    }
+
+    private void removeDevice() {
+        GroupedDevice node = grid.getSelectionModel().getSelectedItem();
+        if (deviceStore.isDevice(node)) {
+            deviceHandler.onRemove(deviceStore.getDevice(node));
         }
     }
 
     @UiHandler("commandButton")
     public void onCommandClicked(SelectEvent event) {
+        sendCommand();
+    }
+
+    private void sendCommand() {
         commandHandler.onCommand(deviceStore.getDevice(grid.getSelectionModel().getSelectedItem()));
     }
 
@@ -871,5 +911,42 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
 
         @Source("org/traccar/web/client/theme/icon/footprints.png")
         ImageResource footprints();
+    }
+
+    private Menu createDeviceGridContextMenu() {
+        Menu menu = new Menu();
+        MenuItem edit = new MenuItem(i18n.edit());
+        edit.addSelectionHandler(new SelectionHandler<Item>() {
+            @Override
+            public void onSelection(SelectionEvent<Item> event) {
+                editDevice();
+            }
+        });
+        menu.add(edit);
+        MenuItem share = new MenuItem(i18n.share());
+        share.addSelectionHandler(new SelectionHandler<Item>() {
+            @Override
+            public void onSelection(SelectionEvent<Item> event) {
+                shareDevice();
+            }
+        });
+        menu.add(share);
+        MenuItem remove = new MenuItem(i18n.remove());
+        remove.addSelectionHandler(new SelectionHandler<Item>() {
+            @Override
+            public void onSelection(SelectionEvent<Item> event) {
+                removeDevice();
+            }
+        });
+        menu.add(remove);
+        MenuItem command = new MenuItem(i18n.command());
+        command.addSelectionHandler(new SelectionHandler<Item>() {
+            @Override
+            public void onSelection(SelectionEvent<Item> event) {
+                sendCommand();
+            }
+        });
+        menu.add(command);
+        return menu;
     }
 }
