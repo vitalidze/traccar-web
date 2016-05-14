@@ -29,7 +29,7 @@ Replace `/opt/traccar/traccar-web.war` path with the path to your traccar instal
 
 * update following lines:
 
-  - SQL query to select list of GPS tracking devices (does not apply to 3.3)
+  - SQL query to select list of GPS tracking devices (does not apply to 3.3 and higher (3.4, 3.5, etc.))
 
 Old:
 
