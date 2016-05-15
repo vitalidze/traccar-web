@@ -16,7 +16,12 @@
 package org.traccar.web.client.editor;
 
 import com.google.gwt.editor.client.LeafValueEditor;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.sencha.gxt.core.client.dom.XElement;
 import com.sencha.gxt.widget.core.client.ListView;
+import com.sencha.gxt.widget.core.client.event.ShowEvent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,6 +40,28 @@ public class ListViewEditor<T> implements LeafValueEditor<Set<T>> {
             listView.getSelectionModel().deselectAll();
         } else {
             listView.getSelectionModel().select(new ArrayList<>(value), false);
+            if (listView.isVisible()) {
+                showSelection();
+            } else {
+                listView.addResizeHandler(new ResizeHandler() {
+                    @Override
+                    public void onResize(ResizeEvent event) {
+                        showSelection();
+                    }
+                });
+            }
+        }
+    }
+
+    private void showSelection() {
+        for (T item : listView.getSelectionModel().getSelectedItems()) {
+            int index = listView.getStore().indexOf(item);
+            XElement element = listView.getElement(index);
+            if (element != null) {
+                element.scrollIntoView(listView.getElement(), false);
+                listView.focus();
+                break;
+            }
         }
     }
 

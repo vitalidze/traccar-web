@@ -75,6 +75,7 @@ public class Application {
         geoFenceController = new GeoFenceController(deviceStore, mapController);
         geoFenceController.getGeoFenceStore().addStoreHandlers(geoFenceStoreHandler);
         commandController = new CommandController();
+        reportsController = new ReportsController(reportStore, deviceStore, geoFenceController.getGeoFenceStore());
         deviceController = new DeviceController(mapController,
                 geoFenceController,
                 commandController,
@@ -85,9 +86,9 @@ public class Application {
                 geoFenceController.getDeviceGeoFences(),
                 groupStore,
                 reportStore,
+                reportsController,
                 this);
         groupsController = new GroupsController(groupStore, deviceController);
-        reportsController = new ReportsController(reportStore, deviceController.getDeviceStore(), geoFenceController.getGeoFenceStore());
         importController = new ImportController(deviceController.getDeviceStore());
         logController = new LogController();
         navController = new NavController(settingsController, reportsController, importController, logController, groupsController);

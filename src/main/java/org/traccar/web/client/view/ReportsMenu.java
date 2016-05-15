@@ -16,7 +16,10 @@
 package org.traccar.web.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.menu.Item;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
@@ -30,15 +33,39 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class ReportsMenu extends Menu {
+    public interface ReportHandler {
+        ReportsDialog createDialog();
+    }
+
+    public interface ReportSettingsHandler {
+        void setSettings(ReportsDialog dialog);
+    }
+
     private final Messages i18n = GWT.create(Messages.class);
     private final ListStore<Report> reports;
     private final Map<String, MenuItem> userReports = new HashMap<>();
+    private final ReportHandler reportHandler;
+    private final ReportSettingsHandler reportSettingsHandler;
 
-    public ReportsMenu(ListStore<Report> reports) {
+    public ReportsMenu(ListStore<Report> reports,
+                       final ReportHandler reportHandler,
+                       final ReportSettingsHandler reportSettingsHandler) {
         this.reports = reports;
+        this.reportHandler = reportHandler;
+        this.reportSettingsHandler = reportSettingsHandler;
         syncReports();
-        for (ReportType type : ReportType.values()) {
-            add(new MenuItem(i18n.reportType(type)));
+        for (final ReportType type : ReportType.values()) {
+            MenuItem reportItem = new MenuItem(i18n.reportType(type));
+            reportItem.addSelectionHandler(new SelectionHandler<Item>() {
+                @Override
+                public void onSelection(SelectionEvent<Item> event) {
+                    ReportsDialog dialog = reportHandler.createDialog();
+                    dialog.selectReportType(type);
+                    reportSettingsHandler.setSettings(dialog);
+                    dialog.show();
+                }
+            });
+            add(reportItem);
         }
         this.reports.addStoreHandlers(new BaseStoreHandlers<Report>() {
             @Override
@@ -61,12 +88,22 @@ public class ReportsMenu extends Menu {
 
         // process added and updated reports
         for (int i = 0; i < reports.size(); i++) {
-            Report report = reports.get(i);
+            final Report report = reports.get(i);
             String key = reports.getKeyProvider().getKey(report);
             MenuItem reportItem = userReports.get(key);
 
             if (reportItem == null) {
                 reportItem = new MenuItem(report.getName());
+                reportItem.addSelectionHandler(new SelectionHandler<Item>() {
+                    @Override
+                    public void onSelection(SelectionEvent<Item> event) {
+                        ReportsDialog dialog = reportHandler.createDialog();
+                        dialog.selectReport(report);
+                        reportSettingsHandler.setSettings(dialog);
+                        dialog.show();
+                    }
+                });
+
                 if (userReports.isEmpty()) {
                     insert(new SeparatorMenuItem(), 0);
                 }

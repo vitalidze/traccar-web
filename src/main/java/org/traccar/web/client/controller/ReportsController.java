@@ -30,13 +30,14 @@ import org.traccar.web.client.model.ReportService;
 import org.traccar.web.client.model.ReportServiceAsync;
 import org.traccar.web.client.view.NavView;
 import org.traccar.web.client.view.ReportsDialog;
+import org.traccar.web.client.view.ReportsMenu;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.Report;
 
 import java.util.List;
 
-public class ReportsController implements NavView.ReportsHandler, ContentController {
+public class ReportsController implements NavView.ReportsHandler, ContentController, ReportsMenu.ReportHandler {
     private final Messages i18n = GWT.create(Messages.class);
     private final ReportMapper reportMapper = GWT.create(ReportMapper.class);
     private final ListStore<Report> reportStore;
@@ -75,8 +76,31 @@ public class ReportsController implements NavView.ReportsHandler, ContentControl
 
     @Override
     public void onShowReports() {
+        createDialog().show();
+    }
+
+    private void generate(Report report) {
+        FormPanel form = new FormPanel("_blank");
+        form.setVisible(false);
+        form.setAction("traccar/report" + (report.isPreview() ? "/" + report.getName() + ".html" : ""));
+        form.setMethod(FormPanel.METHOD_POST);
+        form.setEncoding(FormPanel.ENCODING_URLENCODED);
+        HorizontalPanel container = new HorizontalPanel();
+        container.add(new Hidden("report", reportMapper.write(report)));
+        container.add(new Hidden("locale", LocaleInfo.getCurrentLocale().getLocaleName()));
+        form.add(container);
+        RootPanel.get().add(form);
+        try {
+            form.submit();
+        } finally {
+            RootPanel.get().remove(form);
+        }
+    }
+
+    @Override
+    public ReportsDialog createDialog() {
         final ReportServiceAsync service = GWT.create(ReportService.class);
-        new ReportsDialog(reportStore, deviceStore, geoFenceStore, new ReportsDialog.ReportHandler() {
+        return new ReportsDialog(reportStore, deviceStore, geoFenceStore, new ReportsDialog.ReportHandler() {
             @Override
             public void onAdd(Report report, final ReportHandler handler) {
                 service.addReport(report, new BaseAsyncCallback<Report>(i18n) {
@@ -111,24 +135,6 @@ public class ReportsController implements NavView.ReportsHandler, ContentControl
             public void onGenerate(Report report) {
                 generate(report);
             }
-        }).show();
-    }
-
-    private void generate(Report report) {
-        FormPanel form = new FormPanel("_blank");
-        form.setVisible(false);
-        form.setAction("traccar/report" + (report.isPreview() ? "/" + report.getName() + ".html" : ""));
-        form.setMethod(FormPanel.METHOD_POST);
-        form.setEncoding(FormPanel.ENCODING_URLENCODED);
-        HorizontalPanel container = new HorizontalPanel();
-        container.add(new Hidden("report", reportMapper.write(report)));
-        container.add(new Hidden("locale", LocaleInfo.getCurrentLocale().getLocaleName()));
-        form.add(container);
-        RootPanel.get().add(form);
-        try {
-            form.submit();
-        } finally {
-            RootPanel.get().remove(form);
-        }
+        });
     }
 }

@@ -55,7 +55,6 @@ import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.CellDoubleClickEvent;
 import com.sencha.gxt.widget.core.client.event.RowMouseDownEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.event.ShowEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.StoreFilterField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
@@ -505,7 +504,8 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
                       final ListStore<Device> globalDeviceStore,
                       final ListStore<GeoFence> geoFenceStore,
                       GroupStore groupStore,
-                      final ListStore<Report> reportStore) {
+                      final ListStore<Report> reportStore,
+                      final ReportsMenu.ReportHandler reportHandler) {
         this.deviceHandler = deviceHandler;
         this.geoFenceHandler = geoFenceHandler;
         this.commandHandler = commandHandler;
@@ -700,7 +700,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
             }
         };
         grid.setView(view);
-        grid.setContextMenu(createDeviceGridContextMenu(reportStore));
+        grid.setContextMenu(createDeviceGridContextMenu(reportStore, reportHandler));
 
         // configure device store filtering
         deviceFilter = new StoreFilterField<GroupedDevice>() {
@@ -915,7 +915,8 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         ImageResource footprints();
     }
 
-    private Menu createDeviceGridContextMenu(ListStore<Report> reportStore) {
+    private Menu createDeviceGridContextMenu(final ListStore<Report> reportStore,
+                                             final ReportsMenu.ReportHandler reportHandler) {
         Menu menu = new Menu();
         MenuItem edit = new MenuItem(i18n.edit());
         edit.addSelectionHandler(new SelectionHandler<Item>() {
@@ -951,7 +952,15 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         menu.add(command);
 
         MenuItem report = new MenuItem(i18n.report());
-        report.setSubMenu(new ReportsMenu(reportStore));
+        report.setSubMenu(new ReportsMenu(reportStore, reportHandler, new ReportsMenu.ReportSettingsHandler() {
+            @Override
+            public void setSettings(ReportsDialog dialog) {
+                GroupedDevice node = grid.getSelectionModel().getSelectedItem();
+                if (deviceStore.isDevice(node)) {
+                    dialog.selectDevice((Device) node);
+                }
+            }
+        }));
         menu.add(report);
 
         return menu;

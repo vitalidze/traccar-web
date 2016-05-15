@@ -26,10 +26,7 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.model.GroupStore;
 import org.traccar.web.client.state.DeviceVisibilityHandler;
-import org.traccar.web.client.view.DeviceDialog;
-import org.traccar.web.client.view.UserShareDialog;
-import org.traccar.web.client.view.DeviceView;
-import org.traccar.web.client.view.PositionInfoPopup;
+import org.traccar.web.client.view.*;
 import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
@@ -74,6 +71,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
                             Map<Long, Set<GeoFence>> deviceGeoFences,
                             GroupStore groupStore,
                             final ListStore<Report> reportStore,
+                            ReportsMenu.ReportHandler reportHandler,
                             Application application) {
         this.application = application;
         this.mapController = mapController;
@@ -84,7 +82,7 @@ public class DeviceController implements ContentController, DeviceView.DeviceHan
         this.groupStore = groupStore;
         this.deviceVisibilityHandler = deviceVisibilityHandler;
 
-        deviceView = new DeviceView(this, geoFenceHandler, commandHandler, deviceVisibilityHandler, deviceStore, geoFenceStore, groupStore, reportStore);
+        deviceView = new DeviceView(this, geoFenceHandler, commandHandler, deviceVisibilityHandler, deviceStore, geoFenceStore, groupStore, reportStore, reportHandler);
     }
 
     public ListStore<Device> getDeviceStore() {

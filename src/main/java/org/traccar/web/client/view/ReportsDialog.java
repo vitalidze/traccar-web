@@ -37,6 +37,7 @@ import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.event.ViewReadyEvent;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
@@ -294,5 +295,28 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
     @Override
     public void reportRemoved(Report report) {
         reportStore.remove(report);
+    }
+
+    public void selectReport(final Report report) {
+        grid.getSelectionModel().select(report, false);
+        if (grid.isVisible()) {
+            grid.getView().focusRow(reportStore.indexOf(report));
+        } else {
+            grid.addViewReadyHandler(new ViewReadyEvent.ViewReadyHandler() {
+                @Override
+                public void onViewReady(ViewReadyEvent event) {
+                    grid.getView().focusRow(reportStore.indexOf(report));
+                }
+            });
+        }
+    }
+
+    public void selectDevice(Device device) {
+        devices.setValue(Collections.singleton(device));
+    }
+
+    public void selectReportType(ReportType type) {
+        this.type.setValue(type);
+        reportTypeChanged(type);
     }
 }
