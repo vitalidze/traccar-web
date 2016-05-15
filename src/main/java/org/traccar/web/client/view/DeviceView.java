@@ -864,7 +864,9 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
     }
 
     public void selectDevice(Device device) {
-        grid.getSelectionModel().select(deviceStore.findModel(device), false);
+        GroupedDevice item = deviceStore.findModel(device);
+        grid.getSelectionModel().select(item, false);
+        grid.getView().focusRow(grid.getStore().indexOf(item));
         deviceHandler.onSelected((Device) grid.getSelectionModel().getSelectedItem());
     }
 
