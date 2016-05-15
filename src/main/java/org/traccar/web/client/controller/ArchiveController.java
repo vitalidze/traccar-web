@@ -28,16 +28,14 @@ import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.view.ArchiveView;
 import org.traccar.web.client.view.FilterDialog;
+import org.traccar.web.client.view.ReportsMenu;
 import org.traccar.web.client.view.UserSettingsDialog;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
-import org.traccar.web.shared.model.PositionIconType;
-import org.traccar.web.shared.model.UserSettings;
 
 public class ArchiveController implements ContentController, ArchiveView.ArchiveHandler {
 
@@ -62,10 +60,12 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
 
     public ArchiveController(ArchiveHandler archiveHandler,
                              UserSettingsDialog.UserSettingsHandler userSettingsHandler,
-                             ListStore<Device> deviceStore) {
+                             ListStore<Device> deviceStore,
+                             ListStore<Report> reportStore,
+                             ReportsMenu.ReportHandler reportHandler) {
         this.archiveHandler = archiveHandler;
         this.userSettingsHandler = userSettingsHandler;
-        this.archiveView = new ArchiveView(this, deviceStore);
+        this.archiveView = new ArchiveView(this, deviceStore, reportStore, reportHandler);
         this.originalTracks = new HashMap<>();
         this.snappedTracks = new HashMap<>();
         this.deviceStore = deviceStore;

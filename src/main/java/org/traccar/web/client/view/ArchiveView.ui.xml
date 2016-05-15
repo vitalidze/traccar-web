@@ -78,6 +78,7 @@
                     <toolbar:SeparatorToolItem />
                     <button:TextButton ui:field="clearButton" text="{i18n.clear}" />
                     <toolbar:FillToolItem />
+                    <button:TextButton ui:field="reportButton" text="{i18n.report}" />
                     <button:TextButton text="{i18n.exportData}">
                         <button:menu>
                             <menu:Menu>

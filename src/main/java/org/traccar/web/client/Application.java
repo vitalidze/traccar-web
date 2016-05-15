@@ -92,7 +92,7 @@ public class Application {
         importController = new ImportController(deviceController.getDeviceStore());
         logController = new LogController();
         navController = new NavController(settingsController, reportsController, importController, logController, groupsController);
-        archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore());
+        archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore(), reportStore, reportsController);
 
         view = new ApplicationView(
                 navController.getView(), deviceController.getView(), mapController.getView(), archiveController.getView());

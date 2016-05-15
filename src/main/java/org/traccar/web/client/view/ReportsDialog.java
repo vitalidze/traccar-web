@@ -319,4 +319,18 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
         this.type.setValue(type);
         reportTypeChanged(type);
     }
+
+    public void selectPeriod(Date fromDate, Date toDate) {
+        this.fromDate.setValue(fromDate);
+        this.toDate.setValue(toDate);
+    }
+
+    public void selectPeriod(Period period) {
+        this.period.setValue(period);
+        this.period.update();
+    }
+
+    public void setDisableFilter(boolean b) {
+        this.disableFilter.setValue(b);
+    }
 }

@@ -41,8 +41,7 @@ import org.traccar.web.client.model.BaseStoreHandlers;
 import org.traccar.web.client.model.DeviceProperties;
 import org.traccar.web.client.state.CheckBoxStateHandler;
 import org.traccar.web.client.widget.PeriodComboBox;
-import org.traccar.web.shared.model.Device;
-import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -54,8 +53,6 @@ import com.sencha.gxt.data.shared.event.StoreHandlers;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
-import org.traccar.web.shared.model.PositionIconType;
-import org.traccar.web.shared.model.UserSettings;
 
 public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandler<Position> {
 
@@ -131,12 +128,18 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
     @UiField(provided = true)
     TabPanel devicesTabs;
 
+    @UiField
+    TextButton reportButton;
+
     final Map<Long, ArchivePanel> archivePanels;
 
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public ArchiveView(final ArchiveHandler archiveHandler, ListStore<Device> deviceStore) {
+    public ArchiveView(final ArchiveHandler archiveHandler,
+                       ListStore<Device> deviceStore,
+                       ListStore<Report> reportStore,
+                       ReportsMenu.ReportHandler reportHandler) {
         this.archiveHandler = archiveHandler;
         deviceStore.addStoreHandlers(deviceStoreHandlers);
         this.deviceStore = deviceStore;
@@ -215,6 +218,21 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
 
         new CheckBoxStateHandler(disableFilter).loadState();
         new CheckBoxStateHandler(snapToRoads).loadState();
+
+        reportButton.setMenu(new ReportsMenu(reportStore, reportHandler, new ReportsMenu.ReportSettingsHandler() {
+            @Override
+            public void setSettings(ReportsDialog dialog) {
+                if (deviceCombo.getCurrentValue() != null) {
+                    dialog.selectDevice(deviceCombo.getCurrentValue());
+                }
+                if (periodCombo.getCurrentValue() == null) {
+                    dialog.selectPeriod(getCombineDate(fromDate, fromTime), getCombineDate(toDate, toTime));
+                } else {
+                    dialog.selectPeriod(periodCombo.getCurrentValue());
+                }
+                dialog.setDisableFilter(disableFilter.getValue());
+            }
+        }));
     }
 
     @Override
