@@ -15,18 +15,22 @@
  */
 package org.traccar.web.client.controller;
 
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import org.traccar.web.client.view.NavView;
+import org.traccar.web.client.view.ReportsMenu;
+import org.traccar.web.shared.model.Report;
 
 public class NavController implements ContentController {
     private final NavView navView;
 
     public NavController(NavView.SettingsHandler settingsHandler,
-                         NavView.ReportsHandler reportsHandler,
+                         ListStore<Report> reportStore,
+                         ReportsMenu.ReportHandler reportsHandler,
                          NavView.ImportHandler importHandler,
                          NavView.LogHandler logHandler,
                          NavView.GroupsHandler groupsHandler) {
-        navView = new NavView(settingsHandler, reportsHandler, importHandler, logHandler, groupsHandler);
+        navView = new NavView(settingsHandler, reportStore, reportsHandler, importHandler, logHandler, groupsHandler);
     }
 
     @Override

@@ -22,6 +22,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
@@ -31,6 +32,7 @@ import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
+import org.traccar.web.shared.model.Report;
 
 public class NavView {
     private static NavViewUiBinder uiBinder = GWT.create(NavViewUiBinder.class);
@@ -47,12 +49,6 @@ public class NavView {
     }
 
     private final SettingsHandler settingsHandler;
-
-    public interface ReportsHandler {
-        void onShowReports();
-    }
-
-    private final ReportsHandler reportsHandler;
 
     public interface ImportHandler {
         void onImport();
@@ -110,16 +106,19 @@ public class NavView {
     @UiField
     TextButton importButton;
 
+    @UiField
+    TextButton reportsButton;
+
     @UiField(provided = true)
     final Messages i18n = GWT.create(Messages.class);
 
     public NavView(SettingsHandler settingsHandler,
-                   ReportsHandler reportsHandler,
+                   ListStore<Report> reportListStore,
+                   ReportsMenu.ReportHandler reportHandler,
                    ImportHandler importHandler,
                    LogHandler logHandler,
                    GroupsHandler groupsHandler) {
         this.settingsHandler = settingsHandler;
-        this.reportsHandler = reportsHandler;
         this.importHandler = importHandler;
         this.logHandler = logHandler;
         this.groupsHandler = groupsHandler;
@@ -144,6 +143,12 @@ public class NavView {
                     || admin || manager));
 
         groupsButton.setVisible(!readOnly);
+
+        reportsButton.setMenu(new ReportsMenu(reportListStore, reportHandler, new ReportsMenu.ReportSettingsHandler() {
+            @Override
+            public void setSettings(ReportsDialog dialog) {
+            }
+        }));
     }
 
     @UiHandler("settingsAccount")
@@ -189,11 +194,6 @@ public class NavView {
     @UiHandler("showWrapperLog")
     public void onShowWrapperLog(SelectionEvent<Item> event) {
         logHandler.onShowWrapperLog();
-    }
-
-    @UiHandler("reportsButton")
-    public void onReportsClicked(SelectEvent event) {
-        reportsHandler.onShowReports();
     }
 
     @UiHandler("importButton")

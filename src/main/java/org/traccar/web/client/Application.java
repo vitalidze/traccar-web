@@ -91,7 +91,7 @@ public class Application {
         groupsController = new GroupsController(groupStore, deviceController);
         importController = new ImportController(deviceController.getDeviceStore());
         logController = new LogController();
-        navController = new NavController(settingsController, reportsController, importController, logController, groupsController);
+        navController = new NavController(settingsController, reportStore, reportsController, importController, logController, groupsController);
         archiveController = new ArchiveController(archiveHandler, userSettingsHandler, deviceController.getDeviceStore(), reportStore, reportsController);
 
         view = new ApplicationView(

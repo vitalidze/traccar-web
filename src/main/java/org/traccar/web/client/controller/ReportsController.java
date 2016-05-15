@@ -37,7 +37,7 @@ import org.traccar.web.shared.model.Report;
 
 import java.util.List;
 
-public class ReportsController implements NavView.ReportsHandler, ContentController, ReportsMenu.ReportHandler {
+public class ReportsController implements ContentController, ReportsMenu.ReportHandler {
     private final Messages i18n = GWT.create(Messages.class);
     private final ReportMapper reportMapper = GWT.create(ReportMapper.class);
     private final ListStore<Report> reportStore;
@@ -72,11 +72,6 @@ public class ReportsController implements NavView.ReportsHandler, ContentControl
                                    reportStore.addAll(result);
                                }
                            });
-    }
-
-    @Override
-    public void onShowReports() {
-        createDialog().show();
     }
 
     private void generate(Report report) {
