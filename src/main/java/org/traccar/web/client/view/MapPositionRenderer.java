@@ -705,11 +705,11 @@ public class MapPositionRenderer {
     private void drawAlert(Position position) {
         DeviceData deviceData = getDeviceData(position.getDevice());
 
-        int iconWidthHalf = position.getIcon().isArrow()
-                ? (DeviceIconType.DEFAULT.getPositionIconType(Position.Status.LATEST).getWidth() / 2)
-                : position.getIcon().getWidth() / 2;
+        int iconWidthHalf = (position.getIcon().isArrow()
+                ? (5 + (int) Math.floor(position.getDevice().getIconArrowRadius()))
+                : position.getIcon().getWidth()) / 2;
         int iconHeight = position.getIcon().isArrow()
-                ? (DeviceIconType.DEFAULT.getPositionIconType(Position.Status.LATEST).getHeight() / 2)
+                ? (5 + (int) Math.floor(position.getDevice().getIconArrowRadius()))
                 : position.getIcon().getHeight();
 
         Style alertCircleStyle = new org.gwtopenmaps.openlayers.client.Style();
@@ -751,7 +751,7 @@ public class MapPositionRenderer {
             // Calculate Y offset
             int yOffset;
             if (position.getIcon().isArrow()) {
-                yOffset = -20;
+                yOffset = -10 - (int) Math.floor(position.getDevice().getIconArrowRadius());
             } else {
                 yOffset = -12;
                 if (position.getCourse() != null
@@ -864,7 +864,7 @@ public class MapPositionRenderer {
 
         style.setFillColor("#" + bgColor);
         style.setFill(true);
-        style.setPointRadius(10);
+        style.setPointRadius(position.getDevice().getIconArrowRadius());
         if (position.getCourse() != null) {
             style.setRotation(position.getCourse().toString());
         }

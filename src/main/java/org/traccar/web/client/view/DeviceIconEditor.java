@@ -55,6 +55,8 @@ import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.CheckBox;
+import com.sencha.gxt.widget.core.client.form.NumberField;
+import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.Radio;
 import com.sencha.gxt.widget.core.client.menu.ColorMenu;
 import org.traccar.web.client.i18n.Messages;
@@ -153,6 +155,12 @@ public class DeviceIconEditor {
 
     @UiField
     CheckBox showName;
+
+    @UiField(provided = true)
+    NumberPropertyEditor<Double> doublePropertyEditor = new NumberPropertyEditor.DoublePropertyEditor();
+
+    @UiField
+    NumberField<Double> iconArrowRadius;
 
     @UiField
     Label iconArrowMovingColor;
@@ -344,6 +352,8 @@ public class DeviceIconEditor {
         iconRotation.setValue(device.isIconRotation());
         showName.setValue(device.isShowName());
 
+        iconArrowRadius.setValue(device.getIconArrowRadius());
+
         // set up color buttons
         DeviceProperties properties = GWT.create(DeviceProperties.class);
 
@@ -374,6 +384,7 @@ public class DeviceIconEditor {
         }
         device.setIconRotation(iconRotation.getValue());
         device.setShowName(showName.getValue());
+        device.setIconArrowRadius(iconArrowRadius.getValue());
         for (ColorSelector colorSelector : arrowColors) {
             colorSelector.flush(device);
         }

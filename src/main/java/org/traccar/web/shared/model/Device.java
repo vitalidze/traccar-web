@@ -41,6 +41,8 @@ public class Device implements IsSerializable, GroupedDevice {
     public static final String DEFAULT_STOPPED_ARROW_COLOR = "FF0000";
     public static final String DEFAULT_OFFLINE_ARROW_COLOR = "DEDEDE";
 
+    public static final double DEFAULT_ARROW_RADIUS = 10;
+
     public Device() {
         iconType = DeviceIconType.DEFAULT;
         iconMode = DeviceIconMode.ICON;
@@ -48,6 +50,7 @@ public class Device implements IsSerializable, GroupedDevice {
         iconArrowPausedColor = DEFAULT_PAUSED_ARROW_COLOR;
         iconArrowStoppedColor = DEFAULT_STOPPED_ARROW_COLOR;
         iconArrowOfflineColor = DEFAULT_OFFLINE_ARROW_COLOR;
+        iconArrowRadius = DEFAULT_ARROW_RADIUS;
         showName = true;
         showProtocol = true;
         showOdometer = true;
@@ -90,6 +93,7 @@ public class Device implements IsSerializable, GroupedDevice {
         iconArrowPausedColor = device.iconArrowPausedColor;
         iconArrowStoppedColor = device.iconArrowStoppedColor;
         iconArrowOfflineColor = device.iconArrowOfflineColor;
+        iconArrowRadius = device.iconArrowRadius;
         showName = device.showName;
         showProtocol = device.showProtocol;
         showOdometer = device.showOdometer;
@@ -440,6 +444,17 @@ public class Device implements IsSerializable, GroupedDevice {
 
     public void setIconRotation(boolean iconRotation) {
         this.iconRotation = iconRotation;
+    }
+
+    @Column(nullable = true)
+    private double iconArrowRadius;
+
+    public double getIconArrowRadius() {
+        return iconArrowRadius;
+    }
+
+    public void setIconArrowRadius(double iconArrowRadius) {
+        this.iconArrowRadius = iconArrowRadius;
     }
 
     @Column(nullable = true)

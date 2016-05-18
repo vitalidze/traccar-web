@@ -552,4 +552,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String matchServiceURL();
 
     String errSnapToRoads(int code, String text);
+
+    String arrowSize();
 }

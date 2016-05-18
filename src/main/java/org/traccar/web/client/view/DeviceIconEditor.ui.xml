@@ -24,6 +24,8 @@
   <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="centerData" />
   <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="eastData" />
 
+    <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="doublePropertyEditor" />
+
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
   <container:SimpleContainer ui:field="panel">
@@ -57,6 +59,18 @@
                       </container:child>
                   </container:VerticalLayoutContainer>
                   <container:VerticalLayoutContainer>
+                      <container:child layoutData="{toolBarRowData}">
+                          <form:FieldLabel text="{i18n.arrowSize}" labelWidth="130">
+                              <form:widget>
+                                  <form:NumberField editor="{doublePropertyEditor}"
+                                                    ui:field="iconArrowRadius"
+                                                    allowNegative="false"
+                                                    allowDecimals="true"
+                                                    allowBlank="false"
+                                                    width="4" />
+                              </form:widget>
+                          </form:FieldLabel>
+                      </container:child>
                       <container:child layoutData="{toolBarRowData}">
                           <form:FieldLabel text="{i18n.arrowColorMoving}" labelWidth="130">
                               <form:widget>
