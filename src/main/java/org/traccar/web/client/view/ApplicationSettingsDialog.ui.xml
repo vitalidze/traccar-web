@@ -76,7 +76,7 @@
         <container:child layoutData="{verticalLayoutData}">
             <form:FieldLabel text="{i18n.notificationExpiryPeriod} ({i18n.minute})" labelWidth="230">
                 <form:widget>
-                    <form:NumberField editor="{shortPropertyEditor}"
+                    <form:NumberField editor="{integerPropertyEditor}"
                                       ui:field="notificationExpirationPeriod"
                                       allowNegative="false"
                                       allowDecimals="false"
