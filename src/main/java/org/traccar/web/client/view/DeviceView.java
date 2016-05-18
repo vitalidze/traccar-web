@@ -756,13 +756,14 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         boolean readOnly = ApplicationContext.getInstance().getUser().getReadOnly();
         boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
         boolean manager = ApplicationContext.getInstance().getUser().getManager();
+        boolean allowCommandsSending = admin || !ApplicationContext.getInstance().getApplicationSettings().isAllowCommandsOnlyForAdmins();
 
         shareButton.setVisible(!readOnly && (admin || manager));
 
         addButton.setVisible(!readOnly);
         editButton.setVisible(!readOnly);
         removeButton.setVisible(!readOnly);
-        commandButton.setVisible(!readOnly);
+        commandButton.setVisible(allowCommandsSending && !readOnly);
         toggleManagementButtons(null);
     }
 
@@ -893,11 +894,12 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         boolean admin = ApplicationContext.getInstance().getUser().getAdmin();
         boolean manager = ApplicationContext.getInstance().getUser().getManager();
         boolean allowDeviceManagement = !ApplicationContext.getInstance().getApplicationSettings().isDisallowDeviceManagementByUsers();
+        boolean allowCommandsSending = admin || !ApplicationContext.getInstance().getApplicationSettings().isAllowCommandsOnlyForAdmins();
 
         addButton.setEnabled(allowDeviceManagement || editingGeoFences() || admin || manager);
         editButton.setEnabled(selection != null && (allowDeviceManagement || editingGeoFences() || admin || manager));
         removeButton.setEnabled(selection != null && (allowDeviceManagement || editingGeoFences() || admin || manager));
-        commandButton.setEnabled(selection != null && !editingGeoFences() && (allowDeviceManagement || admin || manager));
+        commandButton.setEnabled(selection != null && !editingGeoFences() && allowCommandsSending && (allowDeviceManagement || admin || manager));
         shareButton.setEnabled(selection != null);
     }
 

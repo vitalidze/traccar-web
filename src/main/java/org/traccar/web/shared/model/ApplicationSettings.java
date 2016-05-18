@@ -145,6 +145,17 @@ public class ApplicationSettings implements IsSerializable {
         this.matchServiceURL = matchServiceURL;
     }
 
+    @Column(nullable = true)
+    private boolean allowCommandsOnlyForAdmins;
+
+    public boolean isAllowCommandsOnlyForAdmins() {
+        return allowCommandsOnlyForAdmins;
+    }
+
+    public void setAllowCommandsOnlyForAdmins(boolean allowCommandsOnlyForAdmins) {
+        this.allowCommandsOnlyForAdmins = allowCommandsOnlyForAdmins;
+    }
+
     @Override
     public int hashCode() {
         return (int) (id ^ (id >>> 32));

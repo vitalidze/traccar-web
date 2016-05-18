@@ -66,6 +66,9 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     CheckBox disallowDeviceManagementByUsers;
 
     @UiField
+    CheckBox allowCommandsOnlyForAdmins;
+
+    @UiField
     CheckBox eventRecordingEnabled;
 
     @UiField(provided = true)
