@@ -18,9 +18,9 @@ package org.traccar.web.shared.model;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public enum PositionIconType implements IsSerializable {
-    iconLatest("marker-green.png", true, "marker.png", true, 21, 25),
-    iconOffline("marker-green.png", true, "marker-white.png", false, 21, 25),
-    iconArchive("marker-gold.png", true, "marker-blue.png", true, 21, 25),
+    iconLatest("marker-green.png", "marker.png", 21, 25),
+    iconOffline("marker-green.png", "marker-white.png", 21, 25),
+    iconArchive("marker-gold.png", "marker-blue.png", 21, 25),
 
     sedanLatest("sedan-green.png", "sedan-red.png", 53, 20),
     sedanOffline("sedan-green.png", "sedan-white.png", 53, 20),
@@ -66,14 +66,8 @@ public enum PositionIconType implements IsSerializable {
     private final int height;
 
     PositionIconType(String selectedURL, String notSelectedURL, int width, int height) {
-        this(selectedURL, false, notSelectedURL, false, width, height);
-    }
-
-    PositionIconType(String selectedURL, boolean selectedFromCloudFlare,
-                     String notSelectedURL, boolean notSelectedFromCloudFlare,
-                     int width, int height) {
-        this.selectedURL = (selectedFromCloudFlare ? "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/" : "img/") + selectedURL;
-        this.notSelectedURL = (notSelectedFromCloudFlare ? "http://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/img/" : "img/") + notSelectedURL;
+        this.selectedURL = "img/" + selectedURL;
+        this.notSelectedURL = "img/" + notSelectedURL;
         this.width = width;
         this.height = height;
     }
