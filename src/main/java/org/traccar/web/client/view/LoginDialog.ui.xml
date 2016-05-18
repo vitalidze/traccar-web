@@ -44,7 +44,7 @@
       <button:TextButton ui:field="loginButton" text="{i18n.login}" />
     </gxt:button>
     <gxt:button>
-      <button:TextButton ui:field="registerButton" text="{i18n.register}" enabled="false" />
+      <button:TextButton ui:field="registerButton" text="{i18n.register}" visible="false" />
     </gxt:button>
   </gxt:Window>
 
