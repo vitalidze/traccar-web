@@ -376,6 +376,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         for (Group group : user.getGroups()) {
             group.getUsers().remove(user);
         }
+        for (User managedUser : user.getManagedUsers()) {
+            managedUser.setManagedBy(user.getManagedBy());
+        }
+
         entityManager.remove(user);
         return fillUserSettings(user);
     }

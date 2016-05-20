@@ -273,6 +273,29 @@ public class DataServiceTest {
 
     }
 
+    @Test
+    public void testDeleteManagerUser() throws TraccarException {
+        Long originalUserId = injector.getProvider(User.class).get().getId();
+
+        User manager = new User("manager", "manager");
+        manager.setManager(true);
+        manager = dataService.addUser(manager);
+
+        currentUserId = manager.getId();
+        User user = new User("user", "user");
+        user = dataService.addUser(user);
+
+        currentUserId = originalUserId;
+        dataService.removeUser(manager);
+
+        List<User> users = dataService.getUsers();
+        assertEquals(2, users.size());
+        user = users.get(users.indexOf(user));
+        assertEquals(currentUserId.longValue(), user.getManagedBy().getId());
+
+        dataService.removeUser(user);
+    }
+
     private static <V> V runInTransaction(Callable<V> c) throws Exception {
         UnitOfWork unitOfWork = injector.getInstance(UnitOfWork.class);
         unitOfWork.begin();
