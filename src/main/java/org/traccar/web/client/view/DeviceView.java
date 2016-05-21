@@ -706,9 +706,20 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         deviceFilter = new StoreFilterField<GroupedDevice>() {
             @Override
             protected boolean doSelect(Store<GroupedDevice> store, GroupedDevice parent, GroupedDevice item, String filter) {
-                return filter.trim().isEmpty() ||
-                        deviceStore.isGroup(item) ||
-                        item.getName().toLowerCase().contains(filter.toLowerCase());
+                return filter.trim().isEmpty() || matches(item, filter);
+            }
+
+            boolean matches(GroupedDevice item, String filter) {
+                if (deviceStore.isGroup(item)) {
+                    for (GroupedDevice child : deviceStore.getChildren(item)) {
+                        if (matches(child, filter)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                } else {
+                    return item.getName().toLowerCase().contains(filter.toLowerCase());
+                }
             }
         };
         deviceFilter.bind(this.deviceStore);
