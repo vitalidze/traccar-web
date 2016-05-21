@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: news
 ---
 
 Today I am pleased to announce support for the version 3.3 of traccar. There is a slight change in the [documentation](/installation.html) as well.

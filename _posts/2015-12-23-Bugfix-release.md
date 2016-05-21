@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: news
 ---
 
 Today's release does not contain any new function except updates to the several translations.

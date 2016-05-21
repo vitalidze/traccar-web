@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: news
 ---
 
 Today's release fixed several issues quickly discovered by the users in yesterday's major release:

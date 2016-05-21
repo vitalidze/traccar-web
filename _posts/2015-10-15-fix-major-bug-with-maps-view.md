@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: news
 ---
 
 This release contains fix for a major bug [#284](https://github.com/vitalidze/traccar-web/issues/284), which was originally posted [here](https://github.com/openlayers/openlayers/issues/1461). The reason is that the hard coded key for the Bing Maps was expired, which break the whole [OpenLayers library](http://openlayers.org/), which is used for mapping in Traccar Web UI. To overcome this issue:

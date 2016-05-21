@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: news
 ---
 
 Today's major release includes two new big features:

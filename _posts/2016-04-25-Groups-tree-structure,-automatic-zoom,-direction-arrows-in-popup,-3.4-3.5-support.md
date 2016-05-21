@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: news
 ---
 
 I am pleased to announce a major release. It contains several new functions:

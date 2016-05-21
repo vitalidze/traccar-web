@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: news
 ---
 
 I am happy to announce next major release. 

@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: news
 ---
 
 I am happy to announce new minor release. It contains following new features:

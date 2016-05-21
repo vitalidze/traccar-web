@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: news
 ---
 
 I am pleased to announce a new major release. The main big features here:
