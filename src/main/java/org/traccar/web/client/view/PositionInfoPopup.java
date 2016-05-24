@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PositionInfoPopup {
-    private final static Messages i18n = GWT.create(Messages.class);
+    private final Messages i18n = GWT.create(Messages.class);
 
     final ToolTip toolTip;
     final ListStore<Device> deviceStore;
@@ -204,17 +204,22 @@ public class PositionInfoPopup {
         toolTip.update(config);
     }
 
-    public static String intervalText(double value, List<SensorInterval> intervals) {
-        String valueText = null;
+    public static SensorInterval interval(double value, List<SensorInterval> intervals) {
+        SensorInterval result = null;
         for (SensorInterval interval : intervals) {
-            if (valueText == null) {
-                valueText = interval.getText();
+            if (result == null) {
+                result = interval;
             }
             if (value < interval.getValue()) {
                 break;
             }
-            valueText = interval.getText();
+            result = interval;
         }
-        return valueText;
+        return result;
+    }
+
+    public static String intervalText(double value, List<SensorInterval> intervals) {
+        SensorInterval interval = interval(value, intervals);
+        return interval == null ? null : interval.getText();
     }
 }
