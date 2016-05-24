@@ -15,12 +15,23 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safecss.shared.SafeStylesUtils;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.TextButtonCell;
 import com.sencha.gxt.core.client.Style.SelectionMode;
+import com.sencha.gxt.core.client.ValueProvider;
+import com.sencha.gxt.core.client.resources.CommonStyles;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.widget.core.client.Window;
@@ -35,6 +46,7 @@ import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
+import com.sencha.gxt.widget.core.client.menu.ColorMenu;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.SensorIntervalProperties;
@@ -53,6 +65,11 @@ public class SensorIntervalsDialog implements SelectionChangedEvent.SelectionCha
     interface SensorIntervalsHandler {
         List<SensorInterval> getIntervals();
         void setIntervals(List<SensorInterval> intervals);
+    }
+
+    interface ColorTemplate extends SafeHtmlTemplates {
+        @Template("<div style=\"background-color:{0}\">&nbsp;</div>")
+        SafeHtml div(String color);
     }
 
     @UiField
@@ -98,6 +115,80 @@ public class SensorIntervalsDialog implements SelectionChangedEvent.SelectionCha
         columnConfigList.add(valueColumn);
         ColumnConfig<SensorInterval, String> nameColumn = new ColumnConfig<>(sensorProperties.text(), 25, i18n.text());
         columnConfigList.add(nameColumn);
+
+        ColumnConfig<SensorInterval, String> colorColumn = new ColumnConfig<>(sensorProperties.color(), 64, i18n.color());
+        colorColumn.setCell(new AbstractCell<String>() {
+
+            final ColorTemplate template = GWT.create(ColorTemplate.class);
+
+            @Override
+            public void render(Context context, String value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    sb.append(template.div("#" + value));
+                }
+            }
+        });
+        colorColumn.setFixed(true);
+        colorColumn.setResizable(false);
+        colorColumn.setSortable(false);
+        columnConfigList.add(colorColumn);
+
+        ColumnConfig<SensorInterval, String> colorSelectColumn = new ColumnConfig<>(new ValueProvider<SensorInterval, String>() {
+            @Override
+            public String getValue(SensorInterval object) {
+                return i18n.select();
+            }
+
+            @Override
+            public void setValue(SensorInterval object, String value) {
+            }
+
+            @Override
+            public String getPath() {
+                return "selectColor";
+            }
+        }, 58);
+        colorSelectColumn.setFixed(true);
+        colorSelectColumn.setResizable(false);
+        colorSelectColumn.setSortable(false);
+        // IMPORTANT we want the text element (cell parent) to only be as wide as
+        // the cell and not fill the cell
+        colorSelectColumn.setColumnTextClassName(CommonStyles.get().inlineBlock());
+        colorSelectColumn.setColumnTextStyle(SafeStylesUtils.fromTrustedString("padding: 1px 3px 0;"));
+        TextButtonCell colorSelectButton = new TextButtonCell();
+        final ColorMenu menu = new ColorMenu();
+        colorSelectButton.setMenu(menu);
+        colorSelectButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            HandlerRegistration registration;
+
+            @Override
+            public void onSelect(SelectEvent event) {
+                int row = event.getContext().getIndex();
+                final SensorInterval interval = sensorStore.get(row);
+                unregister();
+                registration = menu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
+                    @Override
+                    public void onValueChange(ValueChangeEvent<String> event) {
+                        menu.hide(true);
+                        unregister();
+                        selectionChanged(interval, event.getValue());
+                    }
+                });
+            }
+
+            void selectionChanged(SensorInterval interval, String color) {
+                sensorStore.getRecord(interval).addChange(sensorProperties.color(), color);
+            }
+
+            void unregister() {
+                if (registration != null) {
+                    registration.removeHandler();
+                    registration = null;
+                }
+            }
+        });
+        colorSelectColumn.setCell(colorSelectButton);
+        columnConfigList.add(colorSelectColumn);
 
         columnModel = new ColumnModel<>(columnConfigList);
 

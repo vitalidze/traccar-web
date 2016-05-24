@@ -23,4 +23,6 @@ public interface SensorIntervalProperties extends PropertyAccess<SensorInterval>
     ValueProvider<SensorInterval, String> text();
 
     ValueProvider<SensorInterval, Double> value();
+
+    ValueProvider<SensorInterval, String> color();
 }

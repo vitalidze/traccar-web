@@ -15,10 +15,10 @@
  */
 package org.traccar.web.client.view;
 
+import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.json.client.*;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -60,6 +60,11 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
 
     interface SensorsEditorUiBinder extends UiBinder<Widget, SensorsEditor> {
     }
+
+    interface SensorIntervalsMapper extends ObjectMapper<SensorInterval[]> {
+    }
+
+    private static final SensorIntervalsMapper sensorIntervalsMapper = GWT.create(SensorIntervalsMapper.class);
 
     @UiField
     SimpleContainer panel;
@@ -153,14 +158,7 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
                                 return o1.getValue() > o2.getValue() ? 1 : -1;
                             }
                         });
-                        JSONArray array = new JSONArray();
-                        for (SensorInterval interval : intervals) {
-                            JSONObject jsonInterval = new JSONObject();
-                            jsonInterval.put("text", new JSONString(interval.getText()));
-                            jsonInterval.put("value", new JSONNumber(interval.getValue()));
-                            array.set(array.size(), jsonInterval);
-                        }
-                        sensor.setIntervals(array.toString());
+                        sensor.setIntervals(sensorIntervalsMapper.write(intervals.toArray(new SensorInterval[intervals.size()])));
                         sensorStore.getRecord(sensor).addChange(intervalsProperty, i18n.edit());
                     }
                 }).show();
@@ -252,16 +250,7 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
         if (sensor.getIntervals() == null) {
             return Collections.emptyList();
         } else {
-            JSONArray array = (JSONArray) JSONParser.parseStrict(sensor.getIntervals());
-            List<SensorInterval> intervals = new ArrayList<>(array.size());
-            for (int i = 0; i < array.size(); i++) {
-                JSONObject jsonInterval = (JSONObject) array.get(i);
-                SensorInterval interval = new SensorInterval();
-                interval.setText(((JSONString) jsonInterval.get("text")).stringValue());
-                interval.setValue(((JSONNumber) jsonInterval.get("value")).doubleValue());
-                intervals.add(interval);
-            }
-            return intervals;
+            return Arrays.asList(sensorIntervalsMapper.read(sensor.getIntervals()));
         }
     }
 }

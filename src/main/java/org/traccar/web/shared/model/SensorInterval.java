@@ -15,9 +15,15 @@
  */
 package org.traccar.web.shared.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class SensorInterval {
     private String text;
     private double value;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long pictureId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String color;
 
     public SensorInterval() {
     }
@@ -41,5 +47,21 @@ public class SensorInterval {
 
     public void setValue(double value) {
         this.value = value;
+    }
+
+    public Long getPictureId() {
+        return pictureId;
+    }
+
+    public void setPictureId(Long pictureId) {
+        this.pictureId = pictureId;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 }
