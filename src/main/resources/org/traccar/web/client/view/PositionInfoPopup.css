@@ -1,0 +1,42 @@
+.rowPaddingLeftRight {
+    padding: 3px 0px 3px 0px;
+}
+.rowPadding310310 {
+    padding: 3px 10px 3px 10px;
+}
+.rowPadding31030 {
+    padding: 3px 10px 3px 0px;
+}
+.rowBorder {
+    border-style: solid;
+    border-color: #000000;
+}
+.rowBorderTop {
+    border-width: 1px 0px 0px 0px;
+}
+.rowBorderTopBottom {
+    border-width: 1px 0px 1px 0px;
+}
+.rowBorderRightBottom {
+    border-width: 0px 1px 1px 0px;
+}
+.rowBorderBottom {
+    border-width: 0px 0px 1px 0px;
+}
+.font10pt {
+    font-size: 10pt;
+}
+.font11pt {
+    font-size: 11pt;
+}
+.font12pt {
+    font-size: 11pt;
+}
+.geoFenceSquare {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    border: 1px solid;
+    left: 5px;
+    top: 5px;
+}
