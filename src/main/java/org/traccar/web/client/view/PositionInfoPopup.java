@@ -86,10 +86,12 @@ public class PositionInfoPopup {
     static class SensorData {
         final String name;
         final String valueText;
+        final String color;
 
-        SensorData(String name, String valueText) {
+        SensorData(String name, String valueText, String color) {
             this.name = name;
             this.valueText = valueText;
+            this.color = color;
         }
 
         public String getName() {
@@ -98,6 +100,10 @@ public class PositionInfoPopup {
 
         public String getValueText() {
             return valueText;
+        }
+
+        public String getColor() {
+            return color;
         }
     }
 
@@ -166,6 +172,7 @@ public class PositionInfoPopup {
                 String parameterName = entry.getKey();
                 Object value = entry.getValue();
                 String valueText = value.toString();
+                String color = null;
                 Sensor sensor = sensors.get(parameterName);
                 if (sensor != null) {
                     if (!sensor.isVisible()) {
@@ -181,14 +188,16 @@ public class PositionInfoPopup {
                         }
                         List<SensorInterval> intervals = SensorsEditor.intervals(sensor);
                         if (!intervals.isEmpty()) {
-                            valueText = intervalText(doubleValue, intervals);
+                            SensorInterval interval = interval(doubleValue, intervals);
+                            valueText = interval.getText();
+                            color = interval.getColor();
                         }
                     }
                 } else if (parameterName.equals("protocol")) {
                     parameterName = i18n.protocol();
                 }
                 if (!valueText.isEmpty()) {
-                    sensorData.add(new SensorData(parameterName, valueText));
+                    sensorData.add(new SensorData(parameterName, valueText, color));
                 }
             }
         }

@@ -70,7 +70,12 @@
     <tpl for="sensorData">
         <tr>
             <td class="{style.rowPaddingLeftRight}">{name}</td>
-            <td>{valueText}</td>
+            <tpl if="color == null">
+                <td>{valueText}</td>
+            </tpl>
+            <tpl if="color != null">
+                <td style="color: #{color}">{valueText}</td>
+            </tpl>
         </tr>
     </tpl>
     <tpl if="position.geoFences != null && !position.geoFences.empty">
