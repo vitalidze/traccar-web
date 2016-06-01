@@ -119,7 +119,7 @@ public class DeviceView implements RowMouseDownEvent.RowMouseDownHandler, CellDo
         private final ListStore<Device> globalDeviceStore;
         private final DeviceStore deviceStore;
         private final GroupStore groupStore;
-        private final List<Device> pendingDevices = new ArrayList<>();
+        private final Set<Device> pendingDevices = new LinkedHashSet<>();
 
         private GroupsHandler(ListStore<Device> globalDeviceStore,
                               DeviceStore deviceStore,
