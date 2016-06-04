@@ -153,6 +153,7 @@ public class ApplicationSettings implements IsSerializable {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "appsettings_fkey_usersettings_id"))
     @GwtTransient
+    @JsonIgnore
     private UserSettings userSettings;
 
     public UserSettings getUserSettings() {
