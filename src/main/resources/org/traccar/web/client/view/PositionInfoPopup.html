@@ -71,10 +71,26 @@
         <tr>
             <td class="{style.rowPaddingLeftRight}">{name}</td>
             <tpl if="color == null">
-                <td>{valueText}</td>
+                <tpl if="iconURL == null">
+                    <td>{valueText}</td>
+                </tpl>
+                <tpl if="iconURL != null">
+                    <td>
+                        <img src="{iconURL}" align="left" class="{style.valignMiddle}">
+                        <span class="{style.valignMiddle} {style.paddingLeft5}">{valueText}</span>
+                    </td>
+                </tpl>
             </tpl>
             <tpl if="color != null">
-                <td style="color: #{color}">{valueText}</td>
+                <tpl if="iconURL == null">
+                    <td style="color: #{color}">{valueText}</td>
+                </tpl>
+                <tpl if="iconURL != null">
+                    <td>
+                        <img src="{iconURL}" class="{style.valignMiddle}">
+                        <span class="{style.valignMiddle} {style.paddingLeft5}" style="color: #{color};">{valueText}</span>
+                    </td>
+                </tpl>
             </tpl>
         </tr>
     </tpl>

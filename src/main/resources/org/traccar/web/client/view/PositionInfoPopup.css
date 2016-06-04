@@ -11,6 +11,9 @@
     border-style: solid;
     border-color: #000000;
 }
+.paddingLeft5 {
+    padding-left: 5px;
+}
 .rowBorderTop {
     border-width: 1px 0px 0px 0px;
 }
@@ -39,4 +42,7 @@
     border: 1px solid;
     left: 5px;
     top: 5px;
+}
+.valignMiddle {
+    vertical-align: middle;
 }

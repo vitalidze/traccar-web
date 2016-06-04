@@ -57,6 +57,8 @@ public class PositionInfoPopup {
         String font12pt();
         String font10pt();
         String geoFenceSquare();
+        String valignMiddle();
+        String paddingLeft5();
     }
 
     interface PopupResources extends ClientBundle {
@@ -87,11 +89,13 @@ public class PositionInfoPopup {
         final String name;
         final String valueText;
         final String color;
+        final String iconURL;
 
-        SensorData(String name, String valueText, String color) {
+        SensorData(String name, String valueText, String color, String iconURL) {
             this.name = name;
             this.valueText = valueText;
             this.color = color;
+            this.iconURL = iconURL;
         }
 
         public String getName() {
@@ -104,6 +108,10 @@ public class PositionInfoPopup {
 
         public String getColor() {
             return color;
+        }
+
+        public String getIconURL() {
+            return iconURL;
         }
     }
 
@@ -173,6 +181,7 @@ public class PositionInfoPopup {
                 Object value = entry.getValue();
                 String valueText = value.toString();
                 String color = null;
+                String iconURL = null;
                 Sensor sensor = sensors.get(parameterName);
                 if (sensor != null) {
                     if (!sensor.isVisible()) {
@@ -189,15 +198,16 @@ public class PositionInfoPopup {
                         List<SensorInterval> intervals = SensorsEditor.intervals(sensor);
                         if (!intervals.isEmpty()) {
                             SensorInterval interval = interval(doubleValue, intervals);
-                            valueText = interval.getText();
+                            valueText = interval.getText() == null ? "" : interval.getText();
                             color = interval.getColor();
+                            iconURL = interval.getPictureId() == null ? null : (Picture.URL_PREFIX + interval.getPictureId());
                         }
                     }
                 } else if (parameterName.equals("protocol")) {
                     parameterName = i18n.protocol();
                 }
                 if (!valueText.isEmpty()) {
-                    sensorData.add(new SensorData(parameterName, valueText, color));
+                    sensorData.add(new SensorData(parameterName, valueText, color, iconURL));
                 }
             }
         }

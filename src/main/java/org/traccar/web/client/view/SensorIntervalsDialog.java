@@ -17,6 +17,8 @@ package org.traccar.web.client.view;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -47,9 +49,13 @@ import com.sencha.gxt.widget.core.client.grid.Grid;
 import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.menu.ColorMenu;
+import com.sencha.gxt.widget.core.client.menu.Item;
+import com.sencha.gxt.widget.core.client.menu.Menu;
+import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.SensorIntervalProperties;
+import org.traccar.web.shared.model.Picture;
 import org.traccar.web.shared.model.SensorInterval;
 
 import java.util.LinkedList;
@@ -70,6 +76,9 @@ public class SensorIntervalsDialog implements SelectionChangedEvent.SelectionCha
     interface ColorTemplate extends SafeHtmlTemplates {
         @Template("<div style=\"background-color:{0}\">&nbsp;</div>")
         SafeHtml div(String color);
+
+        @Template("<img src=\"{0}\">")
+        SafeHtml img(String src);
     }
 
     @UiField
@@ -116,6 +125,7 @@ public class SensorIntervalsDialog implements SelectionChangedEvent.SelectionCha
         ColumnConfig<SensorInterval, String> nameColumn = new ColumnConfig<>(sensorProperties.text(), 25, i18n.text());
         columnConfigList.add(nameColumn);
 
+        // color
         ColumnConfig<SensorInterval, String> colorColumn = new ColumnConfig<>(sensorProperties.color(), 64, i18n.color());
         colorColumn.setCell(new AbstractCell<String>() {
 
@@ -156,8 +166,8 @@ public class SensorIntervalsDialog implements SelectionChangedEvent.SelectionCha
         colorSelectColumn.setColumnTextClassName(CommonStyles.get().inlineBlock());
         colorSelectColumn.setColumnTextStyle(SafeStylesUtils.fromTrustedString("padding: 1px 3px 0;"));
         TextButtonCell colorSelectButton = new TextButtonCell();
-        final ColorMenu menu = new ColorMenu();
-        colorSelectButton.setMenu(menu);
+        final ColorMenu colorSelectMenu = new ColorMenu();
+        colorSelectButton.setMenu(colorSelectMenu);
         colorSelectButton.addSelectHandler(new SelectEvent.SelectHandler() {
             HandlerRegistration registration;
 
@@ -166,10 +176,10 @@ public class SensorIntervalsDialog implements SelectionChangedEvent.SelectionCha
                 int row = event.getContext().getIndex();
                 final SensorInterval interval = sensorStore.get(row);
                 unregister();
-                registration = menu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
+                registration = colorSelectMenu.getPalette().addValueChangeHandler(new ValueChangeHandler<String>() {
                     @Override
                     public void onValueChange(ValueChangeEvent<String> event) {
-                        menu.hide(true);
+                        colorSelectMenu.hide(true);
                         unregister();
                         selectionChanged(interval, event.getValue());
                     }
@@ -189,6 +199,104 @@ public class SensorIntervalsDialog implements SelectionChangedEvent.SelectionCha
         });
         colorSelectColumn.setCell(colorSelectButton);
         columnConfigList.add(colorSelectColumn);
+
+        // icon
+        ColumnConfig<SensorInterval, Long> iconColumn = new ColumnConfig<>(sensorProperties.pictureId(), 64, i18n.icon());
+        iconColumn.setCell(new AbstractCell<Long>() {
+
+            final ColorTemplate template = GWT.create(ColorTemplate.class);
+
+            @Override
+            public void render(Context context, Long value, SafeHtmlBuilder sb) {
+                if (value != null) {
+                    sb.append(template.img(Picture.URL_PREFIX + value));
+                }
+            }
+        });
+        iconColumn.setFixed(true);
+        iconColumn.setResizable(false);
+        iconColumn.setSortable(false);
+        columnConfigList.add(iconColumn);
+
+        ColumnConfig<SensorInterval, String> iconEditColumn = new ColumnConfig<>(new ValueProvider<SensorInterval, String>() {
+            @Override
+            public String getValue(SensorInterval object) {
+                return i18n.edit();
+            }
+
+            @Override
+            public void setValue(SensorInterval object, String value) {
+            }
+
+            @Override
+            public String getPath() {
+                return "editIcon";
+            }
+        }, 58);
+        iconEditColumn.setFixed(true);
+        iconEditColumn.setResizable(false);
+        iconEditColumn.setSortable(false);
+        // IMPORTANT we want the text element (cell parent) to only be as wide as
+        // the cell and not fill the cell
+        iconEditColumn.setColumnTextClassName(CommonStyles.get().inlineBlock());
+        iconEditColumn.setColumnTextStyle(SafeStylesUtils.fromTrustedString("padding: 1px 3px 0;"));
+        TextButtonCell iconSelectButton = new TextButtonCell();
+        final Menu iconSelectMenu = new Menu();
+        final MenuItem iconUploadMenu = new MenuItem(i18n.upload() + "...");
+        iconSelectMenu.add(iconUploadMenu);
+        final MenuItem iconResetMenu = new MenuItem(i18n.reset());
+        iconSelectMenu.add(iconResetMenu);
+
+        iconSelectButton.setMenu(iconSelectMenu);
+        iconSelectButton.addSelectHandler(new SelectEvent.SelectHandler() {
+            HandlerRegistration registrationUpload;
+            HandlerRegistration registrationReset;
+
+            @Override
+            public void onSelect(SelectEvent event) {
+                int row = event.getContext().getIndex();
+                final SensorInterval interval = sensorStore.get(row);
+                unregister();
+
+                registrationUpload = iconUploadMenu.addSelectionHandler(new SelectionHandler<Item>() {
+                    @Override
+                    public void onSelection(SelectionEvent<Item> event) {
+                        unregister();
+                        new SensorIconDialog(new SensorIconDialog.SensorIconHandler() {
+                            @Override
+                            public void uploaded(Picture icon) {
+                                selectionChanged(interval, icon == null ? null : icon.getId());
+                            }
+                        }).show();
+                    }
+                });
+
+                registrationReset = iconResetMenu.addSelectionHandler(new SelectionHandler<Item>() {
+                    @Override
+                    public void onSelection(SelectionEvent<Item> event) {
+                        unregister();
+                        selectionChanged(interval, null);
+                    }
+                });
+            }
+
+            void selectionChanged(SensorInterval interval, Long pictureId) {
+                sensorStore.getRecord(interval).addChange(sensorProperties.pictureId(), pictureId);
+            }
+
+            void unregister() {
+                if (registrationReset != null) {
+                    registrationReset.removeHandler();
+                    registrationReset = null;
+                }
+                if (registrationUpload != null) {
+                    registrationUpload.removeHandler();
+                    registrationUpload = null;
+                }
+            }
+        });
+        iconEditColumn.setCell(iconSelectButton);
+        columnConfigList.add(iconEditColumn);
 
         columnModel = new ColumnModel<>(columnConfigList);
 
