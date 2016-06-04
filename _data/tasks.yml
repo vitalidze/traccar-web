@@ -3,11 +3,6 @@
   tickets: [25, 95, 270]
   done: false
 
-- id: icons_and_text_color_for_custom_interval
-  description: Add an option for the sensors custom intervals to define icon and/or text color.
-  tickets: [207, 291]
-  done: false
-
 - id: remember_me
   description: Add check box 'Remember me', which will allow to save session for mobile devices and survive application server restarts
   tickets: [174]
@@ -22,6 +17,11 @@
   description: Choose color for tracks in archive automatically. This should ne optional and must choose unique color that is not yet used for already drawn tracks.
   tickets: [179]
   done: false
+
+- id: icons_and_text_color_for_custom_interval
+  description: Add an option for the sensors custom intervals to define icon and/or text color.
+  tickets: [207, 291]
+  done: true
 
 - id: direction_on_map
   description: Display direction of device on map. This should work both in archive and in live data.
