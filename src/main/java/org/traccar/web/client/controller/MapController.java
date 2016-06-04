@@ -97,7 +97,7 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
 
     private Map<Long, Position> latestPositionMap = new HashMap<>();
 
-    private Map<Long, Position> alertsMap = new HashMap<>();
+    private Set<Long> alerts = new HashSet<>();
 
     private Map<Long, Position> timestampMap = new HashMap<>();
 
@@ -116,7 +116,7 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
                 /**
                  * Set up icon, 'idle since' and calculate alerts
                  */
-                alertsMap.clear();
+                Set<Long> newAlerts = new HashSet<>();
                 long currentTime = System.currentTimeMillis();
                 int selectedIndex = -1;
                 for (int i = 0; i < result.size(); i++) {
@@ -144,7 +144,7 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
                         // check maintenances
                         for (Maintenance maintenance : storedDevice.getMaintenances()) {
                             if (storedDevice.getOdometer() >= maintenance.getLastService() + maintenance.getServiceInterval()) {
-                                alertsMap.put(device.getId(), position);
+                                newAlerts.add(device.getId());
                                 break;
                             }
                         }
@@ -157,30 +157,43 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
                     result.add(result.remove(selectedIndex));
                 }
                 /**
-                 * Draw positions
-                 */
-                mapView.clearLatestPositions();
-                mapView.showLatestPositions(result, alertsMap.values());
-                /**
                  * Follow positions and draw track if necessary
                  */
+                Set<Long> devicesWithLatestPositions = new HashSet<>();
                 for (Position position : result) {
                     Device device = position.getDevice();
                     Position prevPosition = latestPositionMap.get(device.getId());
-                    if (prevPosition != null && prevPosition.getId() != position.getId()) {
-                        if (ApplicationContext.getInstance().isFollowing(device)) {
-                            mapView.catchPosition(position);
-                            mapView.zoomIn(device);
-                        }
-                        if (ApplicationContext.getInstance().isRecordingTrace(device)) {
-                            mapView.showLatestTrackPositions(Collections.singletonList(prevPosition));
-                            mapView.showLatestTrack(new Track(Arrays.asList(prevPosition, position)));
-                            Short traceInterval = ApplicationContext.getInstance().getUserSettings().getTraceInterval();
-                            if (traceInterval != null) {
-                                mapView.clearLatestTrackPositions(device, new Date(position.getTime().getTime() - traceInterval * 60 * 1000));
+                    if (prevPosition == null) {
+                        mapView.showLatestPosition(position);
+                    } else {
+                        if (prevPosition.getId() != position.getId()) {
+                            // move latest position
+                            mapView.moveLatestPosition(position);
+                            // follow
+                            if (ApplicationContext.getInstance().isFollowing(device)) {
+                                mapView.catchPosition(position);
+                                mapView.zoomIn(device);
+                            }
+                            // draw track
+                            if (ApplicationContext.getInstance().isRecordingTrace(device)) {
+                                mapView.showLatestTrackPositions(Collections.singletonList(prevPosition));
+                                mapView.showLatestTrack(new Track(Arrays.asList(prevPosition, position)));
+                                Short traceInterval = ApplicationContext.getInstance().getUserSettings().getTraceInterval();
+                                if (traceInterval != null) {
+                                    mapView.clearLatestTrackPositions(device, new Date(position.getTime().getTime() - traceInterval * 60 * 1000));
+                                }
                             }
                         }
                     }
+                    // process alert
+                    if (newAlerts.contains(device.getId())) {
+                        if (alerts.contains(device.getId())) {
+                            mapView.moveAlert(position);
+                        } else {
+                            mapView.showAlert(position);
+                        }
+                    }
+
                     if (ApplicationContext.getInstance().isRecordingTrace(device)) {
                         Position prevTimestampPosition = timestampMap.get(device.getId());
 
@@ -191,7 +204,25 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
                         }
                     }
                     latestPositionMap.put(device.getId(), position);
+                    devicesWithLatestPositions.add(device.getId());
                 }
+                // clear old alerts
+                for (Long deviceId : alerts) {
+                    if (!newAlerts.contains(deviceId)) {
+                        mapView.clearAlert(deviceId);
+                    }
+                }
+                alerts = newAlerts;
+
+                // remove missing positions
+                for (Iterator<Long> it = latestPositionMap.keySet().iterator(); it.hasNext(); ) {
+                    Long deviceId = it.next();
+                    if (!devicesWithLatestPositions.contains(deviceId)) {
+                        mapView.clearLatestPosition(deviceId);
+                        it.remove();
+                    }
+                }
+
                 updateTimer.schedule(ApplicationContext.getInstance().getApplicationSettings().getUpdateInterval());
             }
 
@@ -312,8 +343,10 @@ public class MapController implements ContentController, MapView.MapHandler, Dev
         if (visible) {
             Position latestPosition = latestPositionMap.get(deviceId);
             if (latestPosition != null) {
-                Position alert = alertsMap.get(deviceId);
-                mapView.showLatestPositions(Collections.singletonList(latestPosition), alert == null ? null : Collections.singleton(alert));
+                mapView.showLatestPosition(latestPosition);
+                if (alerts.contains(deviceId)) {
+                    mapView.showAlert(latestPosition);
+                }
             }
         } else {
             mapView.clearLatestPosition(deviceId);

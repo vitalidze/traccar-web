@@ -158,13 +158,8 @@ public class MapPositionRenderer {
     private void changeMarkerIcon(Position position, boolean selected) {
         DeviceData deviceData = getDeviceData(position.getDevice());
         DeviceMarker oldMarker = deviceData.markerMap.get(position.getId());
-        Point point = Point.narrowToPoint(oldMarker.marker.getJSObject().getProperty("geometry"));
-        VectorFeature newMarker = new VectorFeature(point, createStyle(position, selected));
-        setUpEvents(newMarker, position);
-        deviceData.markerMap.put(position.getId(), new DeviceMarker(oldMarker.position, newMarker));
-        getMarkerLayer().removeFeature(oldMarker.marker);
-        oldMarker.marker.destroy();
-        getMarkerLayer().addFeature(newMarker);
+        oldMarker.marker.setStyle(createStyle(position, selected));
+        getMarkerLayer().redraw();
     }
 
     private static class SnappingHandler extends EventHandler {
@@ -299,7 +294,6 @@ public class MapPositionRenderer {
         VectorFeature alert;
         LineString trackLine;
         List<VectorFeature> trackPoints = new ArrayList<>();
-        List<VectorFeature> labels = new ArrayList<>();
         Map<Position, VectorFeature> pauseAndStops = new HashMap<>();
         Map<Position, VectorFeature> timeLabels = new HashMap<>();
         Map<Position, VectorFeature> arrows = new HashMap<>();
@@ -346,12 +340,11 @@ public class MapPositionRenderer {
         clear(getDeviceData(deviceId));
     }
 
-    private void clearMarkersAndTitleAndAlert(DeviceData deviceData) {
-        for (DeviceMarker marker : deviceData.markerMap.values()) {
-            getMarkerLayer().removeFeature(marker.marker);
-            marker.marker.destroy();
-        }
-        deviceData.markerMap.clear();
+    public void clearAlert(Long deviceId) {
+        clearAlert(getDeviceData(deviceId));
+    }
+
+    private void clearAlert(DeviceData deviceData) {
         if (deviceData.alert != null) {
             getVectorLayer().removeFeature(deviceData.alert);
             deviceData.alert.destroy();
@@ -359,15 +352,19 @@ public class MapPositionRenderer {
         }
     }
 
+    private void clearMarkers(DeviceData deviceData) {
+        for (DeviceMarker marker : deviceData.markerMap.values()) {
+            getMarkerLayer().removeFeature(marker.marker);
+            marker.marker.destroy();
+        }
+        deviceData.markerMap.clear();
+        clearAlert(deviceData);
+    }
+
     private void clear(DeviceData deviceData) {
         // clear markers and title
-        clearMarkersAndTitleAndAlert(deviceData);
-        // clear labels
-        for (VectorFeature label : deviceData.labels) {
-            getVectorLayer().removeFeature(label);
-            label.destroy();
-        }
-        deviceData.labels.clear();
+        clearMarkers(deviceData);
+        clearAlert(deviceData);
         // clear time labels
         for (VectorFeature label : deviceData.timeLabels.values()) {
             getVectorLayer().removeFeature(label);
@@ -402,12 +399,6 @@ public class MapPositionRenderer {
         setSnapToTrack(deviceData, false);
     }
 
-    public void clearPositionsAndTitlesAndAlerts() {
-        for (DeviceData deviceData : deviceMap.values()) {
-            clearMarkersAndTitleAndAlert(deviceData);
-        }
-    }
-
     public void clear() {
         for (DeviceData deviceData : deviceMap.values()) {
             clear(deviceData);
@@ -429,14 +420,24 @@ public class MapPositionRenderer {
                 getMarkerLayer().addFeature(marker);
             }
         }
+    }
 
-        if (!selectPosition(null, selectedPosition, false)) {
-            this.selectedPosition = null;
-        }
+    public void movePosition(Position position) {
+        if (visibilityProvider.isVisible(position.getDevice())) {
+            DeviceData deviceData = getDeviceData(position.getDevice());
+            if (deviceData.positions.size() == 1) {
+                Position oldPosition = deviceData.positions.get(0);
+                DeviceMarker oldMarker = deviceData.markerMap.remove(oldPosition.getId());
+                VectorFeature mapMarker = oldMarker.marker;
+                boolean selected = selectedDeviceId != null && selectedDeviceId.equals(position.getDevice().getId());
+                mapMarker.setStyle(createStyle(position, selected));
+                mapMarker.move(mapView.createLonLat(position.getLongitude(), position.getLatitude()));
+                setUpEvents(mapMarker, position);
 
-        if (positions.size() == 1 && selectedDeviceId != null && selectedDeviceId.equals(positions.get(0).getDevice().getId())
-                && !selectPosition(null, positions.get(0), false)) {
-            selectedDeviceId = null;
+                DeviceMarker newMarker = new DeviceMarker(position, mapMarker);
+                deviceData.positions = Collections.singletonList(position);
+                deviceData.markerMap.put(position.getId(), newMarker);
+            }
         }
     }
 
@@ -596,9 +597,7 @@ public class MapPositionRenderer {
             if (deviceData.markerMap.containsKey(newPosition.getId())) {
                 changeMarkerIcon(newPosition, true);
                 if (center) {
-                    DeviceMarker marker = deviceData.markerMap.get(newPosition.getId());
-                    Point point = Point.narrowToPoint(marker.marker.getJSObject().getProperty("geometry"));
-                    mapView.getMap().panTo(new LonLat(point.getX(), point.getY()));
+                    centerPosition(newPosition);
                 }
                 return true;
             }
@@ -606,10 +605,14 @@ public class MapPositionRenderer {
         return false;
     }
 
+    private void centerPosition(Position position) {
+        mapView.getMap().panTo(mapView.createLonLat(position.getLongitude(), position.getLatitude()));
+    }
+
     public void catchPosition(Position position) {
         if (visibilityProvider.isVisible(position.getDevice())
             && !mapView.getMap().getExtent().containsLonLat(mapView.createLonLat(position.getLongitude(), position.getLatitude()), true)) {
-            selectPosition(position, true);
+            centerPosition(position);
         }
     }
 
@@ -686,18 +689,23 @@ public class MapPositionRenderer {
             if (position != null) {
                 position.setDevice(device);
                 position.setIcon(MarkerIcon.create(position).setName(device.isShowName()));
-                boolean selected = selectedPosition != null && selectedPosition.getId() == position.getId();
+                boolean selected = selectedDeviceId != null && selectedDeviceId.equals(device.getId());
                 changeMarkerIcon(position, selected);
             }
         }
     }
 
-    public void showAlerts(Collection<Position> positions) {
-        if (positions != null) {
-            for (Position position : positions) {
-                if (visibilityProvider.isVisible(position.getDevice())) {
-                    drawAlert(position);
-                }
+    public void showAlert(Position position) {
+        if (visibilityProvider.isVisible(position.getDevice())) {
+            drawAlert(position);
+        }
+    }
+
+    public void moveAlert(Position position) {
+        if (visibilityProvider.isVisible(position.getDevice())) {
+            DeviceData deviceData = getDeviceData(position.getDevice());
+            if (deviceData.alert != null) {
+                deviceData.alert.move(mapView.createLonLat(position.getLongitude(), position.getLatitude()));
             }
         }
     }

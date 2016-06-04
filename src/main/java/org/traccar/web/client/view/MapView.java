@@ -320,23 +320,28 @@ public class MapView {
     private final MapPositionRenderer latestPositionTrackRenderer;
     private final GeoFenceRenderer geoFenceRenderer;
 
-    public void clearLatestPositions() {
-        latestPositionRenderer.clearPositionsAndTitlesAndAlerts();
-    }
-
     public void clearLatestPosition(Long deviceId) {
         latestPositionRenderer.clear(deviceId);
     }
 
-    public void showLatestPositions(List<Position> positions, Collection<Position> alerts) {
-        for (Position position : positions) {
-            latestPositionRenderer.showPositions(Collections.singletonList(position));
-        }
-        showAlerts(alerts);
+    public void clearAlert(Long deviceId) {
+        latestPositionRenderer.clearAlert(deviceId);
     }
 
-    public void showAlerts(Collection<Position> positions) {
-        latestPositionRenderer.showAlerts(positions);
+    public void showLatestPosition(Position position) {
+        latestPositionRenderer.showPositions(Collections.singletonList(position));
+    }
+
+    public void showAlert(Position position) {
+        latestPositionRenderer.showAlert(position);
+    }
+
+    public void moveLatestPosition(Position position) {
+        latestPositionRenderer.movePosition(position);
+    }
+
+    public void moveAlert(Position position) {
+        latestPositionRenderer.moveAlert(position);
     }
 
     public void clearLatestTrackPositions(Device device, Date before) {
