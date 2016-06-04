@@ -225,7 +225,8 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
                 if (deviceCombo.getCurrentValue() != null) {
                     dialog.selectDevice(deviceCombo.getCurrentValue());
                 }
-                if (periodCombo.getCurrentValue() == null) {
+                if (periodCombo.getCurrentValue() == null || periodCombo.getCurrentValue() == Period.CUSTOM) {
+                    dialog.selectPeriod(Period.CUSTOM);
                     dialog.selectPeriod(getCombineDate(fromDate, fromTime), getCombineDate(toDate, toTime));
                 } else {
                     dialog.selectPeriod(periodCombo.getCurrentValue());
