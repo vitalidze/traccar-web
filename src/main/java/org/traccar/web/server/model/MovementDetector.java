@@ -16,6 +16,7 @@
 package org.traccar.web.server.model;
 
 import com.google.inject.Inject;
+import com.google.inject.persist.Transactional;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.Position;
 
@@ -49,6 +50,7 @@ public class MovementDetector extends ScheduledTask {
         scheduler.scheduleWithFixedDelay(this, 0, 1, TimeUnit.MINUTES);
     }
 
+    @Transactional
     @Override
     public void doWork() throws Exception {
         if (lastScannedPositionId == null) {
