@@ -131,7 +131,6 @@ public class NavView {
 
         settingsButton.setVisible(admin || manager);
         settingsAccount.setVisible(!readOnly);
-        settingsPreferences.setVisible(!readOnly);
 
         settingsGlobal.setVisible(!readOnly && admin);
         logsButton.setVisible(admin);
