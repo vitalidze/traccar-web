@@ -69,7 +69,7 @@ public class Application {
         ReportProperties reportProperties = GWT.create(ReportProperties.class);
         final ListStore<Report> reportStore = new ListStore<>(reportProperties.id());
 
-        settingsController = new SettingsController(userSettingsHandler);
+        settingsController = new SettingsController(userSettingsHandler, new DefaultUserSettingsHandlerImpl());
         visibilityController = new VisibilityController();
         mapController = new MapController(mapHandler, deviceStore, visibilityController);
         geoFenceController = new GeoFenceController(deviceStore, mapController);
@@ -217,19 +217,9 @@ public class Application {
         }
     };
 
-    private class UserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler {
+    private abstract class AbstractUserSettingsHandlerImpl implements UserSettingsDialog.UserSettingsHandler {
         @Override
-        public void onSave(UserSettings userSettings) {
-            Application.getDataService().updateUserSettings(userSettings, new BaseAsyncCallback<UserSettings>(i18n) {
-                @Override
-                public void onSuccess(UserSettings result) {
-                    ApplicationContext.getInstance().setUserSettings(result);
-                }
-            });
-        }
-
-        @Override
-        public void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
+        public final void onTakeCurrentMapState(ComboBox<UserSettings.MapType> mapType,
                                           NumberField<Double> centerLongitude,
                                           NumberField<Double> centerLatitude,
                                           NumberField<Integer> zoomLevel,
@@ -260,10 +250,29 @@ public class Application {
         }
 
         @Override
-        public void onSetZoomLevelToCurrent(NumberField<Short> field) {
+        public final void onSetZoomLevelToCurrent(NumberField<Short> field) {
             field.setValue((short) mapController.getMap().getZoom());
         }
     }
 
-    private UserSettingsHandlerImpl userSettingsHandler = new UserSettingsHandlerImpl();
+    private class UserSettingsHandlerImpl extends AbstractUserSettingsHandlerImpl {
+        @Override
+        public void onSave(UserSettings userSettings) {
+            Application.getDataService().updateUserSettings(userSettings, new BaseAsyncCallback<UserSettings>(i18n) {
+                @Override
+                public void onSuccess(UserSettings result) {
+                    ApplicationContext.getInstance().setUserSettings(result);
+                }
+            });
+        }
+    }
+
+    private class DefaultUserSettingsHandlerImpl extends AbstractUserSettingsHandlerImpl {
+        @Override
+        public void onSave(UserSettings userSettings) {
+            getDataService().saveDefaultUserSettigs(userSettings, new BaseAsyncCallback<Void>(i18n));
+        }
+    }
+
+    private UserSettingsDialog.UserSettingsHandler userSettingsHandler = new UserSettingsHandlerImpl();
 }

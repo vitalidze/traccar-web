@@ -257,8 +257,12 @@ public class DBMigrations {
     static class SetDefaultUserSettings implements Migration {
         @Override
         public void migrate(EntityManager em) throws Exception {
+            List<ApplicationSettings> appSettings = em.createQuery("SELECT x FROM ApplicationSettings x", ApplicationSettings.class).getResultList();
             for (User user : em.createQuery("SELECT u FROM " + User.class.getName() + " u WHERE u.userSettings IS NULL", User.class).getResultList()) {
-                user.setUserSettings(new UserSettings());
+                UserSettings defaultSettings = appSettings.isEmpty() || appSettings.get(0).getUserSettings() == null
+                        ? new UserSettings()
+                        : appSettings.get(0).getUserSettings().copy();
+                user.setUserSettings(defaultSettings);
                 em.persist(user);
             }
         }

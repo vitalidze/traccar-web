@@ -67,6 +67,10 @@ public interface DataService extends RemoteService {
 
     void updateApplicationSettings(ApplicationSettings applicationSettings);
 
+    void saveDefaultUserSettigs(UserSettings userSettings);
+
+    UserSettings getDefaultUserSettings();
+
     void saveRoles(List<User> users) throws InvalidMaxDeviceNumberForUserException;
 
     List<GeoFence> getGeoFences();

@@ -1,16 +1,10 @@
 package org.traccar.web.shared.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
+import javax.persistence.*;
 
 @Entity
 @Table(name="application_settings")
@@ -154,6 +148,19 @@ public class ApplicationSettings implements IsSerializable {
 
     public void setAllowCommandsOnlyForAdmins(boolean allowCommandsOnlyForAdmins) {
         this.allowCommandsOnlyForAdmins = allowCommandsOnlyForAdmins;
+    }
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(foreignKey = @ForeignKey(name = "appsettings_fkey_usersettings_id"))
+    @GwtTransient
+    private UserSettings userSettings;
+
+    public UserSettings getUserSettings() {
+        return userSettings;
+    }
+
+    public void setUserSettings(UserSettings userSettings) {
+        this.userSettings = userSettings;
     }
 
     @Override

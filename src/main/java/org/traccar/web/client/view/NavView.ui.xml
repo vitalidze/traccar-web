@@ -25,6 +25,7 @@
             <menu:MenuItem text="{i18n.users}" ui:field="settingsUsers" visible="false" />
             <menu:MenuItem text="{i18n.global}" ui:field="settingsGlobal" visible="false" />
             <menu:MenuItem text="{i18n.notifications}" ui:field="settingsNotifications" visible="false" />
+            <menu:MenuItem text="{i18n.defaultPreferences}" ui:field="settingsDefaultPreferences" visible="false" />
           </menu:Menu>
         </button:menu>
       </button:TextButton>

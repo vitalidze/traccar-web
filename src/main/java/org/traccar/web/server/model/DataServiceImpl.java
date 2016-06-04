@@ -186,7 +186,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
                     user.setPassword(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()));
                     user.setManager(Boolean.TRUE); // registered users are always managers
-                    user.setUserSettings(new UserSettings());
+                    user.setUserSettings(getUserSettingsForNewUser());
                     getSessionEntityManager().persist(user);
                     getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
                     setSessionUser(user);
@@ -243,7 +243,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
             user.setPassword(user.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()));
             if (user.getUserSettings() == null) {
-                user.setUserSettings(new UserSettings());
+                user.setUserSettings(getUserSettingsForNewUser());
             }
             user.setNotificationEvents(user.getTransferNotificationEvents());
             getSessionEntityManager().persist(user);
@@ -839,6 +839,31 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     public void updateApplicationSettings(ApplicationSettings applicationSettings) {
         getSessionEntityManager().merge(applicationSettings);
         eventService.applicationSettingsChanged();
+    }
+
+    @Transactional
+    @RequireUser(roles = { Role.ADMIN })
+    @RequireWrite
+    @Override
+    public void saveDefaultUserSettigs(UserSettings userSettings) {
+        if (getApplicationSettings().getUserSettings() == null) {
+            getSessionEntityManager().persist(userSettings);
+            getApplicationSettings().setUserSettings(userSettings);
+        } else {
+            getApplicationSettings().getUserSettings().copyFrom(userSettings);
+        }
+    }
+
+    @Transactional
+    @RequireUser
+    @Override
+    public UserSettings getDefaultUserSettings() {
+        return getApplicationSettings().getUserSettings() == null ? new UserSettings() : unproxy(getApplicationSettings().getUserSettings());
+    }
+
+    private UserSettings getUserSettingsForNewUser() {
+        ApplicationSettings applicationSettings = this.applicationSettings.get();
+        return applicationSettings.getUserSettings() == null ? new UserSettings() : applicationSettings.getUserSettings().copy();
     }
 
     @Transactional

@@ -556,4 +556,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String arrowSize();
 
     String allowCommandsOnlyForAdmins();
+
+    String defaultPreferences();
 }

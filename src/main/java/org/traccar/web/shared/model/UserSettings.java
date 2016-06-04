@@ -395,4 +395,11 @@ public class UserSettings implements IsSerializable {
         speedForFilter = userSettings.speedForFilter;
         archiveMarkerType = userSettings.archiveMarkerType;
     }
+
+    public UserSettings copy() {
+        UserSettings result = new UserSettings();
+        result.copyFrom(this);
+        result.id = 0;
+        return result;
+    }
 }

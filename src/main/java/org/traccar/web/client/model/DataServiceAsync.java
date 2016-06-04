@@ -80,4 +80,8 @@ public interface DataServiceAsync {
     void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share, AsyncCallback<Void> async);
 
     void sendCommand(Command command, AsyncCallback<String> async);
+
+    void saveDefaultUserSettigs(UserSettings userSettings, AsyncCallback<Void> async);
+
+    void getDefaultUserSettings(AsyncCallback<UserSettings> async);
 }

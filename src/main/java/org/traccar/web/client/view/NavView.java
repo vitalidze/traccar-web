@@ -46,6 +46,7 @@ public class NavView {
         void onUsersSelected();
         void onApplicationSelected();
         void onNotificationsSelected();
+        void onDefaultPreferencesSelected();
     }
 
     private final SettingsHandler settingsHandler;
@@ -95,6 +96,9 @@ public class NavView {
     MenuItem settingsNotifications;
 
     @UiField
+    MenuItem settingsDefaultPreferences;
+
+    @UiField
     TextButton logsButton;
 
     @UiField
@@ -133,6 +137,7 @@ public class NavView {
         settingsAccount.setVisible(!readOnly);
 
         settingsGlobal.setVisible(!readOnly && admin);
+        settingsDefaultPreferences.setVisible(!readOnly && admin);
         logsButton.setVisible(admin);
         showTrackerServerLog.setVisible(admin);
         settingsUsers.setVisible(!readOnly && (admin || manager));
@@ -173,6 +178,11 @@ public class NavView {
     @UiHandler("settingsNotifications")
     public void onSettingsNotificationsSelected(SelectionEvent<Item> event) {
         settingsHandler.onNotificationsSelected();
+    }
+
+    @UiHandler("settingsDefaultPreferences")
+    public void onSettingsDefaultPreferencesSelected(SelectionEvent<Item> event) {
+        settingsHandler.onDefaultPreferencesSelected();
     }
 
     @UiHandler("logoutButton")
