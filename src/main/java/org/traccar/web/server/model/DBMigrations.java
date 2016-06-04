@@ -58,14 +58,14 @@ public class DBMigrations {
                 new SetDefaultDeviceIconArrowRadius(),
                 new SetDefaultHashImplementation(),
                 new SetGlobalHashSalt(),
+                new SetDefaultAllowCommandsOnlyForAdmins(),
                 new SetDefaultUserSettings(),
                 new SetArchiveDefaultColumns(),
                 new SetGeoFenceAllDevicesFlag(),
                 new SetReportsFilterAndPreview(),
                 new SetDefaultNotificationExpirationPeriod(),
                 new SetDefaultExpiredFlagForEvents(),
-                new SetDefaultMatchServiceURL(),
-                new SetDefaultAllowCommandsOnlyForAdmins()
+                new SetDefaultMatchServiceURL()
         }) {
             em.getTransaction().begin();
             try {
