@@ -59,11 +59,11 @@ public class DBMigrations {
                 new SetDefaultHashImplementation(),
                 new SetGlobalHashSalt(),
                 new SetDefaultAllowCommandsOnlyForAdmins(),
+                new SetDefaultNotificationExpirationPeriod(),
                 new SetDefaultUserSettings(),
                 new SetArchiveDefaultColumns(),
                 new SetGeoFenceAllDevicesFlag(),
                 new SetReportsFilterAndPreview(),
-                new SetDefaultNotificationExpirationPeriod(),
                 new SetDefaultExpiredFlagForEvents(),
                 new SetDefaultMatchServiceURL()
         }) {
