@@ -82,6 +82,7 @@ public class ReportServiceImpl extends RemoteServiceServlet implements ReportSer
         toSave.setGeoFences(new HashSet<GeoFence>(report.getGeoFences().size()));
         toSave.setUsers(new HashSet<User>(1));
         toSave.getUsers().add(sessionUser.get());
+        processDevicesAndGeoFences(report, toSave);
         entityManager.get().persist(toSave);
 
         return unproxy(toSave);
