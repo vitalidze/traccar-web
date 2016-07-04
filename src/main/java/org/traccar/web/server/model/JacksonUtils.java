@@ -40,6 +40,7 @@ class JacksonUtils {
 
         SimpleModule module = new SimpleModule();
         module.addSerializer(DeviceIconType.class, new DeviceIconTypeSerializer());
+        module.addDeserializer(DeviceIconType.class, new DeviceIconTypeDeserializer());
         mapper.registerModule(module);
         return mapper;
     }

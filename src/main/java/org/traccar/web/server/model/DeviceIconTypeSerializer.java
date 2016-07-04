@@ -32,6 +32,7 @@ class DeviceIconTypeSerializer extends JsonSerializer<DeviceIconType> {
                           JsonGenerator json,
                           SerializerProvider serializerProvider) throws IOException {
         json.writeStartObject();
+        json.writeStringField("type", deviceIcon.name());
         for (Position.Status status : Position.Status.values()) {
             json.writeObjectFieldStart(status.name());
 

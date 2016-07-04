@@ -148,7 +148,10 @@ public class RESTApiServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } catch (Exception ex) {}
         } catch (Exception ex) {
-            log("Merhod '" + methodName + "' failed with unexpected error", ex);
+            log("Method '" + methodName + "' failed with unexpected error", ex);
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            } catch (Exception e) {}
         }
     }
 }

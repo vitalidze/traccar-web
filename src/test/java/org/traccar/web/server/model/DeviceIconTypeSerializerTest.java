@@ -54,5 +54,7 @@ public class DeviceIconTypeSerializerTest {
         Iterator<JsonNode> urls = jsonPositionIconType.get("urls").elements();
         assertEquals(positionIconType.getURL(false), urls.next().asText());
         assertEquals(positionIconType.getURL(true), urls.next().asText());
+
+        assertEquals(DeviceIconType.DEFAULT.name(), jsonDeviceIconType.get("type").asText());
     }
 }
