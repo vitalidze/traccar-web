@@ -2,8 +2,11 @@
 layout: default
 title: Installation
 ---
+### Version 3.6
 
-### Version 3.x
+To be updated.
+
+### Version 3.x - 3.5
 
 1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
 
