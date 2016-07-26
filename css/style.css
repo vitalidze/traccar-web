@@ -35,3 +35,26 @@ html, body {
 #webform_side_tab {
     background-color: #87fdff !important;
 }
+
+.installation {
+  display: none;
+}
+
+.installation ~ label {
+  display: inline-block;
+  background-color: black;
+  color: white;
+  padding: 5px 15px;
+}
+
+.installation ~ label:hover {
+  color: #eee;
+}
+
+.installation-version3_6 {
+  display: none;
+}
+
+.installation:checked ~ .installation-version3_6 {
+  display: block;
+}
