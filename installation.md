@@ -3,10 +3,11 @@ layout: default
 title: Installation
 ---
 ### Version 3.6
-**Still in BETA, use at your own risk**
-<div>
-<input id="installation" class="installation" type="checkbox">
-<label for="installation">Show</label>
+**Still in BETA, use at your own risk.**<br>
+Last update: 28.07.2016
+<div class="toggle-container">
+<input id="toggle-button" class="toggle-button" type="checkbox">
+<label for="toggle-button"></label>
 
 <div class="installation-version3_6" markdown="1">
 
@@ -25,7 +26,27 @@ title: Installation
 
 * Replace `/opt/traccar/traccar-web.war` path with the path to your traccar installation (usually it will be the same folder on linux/mac, on windows it is most probably `c:\Program Files\Traccar\traccar-web.war`).
 
-5) Disable database migrations made by the backend by commenting out the following configuration file entry:
+5) Disable notification system
+
+Old:
+
+    <entry key='event.enable'>true</entry>
+    <entry key='event.suppressRepeated'>60</entry>
+    <entry key='event.overspeedHandler'>true</entry>
+    <entry key='event.globalSpeedLimit'>90</entry>
+    <entry key='event.motionHandler'>true</entry>
+    <entry key='event.geofenceHandler'>true</entry>
+
+New:
+
+    <entry key='event.enable'>false</entry>
+    <entry key='event.suppressRepeated'>60</entry>
+    <entry key='event.overspeedHandler'>false</entry>
+    <entry key='event.globalSpeedLimit'>90</entry>
+    <entry key='event.motionHandler'>false</entry>
+    <entry key='event.geofenceHandler'>false</entry>
+
+6) Disable database migrations made by the backend by commenting out the following configuration file entry:
 
 Old:
 
@@ -44,7 +65,7 @@ Your database must be empty before first startup. To ensure this please drop and
 
 **IMPORTANT NOTE :** This will delete all existing data. If it needed to be preserved, then instead of dropping database just use a brand new database with a different name. Then data can be copied between databases using SQL queries or some scripts.
 
-6) Update the following queries:
+7) Update the following queries:
 
 Old:
 
@@ -137,128 +158,9 @@ New:
         INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
     </entry> -->
 
--------------------
+8) Start Traccar service
 
-Old:
-
-    <entry key='database.selectServers'>
-    	SELECT * FROM server;
-    </entry>
-
-New:
-
-    <!-- ( comment out or remove this query )
-    <entry key='database.selectServers'>
-    	SELECT * FROM server;
-    </entry> -->
-
-------------------
-
-Old:
-
-    <entry key='database.selectGroupPermissions'>
-        SELECT userId, groupId FROM user_group;
-    </entry>
-
-New:
-
-    <!-- ( comment out or remove this query )
-    <entry key='database.selectGroupPermissions'>
-        SELECT userId, groupId FROM user_group;
-    </entry> -->
-
-------------------
-
-Old:
-
-    <entry key='database.updateDeviceStatus'>
-    	UPDATE devices SET status = :status, lastUpdate = :lastUpdate, motion = :motion WHERE id = :id
-    </entry>
-
-New:
-
-    <entry key='database.updateDeviceStatus'>
-        UPDATE devices SET status = :status, lastUpdate = :lastUpdate WHERE id = :id;
-    </entry>
-
------------------
-
-Old:
-
-    <entry key='database.selectEvents'>
-        SELECT * FROM events WHERE deviceId = :deviceId AND type LIKE :type AND serverTime BETWEEN :from AND :to ORDER BY serverTime DESC;
-    </entry>
-
-New:
-
-    <!-- Probably should be commented out at all -->
-    <entry key='database.selectEvents'>
-        SELECT * FROM events WHERE device_id = :deviceId AND type LIKE :type AND time BETWEEN :from AND :to ORDER BY time DESC;
-    </entry>
-
------------------
-
-Old:
-
-    <entry key='database.selectGeofencePermissions'>
-    	SELECT userId, geofenceId FROM user_geofence;
-    </entry>
-
-New:
-
-    <!-- ( comment out or remove this query )
-    <entry key='database.selectGeofencePermissions'>
-    	SELECT userId, geofenceId FROM user_geofence;
-    </entry> -->
-
------------------
-
-Old:
-
-    <entry key='database.selectGroupGeofences'>
-        SELECT groupId, geofenceId FROM group_geofence;
-    </entry>
-
-New:
-
-    <!-- ( comment out or remove this query )
-    <entry key='database.selectGroupGeofences'>
-        SELECT groupId, geofenceId FROM group_geofence;
-    </entry> -->
-
------------------
-
-Old:
-
-    <entry key='database.selectDeviceGeofences'>
-        SELECT deviceId, geofenceId FROM device_geofence;
-    </entry>
-
-New:
-
-    <!-- ( comment out or remove this query )
-    <entry key='database.selectDeviceGeofences'>
-        SELECT deviceId, geofenceId FROM device_geofence;
-    </entry> -->
-
------------------
-
-Old:
-
-    <entry key='database.selectNotifications'>
-        SELECT * FROM notifications;
-    </entry>
-
-New:
-
-    <!-- ( comment out or remove this query )
-    <entry key='database.selectNotifications'>
-        SELECT * FROM notifications;
-    </entry> -->
-
-7) Start Traccar service
-
-8) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
+9) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
 </div>
 </div>
 

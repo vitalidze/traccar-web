@@ -36,25 +36,39 @@ html, body {
     background-color: #87fdff !important;
 }
 
-.installation {
+/* Show & Hide button*/
+.toggle-container {
+  position: relative;
+}
+.toggle-button {
   display: none;
 }
-
-.installation ~ label {
+.toggle-button + label {
   display: inline-block;
-  background-color: black;
+  width: 70px;
+  height: 30px;
+  cursor: pointer;
   color: white;
-  padding: 5px 15px;
+  border-radius: 3px;
+  background-color: black;
 }
-
-.installation ~ label:hover {
+.toggle-button + label:after {
+  position: absolute;
+  left: 18px;
+  content: 'Show';
+  color: white;
+  line-height: 30px;
+}
+.toggle-button:checked + label:after {
+  left: 20px;
+  content: 'Hide';
+}
+.toggle-button + label:hover:after {
   color: #eee;
 }
-
 .installation-version3_6 {
   display: none;
 }
-
-.installation:checked ~ .installation-version3_6 {
+.toggle-button:checked ~ .installation-version3_6 {
   display: block;
 }
