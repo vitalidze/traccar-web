@@ -157,6 +157,20 @@ New:
     <entry key='database.linkDevice'>
         INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
     </entry> -->
+    
+-------------------
+
+Old:
+
+    <entry key='database.updateDeviceStatus'>
+        UPDATE devices SET status = :status, lastUpdate = :lastUpdate, motion = :motion WHERE id = :id
+    </entry>
+
+New:
+
+    <entry key='database.updateDeviceStatus'>
+        UPDATE devices SET status = :status, lastUpdate = :lastUpdate WHERE id = :id;
+    </entry>
 
 8) Start Traccar service
 
