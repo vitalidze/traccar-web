@@ -119,7 +119,15 @@ public class MapView {
                     ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey().trim().isEmpty())) {
                 continue;
             }
-            map.addLayer(createMap(mapType));
+
+            Layer mapLayer = createMap(mapType);
+
+            try {
+                map.addLayer(mapLayer);
+            } catch (Exception ex) {
+                GWT.log("Error adding map layer " + mapType, ex);
+                map.removeLayer(mapLayer);
+            }
         }
     }
 
