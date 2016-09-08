@@ -65,7 +65,8 @@ public class DBMigrations {
                 new SetGeoFenceAllDevicesFlag(),
                 new SetReportsFilterAndPreview(),
                 new SetDefaultExpiredFlagForEvents(),
-                new SetDefaultMatchServiceURL()
+                new SetDefaultMatchServiceURL(),
+                new RemoveMapQuest()
         }) {
             em.getTransaction().begin();
             try {
@@ -470,6 +471,17 @@ public class DBMigrations {
         public void migrate(EntityManager em) throws Exception {
             em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.allowCommandsOnlyForAdmins = :false WHERE S.allowCommandsOnlyForAdmins IS NULL")
                     .setParameter("false", false)
+                    .executeUpdate();
+        }
+    }
+
+    static class RemoveMapQuest implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createNativeQuery("UPDATE user_settings SET mapType=? WHERE mapType=? OR mapType=?")
+                    .setParameter(1, UserSettings.MapType.OSM.name())
+                    .setParameter(2, "MAPQUEST_ROAD")
+                    .setParameter(3, "MAPQUEST_AERIAL")
                     .executeUpdate();
         }
     }
