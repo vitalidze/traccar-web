@@ -41,6 +41,7 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 import org.gwtopenmaps.openlayers.client.*;
+import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.control.DrawFeature;
 import org.gwtopenmaps.openlayers.client.control.DrawFeatureOptions;
@@ -315,10 +316,10 @@ public class GeoFenceWindow implements Editor<GeoFence> {
                 break;
         }
         if (vertices != null) {
-            GeoFence.LonLat[] points = new GeoFence.LonLat[vertices.length];
+            org.traccar.web.shared.model.LonLat[] points = new org.traccar.web.shared.model.LonLat[vertices.length];
             for (int i = 0; i < vertices.length; i++) {
                 vertices[i].transform(mapProjection, epsg4326);
-                points[i] = new GeoFence.LonLat(vertices[i].getX(), vertices[i].getY());
+                points[i] = new org.traccar.web.shared.model.LonLat(vertices[i].getX(), vertices[i].getY());
             }
             updated.points(points);
         }

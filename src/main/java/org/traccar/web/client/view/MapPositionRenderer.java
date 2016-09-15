@@ -476,12 +476,8 @@ public class MapPositionRenderer {
                         linePoints.add(mapView.createPoint(position.getLongitude(), position.getLatitude()));
                     }
                 } else {
-                    for (VectorFeature feature : segment.getGeometry()) {
-                        LineString lineString = LineString.narrowToLineString(feature.getJSObject().getProperty("geometry"));
-                        for (int i = 0; i < lineString.getNumberOfComponents(); i++) {
-                            Point point = Point.narrowToPoint(lineString.getComponent(i));
-                            linePoints.add(mapView.createPoint(point.getX() / 10, point.getY() / 10));
-                        }
+                    for (org.traccar.web.shared.model.LonLat point : segment.getGeometry()) {
+                        linePoints.add(mapView.createPoint(point.lon, point.lat));
                     }
                 }
             }

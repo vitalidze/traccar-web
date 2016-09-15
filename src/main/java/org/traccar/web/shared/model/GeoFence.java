@@ -209,16 +209,6 @@ public class GeoFence implements IsSerializable {
         return result;
     }
 
-    public static class LonLat {
-        public final double lon;
-        public final double lat;
-
-        public LonLat(double lon, double lat) {
-            this.lon = lon;
-            this.lat = lat;
-        }
-    }
-
     public List<LonLat> points() {
         if (getPoints() == null || getPoints().isEmpty()) {
             return Collections.emptyList();

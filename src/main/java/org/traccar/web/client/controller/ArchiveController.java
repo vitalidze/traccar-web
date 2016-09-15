@@ -15,27 +15,35 @@
  */
 package org.traccar.web.client.controller;
 
-import java.util.*;
-
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsonUtils;
-import com.google.gwt.http.client.*;
+import com.google.gwt.core.client.GWT;
+import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.AutoProgressMessageBox;
-import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
-import org.gwtopenmaps.openlayers.client.format.EncodedPolyline;
-import org.traccar.web.client.*;
+import org.traccar.web.client.Application;
+import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.ArchiveStyle;
+import org.traccar.web.client.MatchService;
+import org.traccar.web.client.OSRMv4MatchService;
+import org.traccar.web.client.OSRMv5MatchService;
+import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
 import org.traccar.web.client.view.ArchiveView;
 import org.traccar.web.client.view.FilterDialog;
 import org.traccar.web.client.view.ReportsMenu;
 import org.traccar.web.client.view.UserSettingsDialog;
-import org.traccar.web.shared.model.*;
+import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.MatchServiceType;
+import org.traccar.web.shared.model.Position;
+import org.traccar.web.shared.model.PositionIconType;
+import org.traccar.web.shared.model.Report;
+import org.traccar.web.shared.model.UserSettings;
 
-import com.google.gwt.core.client.GWT;
-import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.widget.core.client.ContentPanel;
-import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ArchiveController implements ContentController, ArchiveView.ArchiveHandler {
 
@@ -169,98 +177,37 @@ public class ArchiveController implements ContentController, ArchiveView.Archive
         archiveView.selectDevice(device);
     }
 
-    public static class Matchings extends JavaScriptObject {
-        protected Matchings() {
-        }
-
-        public final native Matching[] getMatchings() /*-{
-            return this.matchings;
-        }-*/;
-    }
-
-    public static class Matching extends JavaScriptObject {
-        protected Matching() {
-        }
-
-        public final native double[][] getMatchedPoints() /*-{
-            return this.matched_points;
-        }-*/;
-
-        public final native int[] getIndices() /*-{
-            return this.indices;
-        }-*/;
-
-        public final native String getGeometry() /*-{
-            return this.geometry;
-        }-*/;
-    }
-
     private void loadSnappedPointsAndShowTrack(final Device device) {
-        final Track track = originalTracks.get(device.getId());
-
-        final List<Position> originalPositions = track.getPositions();
-        StringBuilder body = new StringBuilder("");
-        for (Position position : originalPositions) {
-            if (body.length() > 0) {
-                body.append('&');
-            }
-            body.append("loc=").append(formatLonLat(position.getLatitude()))
-                    .append(',').append(formatLonLat(position.getLongitude()))
-                    .append("&t=").append(position.getTime().getTime() / 1000);
-        }
-
-        RequestBuilder builder = new RequestBuilder(RequestBuilder.POST, ApplicationContext.getInstance().getApplicationSettings().getMatchServiceURL());
-        builder.setHeader("Content-type", "application/x-www-form-urlencoded");
-        try {
-            builder.sendRequest(body.toString(), new RequestCallback() {
+        MatchService matchService = getMatchService();
+        if (matchService == null) {
+            new AlertMessageBox(i18n.error(), i18n.errSnapToRoads(-1, "Match service implementation cannot be found"));
+        } else {
+            matchService.load(originalTracks.get(device.getId()), new MatchService.Callback() {
                 @Override
-                public void onResponseReceived(Request request, Response response) {
-                    if (200 == response.getStatusCode()) {
-                        Matchings matchings = JsonUtils.safeEval(response.getText());
-                        Track snappedTrack = new Track();
-                        int lastIndex = 0;
-                        for (Matching matching : matchings.getMatchings()) {
-                            // add original track segment
-                            List<Position> originalTrack = lastIndex < matching.getIndices()[0]
-                                    ? Collections.<Position>emptyList()
-                                    : originalPositions.subList(lastIndex, matching.getIndices()[0]);
-                            // add snapped track segment
-                            List<Position> snappedPositions = new ArrayList<>(matching.getIndices().length);
-                            for (int i = 0; i < matching.getIndices().length; i++) {
-                                int snappedPositionIndex = matching.getIndices()[i];
-                                double[] latLon = matching.getMatchedPoints()[i];
-                                Position snapped = new Position(originalPositions.get(snappedPositionIndex));
-                                snapped.setLatitude(latLon[0]);
-                                snapped.setLongitude(latLon[1]);
-                                snappedPositions.add(snapped);
-                            }
-                            EncodedPolyline encodedPolyline = new EncodedPolyline();
-                            VectorFeature[] geometry = encodedPolyline.read(matching.getGeometry());
-                            snappedTrack.addSegment(originalTrack, null, track.getStyle());
-                            snappedTrack.addSegment(snappedPositions, geometry, track.getStyle());
-                            lastIndex = matching.getIndices()[matching.getIndices().length - 1] + 1;
-                        }
-                        if (lastIndex < originalPositions.size()) {
-                            snappedTrack.addSegment(originalPositions.subList(lastIndex, originalPositions.size()), null, track.getStyle());
-                        }
-                        snappedTracks.put(device.getId(), snappedTrack);
-                        showArchive(device);
-                    } else {
-                        new AlertMessageBox(i18n.error(), i18n.errSnapToRoads(response.getStatusCode(), response.getText())).show();
-                    }
+                public void onSuccess(Track track) {
+                    snappedTracks.put(device.getId(), track);
+                    showArchive(device);
                 }
 
                 @Override
-                public void onError(Request request, Throwable exception) {
-                    new AlertMessageBox(i18n.error(), i18n.errSnapToRoads(-1, exception.getLocalizedMessage())).show();
+                public void onError(int code, String text) {
+                    new AlertMessageBox(i18n.error(), i18n.errSnapToRoads(code, text)).show();
                 }
             });
-        } catch (RequestException re) {
-            GWT.log("Request failed", re);
         }
     }
 
-    static native String formatLonLat(double lonLat) /*-{
-        return lonLat.toFixed(6);
-    }-*/;
+    private MatchService getMatchService() {
+        MatchServiceType matchServiceType = ApplicationContext.getInstance().getApplicationSettings().getMatchServiceType();
+        String url = ApplicationContext.getInstance().getApplicationSettings().getMatchServiceURL();
+        if (matchServiceType != null) {
+            switch (matchServiceType) {
+                case OSRM_V4:
+                    return new OSRMv4MatchService(url);
+                case OSRM_V5:
+                    return new OSRMv5MatchService(url);
+            }
+        }
+        return null;
+    }
 }

@@ -13,27 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.web.shared.model;
+package org.traccar.web.client;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+public abstract class MatchService {
+    protected final String url;
 
-public enum MatchServiceType implements IsSerializable {
-    OSRM_V4("OSRM v4", "https://router.project-osrm.org/match"),
-    OSRM_V5("OSRM v5", "https://router.project-osrm.org/match/v1/driving/");
-
-    private final String name;
-    private final String defaultURL;
-
-    MatchServiceType(String name, String defaultURL) {
-        this.name = name;
-        this.defaultURL = defaultURL;
+    public MatchService(String url) {
+        this.url = url;
     }
 
-    public String getName() {
-        return name;
+    public abstract void load(Track track, Callback callback);
+
+    public interface Callback {
+        void onSuccess(Track track);
+        void onError(int code, String text);
     }
 
-    public String getDefaultURL() {
-        return defaultURL;
-    }
+    static native String formatLonLat(double lonLat) /*-{
+        return lonLat.toFixed(6);
+    }-*/;
 }

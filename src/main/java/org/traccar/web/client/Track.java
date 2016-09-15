@@ -15,7 +15,7 @@
  */
 package org.traccar.web.client;
 
-import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
+import org.traccar.web.shared.model.LonLat;
 import org.traccar.web.shared.model.Position;
 
 import java.util.Collections;
@@ -23,8 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Track {
-
-    private List<TrackSegment> segments = new LinkedList<>();
+    private final List<TrackSegment> segments = new LinkedList<>();
 
     public Track() {
     }
@@ -43,7 +42,7 @@ public class Track {
         }
     }
 
-    public void addSegment(List<Position> positions, VectorFeature[] geometry, ArchiveStyle style) {
+    public void addSegment(List<Position> positions, List<LonLat> geometry, ArchiveStyle style) {
         if (positions.size() > 0) {
             segments.add(new TrackSegment(positions, geometry, style));
         }
