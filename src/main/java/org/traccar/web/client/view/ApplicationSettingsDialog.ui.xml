@@ -92,6 +92,13 @@
                 </form:widget>
             </form:FieldLabel>
         </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+          <form:FieldLabel text="{i18n.matchServiceType} ({i18n.snapToRoads})" labelWidth="230">
+              <form:widget>
+                  <form:ComboBox ui:field="matchServiceType" />
+              </form:widget>
+          </form:FieldLabel>
+      </container:child>
         <container:child layoutData="{verticalLayoutData}">
             <form:FieldLabel text="{i18n.matchServiceURL} ({i18n.snapToRoads})" labelWidth="230">
                 <form:widget>

@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.event.logical.shared.*;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.*;
@@ -23,7 +24,7 @@ import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.model.ApplicationSettingsProperties;
 import org.traccar.web.client.model.EnumKeyProvider;
 import org.traccar.web.client.widget.LanguageComboBox;
-import org.traccar.web.shared.model.ApplicationSettings;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -34,7 +35,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import org.traccar.web.shared.model.PasswordHashMethod;
 
 import java.util.Arrays;
 
@@ -92,6 +92,9 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     @UiField
     TextField bingMapsKey;
 
+    @UiField(provided = true)
+    ComboBox<MatchServiceType> matchServiceType;
+
     @UiField
     TextField matchServiceURL;
 
@@ -106,6 +109,18 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
 
         defaultHashImplementation.setForceSelection(true);
         defaultHashImplementation.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+
+        ListStore<MatchServiceType> mstStore = new ListStore<>(new EnumKeyProvider<MatchServiceType>());
+        mstStore.addAll(Arrays.asList(MatchServiceType.values()));
+        matchServiceType = new ComboBox<>(mstStore, new ApplicationSettingsProperties.MatchServiceTypeLabelProvider());
+        matchServiceType.setForceSelection(true);
+        matchServiceType.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+        matchServiceType.addSelectionHandler(new SelectionHandler<MatchServiceType>() {
+            @Override
+            public void onSelection(SelectionEvent<MatchServiceType> event) {
+                matchServiceURL.setValue(event.getSelectedItem().getDefaultURL());
+            }
+        });
 
         language = new LanguageComboBox();
 

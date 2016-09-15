@@ -558,4 +558,6 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String allowCommandsOnlyForAdmins();
 
     String defaultPreferences();
+
+    String matchServiceType();
 }

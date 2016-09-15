@@ -19,8 +19,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Random;
 
 public enum PasswordHashMethod implements IsSerializable {
     PLAIN("plain") {
