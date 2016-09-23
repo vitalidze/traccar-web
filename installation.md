@@ -2,9 +2,266 @@
 layout: default
 title: Installation
 ---
+
+### Version 3.7
+
+<div class="toggle-container">
+<input id="toggle-button" class="toggle-button" type="checkbox">
+<label for="toggle-button"></label>
+
+<div class="installation-version3_7" markdown="1">
+
+1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
+
+2) Stop Traccar service.
+
+3) Put the downloaded `traccar-web.war` in Traccar installation folder (`/opt/traccar` or `c:\Program Files\Traccar`). I recommend to do a backup of existing `traccar-web.war` just in case.
+
+4) Update the configuration file (located in `conf\traccar.xml` of traccar installation folder):
+
+* add the following lines right after `<entry key='web.path'>/opt/traccar/web</entry>`:
+
+      <entry key='web.type'>old</entry>
+      <entry key='web.application'>/opt/traccar/traccar-web.war</entry>
+
+* Replace `/opt/traccar/traccar-web.war` path with the path to your traccar installation (usually it will be the same folder on linux/mac, on windows it is most probably `c:\Program Files\Traccar\traccar-web.war`).
+
+5) Disable notification system
+
+Old:
+
+    <entry key='event.enable'>true</entry>
+    <entry key='event.overspeedHandler'>true</entry>
+    <entry key='event.overspeed.notRepeat'>true</entry>
+    <entry key='event.motionHandler'>true</entry>
+    <entry key='event.geofenceHandler'>true</entry>
+    <entry key='event.alertHandler'>true</entry>
+    <entry key='event.ignitionHandler'>true</entry>
+
+New:
+
+    <entry key='event.enable'>false</entry>
+    <entry key='event.overspeedHandler'>false</entry>
+    <entry key='event.overspeed.notRepeat'>true</entry>
+    <entry key='event.motionHandler'>false</entry>
+    <entry key='event.geofenceHandler'>false</entry>
+    <entry key='event.alertHandler'>false</entry>
+    <entry key='event.ignitionHandler'>false</entry>
+
+6) Disable database migrations made by the backend by commenting out the following configuration file entry:
+
+Old:
+
+    <entry key='database.changelog'>/opt/traccar/schema/changelog-master.xml</entry>
+
+New: ( comment out or remove this entry )
+
+    <!-- <entry key='database.changelog'>/opt/traccar/schema/changelog-master.xml</entry> -->
+
+**IMPORTANT NOTE :**
+Your database must be empty before first startup. To ensure this please drop and re-create the existing database:
+
+* for a default H2 database this can be done by removing contents of the `data` folder under the traccar installation folder. The database will be automatically re-created on first service start.
+
+* for any other databases like MySQL there are queries to drop and create them. Also this can be done via GUI management tools (like [MySQL Workbench](https://www.mysql.com/products/workbench/)).
+
+**IMPORTANT NOTE :** This will delete all existing data. If it needed to be preserved, then instead of dropping database just use a brand new database with a different name. Then data can be copied between databases using SQL queries or some scripts.
+
+7) Update the following queries:
+
+Old:
+
+    <entry key='database.insertPosition'>
+       INSERT INTO positions (deviceId, protocol, serverTime, deviceTime, fixTime, valid, latitude, longitude, altitude, speed, course, address, attributes)
+       VALUES (:deviceId, :protocol, :now, :deviceTime, :fixTime, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
+    </entry>
+
+New:
+
+    <entry key='database.insertPosition'>
+        INSERT INTO positions (device_id, protocol, serverTime, time, valid, latitude, longitude, altitude, speed, course, address, other)
+        VALUES (:deviceId, :protocol, :now, :deviceTime, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
+    </entry>
+
+-------------------
+
+Old:
+
+    <entry key='database.selectLatestPositions'>
+        SELECT * FROM positions WHERE id IN (SELECT positionId FROM devices);
+    </entry>
+
+New:
+
+    <entry key='database.selectLatestPositions'>
+        SELECT id, protocol, device_id AS deviceId, serverTime, time AS deviceTime, time AS fixTime,
+        valid, latitude, longitude, altitude, speed, course, address, other AS attributes
+        FROM positions WHERE id IN (SELECT latestPosition_id FROM devices);
+    </entry>
+
+-------------------
+
+Old:
+
+    <entry key='database.updateLatestPosition'>
+        UPDATE devices SET positionId = :id WHERE id = :deviceId;
+    </entry>
+
+New:
+
+    <entry key='database.updateLatestPosition'>
+        UPDATE devices SET latestPosition_id = :id WHERE id = :deviceId;
+    </entry>
+
+--------------------
+
+Old:
+
+    <entry key='database.selectUsersAll'>
+        SELECT * FROM users;
+    </entry>
+
+New:
+
+    <entry key='database.selectUsersAll'>
+        SELECT id, login AS name, email, readOnly AS readonly, admin FROM users;
+    </entry>
+
+------------------
+
+Old:
+
+    <entry key='database.selectDevicePermissions'>
+        SELECT userId, deviceId FROM user_device;
+    </entry>
+
+New:
+
+    <entry key='database.selectDevicePermissions'>
+        SELECT u.id AS userId, d.id AS deviceId FROM users u, devices d WHERE u.admin=1
+        UNION
+        SELECT ud.users_id AS userId, ud.devices_id AS deviceId FROM users_devices ud
+        INNER JOIN users u ON ud.users_id=u.id
+        WHERE u.admin=0 AND u.readOnly=0
+    </entry>
+
+-------------------
+
+Old:
+
+    <entry key='database.linkDevice'>
+        INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
+    </entry>
+
+New:
+
+    <!-- ( comment out or remove this query )
+    <entry key='database.linkDevice'>
+        INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
+    </entry> -->
+    
+-------------------
+
+Old:
+
+    <entry key='database.updateDeviceStatus'>
+        UPDATE devices SET status = :status, lastUpdate = :lastUpdate, motion = :motion WHERE id = :id
+    </entry>
+
+New:
+
+    <entry key='database.updateDeviceStatus'>
+        UPDATE devices SET status = :status, lastUpdate = :lastUpdate WHERE id = :id;
+    </entry>
+    
+-------------------
+
+Old:
+
+    <entry key='database.ignoreUnknown'>true</entry>
+    
+New:
+
+    <entry key='database.ignoreUnknown'>false</entry>
+
+
+7a) **Only for the first time installation, i.e. not when upgrading from previous versions when the database is already present**
+
+Temporarily comment out the following queries.
+
+-------------------
+
+Old:
+
+    <entry key='database.selectDevicesAll'>
+        SELECT * FROM devices;
+    </entry>
+    
+New:
+
+    <!-- entry key='database.selectDevicesAll'>
+        SELECT * FROM devices;
+    </entry -->
+    
+-------------------
+
+Old:
+
+    <entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
+    </entry>
+    
+New:
+
+    <!-- entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
+    </entry -->
+
+
+8) Start Traccar service
+
+8a) **Only for the first time installation, i.e. not when upgrading from previous versions when the database is already present**
+
+Stop Traccar service. Then uncomment queries, which were commented out in step 7a:
+
+-------------------
+
+Old:
+
+    <!-- entry key='database.selectDevicesAll'>
+        SELECT * FROM devices;
+    </entry -->
+    
+New:
+
+    <entry key='database.selectDevicesAll'>
+        SELECT * FROM devices;
+    </entry>
+    
+-------------------
+
+Old:
+
+    <!-- entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
+    </entry -->
+    
+New:
+
+    <entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
+    </entry>
+    
+-------------------
+
+Start Traccar service.
+
+9) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
+</div>
+</div>
+
 ### Version 3.6
-**Still in BETA, use at your own risk.**<br>
-Last update: 28.07.2016
+
 <div class="toggle-container">
 <input id="toggle-button" class="toggle-button" type="checkbox">
 <label for="toggle-button"></label>

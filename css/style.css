@@ -72,3 +72,9 @@ html, body {
 .toggle-button:checked ~ .installation-version3_6 {
   display: block;
 }
+.installation-version3_7 {
+  display: none;
+}
+.toggle-button:checked ~ .installation-version3_7 {
+  display: block;
+}
