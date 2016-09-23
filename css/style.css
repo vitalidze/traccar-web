@@ -69,12 +69,12 @@ html, body {
 .installation-version3_6 {
   display: none;
 }
-.toggle-button:checked ~ .installation-version3_6 {
+.toggle-button#tb36:checked ~ .installation-version3_6 {
   display: block;
 }
 .installation-version3_7 {
   display: none;
 }
-.toggle-button:checked ~ .installation-version3_7 {
+.toggle-button#tb37:checked ~ .installation-version3_7 {
   display: block;
 }

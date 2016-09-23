@@ -6,7 +6,7 @@ title: Installation
 ### Version 3.7
 
 <div class="toggle-container">
-<input id="toggle-button" class="toggle-button" type="checkbox">
+<input class="toggle-button" type="checkbox" id="tb37" />
 <label for="toggle-button"></label>
 
 <div class="installation-version3_7" markdown="1">
@@ -257,13 +257,14 @@ New:
 Start Traccar service.
 
 9) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
+
 </div>
 </div>
 
 ### Version 3.6
 
 <div class="toggle-container">
-<input id="toggle-button" class="toggle-button" type="checkbox">
+<input class="toggle-button" type="checkbox" id="tb36" />
 <label for="toggle-button"></label>
 
 <div class="installation-version3_6" markdown="1">
