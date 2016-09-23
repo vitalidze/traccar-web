@@ -5,12 +5,6 @@ title: Installation
 
 ### Version 3.7
 
-<div class="toggle-container">
-<input class="toggle-button" type="checkbox" id="tb37" />
-<label for="toggle-button"></label>
-
-<div class="installation-version3_7" markdown="1">
-
 1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
 
 2) Stop Traccar service.
@@ -258,16 +252,7 @@ Start Traccar service.
 
 9) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
 
-</div>
-</div>
-
 ### Version 3.6
-
-<div class="toggle-container">
-<input class="toggle-button" type="checkbox" id="tb36" />
-<label for="toggle-button"></label>
-
-<div class="installation-version3_6" markdown="1">
 
 1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
 
@@ -433,8 +418,6 @@ New:
 8) Start Traccar service
 
 9) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
-</div>
-</div>
 
 ### Version 3.x - 3.5
 
