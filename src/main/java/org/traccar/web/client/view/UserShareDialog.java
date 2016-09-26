@@ -29,6 +29,7 @@ import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.Store;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
+import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
@@ -39,9 +40,9 @@ import java.util.*;
 
 public class UserShareDialog {
 
-    private static UsersDialogUiBinder uiBinder = GWT.create(UsersDialogUiBinder.class);
+    private static UserShareDialogUiBinder uiBinder = GWT.create(UserShareDialogUiBinder.class);
 
-    interface UsersDialogUiBinder extends UiBinder<Widget, UserShareDialog> {
+    interface UserShareDialogUiBinder extends UiBinder<Widget, UserShareDialog> {
     }
 
     public class UserShared {
@@ -97,6 +98,9 @@ public class UserShareDialog {
     Grid<UserShared> grid;
 
     @UiField(provided = true)
+    StoreFilterField<UserShared> userFilter;
+
+    @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
     public UserShareDialog(Map<User, Boolean> shares, UserShareHandler shareHandler) {
@@ -127,9 +131,21 @@ public class UserShareDialog {
 
         columnModel = new ColumnModel<>(columnConfigList);
 
+        userFilter = new StoreFilterField<UserShared>() {
+            @Override
+            protected boolean doSelect(Store<UserShared> store, UserShared parent, UserShared item, String filter) {
+                return filter.trim().isEmpty() || matches(item, filter);
+            }
+
+            boolean matches(UserShared item, String filter) {
+                return item.getName().toLowerCase().contains(filter.toLowerCase());
+            }
+        };
+
         uiBinder.createAndBindUi(this);
 
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        userFilter.bind(shareStore);
     }
 
     public void show() {
