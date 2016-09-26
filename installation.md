@@ -4,6 +4,10 @@ title: Installation
 ---
 
 ### Version 3.7
+<div class="toggle-container">
+  <input id="version3_7" class="toggle-container__button" type="checkbox">
+  <label for="version3_7" class="toggle-container__label"></label>
+  <article class="toggle-container__text" markdown="1">
 
 1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
 
@@ -153,7 +157,7 @@ New:
     <entry key='database.linkDevice'>
         INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
     </entry> -->
-    
+
 -------------------
 
 Old:
@@ -167,13 +171,13 @@ New:
     <entry key='database.updateDeviceStatus'>
         UPDATE devices SET status = :status, lastUpdate = :lastUpdate WHERE id = :id;
     </entry>
-    
+
 -------------------
 
 Old:
 
     <entry key='database.ignoreUnknown'>true</entry>
-    
+
 New:
 
     <entry key='database.ignoreUnknown'>false</entry>
@@ -190,13 +194,13 @@ Old:
     <entry key='database.selectDevicesAll'>
         SELECT * FROM devices;
     </entry>
-    
+
 New:
 
     <!-- entry key='database.selectDevicesAll'>
         SELECT * FROM devices;
     </entry -->
-    
+
 -------------------
 
 Old:
@@ -204,7 +208,7 @@ Old:
     <entry key='database.selectGroupsAll'>
         SELECT * FROM groups;
     </entry>
-    
+
 New:
 
     <!-- entry key='database.selectGroupsAll'>
@@ -225,13 +229,13 @@ Old:
     <!-- entry key='database.selectDevicesAll'>
         SELECT * FROM devices;
     </entry -->
-    
+
 New:
 
     <entry key='database.selectDevicesAll'>
         SELECT * FROM devices;
     </entry>
-    
+
 -------------------
 
 Old:
@@ -239,20 +243,27 @@ Old:
     <!-- entry key='database.selectGroupsAll'>
         SELECT * FROM groups;
     </entry -->
-    
+
 New:
 
     <entry key='database.selectGroupsAll'>
         SELECT * FROM groups;
     </entry>
-    
+
 -------------------
 
 Start Traccar service.
 
 9) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
 
+  </article>
+</div>
+
 ### Version 3.6
+<div class="toggle-container">
+  <input id="version3_6" class="toggle-container__button" type="checkbox">
+  <label for="version3_6" class="toggle-container__label"></label>
+  <article class="toggle-container__text" markdown="1">
 
 1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
 
@@ -400,7 +411,7 @@ New:
     <entry key='database.linkDevice'>
         INSERT INTO user_device (userId, deviceId) VALUES (:userId, :deviceId);
     </entry> -->
-    
+
 -------------------
 
 Old:
@@ -419,7 +430,14 @@ New:
 
 9) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
 
+  </article>
+</div>
+
 ### Version 3.x - 3.5
+<div class="toggle-container">
+  <input id="version3_5" class="toggle-container__button" type="checkbox">
+  <label for="version3_5" class="toggle-container__label"></label>
+  <article class="toggle-container__text" markdown="1">
 
 1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
 
@@ -642,8 +660,14 @@ b) Database must be empty before first startup. To ensure this please drop and r
 6) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
 
 **IMPORTANT NOTE**: existing data of original web interface will not be accessible because it is stored in other tables. It can be copied manually with SQL queries.
+  </article>
+</div>
 
 ### Version 2.x
+<div class="toggle-container">
+  <input id="version2" class="toggle-container__button" type="checkbox">
+  <label for="version2" class="toggle-container__label"></label>
+  <article class="toggle-container__text" markdown="1">
 
 1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
 
@@ -654,3 +678,6 @@ b) Database must be empty before first startup. To ensure this please drop and r
 4) Start Traccar service
 
 5) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
+
+  </article>
+</div>

@@ -36,45 +36,49 @@ html, body {
     background-color: #87fdff !important;
 }
 
-/* Show & Hide button*/
-.toggle-container {
-  position: relative;
-}
-.toggle-button {
+/* Show & Hide buttons */
+.toggle-container__button {
   display: none;
 }
-.toggle-button + label {
+.toggle-container__label:after {
   display: inline-block;
-  width: 70px;
-  height: 30px;
+
+  min-width: 70px;
+  padding: 6px 5px;
+
+  content: 'Show';
   cursor: pointer;
+  text-align: center;
+
   color: white;
   border-radius: 3px;
   background-color: black;
 }
-.toggle-button + label:after {
-  position: absolute;
-  left: 18px;
-  content: 'Show';
-  color: white;
-  line-height: 30px;
-}
-.toggle-button:checked + label:after {
-  left: 20px;
+.toggle-container__button:checked + .toggle-container__label:after {
   content: 'Hide';
 }
-.toggle-button + label:hover:after {
-  color: #eee;
+.toggle-container__label:hover:after {
+  color: #ddd;
 }
-.installation-version3_6 {
-  display: none;
+.toggle-container__text {
+  overflow: hidden;
+
+  height: 0;
+  padding-top: 0;
+
+  -webkit-transition-duration: 0.8s;
+          transition-duration: 0.8s;
+  -webkit-transition-property: none;
+          transition-property: none;
+
+  opacity: 0;
 }
-.toggle-button#tb36:checked ~ .installation-version3_6 {
-  display: block;
-}
-.installation-version3_7 {
-  display: none;
-}
-.toggle-button#tb37:checked ~ .installation-version3_7 {
-  display: block;
+.toggle-container__button:checked ~ .toggle-container__text {
+  height: auto;
+  padding-top: 15px;
+
+  -webkit-transition-property: opacity;
+          transition-property: opacity;
+
+  opacity: 1;
 }
