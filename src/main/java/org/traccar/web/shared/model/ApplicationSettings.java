@@ -110,7 +110,6 @@ public class ApplicationSettings implements IsSerializable {
         this.salt = salt;
     }
 
-    @JsonIgnore
     private String bingMapsKey;
 
     public String getBingMapsKey() {
