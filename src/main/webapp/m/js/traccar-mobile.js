@@ -331,7 +331,7 @@ myApp.onPageInit('map-screen', function(page) {
     } else if (appState.userSettings.mapType.indexOf("BING_") == 0) {
         var style = 'Road';
         if (appState.userSettings.mapType == "BING_HYBRID") {
-            style = 'AerialWithLabels';
+            style = 'ordnancesurvey';
         } else if (appState.userSettings.mapType == "BING_AERIAL") {
             style = 'Aerial';
         }
