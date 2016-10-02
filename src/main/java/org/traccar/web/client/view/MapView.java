@@ -158,6 +158,8 @@ public class MapView {
             case BING_ROAD:
                 return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.ROAD));
             case BING_HYBRID:
+                return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.HYBRID));
+            case BING_OS:
                 return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.ordnancesurvey));
             case BING_AERIAL:
                 return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.AERIAL));
