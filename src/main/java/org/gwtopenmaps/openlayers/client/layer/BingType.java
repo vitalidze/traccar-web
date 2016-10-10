@@ -26,7 +26,7 @@ public enum BingType {
     ROAD("Road"),
     HYBRID("AerialWithLabels"),
     AERIAL("Aerial"),
-    ordnancesurvey("ordnancesurvey");
+    ORDNANCESURVEY("ordnancesurvey");
     //
     private String value;
 
