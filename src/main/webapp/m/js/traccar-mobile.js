@@ -334,8 +334,8 @@ myApp.onPageInit('map-screen', function(page) {
             style = 'AerialWithLabels';
         } else if (appState.userSettings.mapType == "BING_AERIAL") {
             style = 'Aerial';
-        } else if (appState.userSettings.mapType == "BING_OS") {
-            style = 'ordnancesurvey';
+        } else if (appState.userSettings.mapType == "BING_ORDNANCE_SURVEY") {
+            style = 'ORDNANCESURVEY';
         }
 
         layers.push(new ol.layer.Tile({
