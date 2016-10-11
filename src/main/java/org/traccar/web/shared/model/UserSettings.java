@@ -86,6 +86,7 @@ public class UserSettings implements IsSerializable {
         BING_ROAD("Bing Road") { @Override public boolean isBing() { return true; } },
         BING_HYBRID("Bing Hybrid") { @Override public boolean isBing() { return true; } },
         BING_AERIAL("Bing Aerial") { @Override public boolean isBing() { return true; } },
+        BING_ORDNANCE_SURVEY("Bing Ordnance Survey") { @Override public boolean isBing() { return true; } },
         STAMEN_TONER("Stamen Toner");
 
         final String name;

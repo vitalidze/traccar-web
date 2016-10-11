@@ -159,6 +159,8 @@ public class MapView {
                 return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.ROAD));
             case BING_HYBRID:
                 return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.HYBRID));
+            case BING_ORDNANCE_SURVEY:
+                return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.ORDNANCESURVEY));
             case BING_AERIAL:
                 return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.AERIAL));
             case STAMEN_TONER:
