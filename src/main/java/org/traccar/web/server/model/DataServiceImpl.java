@@ -15,6 +15,8 @@
  */
 package org.traccar.web.server.model;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -129,7 +131,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             query.setParameter("login", login);
             List<User> results = query.getResultList();
 
-            if (!results.isEmpty() && password.equals(results.get(0).getPassword())) {
+            if (!results.isEmpty() && DataServiceImpl.encryptSHA512(password).equals(results.get(0).getPassword())) {
                 User user = results.get(0);
                 setSessionUser(user);
                 return user;
@@ -461,6 +463,26 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                     throw new SecurityException();
                 }
             }
+        }
+    }
+
+    /**
+     * sha512
+     *
+     * @param target
+     * @return [encrypted string]
+     */
+    private final static String encryptSHA512(String target) {
+        try {
+            final MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
+            sha512.update(target.getBytes());
+            byte data[] = sha512.digest();
+            StringBuffer hexData = new StringBuffer();
+            for (int byteIndex = 0; byteIndex < data.length; byteIndex++)
+                hexData.append(Integer.toString((data[byteIndex] & 0xff) + 0x100, 16).substring(1));
+            return hexData.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
 

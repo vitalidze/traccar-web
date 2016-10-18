@@ -16,6 +16,8 @@
 package org.traccar.web.shared.model;
 
 import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -70,7 +72,20 @@ public class User implements Serializable, Cloneable {
     private String password;
 
     public void setPassword(String password) {
-        this.password = password;
+        /**
+         * sha512
+         */
+        try {
+            final MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
+            sha512.update(password.getBytes());
+            byte data[] = sha512.digest();
+            StringBuffer hexData = new StringBuffer();
+            for (int byteIndex = 0; byteIndex < data.length; byteIndex++)
+                hexData.append(Integer.toString((data[byteIndex] & 0xff) + 0x100, 16).substring(1));
+            this.password = hexData.toString();
+        } catch (NoSuchAlgorithmException e) {
+            //throw new RuntimeException(e);
+        }
     }
 
     public String getPassword() {
