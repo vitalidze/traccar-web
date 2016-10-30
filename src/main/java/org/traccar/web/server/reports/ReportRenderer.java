@@ -64,7 +64,7 @@ public class ReportRenderer {
         line("</style>");
         // include OpenLayers 3 css and javascript if report intends to include map
         if (report.isIncludeMap() && report.getType().supportsMapDisplay()) {
-            line("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/ol3/3.11.1/ol.min.js\" type=\"text/css\">");
+            line("<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/ol3/3.11.1/ol.min.css\" type=\"text/css\">");
             line("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/ol3/3.11.1/ol.min.js\" type=\"text/javascript\"></script>");
         }
 
