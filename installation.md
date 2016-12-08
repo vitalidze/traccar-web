@@ -3,6 +3,158 @@ layout: default
 title: Installation
 ---
 
+### Version 3.8
+<div class="toggle-container">
+  <input id="version3_8" class="toggle-container__button" type="checkbox">
+  <label for="version3_8" class="toggle-container__label"></label>
+  <article class="toggle-container__text" markdown="1">
+
+1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
+
+2) Stop Traccar service.
+
+3) Put the downloaded `traccar-web.war` in Traccar installation folder (`/opt/traccar` or `c:\Program Files\Traccar`). I recommend to do a backup of existing `traccar-web.war` just in case.
+
+4) Update the configuration file (located in `conf\traccar.xml` of traccar installation folder):
+
+* add the following lines to the end of file:
+
+      <entry key='web.type'>old</entry>
+      <entry key='web.application'>/opt/traccar/traccar-web.war</entry>
+
+* Replace `/opt/traccar/traccar-web.war` path with the path to your traccar installation (usually it will be the same folder on linux/mac, on windows it is most probably `c:\Program Files\Traccar\traccar-web.war`).
+
+5) Disable notification system. Add following lines to the end of configuration file (located in `conf\traccar.xml` of traccar installation folder):
+
+    <entry key='event.enable'>false</entry>
+    <entry key='event.overspeedHandler'>false</entry>
+    <entry key='event.overspeed.notRepeat'>true</entry>
+    <entry key='event.motionHandler'>false</entry>
+    <entry key='event.geofenceHandler'>false</entry>
+    <entry key='event.alertHandler'>false</entry>
+    <entry key='event.ignitionHandler'>false</entry>
+
+6) Disable database migrations made by the backend by commenting out the following configuration file entry in **default configuration file** (located in `conf\default.xml` of traccar installation folder):
+
+Old:
+
+    <entry key='database.changelog'>/opt/traccar/schema/changelog-master.xml</entry>
+
+New: ( comment out or remove this entry )
+
+    <!-- <entry key='database.changelog'>/opt/traccar/schema/changelog-master.xml</entry> -->
+
+**IMPORTANT NOTE :** These changes must be done in **default configuration file** named `default.xml`, not in `traccar.xml`.
+
+**IMPORTANT NOTE :**
+Your database must be empty before first startup. To ensure this please drop and re-create the existing database:
+
+* for a default H2 database this can be done by removing contents of the `data` folder under the traccar installation folder. The database will be automatically re-created on first service start.
+
+* for any other databases like MySQL there are queries to drop and create them. Also this can be done via GUI management tools (like [MySQL Workbench](https://www.mysql.com/products/workbench/)).
+
+**IMPORTANT NOTE :** This will delete all existing data. If it needed to be preserved, then instead of dropping database just use a brand new database with a different name. Then data can be copied between databases using SQL queries or some scripts.
+
+7) Add following queries to the end of configuration file (located in `conf\traccar.xml` of traccar installation folder):
+
+    <entry key='database.insertPosition'>
+        INSERT INTO positions (device_id, protocol, serverTime, time, valid, latitude, longitude, altitude, speed, course, address, other)
+        VALUES (:deviceId, :protocol, :now, :deviceTime, :valid, :latitude, :longitude, :altitude, :speed, :course, :address, :attributes);
+    </entry>
+    
+    <entry key='database.selectLatestPositions'>
+        SELECT id, protocol, device_id AS deviceId, serverTime, time AS deviceTime, time AS fixTime,
+        valid, latitude, longitude, altitude, speed, course, address, other AS attributes
+        FROM positions WHERE id IN (SELECT latestPosition_id FROM devices);
+    </entry>
+    
+    <entry key='database.updateLatestPosition'>
+        UPDATE devices SET latestPosition_id = :id WHERE id = :deviceId;
+    </entry>
+    
+    <entry key='database.ignoreUnknown'>false</entry>
+
+
+7a) **Only for the first time installation, i.e. not when upgrading from previous versions when the database is already present**
+
+Temporarily comment out the following queries in **default configuration file** (located in `conf\default.xml` of traccar installation folder).
+
+-------------------
+
+Old:
+
+    <entry key='database.selectDevicesAll'>
+        SELECT * FROM devices;
+    </entry>
+
+New:
+
+    <!-- entry key='database.selectDevicesAll'>
+        SELECT * FROM devices;
+    </entry -->
+
+-------------------
+
+Old:
+
+    <entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
+    </entry>
+
+New:
+
+    <!-- entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
+    </entry -->
+
+**IMPORTANT NOTE :** These changes must be done in **default configuration file** named `default.xml`, not in `traccar.xml`.
+
+8) Start Traccar service
+
+8a) **Only for the first time installation, i.e. not when upgrading from previous versions when the database is already present**
+
+Stop Traccar service. Then uncomment queries, which were commented out in step 7a in **default configuration file** (located in `conf\default.xml` of traccar installation folder):
+
+-------------------
+
+Old:
+
+    <!-- entry key='database.selectDevicesAll'>
+        SELECT * FROM devices;
+    </entry -->
+
+New:
+
+    <entry key='database.selectDevicesAll'>
+        SELECT * FROM devices;
+    </entry>
+
+-------------------
+
+Old:
+
+    <!-- entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
+    </entry -->
+
+New:
+
+    <entry key='database.selectGroupsAll'>
+        SELECT * FROM groups;
+    </entry>
+
+-------------------
+
+Start Traccar service.
+
+**IMPORTANT NOTE :** These changes must be done in **default configuration file** named `default.xml`, not in `traccar.xml`.
+
+9) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
+
+  </article>
+</div>
+
+
 ### Version 3.7
 <div class="toggle-container">
   <input id="version3_7" class="toggle-container__button" type="checkbox">
