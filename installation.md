@@ -3,10 +3,10 @@ layout: default
 title: Installation
 ---
 
-### Version 3.8
+### Version 3.8 - 3.9
 <div class="toggle-container">
-  <input id="version3_8" class="toggle-container__button" type="checkbox">
-  <label for="version3_8" class="toggle-container__label"></label>
+  <input id="version3_8_3_9" class="toggle-container__button" type="checkbox">
+  <label for="version3_8_3_9" class="toggle-container__label"></label>
   <article class="toggle-container__text" markdown="1">
 
 1) Download latest build from [http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war](http://myultrashare.appspot.com/s/traccar-web/dev/latest/traccar-web.war)
@@ -33,6 +33,9 @@ title: Installation
     <entry key='event.geofenceHandler'>false</entry>
     <entry key='event.alertHandler'>false</entry>
     <entry key='event.ignitionHandler'>false</entry>
+    <entry key='event.statusHandler'>false</entry>
+    <entry key='event.maintenanceHandler'>false</entry>
+
 
 6) Disable database migrations made by the backend by commenting out the following configuration file entry in **default configuration file** (located in `conf\default.xml` of traccar installation folder):
 
