@@ -18,6 +18,7 @@ package org.traccar.web.server.model;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import static org.traccar.web.server.model.PasswordUtils.*;
 import static org.traccar.web.shared.model.PasswordHashMethod.*;
 
 import com.google.inject.AbstractModule;
@@ -214,33 +215,33 @@ public class DataServiceTest {
         String salt = dataService.getApplicationSettings().getSalt();
         // ordinary log in
         User admin = dataService.login("admin", "admin");
-        assertEquals(MD5.doHash("admin", salt), admin.getPassword());
+        assertEquals(hash(MD5, "admin", salt, ""), admin.getPassword());
         // log in with hash
-        admin = dataService.login("admin", MD5.doHash("admin", salt), true);
-        assertEquals(MD5.doHash("admin", salt), admin.getPassword());
+        admin = dataService.login("admin", hash(MD5, "admin", salt, null), true);
+        assertEquals(hash(MD5, "admin", salt, ""), admin.getPassword());
         // update user
         runInTransaction(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 injector.getInstance(EntityManager.class).createQuery("UPDATE User u SET u.password=:pwd")
-                        .setParameter("pwd", MD5.doHash("admin", null))
+                        .setParameter("pwd", hash(MD5, "admin", null, null))
                         .executeUpdate();
                 return null;
             }
         });
         // log in with hash will not be possible anymore
         try {
-            admin = dataService.login("admin", MD5.doHash("admin", salt), true);
+            admin = dataService.login("admin", hash(MD5, "admin", salt, null), true);
             fail("Should be impossible to log in with different hash");
         } catch (IllegalStateException expected) {
             // do nothing since exception is expected in this case
         }
         // check logging in with old hash (for backwards compatibility)
-        admin = dataService.login("admin", MD5.doHash("admin", null), true);
-        assertEquals(MD5.doHash("admin", null), admin.getPassword());
+        admin = dataService.login("admin", hash(MD5, "admin", null, null), true);
+        assertEquals(hash(MD5, "admin", null, null), admin.getPassword());
         // log in and check if password is updated
         admin = dataService.login("admin", "admin");
-        assertEquals(MD5.doHash("admin", salt), admin.getPassword());
+        assertEquals(hash(MD5, "admin", salt, null), admin.getPassword());
     }
 
     @Test

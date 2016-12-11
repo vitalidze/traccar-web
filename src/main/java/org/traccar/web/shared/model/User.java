@@ -117,6 +117,17 @@ public class User implements IsSerializable, Cloneable {
         return (password_hash_method == null) ? PasswordHashMethod.PLAIN : password_hash_method;
     }
 
+    @JsonIgnore
+    private String salt;
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
     // TODO temporary nullable to migrate from old database
     private Boolean admin;
 

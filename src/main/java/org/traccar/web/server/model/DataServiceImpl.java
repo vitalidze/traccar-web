@@ -15,6 +15,9 @@
  */
 package org.traccar.web.server.model;
 
+import static org.traccar.web.server.model.PasswordUtils.generateRandomUserSalt;
+import static org.traccar.web.server.model.PasswordUtils.hash;
+
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
@@ -127,11 +130,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 throw new IllegalStateException();
             }
         } else {
-            if (!storedPassword.equals(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()))) {
+            if (!storedPassword.equals(hash(user.getPasswordHashMethod(), password, getApplicationSettings().getSalt(), user.getSalt()))) {
                 // check for the old implementation without salt
                 // if it matches then update password with new salt
-                if (storedPassword.equals(user.getPasswordHashMethod().doHash(password, ""))) {
-                    user.setPassword(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()));
+                if (storedPassword.equals(hash(user.getPasswordHashMethod(), password, "", ""))) {
+                    user.setPassword(hash(user.getPasswordHashMethod(), password, getApplicationSettings().getSalt(), user.getSalt()));
                 } else {
                     throw new IllegalStateException();
                 }
@@ -151,7 +154,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
          */
         if (!user.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation()) && !passwordHashed) {
             user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-            user.setPassword(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()));
+            user.setPassword(hash(user.getPasswordHashMethod(), password, getApplicationSettings().getSalt(), user.getSalt()));
         }
 
         setSessionUser(user);
@@ -181,16 +184,17 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             query.setParameter("login", login);
             List<User> results = query.getResultList();
             if (results.isEmpty()) {
-                    User user = new User();
-                    user.setLogin(login);
-                    user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                    user.setPassword(user.getPasswordHashMethod().doHash(password, getApplicationSettings().getSalt()));
-                    user.setManager(Boolean.TRUE); // registered users are always managers
-                    user.setUserSettings(getUserSettingsForNewUser());
-                    getSessionEntityManager().persist(user);
-                    getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
-                    setSessionUser(user);
-                    return fillUserSettings(new User(user));
+                User user = new User();
+                user.setLogin(login);
+                user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
+                user.setSalt(generateRandomUserSalt());
+                user.setPassword(hash(user.getPasswordHashMethod(), password, getApplicationSettings().getSalt(), user.getSalt()));
+                user.setManager(Boolean.TRUE); // registered users are always managers
+                user.setUserSettings(getUserSettingsForNewUser());
+                getSessionEntityManager().persist(user);
+                getSessionEntityManager().persist(UIStateEntry.createDefaultArchiveGridStateEntry(user));
+                setSessionUser(user);
+                return fillUserSettings(new User(user));
             }
             else
             {
@@ -241,7 +245,8 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             user.setManagedBy(currentUser);
             validateMaximumNumberOfDevices(user, null, user.getMaxNumOfDevices());
             user.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-            user.setPassword(user.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()));
+            user.setSalt(generateRandomUserSalt());
+            user.setPassword(hash(user.getPasswordHashMethod(), user.getPassword(), getApplicationSettings().getSalt(), user.getSalt()));
             if (user.getUserSettings() == null) {
                 user.setUserSettings(getUserSettingsForNewUser());
             }
@@ -284,7 +289,10 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                         || currentUser.getPasswordHashMethod().equals(PasswordHashMethod.PLAIN)
                         && !getApplicationSettings().getDefaultHashImplementation().equals(PasswordHashMethod.PLAIN)) {
                     currentUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                    currentUser.setPassword(currentUser.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()));
+                    if (currentUser.getSalt() == null) {
+                        currentUser.setSalt(generateRandomUserSalt());
+                    }
+                    currentUser.setPassword(hash(currentUser.getPasswordHashMethod(), user.getPassword(), getApplicationSettings().getSalt(), currentUser.getSalt()));
                 }
                 if (currentUser.getAdmin() || currentUser.getManager())
                 {
@@ -307,12 +315,15 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
                 // update password
                 if (currentUser.getAdmin() || currentUser.getManager()) {
                     User existingUser = entityManager.find(User.class, user.getId());
+                    if (existingUser.getSalt() == null) {
+                        existingUser.setSalt(generateRandomUserSalt());
+                    }
                     // Checks if password has changed or default hash method not equal to current user hash method
                     if (!existingUser.getPassword().equals(user.getPassword())
-                            && !existingUser.getPassword().equals(existingUser.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()))
+                            && !existingUser.getPassword().equals(hash(existingUser.getPasswordHashMethod(), user.getPassword(), getApplicationSettings().getSalt(), existingUser.getSalt()))
                             || !existingUser.getPasswordHashMethod().equals(getApplicationSettings().getDefaultHashImplementation())) {
                         existingUser.setPasswordHashMethod(getApplicationSettings().getDefaultHashImplementation());
-                        existingUser.setPassword(existingUser.getPasswordHashMethod().doHash(user.getPassword(), getApplicationSettings().getSalt()));
+                        existingUser.setPassword(hash(existingUser.getPasswordHashMethod(), user.getPassword(), getApplicationSettings().getSalt(), existingUser.getSalt()));
                     }
                     entityManager.merge(existingUser);
                 } else {

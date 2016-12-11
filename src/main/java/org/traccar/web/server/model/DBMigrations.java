@@ -66,7 +66,8 @@ public class DBMigrations {
                 new SetReportsFilterAndPreview(),
                 new SetDefaultExpiredFlagForEvents(),
                 new SetDefaultMatchServiceSettings(),
-                new RemoveMapQuest()
+                new RemoveMapQuest(),
+                new SetUserHashSalt()
         }) {
             em.getTransaction().begin();
             try {
@@ -489,6 +490,16 @@ public class DBMigrations {
                     .setParameter(2, "MAPQUEST_ROAD")
                     .setParameter(3, "MAPQUEST_AERIAL")
                     .executeUpdate();
+        }
+    }
+
+    static class SetUserHashSalt implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            for (User user : em.createQuery("SELECT x FROM " + User.class.getName() + " x WHERE x.salt IS NULL", User.class)
+                    .getResultList()) {
+                user.setSalt(PasswordUtils.generateRandomUserSalt());
+            }
         }
     }
 }
