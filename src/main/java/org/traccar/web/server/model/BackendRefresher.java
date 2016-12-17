@@ -45,6 +45,30 @@ public class BackendRefresher implements MethodInterceptor {
     }
 
     private boolean refreshWithReflection() {
+        return refreshNew() || refreshOld();
+    }
+
+    private boolean refreshNew() {
+        try {
+            Class<?> contextClass = Class.forName("org.traccar.Context");
+            Method getPermissionsManager = contextClass.getDeclaredMethod("getPermissionsManager");
+            Object permissionsManager = getPermissionsManager.invoke(null);
+            if (permissionsManager == null) {
+                logger.log(Level.WARNING, "Unable to find permissions manager");
+            } else {
+                Method refreshPermissions = permissionsManager.getClass().getDeclaredMethod("refreshPermissions");
+                refreshPermissions.invoke(permissionsManager);
+                Method refreshUsers = permissionsManager.getClass().getDeclaredMethod("refreshUsers");
+                refreshUsers.invoke(permissionsManager);
+            }
+            return true;
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Unable to refresh permissions via reflection", e);
+        }
+        return false;
+    }
+
+    private boolean refreshOld() {
         try {
             Class<?> contextClass = Class.forName("org.traccar.Context");
             Method getPermissionsManager = contextClass.getDeclaredMethod("getPermissionsManager");

@@ -226,6 +226,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
+    @RefreshBackendPermissions
     @Override
     public User addUser(User user) throws InvalidMaxDeviceNumberForUserException {
         User currentUser = getSessionUser();
@@ -271,6 +272,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser
     @RequireWrite
+    @RefreshBackendPermissions
     @Override
     public User updateUser(User user) throws AccessDeniedException {
         User currentUser = getSessionUser();
@@ -352,6 +354,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
     @Transactional
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @RequireWrite
+    @RefreshBackendPermissions
     @Override
     public User removeUser(User user) throws AccessDeniedException {
         EntityManager entityManager = getSessionEntityManager();
