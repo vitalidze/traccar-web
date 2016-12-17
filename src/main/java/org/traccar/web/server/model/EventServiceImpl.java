@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.servlet.ServletException;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -51,7 +52,10 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         public void doWork() {
             Date currentTime = new Date();
 
-            for (Device device : entityManager.get().createQuery("SELECT d FROM Device d INNER JOIN FETCH d.latestPosition", Device.class).getResultList()) {
+            for (Device device : entityManager.get()
+                    .createQuery("SELECT d FROM Device d INNER JOIN FETCH d.latestPosition", Device.class)
+                    .setFlushMode(FlushModeType.COMMIT)
+                    .getResultList()) {
                 Position position = device.getLatestPosition();
                 // check that device is offline
                 long timeout = (long) device.getTimeout() * 1000;
@@ -60,7 +64,9 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
                             || currentTime.getTime() - position.getServerTime().getTime() >= timeout)) {
                     Long latestOfflinePositionId = latestOfflineEvents.get(device.getId());
                     if (latestOfflinePositionId == null) {
-                        List<DeviceEvent> offlineEvents = entityManager.get().createQuery("SELECT e FROM DeviceEvent e WHERE e.position=:position AND e.type=:offline", DeviceEvent.class)
+                        List<DeviceEvent> offlineEvents = entityManager.get()
+                                .createQuery("SELECT e FROM DeviceEvent e WHERE e.position=:position AND e.type=:offline", DeviceEvent.class)
+                                .setFlushMode(FlushModeType.COMMIT)
                                 .setParameter("position", position)
                                 .setParameter("offline", DeviceEventType.OFFLINE)
                                 .getResultList();
@@ -121,7 +127,10 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         public List<Position> getPositions() {
             // find latest position id for the first scan
             if (lastScannedPositionId == null) {
-                List<Long> latestPositionId = entityManager.get().createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class).getResultList();
+                List<Long> latestPositionId = entityManager.get()
+                        .createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class)
+                        .setFlushMode(FlushModeType.COMMIT)
+                        .getResultList();
                 if (latestPositionId.isEmpty() || latestPositionId.get(0) == null) {
                     return Collections.emptyList();
                 } else {
@@ -130,8 +139,9 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
             }
 
             // load all positions since latest
-            List<Position> positions = entityManager.get().createQuery(
-                    "SELECT p FROM Position p INNER JOIN p.device d WHERE p.id > :from ORDER BY d.id, p.time ASC", Position.class)
+            List<Position> positions = entityManager.get()
+                    .createQuery("SELECT p FROM Position p INNER JOIN p.device d WHERE p.id > :from ORDER BY d.id, p.time ASC", Position.class)
+                    .setFlushMode(FlushModeType.COMMIT)
                     .setParameter("from", lastScannedPositionId)
                     .getResultList();
             return positions;
@@ -215,7 +225,10 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         @Override
         @Transactional
         void before() {
-            geoFences.addAll(entityManager.get().createQuery("SELECT g FROM GeoFence g LEFT JOIN FETCH g.devices", GeoFence.class).getResultList());
+            geoFences.addAll(entityManager.get()
+                    .createQuery("SELECT g FROM GeoFence g LEFT JOIN FETCH g.devices", GeoFence.class)
+                    .setFlushMode(FlushModeType.COMMIT)
+                    .getResultList());
             if (geoFences.isEmpty()) {
                 return;
             }
@@ -269,15 +282,21 @@ public class EventServiceImpl extends RemoteServiceServlet implements EventServi
         @Transactional
         @Override
         void before() {
-            List<Device> devices = entityManager().createQuery("SELECT d FROM Device d WHERE d.autoUpdateOdometer=:b", Device.class)
-                    .setParameter("b", Boolean.TRUE).getResultList();
+            List<Device> devices = entityManager()
+                    .createQuery("SELECT d FROM Device d WHERE d.autoUpdateOdometer=:b", Device.class)
+                    .setFlushMode(FlushModeType.COMMIT)
+                    .setParameter("b", Boolean.TRUE)
+                    .getResultList();
             if (devices.isEmpty()) {
                 return;
             }
 
             // load maintenances
-            for (Maintenance maintenance : entityManager().createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices", Maintenance.class)
-                    .setParameter("devices", devices).getResultList()) {
+            for (Maintenance maintenance : entityManager()
+                    .createQuery("SELECT m FROM Maintenance m WHERE m.device IN :devices", Maintenance.class)
+                    .setParameter("devices", devices)
+                    .setFlushMode(FlushModeType.COMMIT)
+                    .getResultList()) {
                 List<Maintenance> deviceMaintenances = maintenances.get(maintenance.getDevice());
                 if (deviceMaintenances == null) {
                     deviceMaintenances = new LinkedList<>();

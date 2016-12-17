@@ -38,6 +38,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.servlet.ServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -83,7 +84,10 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         @Override
         public void doWork() throws Exception {
             Set<DeviceEventType> eventTypes = new HashSet<>();
-            for (User user : entityManager.get().createQuery("SELECT u FROM User u INNER JOIN FETCH u.notificationEvents", User.class).getResultList()) {
+            for (User user : entityManager.get()
+                    .createQuery("SELECT u FROM User u INNER JOIN FETCH u.notificationEvents", User.class)
+                    .setFlushMode(FlushModeType.COMMIT)
+                    .getResultList()) {
                 eventTypes.addAll(user.getNotificationEvents());
             }
 
@@ -102,6 +106,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                             " WHERE e.notificationSent = :false" +
                             " AND e.expired = :false" +
                             " AND e.type IN (:types)", DeviceEvent.class)
+                                    .setFlushMode(FlushModeType.COMMIT)
                                     .setParameter("false", false)
                                     .setParameter("types", eventTypes)
                                     .getResultList()) {
@@ -136,7 +141,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 }
 
                 if (admins == null) {
-                    admins = entityManager.get().createQuery("SELECT u FROM User u WHERE u.admin=:true", User.class)
+                    admins = entityManager.get()
+                            .createQuery("SELECT u FROM User u WHERE u.admin=:true", User.class)
+                            .setFlushMode(FlushModeType.COMMIT)
                             .setParameter("true", true)
                             .getResultList();
                 }
@@ -217,7 +224,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
             // take settings from first admin ordered by id
             if (s == null) {
-                List<NotificationSettings> settings = entityManager.get().createQuery("SELECT s FROM NotificationSettings s WHERE s.user.admin=:true ORDER BY s.user.id ASC", NotificationSettings.class)
+                List<NotificationSettings> settings = entityManager.get()
+                        .createQuery("SELECT s FROM NotificationSettings s WHERE s.user.admin=:true ORDER BY s.user.id ASC", NotificationSettings.class)
+                        .setFlushMode(FlushModeType.COMMIT)
                         .setParameter("true", true)
                         .getResultList();
                 if (!settings.isEmpty()) {
@@ -229,7 +238,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         }
 
         private NotificationSettings getNotificationSettings(User user) {
-            List<NotificationSettings> settings = entityManager.get().createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
+            List<NotificationSettings> settings = entityManager.get()
+                    .createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
+                    .setFlushMode(FlushModeType.COMMIT)
                     .setParameter("user", user)
                     .getResultList();
             return settings.isEmpty() ? null : settings.get(0);
@@ -561,7 +572,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
     public NotificationSettings getSettings() {
-        List<NotificationSettings> settings = entityManager.get().createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
+        List<NotificationSettings> settings = entityManager.get()
+                .createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
+                .setFlushMode(FlushModeType.COMMIT)
                 .setParameter("user", sessionUser.get())
                 .getResultList();
         if (settings.isEmpty()) {

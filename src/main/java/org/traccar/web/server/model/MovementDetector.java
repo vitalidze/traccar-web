@@ -23,6 +23,7 @@ import org.traccar.web.shared.model.Position;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +55,10 @@ public class MovementDetector extends ScheduledTask {
     @Override
     public void doWork() throws Exception {
         if (lastScannedPositionId == null) {
-            List<Long> latestPositionId = entityManager().createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class).getResultList();
+            List<Long> latestPositionId = entityManager()
+                    .createQuery("SELECT MAX(d.latestPosition.id) FROM Device d WHERE d.latestPosition IS NOT NULL", Long.class)
+                    .setFlushMode(FlushModeType.COMMIT)
+                    .getResultList();
             if (latestPositionId.isEmpty() || latestPositionId.get(0) == null) {
                 return;
             } else {
@@ -86,6 +90,7 @@ public class MovementDetector extends ScheduledTask {
         List<Position> positions = entityManager().createQuery(
                 "SELECT p FROM Position p WHERE p.id > :from ORDER BY p.time ASC", Position.class)
                 .setParameter("from", lastScannedPositionId)
+                .setFlushMode(FlushModeType.COMMIT)
                 .getResultList();
 
         for (Position position : positions) {
@@ -102,12 +107,14 @@ public class MovementDetector extends ScheduledTask {
         List<Position> position = entityManager().createQuery("SELECT p FROM Position p WHERE p.device = :device AND p.speed > :threshold ORDER BY time DESC", Position.class)
                 .setParameter("device", device)
                 .setParameter("threshold", device.getIdleSpeedThreshold())
+                .setFlushMode(FlushModeType.COMMIT)
                 .setMaxResults(1)
                 .getResultList();
 
         if (position.isEmpty()) {
             position = entityManager().createQuery("SELECT p FROM Position p WHERE p.device = :device ORDER BY time ASC", Position.class)
                     .setParameter("device", device)
+                    .setFlushMode(FlushModeType.COMMIT)
                     .setMaxResults(1)
                     .getResultList();
         }
@@ -117,6 +124,7 @@ public class MovementDetector extends ScheduledTask {
     private List<Device> getDevices() {
         return entityManager().createQuery(
                 "SELECT D FROM Device D LEFT JOIN FETCH D.latestPosition", Device.class)
+                .setFlushMode(FlushModeType.COMMIT)
                 .getResultList();
     }
 
