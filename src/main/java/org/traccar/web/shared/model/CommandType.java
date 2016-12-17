@@ -30,7 +30,7 @@ public enum CommandType implements IsSerializable {
     rebootDevice,
     movementAlarm,
     sendSms,
-    CUSTOM;
+    custom;
 
     public static final String KEY_FREQUENCY = "frequency";
     public static final String KEY_TIMEZONE = "timezone";
