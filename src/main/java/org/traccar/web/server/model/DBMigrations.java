@@ -453,7 +453,7 @@ public class DBMigrations {
         @Override
         public void migrate(EntityManager em) throws Exception {
             // for existing installations, which are using v4 and has no 'matchServiceType' set yet
-            em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.matchServiceType = :msType WHERE S.matchServiceURL IS NOT NULL")
+            em.createQuery("UPDATE " + ApplicationSettings.class.getName() + " S SET S.matchServiceType = :msType WHERE S.matchServiceURL IS NOT NULL AND S.matchServiceType IS NULL")
                     .setParameter("msType", MatchServiceType.OSRM_V4)
                     .executeUpdate();
             // for new installations without match service type set
