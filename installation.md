@@ -179,7 +179,7 @@ New:
 
 9a) **Only for the first time installation, i.e. not when upgrading from previous versions when the database is already present**
 
-Stop Traccar service. Then uncomment queries, which were commented out in step 7a in **default configuration file** (located in `conf\default.xml` of traccar installation folder):
+Stop Traccar service. Then uncomment queries, which were commented out in step 8a in **default configuration file** (located in `conf\default.xml` of traccar installation folder):
 
 -------------------
 
