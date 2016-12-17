@@ -1,6 +1,6 @@
 ---
 layout: feature
-title: Traccar Managed mobile apps
+title: Traccar Manager mobile apps
 ---
 
 For the original version of traccar [there are couple of mobile apps called "Manager"](https://www.traccar.org/manager/). To make the working with the installed Traccar Web UI Mod there are several:
