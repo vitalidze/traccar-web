@@ -148,8 +148,8 @@ public class CommandDialog {
         frequency.setVisible(type == CommandType.positionPeriodic);
         frequencyUnit.setVisible(type == CommandType.positionPeriodic);
 
-        lblCustomMessage.setVisible(type == CommandType.CUSTOM);
-        customMessage.setVisible(type == CommandType.CUSTOM);
+        lblCustomMessage.setVisible(type == CommandType.custom);
+        customMessage.setVisible(type == CommandType.custom);
 
         lblTimeZone.setVisible(type == CommandType.setTimezone);
         timeZone.setVisible(type == CommandType.setTimezone);
