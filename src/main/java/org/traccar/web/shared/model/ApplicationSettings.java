@@ -23,7 +23,7 @@ public class ApplicationSettings implements IsSerializable {
     public ApplicationSettings() {
         registrationEnabled = true;
         updateInterval = DEFAULT_UPDATE_INTERVAL;
-        defaultPasswordHash = PasswordHashMethod.MD5;
+        defaultPasswordHash = PasswordHashMethod.PBKDF2WithHmacSha1;
         eventRecordingEnabled = true;
         language = "default";
         notificationExpirationPeriod = DEFAULT_NOTIFICATION_EXPIRATION_PERIOD;

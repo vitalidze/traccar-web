@@ -20,7 +20,7 @@ public class ApplicationSettingsProvider implements Provider<ApplicationSettings
         if (resultList.isEmpty()) {
             ApplicationSettings appSettings = new ApplicationSettings();
             appSettings.setSalt(PasswordUtils.generateRandomString());
-            appSettings.setDefaultHashImplementation(PasswordHashMethod.MD5);
+            appSettings.setDefaultHashImplementation(PasswordHashMethod.PBKDF2WithHmacSha1);
             entityManager.get().persist(appSettings);
             return appSettings;
         }
