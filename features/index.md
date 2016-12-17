@@ -84,3 +84,4 @@ This project has following features, which don't exist in original `traccar-web`
 * [device groups](groups.html)
 * device filter/lookup
 * [device visibility management](visibility.html)
+* [traccar manager support](traccar-manager.html)

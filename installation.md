@@ -58,7 +58,35 @@ Your database must be empty before first startup. To ensure this please drop and
 
 **IMPORTANT NOTE :** This will delete all existing data. If it needed to be preserved, then instead of dropping database just use a brand new database with a different name. Then data can be copied between databases using SQL queries or some scripts.
 
-7) Add following queries to the end of configuration file (located in `conf\traccar.xml` of traccar installation folder):
+7) Disable queries for the group permissions and attribute aliases in **default configuration file** (located in `conf\default.xml` of traccar installation folder):
+
+Old:
+
+    <entry key='database.selectGroupPermissions'>
+        SELECT userId, groupId FROM user_group
+    </entry>
+
+New:
+
+    <!-- entry key='database.selectGroupPermissions'>
+        SELECT userId, groupId FROM user_group
+    </entry -->
+
+Old:
+
+    <entry key='database.selectAttributeAliases'>
+        SELECT * FROM attribute_aliases
+    </entry>
+
+New:
+
+    <!-- entry key='database.selectAttributeAliases'>
+        SELECT * FROM attribute_aliases
+    </entry -->
+    
+**IMPORTANT NOTE :** These changes must be done in **default configuration file** named `default.xml`, not in `traccar.xml`.
+
+8) Add following queries to the end of configuration file (located in `conf\traccar.xml` of traccar installation folder):
 
     <entry key='database.insertPosition'>
         INSERT INTO positions (device_id, protocol, serverTime, time, valid, latitude, longitude, altitude, speed, course, address, other)
@@ -76,9 +104,44 @@ Your database must be empty before first startup. To ensure this please drop and
     </entry>
     
     <entry key='database.ignoreUnknown'>false</entry>
+    
+    <entry key='database.selectUsersAll'>
+        SELECT u.id, u.login AS name, u.password AS hashedPassword, u.salt, u.email, u.readOnly AS readonly,
+        u.expirationDate AS expirationTime, u.blocked AS disabled, u.admin,
+        us.speedUnit, us.centerLatitude AS latitude, us.centerLongitude AS longitude,
+        us.zoomLevel AS zoom
+        FROM users AS u
+        LEFT OUTER JOIN user_settings us ON us.id = u.userSettings_id
+    </entry>
+
+    <entry key='database.loginUser'>
+        SELECT u.id, u.login AS name, u.password AS hashedPassword, u.salt, u.email, u.readOnly AS readonly,
+        u.expirationDate AS expirationTime, u.blocked AS disabled, u.admin,
+        us.speedUnit, us.centerLatitude AS latitude, us.centerLongitude AS longitude,
+        us.zoomLevel AS zoom
+        FROM users AS u
+        LEFT OUTER JOIN user_settings AS us ON us.id = u.userSettings_id
+        WHERE u.email = :email
+    </entry>
+
+    <entry key='database.selectServers'>
+        SELECT s.id, s.bingMapsKey AS bingKey,
+        us.speedUnit, us.centerLatitude AS latitude, us.centerLongitude AS longitude,
+        us.zoomLevel AS zoom
+        FROM application_settings AS s
+        LEFT OUTER JOIN user_settings AS us ON us.id = s.userSettings_id
+    </entry>
+
+    <entry key='database.selectDevicePermissions'>
+        SELECT u.id AS userId, d.id AS deviceId FROM users AS u, devices AS d WHERE u.admin = 1
+        UNION
+        SELECT ud.users_id AS userId, ud.devices_id AS deviceId FROM users_devices AS ud
+        INNER JOIN users AS u ON ud.users_id=u.id
+        WHERE u.admin=0 AND u.readOnly=0
+    </entry>
 
 
-7a) **Only for the first time installation, i.e. not when upgrading from previous versions when the database is already present**
+8a) **Only for the first time installation, i.e. not when upgrading from previous versions when the database is already present**
 
 Temporarily comment out the following queries in **default configuration file** (located in `conf\default.xml` of traccar installation folder).
 
@@ -112,9 +175,9 @@ New:
 
 **IMPORTANT NOTE :** These changes must be done in **default configuration file** named `default.xml`, not in `traccar.xml`.
 
-8) Start Traccar service
+9) Start Traccar service
 
-8a) **Only for the first time installation, i.e. not when upgrading from previous versions when the database is already present**
+9a) **Only for the first time installation, i.e. not when upgrading from previous versions when the database is already present**
 
 Stop Traccar service. Then uncomment queries, which were commented out in step 7a in **default configuration file** (located in `conf\default.xml` of traccar installation folder):
 
@@ -152,7 +215,7 @@ Start Traccar service.
 
 **IMPORTANT NOTE :** These changes must be done in **default configuration file** named `default.xml`, not in `traccar.xml`.
 
-9) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
+10) If necessary clear web browser cookies related to your traccar web UI. In chrome this can be done like said [here](http://superuser.com/questions/548096/how-can-i-clear-cookies-for-a-single-site)
 
   </article>
 </div>
