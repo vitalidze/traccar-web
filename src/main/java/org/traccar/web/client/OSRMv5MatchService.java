@@ -83,14 +83,21 @@ public class OSRMv5MatchService extends MatchService {
 
     @Override
     public void load(final Track track, final Callback callback) {
-        final List<Position> originalPositions = track.getPositions();
+        runQuery(track.getPositions(), 0, new Track(), track.getStyle(), callback);
+    }
+
+    private void runQuery(final List<Position> originalPositions,
+                          final int startIndex,
+                          final Track snappedTrack,
+                          final ArchiveStyle style,
+                          final Callback callback) {
         StringBuilder url = new StringBuilder(this.url);
         if (url.charAt(url.length() - 1) != '/') {
             url.append('/');
         }
         StringBuilder timestamps = new StringBuilder();
         boolean first = true;
-        int i = 0;
+        int i = startIndex;
         while (url.length() + timestamps.length() < 1950 && i < originalPositions.size()) {
             if (first) {
                 first = false;
@@ -106,6 +113,8 @@ public class OSRMv5MatchService extends MatchService {
             i++;
         }
 
+        final int nextBatchIndex = i;
+
         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url
                 .append("?timestamps=").append(timestamps).toString());
         try {
@@ -120,8 +129,7 @@ public class OSRMv5MatchService extends MatchService {
                             return;
                         }
 
-                        Track snappedTrack = new Track();
-                        int lastIndex = 0;
+                        int lastIndex = startIndex;
 
                         for (int matchingIndex = 0; matchingIndex < result.getMatchings().length; matchingIndex++) {
                             Matching matching = result.getMatchings()[matchingIndex];
@@ -160,13 +168,18 @@ public class OSRMv5MatchService extends MatchService {
                                     geometry.add(new LonLat(point.getX(), point.getY()));
                                 }
                             }
-                            snappedTrack.addSegment(originalTrack, null, track.getStyle());
-                            snappedTrack.addSegment(snappedPositions, geometry, track.getStyle());
+                            snappedTrack.addSegment(originalTrack, null, style);
+                            snappedTrack.addSegment(snappedPositions, geometry, style);
                         }
-                        if (lastIndex < originalPositions.size()) {
-                            snappedTrack.addSegment(originalPositions.subList(lastIndex, originalPositions.size()), null, track.getStyle());
+                        if (lastIndex < nextBatchIndex) {
+                            snappedTrack.addSegment(originalPositions.subList(lastIndex, nextBatchIndex), null, style);
                         }
-                        callback.onSuccess(snappedTrack);
+
+                        if (nextBatchIndex < originalPositions.size()) {
+                            runQuery(originalPositions, nextBatchIndex, snappedTrack, style, callback);
+                        } else {
+                            callback.onSuccess(snappedTrack);
+                        }
                     } else {
                         callback.onError(response.getStatusCode(), response.getText());
                     }
