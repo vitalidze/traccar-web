@@ -47,6 +47,7 @@
     <extend-configuration-property name="traccar.locale" value="kk" />
     <extend-configuration-property name="traccar.locale" value="hi_IN" />
     <extend-configuration-property name="traccar.locale" value="tr" />
+    <extend-configuration-property name="traccar.locale" value="sl" />
 
     <!-- generator for all 'Messages' interfaces -->
     <generate-with class="org.traccar.web.i18n.rebind.LocalizableGenerator">
