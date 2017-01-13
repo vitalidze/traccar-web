@@ -99,6 +99,7 @@ public class DBMigrations {
                 user.setPasswordHashMethod(PasswordHashMethod.PLAIN);
                 user.setAdmin(true);
                 user.setManager(false);
+                user.setSalt(PasswordUtils.generateRandomUserSalt());
                 em.persist(user);
             } else if (results.size() == 1) {
                 User singleAdmin = results.get(0);
