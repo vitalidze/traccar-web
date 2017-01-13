@@ -96,6 +96,10 @@ public class DataServiceTest {
             @Override
             public Object call() throws Exception {
                 injector.getInstance(DBMigrations.CreateAdmin.class).migrate(injector.getInstance(EntityManager.class));
+                ApplicationSettings applicationSettings = dataService.getApplicationSettings();
+                applicationSettings.setDefaultHashImplementation(PasswordHashMethod.MD5);
+                applicationSettings.setEventRecordingEnabled(false);
+                dataService.updateApplicationSettings(applicationSettings);
                 return null;
             }
         });
