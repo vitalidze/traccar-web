@@ -53,7 +53,11 @@ public class DynamicTranslator {
             value = object.get("null");
         }
         JSONString string = value == null ? null : value.isString();
-        return string == null ? na(key + "[" + selectKey + "]") : format(string.stringValue(), args);
+        Object[] allArgs = new Object[args.length + 1];
+        System.arraycopy(args, 0, allArgs, 1, args.length);
+        allArgs[0] = select;
+
+        return string == null ? na(key + "[" + selectKey + "]") : format(string.stringValue(), allArgs);
     }
 
     public String[] stringArray(String key, Object... args) {
