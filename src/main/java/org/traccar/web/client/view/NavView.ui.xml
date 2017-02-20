@@ -13,7 +13,8 @@
       
     @external gwt-Button gwt-Button-right gwt-Button-rightty app-menu logo-button;
     .gwt-Button { 
-      background-color: 0 !important;
+      background-color: #3B4767 !important;
+      border-radius: 1px;
       color: 0 !important;
       padding-right: 18px;
       border: 0px solid #bbb;
