@@ -64,7 +64,7 @@ public class ApplicationView extends Composite {
         final ContentPanel panel;
         final ToolButton btnExpandCollapse;
 
-        int previousSize = 200;
+        int previousSize = 425;
         boolean expanded;
 
         ExpandCollapseHandler(BorderLayoutContainer.BorderLayoutData layoutData,
@@ -124,10 +124,10 @@ public class ApplicationView extends Composite {
             archivePanel.removeFromParent();
         }
 
-        if (devicePanel.getElement().getSize().getWidth() < 350) {
-            westData.setSize(350);
+        if (devicePanel.getElement().getSize().getWidth() < 410) {
+            westData.setSize(410);
         }
 
-        new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 84);
+        new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 87);
     }
 }

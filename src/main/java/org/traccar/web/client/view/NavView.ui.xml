@@ -15,7 +15,7 @@
     .gwt-Button { 
       background-color: 0 !important;
       color: 0 !important;
-      padding-right: 19px;
+      padding-right: 18px;
       border: 0px solid #bbb;
       border-bottom: 0px solid #999;
       cursor: pointer;
@@ -25,7 +25,7 @@
       
       .gwt-Button-right { 
       background-color: 0 !important;
-      padding-left: 19px;
+      padding-left: 18px;
       border: 0px solid #bbb;
       border-bottom: 0px solid #999;
       cursor: pointer;
@@ -35,8 +35,8 @@
       
       .gwt-Button-rightty { 
       background-color: 0 !important;
-      padding-left: 19px;
-      padding-right: 19px;
+      padding-left: 18px;
+      padding-right: 18px;
       padding-top: 0px;
       padding-bottom: 0px;
       border: 0px solid #bbb;
@@ -55,47 +55,30 @@
     }
       
     .logo-button{
-      padding-right: 100px;
+      padding-right: 55px;
       background-image: none !important;
        background-color: 0 !important;
       }
       
       /** Button test ********************/
-      
-      
-      
-      
-      
   </ui:style>
-  
 
   <gxt:ContentPanel ui:field="contentPanel" headerVisible="false" addStyleNames="{style.app-menu}">
       
     <toolbar:ToolBar addStyleNames="{style.app-menu}">
         <!--Logo crap crap-->
         <button:TextButton ui:field="logoButton" addStyleNames="{style.logo-button}">
-            &nbsp;
-            <img style="vertical-align:middle" height="24px" width="65px" src='http://localhost/BHN_only.png' />
-            &nbsp;
+            &nbsp;<img style="vertical-align:middle" height="24px" width="65px" src='http://localhost/BHN_only.png' />
         </button:TextButton>
         
         <button:TextButton ui:field="reportsButton" addStyleNames="{style.gwt-Button}">
-            <img style="vertical-align:middle" src='http://localhost/report.svg' />
-            &nbsp;
-            <font>Reports</font>
-            &nbsp;
+            <img style="vertical-align:middle" src='http://localhost/report.svg' />&nbsp;<font>Reports</font>
         </button:TextButton>
         <button:TextButton ui:field="groupsButton" addStyleNames="{style.gwt-Button}">
-            <img style="vertical-align:middle" src='http://localhost/folder.svg' />
-            &nbsp;
-            <font>Groups</font>
-            &nbsp;
+            <img style="vertical-align:middle" src='http://localhost/folder.svg' />&nbsp;<font>Groups</font>
         </button:TextButton>
       <button:TextButton ui:field="settingsButton" addStyleNames="{style.gwt-Button}">
-            <img style="vertical-align:middle" src='http://localhost/settings.svg' />
-            &nbsp;
-            <font>Settings</font>
-            &nbsp;
+            <img style="vertical-align:middle" src='http://localhost/settings.svg' />&nbsp;<font>Settings</font>
         <button:menu>
           <menu:Menu>
             <menu:MenuItem text="{i18n.users}" ui:field="settingsUsers" visible="false" />
@@ -106,10 +89,7 @@
         </button:menu>
       </button:TextButton>
       <button:TextButton ui:field="logsButton" addStyleNames="{style.gwt-Button}">
-            <img style="vertical-align:middle" src='http://localhost/log.svg' />
-            &nbsp;
-            <font>Logger</font>
-            &nbsp;
+            <img style="vertical-align:middle" src='http://localhost/log.svg' />&nbsp;<font>Logger</font>
         <button:menu>
           <menu:Menu>
             <menu:MenuItem text="{i18n.trackerServerLog}" ui:field="showTrackerServerLog" />
@@ -118,31 +98,18 @@
         </button:menu>
       </button:TextButton>
       <button:TextButton ui:field="importButton" addStyleNames="{style.gwt-Button}">
-            <img style="vertical-align:middle" src='http://localhost/import.svg' />
-            &nbsp;
-            <font>Import</font>
-            &nbsp;
+            <img style="vertical-align:middle" src='http://localhost/import.svg' />&nbsp;<font>Import</font>
       </button:TextButton>
       <toolbar:FillToolItem/>
       <button:TextButton ui:field="settingsAccount" addStyleNames="{style.gwt-Button-right}">
-          <img style="vertical-align:middle" src='http://localhost/profile.svg' />
-            &nbsp;
-            <font>Profile settings</font>
-            &nbsp;
+          <img style="vertical-align:middle" src='http://localhost/profile.svg' />&nbsp;<font>Profile settings</font>
       </button:TextButton>
       <button:TextButton ui:field="settingsPreferences" addStyleNames="{style.gwt-Button-right}">
-          <img style="vertical-align:middle" src='http://localhost/map.svg' />
-            &nbsp;
-            <font>Map options</font>
-            &nbsp;
+          <img style="vertical-align:middle" src='http://localhost/map.svg' />&nbsp;<font>Map options</font>
       </button:TextButton>
       <button:TextButton ui:field="logoutButton" addStyleNames="{style.gwt-Button-rightty}">
-          <img style="vertical-align:middle" src='http://localhost/signout.svg' />
-            &nbsp;
-            <font>Sign out</font>
-            &nbsp;
+          <img style="vertical-align:middle" src='http://localhost/signout.svg' />&nbsp;<font>Sign out</font>
       </button:TextButton>
     </toolbar:ToolBar>
   </gxt:ContentPanel>
-
 </ui:UiBinder>
