@@ -69,17 +69,17 @@
     <toolbar:ToolBar addStyleNames="{style.app-menu}">
         <!--Logo crap crap-->
         <button:TextButton ui:field="logoButton" addStyleNames="{style.logo-button}">
-            &nbsp;<img style="vertical-align:middle" height="24px" width="65px" src='http://localhost/BHN_only.png' />
+            &nbsp;<img style="vertical-align:middle" height="24px" width="65px" src='img/BHN_only.png' />
         </button:TextButton>
         
         <button:TextButton ui:field="reportsButton" addStyleNames="{style.gwt-Button}">
-            <img style="vertical-align:middle" src='http://localhost/report.svg' />&nbsp;<font>Reports</font>
+            <img style="vertical-align:middle" src='img/report.svg' />&nbsp;<font>Reports</font>
         </button:TextButton>
         <button:TextButton ui:field="groupsButton" addStyleNames="{style.gwt-Button}">
-            <img style="vertical-align:middle" src='http://localhost/folder.svg' />&nbsp;<font>Groups</font>
+            <img style="vertical-align:middle" src='img/folder.svg' />&nbsp;<font>Groups</font>
         </button:TextButton>
       <button:TextButton ui:field="settingsButton" addStyleNames="{style.gwt-Button}">
-            <img style="vertical-align:middle" src='http://localhost/settings.svg' />&nbsp;<font>Settings</font>
+            <img style="vertical-align:middle" src='img/settings.svg' />&nbsp;<font>Settings</font>
         <button:menu>
           <menu:Menu>
             <menu:MenuItem text="{i18n.users}" ui:field="settingsUsers" visible="false" />
@@ -90,7 +90,7 @@
         </button:menu>
       </button:TextButton>
       <button:TextButton ui:field="logsButton" addStyleNames="{style.gwt-Button}">
-            <img style="vertical-align:middle" src='http://localhost/log.svg' />&nbsp;<font>Logger</font>
+            <img style="vertical-align:middle" src='img/log.svg' />&nbsp;<font>Logger</font>
         <button:menu>
           <menu:Menu>
             <menu:MenuItem text="{i18n.trackerServerLog}" ui:field="showTrackerServerLog" />
@@ -99,17 +99,17 @@
         </button:menu>
       </button:TextButton>
       <button:TextButton ui:field="importButton" addStyleNames="{style.gwt-Button}">
-            <img style="vertical-align:middle" src='http://localhost/import.svg' />&nbsp;<font>Import</font>
+            <img style="vertical-align:middle" src='img/import.svg' />&nbsp;<font>Import</font>
       </button:TextButton>
       <toolbar:FillToolItem/>
       <button:TextButton ui:field="settingsAccount" addStyleNames="{style.gwt-Button-right}">
-          <img style="vertical-align:middle" src='http://localhost/profile.svg' />&nbsp;<font>Profile settings</font>
+          <img style="vertical-align:middle" src='img/profile.svg' />&nbsp;<font>Profile settings</font>
       </button:TextButton>
       <button:TextButton ui:field="settingsPreferences" addStyleNames="{style.gwt-Button-right}">
-          <img style="vertical-align:middle" src='http://localhost/map.svg' />&nbsp;<font>Map options</font>
+          <img style="vertical-align:middle" src='img/map.svg' />&nbsp;<font>Map options</font>
       </button:TextButton>
       <button:TextButton ui:field="logoutButton" addStyleNames="{style.gwt-Button-rightty}">
-          <img style="vertical-align:middle" src='http://localhost/signout.svg' />&nbsp;<font>Sign out</font>
+          <img style="vertical-align:middle" src='img/signout.svg' />&nbsp;<font>Sign out</font>
       </button:TextButton>
     </toolbar:ToolBar>
   </gxt:ContentPanel>
