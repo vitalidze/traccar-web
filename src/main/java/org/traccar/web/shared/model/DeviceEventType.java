@@ -21,5 +21,8 @@ public enum DeviceEventType implements IsSerializable {
     OFFLINE,
     GEO_FENCE_ENTER,
     GEO_FENCE_EXIT,
-    MAINTENANCE_REQUIRED;
+    MAINTENANCE_REQUIRED,
+    OVERSPEED,
+    STOPPED,
+    MOVING;
 }

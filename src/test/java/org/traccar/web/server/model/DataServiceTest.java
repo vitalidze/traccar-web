@@ -18,6 +18,7 @@ package org.traccar.web.server.model;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import static org.traccar.web.server.model.PasswordUtils.*;
 import static org.traccar.web.shared.model.PasswordHashMethod.*;
 
 import com.google.inject.AbstractModule;
@@ -41,6 +42,7 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -94,6 +96,10 @@ public class DataServiceTest {
             @Override
             public Object call() throws Exception {
                 injector.getInstance(DBMigrations.CreateAdmin.class).migrate(injector.getInstance(EntityManager.class));
+                ApplicationSettings applicationSettings = dataService.getApplicationSettings();
+                applicationSettings.setDefaultHashImplementation(PasswordHashMethod.MD5);
+                applicationSettings.setEventRecordingEnabled(false);
+                dataService.updateApplicationSettings(applicationSettings);
                 return null;
             }
         });
@@ -121,7 +127,7 @@ public class DataServiceTest {
 
         GeoFence geoFence = new GeoFence();
         geoFence.setName("GF1");
-        geoFence.setTransferDevices(new HashSet<Device>(Collections.singleton(device)));
+        geoFence.setTransferDevices(new HashSet<>(Collections.singleton(device)));
         dataService.addGeoFence(geoFence);
 
         dataService.removeDevice(device);
@@ -144,6 +150,28 @@ public class DataServiceTest {
         NotificationService notificationService = injector.getInstance(NotificationService.class);
         currentUserId = user.getId();
         notificationService.saveSettings(new NotificationSettings());
+
+        currentUserId = originalUserId;
+        dataService.removeUser(user);
+
+        assertEquals(1, dataService.getUsers().size());
+        assertEquals(originalUserId.longValue(), dataService.getUsers().get(0).getId());
+    }
+
+    @Test
+    public void testDeleteUserWithNotificationSettingsAndTemplate() throws TraccarException {
+        Long originalUserId = injector.getProvider(User.class).get().getId();
+
+        User user = new User("test", "test");
+        user.setManager(true);
+        user = dataService.addUser(user);
+
+        NotificationService notificationService = injector.getInstance(NotificationService.class);
+        currentUserId = user.getId();
+        NotificationSettings settings = new NotificationSettings();
+        settings.setTransferTemplates(new HashMap<DeviceEventType, NotificationTemplate>());
+        settings.getTransferTemplates().put(DeviceEventType.OFFLINE, new NotificationTemplate());
+        notificationService.saveSettings(settings);
 
         currentUserId = originalUserId;
         dataService.removeUser(user);
@@ -191,33 +219,33 @@ public class DataServiceTest {
         String salt = dataService.getApplicationSettings().getSalt();
         // ordinary log in
         User admin = dataService.login("admin", "admin");
-        assertEquals(MD5.doHash("admin", salt), admin.getPassword());
+        assertEquals(hash(MD5, "admin", salt, ""), admin.getPassword());
         // log in with hash
-        admin = dataService.login("admin", MD5.doHash("admin", salt), true);
-        assertEquals(MD5.doHash("admin", salt), admin.getPassword());
+        admin = dataService.login("admin", hash(MD5, "admin", salt, null), true);
+        assertEquals(hash(MD5, "admin", salt, ""), admin.getPassword());
         // update user
         runInTransaction(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 injector.getInstance(EntityManager.class).createQuery("UPDATE User u SET u.password=:pwd")
-                        .setParameter("pwd", MD5.doHash("admin", null))
+                        .setParameter("pwd", hash(MD5, "admin", null, null))
                         .executeUpdate();
                 return null;
             }
         });
         // log in with hash will not be possible anymore
         try {
-            admin = dataService.login("admin", MD5.doHash("admin", salt), true);
+            admin = dataService.login("admin", hash(MD5, "admin", salt, null), true);
             fail("Should be impossible to log in with different hash");
         } catch (IllegalStateException expected) {
             // do nothing since exception is expected in this case
         }
         // check logging in with old hash (for backwards compatibility)
-        admin = dataService.login("admin", MD5.doHash("admin", null), true);
-        assertEquals(MD5.doHash("admin", null), admin.getPassword());
+        admin = dataService.login("admin", hash(MD5, "admin", null, null), true);
+        assertEquals(hash(MD5, "admin", null, null), admin.getPassword());
         // log in and check if password is updated
         admin = dataService.login("admin", "admin");
-        assertEquals(MD5.doHash("admin", salt), admin.getPassword());
+        assertEquals(hash(MD5, "admin", salt, null), admin.getPassword());
     }
 
     @Test
@@ -248,6 +276,29 @@ public class DataServiceTest {
             }
         });
 
+    }
+
+    @Test
+    public void testDeleteManagerUser() throws TraccarException {
+        Long originalUserId = injector.getProvider(User.class).get().getId();
+
+        User manager = new User("manager", "manager");
+        manager.setManager(true);
+        manager = dataService.addUser(manager);
+
+        currentUserId = manager.getId();
+        User user = new User("user", "user");
+        user = dataService.addUser(user);
+
+        currentUserId = originalUserId;
+        dataService.removeUser(manager);
+
+        List<User> users = dataService.getUsers();
+        assertEquals(2, users.size());
+        user = users.get(users.indexOf(user));
+        assertEquals(currentUserId.longValue(), user.getManagedBy().getId());
+
+        dataService.removeUser(user);
     }
 
     private static <V> V runInTransaction(Callable<V> c) throws Exception {

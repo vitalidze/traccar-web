@@ -53,7 +53,7 @@ public interface DataService extends RemoteService {
 
     Device updateDevice(Device device) throws TraccarException;
 
-    Device removeDevice(Device device);
+    Device removeDevice(Device device) throws AccessDeniedException;
 
     Map<User, Boolean> getDeviceShare(Device device);
 
@@ -63,13 +63,13 @@ public interface DataService extends RemoteService {
 
     List<Position> getLatestPositions();
 
-    List<Position> getLatestNonIdlePositions();
-
     ApplicationSettings getApplicationSettings();
 
     void updateApplicationSettings(ApplicationSettings applicationSettings);
 
-    String getTrackerServerLog(short sizeKb);
+    void saveDefaultUserSettigs(UserSettings userSettings);
+
+    UserSettings getDefaultUserSettings();
 
     void saveRoles(List<User> users) throws InvalidMaxDeviceNumberForUserException;
 
@@ -84,4 +84,6 @@ public interface DataService extends RemoteService {
     Map<User, Boolean> getGeoFenceShare(GeoFence geoFence);
 
     void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share);
+
+    String sendCommand(Command command) throws AccessDeniedException;
 }

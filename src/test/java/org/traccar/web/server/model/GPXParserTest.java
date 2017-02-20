@@ -19,44 +19,49 @@ import org.junit.Test;
 import org.traccar.web.shared.model.Position;
 
 import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 import java.text.ParseException;
 
 import static org.junit.Assert.*;
 
 public class GPXParserTest {
     @Test
-    public void testTraccarOutput() throws XMLStreamException, ParseException {
-        GPXParser.Result r = new GPXParser().parse(getClass().getResourceAsStream("/org/traccar/web/server/model/test_traccar.gpx"), null);
-        assertNotNull(r);
-        assertNotNull(r.positions);
-        assertEquals(2, r.positions.size());
+    public void testTraccarOutput() throws XMLStreamException, ParseException, IOException {
+        for (String file : new String[] {"test_traccar.gpx", "test_traccar_json.gpx"}) {
+            GPXParser.Result r = new GPXParser().parse(getClass().getResourceAsStream("/org/traccar/web/server/model/" + file), null);
+            assertNotNull(r);
+            assertNotNull(r.positions);
+            assertEquals(2, r.positions.size());
 
-        Position p = r.positions.get(0);
-        assertEquals(-1, p.getLatitude(), 0.01);
-        assertEquals(-3, p.getLongitude(), 0.01);
-        assertEquals("ADDR1", p.getAddress());
-        assertEquals(5.5, p.getSpeed(), 0.01);
-        assertEquals(7.7, p.getCourse(), 0.01);
-        assertEquals(55.5, p.getAltitude(), 0.01);
-        assertEquals(1420096479000L, p.getTime().getTime());
-        assertEquals("<info><protocol>gps103</protocol><alarm>acc on</alarm><type>import_start</type></info>", p.getOther());
+            Position p = r.positions.get(0);
+            assertEquals(-1, p.getLatitude(), 0.01);
+            assertEquals(-3, p.getLongitude(), 0.01);
+            assertEquals("ADDR1", p.getAddress());
+            assertEquals(5.5, p.getSpeed(), 0.01);
+            assertEquals(7.7, p.getCourse(), 0.01);
+            assertEquals(55.5, p.getAltitude(), 0.01);
+            assertEquals(1420096479000L, p.getTime().getTime());
+            assertEquals("gps103", p.getProtocol());
+            assertEquals("{\"protocol\":\"gps103\",\"alarm\":\"acc on\",\"import_type\":\"import_start\"}", p.getOther());
 
-        p = r.positions.get(1);
-        assertEquals(-2, p.getLatitude(), 0.01);
-        assertEquals(-4, p.getLongitude(), 0.01);
-        assertEquals("ADDR2", p.getAddress());
-        assertEquals(8.8, p.getSpeed(), 0.01);
-        assertEquals(10.10, p.getCourse(), 0.01);
-        assertEquals(77.7, p.getAltitude(), 0.01);
-        assertEquals(1420102196000L, p.getTime().getTime());
-        assertEquals("<info><protocol>gps103</protocol><alarm>acc on</alarm><type>import_end</type></info>", p.getOther());
+            p = r.positions.get(1);
+            assertEquals(-2, p.getLatitude(), 0.01);
+            assertEquals(-4, p.getLongitude(), 0.01);
+            assertEquals("ADDR2", p.getAddress());
+            assertEquals(8.8, p.getSpeed(), 0.01);
+            assertEquals(10.10, p.getCourse(), 0.01);
+            assertEquals(77.7, p.getAltitude(), 0.01);
+            assertEquals(1420102196000L, p.getTime().getTime());
+            assertEquals("gps103", p.getProtocol());
+            assertEquals("{\"protocol\":\"gps103\",\"alarm\":\"acc on\",\"import_type\":\"import_end\"}", p.getOther());
 
-        assertNotNull(r.latestPosition);
-        assertTrue(r.latestPosition == r.positions.get(1));
+            assertNotNull(r.latestPosition);
+            assertTrue(r.latestPosition == r.positions.get(1));
+        }
     }
 
     @Test
-    public void testForeign() throws XMLStreamException, ParseException {
+    public void testForeign() throws XMLStreamException, ParseException, IOException {
         GPXParser.Result r = new GPXParser().parse(getClass().getResourceAsStream("/org/traccar/web/server/model/test_foreign.gpx"), null);
         assertNotNull(r);
         assertNotNull(r.positions);
@@ -79,7 +84,8 @@ public class GPXParserTest {
             assertNull(p.getAddress());
             assertNull(p.getSpeed());
             assertNull(p.getCourse());
-            assertEquals("<info><protocol>gpx_import</protocol><type>import" + (i == 0 ? "_start" : i == r.positions.size() - 1 ? "_end" : "") + "</type></info>", p.getOther());
+            assertEquals("gpx_import", p.getProtocol());
+            assertEquals("{\"import_type\":\"import" + (i == 0 ? "_start" : i == r.positions.size() - 1 ? "_end" : "") + "\"}", p.getOther());
         }
 
         assertNotNull(r.latestPosition);
@@ -87,7 +93,7 @@ public class GPXParserTest {
     }
 
     @Test
-    public void testWithForeignExtensions() throws XMLStreamException, ParseException {
+    public void testWithForeignExtensions() throws XMLStreamException, ParseException, IOException {
         GPXParser.Result r = new GPXParser().parse(getClass().getResourceAsStream("/org/traccar/web/server/model/test_foreign_ext.gpx"), null);
         assertEquals(1, r.positions.size());
         Position p = r.positions.get(0);
@@ -99,6 +105,7 @@ public class GPXParserTest {
         assertNull(p.getCourse());
         assertNull(p.getPower());
         assertNull(p.getSpeed());
-        assertEquals("<info><protocol>gpx_import</protocol><Primary_ID>PID4</Primary_ID><Secondary_ID>SID4</Secondary_ID><additional-a>X</additional-a><additional-b>Y</additional-b><type>import_start</type></info>", p.getOther());
+        assertEquals("gpx_import", p.getProtocol());
+        assertEquals("{\"Primary_ID\":\"PID4\",\"Secondary_ID\":\"SID4\",\"additional-a\":\"X\",\"additional-b\":\"Y\",\"import_type\":\"import_start\"}", p.getOther());
     }
 }

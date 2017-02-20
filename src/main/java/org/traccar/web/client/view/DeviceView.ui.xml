@@ -3,8 +3,10 @@
     xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
     xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
+    xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
     xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar"
     xmlns:grid="urn:import:com.sencha.gxt.widget.core.client.grid"
+    xmlns:treegrid="urn:import:com.sencha.gxt.widget.core.client.treegrid"
     xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
     xmlns:menu="urn:import:com.sencha.gxt.widget.core.client.menu">
 
@@ -17,13 +19,6 @@
 
   <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="devicesTabConfig">
     <ui:attributes text="{i18n.devices}" />
-  </ui:with>
-
-  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="deviceStore" />
-  <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
-
-  <ui:with type="com.sencha.gxt.widget.core.client.grid.GridView" field="view">
-    <ui:attributes stripeRows="true" autoFill="true" />
   </ui:with>
 
   <ui:with type="com.sencha.gxt.widget.core.client.TabItemConfig" field="geoFencesTabConfig" />
@@ -41,28 +36,21 @@
           <button:TextButton ui:field="editButton" text="{i18n.edit}" enabled="false" />
           <button:TextButton ui:field="shareButton" text="{i18n.share}" enabled="false" visible="false" />
           <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
-          <toolbar:FillToolItem ui:field="fillItem" />
-          <toolbar:SeparatorToolItem ui:field="separatorItem" />
-          <button:TextButton ui:field="settingsButton" text="{i18n.settings}">
-            <button:menu>
-              <menu:Menu>
-                <menu:MenuItem text="{i18n.account}" ui:field="settingsAccount" />
-                <menu:MenuItem text="{i18n.preferences}" ui:field="settingsPreferences" />
-                <menu:MenuItem text="{i18n.users}" ui:field="settingsUsers" visible="false" />
-                <menu:MenuItem text="{i18n.global}" ui:field="settingsGlobal" visible="false" />
-                <menu:MenuItem text="{i18n.notifications}" ui:field="settingsNotifications" visible="false" />
-                <menu:MenuItem text="{i18n.trackerServerLog}" ui:field="showTrackerServerLog" visible="false" />
-              </menu:Menu>
-            </button:menu>
-          </button:TextButton>
-          <button:TextButton ui:field="logoutButton" text="{i18n.logout}" />
-          </toolbar:ToolBar>
+          <button:TextButton ui:field="commandButton" text="{i18n.command}" enabled="false" />
+        </toolbar:ToolBar>
       </container:child>
       
       <container:child layoutData="{layoutData}">
         <gxt:TabPanel ui:field="objectsTabs">
           <gxt:child config="{devicesTabConfig}">
-            <grid:Grid ui:field="grid" store="{deviceStore}" cm="{columnModel}" view="{view}" stateful="true" stateId="deviceGrid" />
+            <container:VerticalLayoutContainer>
+              <container:child layoutData="{toolBarRowData}">
+                <form:StoreFilterField ui:field="deviceFilter" emptyText="{i18n.filter}..."/>
+              </container:child>
+              <container:child layoutData="{layoutData}">
+                <treegrid:TreeGrid ui:field="grid" stateful="true" stateId="deviceGrid" />
+              </container:child>
+            </container:VerticalLayoutContainer>
           </gxt:child>
 
           <gxt:child config="{geoFencesTabConfig}">

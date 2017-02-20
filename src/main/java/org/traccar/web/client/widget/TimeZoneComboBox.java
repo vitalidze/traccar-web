@@ -31,7 +31,7 @@ import java.util.List;
 
 public class TimeZoneComboBox extends ComboBox<TimeZoneInfo> {
     public TimeZoneComboBox() {
-        super(new ListStore<TimeZoneInfo>(new ModelKeyProvider<TimeZoneInfo>() {
+        super(new ListStore<>(new ModelKeyProvider<TimeZoneInfo>() {
             @Override
             public String getKey(TimeZoneInfo item) {
                 return item.getID();
@@ -54,7 +54,7 @@ public class TimeZoneComboBox extends ComboBox<TimeZoneInfo> {
     }
 
     private static List<TimeZoneInfo> getAllTimeZones() {
-        List<TimeZoneInfo> result = new ArrayList<TimeZoneInfo>();
+        List<TimeZoneInfo> result = new ArrayList<>();
         TimeZoneConstants timeZoneConstants = GWT.create(TimeZoneConstants.class);
 
         for (String timeZoneString : new String[] {

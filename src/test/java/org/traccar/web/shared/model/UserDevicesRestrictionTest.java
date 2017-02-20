@@ -210,7 +210,7 @@ public class UserDevicesRestrictionTest {
     private User m(String name, Integer maxNumOfDevices, User... managedUsers) {
         User manager = new User(name);
         manager.setManager(true);
-        manager.setManagedUsers(new HashSet<User>(Arrays.asList(managedUsers)));
+        manager.setManagedUsers(new HashSet<>(Arrays.asList(managedUsers)));
         manager.setMaxNumOfDevices(maxNumOfDevices);
         for (User managedUser : managedUsers) {
             managedUser.setManagedBy(manager);

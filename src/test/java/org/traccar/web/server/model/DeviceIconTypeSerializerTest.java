@@ -17,41 +17,44 @@ package org.traccar.web.server.model;
 
 import static org.junit.Assert.*;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.DeviceIconType;
 import org.traccar.web.shared.model.Position;
 import org.traccar.web.shared.model.PositionIconType;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 public class DeviceIconTypeSerializerTest {
-    Gson gson = GsonUtils.create();
+    ObjectMapper jackson = JacksonUtils.create();
 
     @Test
-    public void testDefaultIcon() {
+    public void testDefaultIcon() throws IOException {
         Device device = new Device();
         device.setIconType(DeviceIconType.DEFAULT);
-        String json = gson.toJson(device);
+        String json = jackson.writeValueAsString(device);
 
-        JsonObject jsonDevice = gson.fromJson(json, JsonObject.class);
-        JsonObject jsonDeviceIconType = jsonDevice.getAsJsonObject("iconType");
+        JsonNode jsonDevice = jackson.readTree(json);
+        JsonNode jsonDeviceIconType = jsonDevice.get("iconType");
         assertNotNull(jsonDeviceIconType);
 
         testDefaultPositionIconType(jsonDeviceIconType, Position.Status.OFFLINE, "OFFLINE");
         testDefaultPositionIconType(jsonDeviceIconType, Position.Status.LATEST, "LATEST");
     }
 
-    private void testDefaultPositionIconType(JsonObject jsonDeviceIconType, Position.Status status, String iconTypeString) {
+    private void testDefaultPositionIconType(JsonNode jsonDeviceIconType, Position.Status status, String iconTypeString) {
         PositionIconType positionIconType = DeviceIconType.DEFAULT.getPositionIconType(status);
-        JsonObject jsonPositionIconType = jsonDeviceIconType.getAsJsonObject(iconTypeString);
-        assertEquals(positionIconType.getWidth(), jsonPositionIconType.getAsJsonPrimitive("width").getAsInt());
-        assertEquals(positionIconType.getHeight(), jsonPositionIconType.getAsJsonPrimitive("height").getAsInt());
+        JsonNode jsonPositionIconType = jsonDeviceIconType.get(iconTypeString);
+        assertEquals(positionIconType.getWidth(), jsonPositionIconType.get("width").asInt());
+        assertEquals(positionIconType.getHeight(), jsonPositionIconType.get("height").asInt());
 
-        JsonArray urls = jsonPositionIconType.getAsJsonArray("urls");
-        assertEquals(positionIconType.getURL(false), urls.get(0).getAsString());
-        assertEquals(positionIconType.getURL(true), urls.get(1).getAsString());
+        Iterator<JsonNode> urls = jsonPositionIconType.get("urls").elements();
+        assertEquals(positionIconType.getURL(false), urls.next().asText());
+        assertEquals(positionIconType.getURL(true), urls.next().asText());
+
+        assertEquals(DeviceIconType.DEFAULT.name(), jsonDeviceIconType.get("type").asText());
     }
 }

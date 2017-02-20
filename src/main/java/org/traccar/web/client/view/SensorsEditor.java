@@ -15,10 +15,10 @@
  */
 package org.traccar.web.client.view;
 
+import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.json.client.*;
 import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -61,6 +61,11 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
     interface SensorsEditorUiBinder extends UiBinder<Widget, SensorsEditor> {
     }
 
+    interface SensorIntervalsMapper extends ObjectMapper<SensorInterval[]> {
+    }
+
+    private static final SensorIntervalsMapper sensorIntervalsMapper = GWT.create(SensorIntervalsMapper.class);
+
     @UiField
     SimpleContainer panel;
 
@@ -95,17 +100,17 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
 
         final SensorProperties sensorProperties = GWT.create(SensorProperties.class);
 
-        this.sensorStore = new ListStore<Sensor>(sensorProperties.id());
+        this.sensorStore = new ListStore<>(sensorProperties.id());
 
-        List<ColumnConfig<Sensor, ?>> columnConfigList = new LinkedList<ColumnConfig<Sensor, ?>>();
+        List<ColumnConfig<Sensor, ?>> columnConfigList = new LinkedList<>();
 
-        ColumnConfig<Sensor, String> nameColumn = new ColumnConfig<Sensor, String>(sensorProperties.name(), 25, i18n.name());
+        ColumnConfig<Sensor, String> nameColumn = new ColumnConfig<>(sensorProperties.name(), 25, i18n.name());
         columnConfigList.add(nameColumn);
-        ColumnConfig<Sensor, String> parameterNameColumn = new ColumnConfig<Sensor, String>(sensorProperties.parameterName(), 25, i18n.parameter());
+        ColumnConfig<Sensor, String> parameterNameColumn = new ColumnConfig<>(sensorProperties.parameterName(), 25, i18n.parameter());
         columnConfigList.add(parameterNameColumn);
-        ColumnConfig<Sensor, String> descriptionColumn = new ColumnConfig<Sensor, String>(sensorProperties.description(), 25, i18n.description());
+        ColumnConfig<Sensor, String> descriptionColumn = new ColumnConfig<>(sensorProperties.description(), 25, i18n.description());
         columnConfigList.add(descriptionColumn);
-        ColumnConfig<Sensor, Boolean> visibleColumn = new ColumnConfig<Sensor, Boolean>(sensorProperties.visible(), 70, i18n.visible());
+        ColumnConfig<Sensor, Boolean> visibleColumn = new ColumnConfig<>(sensorProperties.visible(), 70, i18n.visible());
         visibleColumn.setCell(new CheckBoxCell());
         visibleColumn.setFixed(true);
         columnConfigList.add(visibleColumn);
@@ -125,7 +130,7 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
                 return "intervals";
             }
         };
-        ColumnConfig<Sensor, String> intervalsColumn = new ColumnConfig<Sensor, String>(intervalsProperty, 90, i18n.intervals());
+        ColumnConfig<Sensor, String> intervalsColumn = new ColumnConfig<>(intervalsProperty, 90, i18n.intervals());
         intervalsColumn.setFixed(true);
         intervalsColumn.setResizable(false);
         // IMPORTANT we want the text element (cell parent) to only be as wide as
@@ -146,21 +151,14 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
 
                     @Override
                     public void setIntervals(List<SensorInterval> intervals) {
-                        intervals = new ArrayList<SensorInterval>(intervals);
+                        intervals = new ArrayList<>(intervals);
                         Collections.sort(intervals, new Comparator<SensorInterval>() {
                             @Override
                             public int compare(SensorInterval o1, SensorInterval o2) {
                                 return o1.getValue() > o2.getValue() ? 1 : -1;
                             }
                         });
-                        JSONArray array = new JSONArray();
-                        for (SensorInterval interval : intervals) {
-                            JSONObject jsonInterval = new JSONObject();
-                            jsonInterval.put("text", new JSONString(interval.getText()));
-                            jsonInterval.put("value", new JSONNumber(interval.getValue()));
-                            array.set(array.size(), jsonInterval);
-                        }
-                        sensor.setIntervals(array.toString());
+                        sensor.setIntervals(sensorIntervalsMapper.write(intervals.toArray(new SensorInterval[intervals.size()])));
                         sensorStore.getRecord(sensor).addChange(intervalsProperty, i18n.edit());
                     }
                 }).show();
@@ -174,10 +172,10 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
             columnConfig.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         }
 
-        columnModel = new ColumnModel<Sensor>(columnConfigList);
+        columnModel = new ColumnModel<>(columnConfigList);
 
         DeviceProperties deviceProperties = GWT.create(DeviceProperties.class);
-        deviceCombo = new ComboBox<Device>(deviceStore, deviceProperties.label());
+        deviceCombo = new ComboBox<>(deviceStore, deviceProperties.label());
         deviceCombo.addSelectionHandler(new SelectionHandler<Device>() {
             @Override
             public void onSelection(SelectionEvent<Device> event) {
@@ -195,7 +193,7 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
         grid.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         grid.getSelectionModel().addSelectionChangedHandler(this);
 
-        GridEditing<Sensor> editing = new GridInlineEditing<Sensor>(grid);
+        GridEditing<Sensor> editing = new GridInlineEditing<>(grid);
         editing.addEditor(nameColumn, new TextField());
         editing.addEditor(parameterNameColumn, new TextField());
         editing.addEditor(descriptionColumn, new TextField());
@@ -208,7 +206,7 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
 
     public void flush() {
         sensorStore.commitChanges();
-        device.setSensors(new ArrayList<Sensor>(sensorStore.getAll()));
+        device.setSensors(new ArrayList<>(sensorStore.getAll()));
     }
 
     @UiHandler("addButton")
@@ -252,16 +250,7 @@ public class SensorsEditor implements SelectionChangedEvent.SelectionChangedHand
         if (sensor.getIntervals() == null) {
             return Collections.emptyList();
         } else {
-            JSONArray array = (JSONArray) JSONParser.parseStrict(sensor.getIntervals());
-            List<SensorInterval> intervals = new ArrayList<SensorInterval>(array.size());
-            for (int i = 0; i < array.size(); i++) {
-                JSONObject jsonInterval = (JSONObject) array.get(i);
-                SensorInterval interval = new SensorInterval();
-                interval.setText(((JSONString) jsonInterval.get("text")).stringValue());
-                interval.setValue(((JSONNumber) jsonInterval.get("value")).doubleValue());
-                intervals.add(interval);
-            }
-            return intervals;
+            return Arrays.asList(sensorIntervalsMapper.read(sensor.getIntervals()));
         }
     }
 }

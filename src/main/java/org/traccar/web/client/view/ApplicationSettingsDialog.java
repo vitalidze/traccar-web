@@ -15,6 +15,7 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.event.logical.shared.*;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.form.*;
@@ -22,9 +23,8 @@ import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
 import org.traccar.web.client.model.ApplicationSettingsProperties;
 import org.traccar.web.client.model.EnumKeyProvider;
-import org.traccar.web.client.model.UserSettingsProperties;
 import org.traccar.web.client.widget.LanguageComboBox;
-import org.traccar.web.shared.model.ApplicationSettings;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -35,8 +35,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import org.traccar.web.shared.model.PasswordHashMethod;
-import org.traccar.web.shared.model.UserSettings;
 
 import java.util.Arrays;
 
@@ -53,7 +51,7 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     }
 
     public interface ApplicationSettingsHandler {
-        public void onSave(ApplicationSettings applicationSettings);
+        void onSave(ApplicationSettings applicationSettings);
     }
 
     private ApplicationSettingsHandler applicationSettingsHandler;
@@ -68,7 +66,16 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     CheckBox disallowDeviceManagementByUsers;
 
     @UiField
+    CheckBox allowCommandsOnlyForAdmins;
+
+    @UiField
     CheckBox eventRecordingEnabled;
+
+    @UiField(provided = true)
+    NumberPropertyEditor<Integer> integerPropertyEditor = new NumberPropertyEditor.IntegerPropertyEditor();
+
+    @UiField
+    NumberField<Integer> notificationExpirationPeriod;
 
     @UiField(provided = true)
     NumberPropertyEditor<Short> shortPropertyEditor = new NumberPropertyEditor.ShortPropertyEditor();
@@ -85,24 +92,42 @@ public class ApplicationSettingsDialog implements Editor<ApplicationSettings> {
     @UiField
     TextField bingMapsKey;
 
+    @UiField(provided = true)
+    ComboBox<MatchServiceType> matchServiceType;
+
+    @UiField
+    TextField matchServiceURL;
+
     public ApplicationSettingsDialog(ApplicationSettings applicationSettings, ApplicationSettingsHandler applicationSettingsHandler) {
         this.applicationSettingsHandler = applicationSettingsHandler;
 
-        ListStore<PasswordHashMethod> dhmStore = new ListStore<PasswordHashMethod>(
+        ListStore<PasswordHashMethod> dhmStore = new ListStore<>(
                 new EnumKeyProvider<PasswordHashMethod>());
         dhmStore.addAll(Arrays.asList(PasswordHashMethod.values()));
-        defaultHashImplementation = new ComboBox<PasswordHashMethod>(
+        defaultHashImplementation = new ComboBox<>(
                 dhmStore, new ApplicationSettingsProperties.PasswordHashMethodLabelProvider());
 
         defaultHashImplementation.setForceSelection(true);
         defaultHashImplementation.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
 
+        ListStore<MatchServiceType> mstStore = new ListStore<>(new EnumKeyProvider<MatchServiceType>());
+        mstStore.addAll(Arrays.asList(MatchServiceType.values()));
+        matchServiceType = new ComboBox<>(mstStore, new ApplicationSettingsProperties.MatchServiceTypeLabelProvider());
+        matchServiceType.setForceSelection(true);
+        matchServiceType.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+        matchServiceType.addSelectionHandler(new SelectionHandler<MatchServiceType>() {
+            @Override
+            public void onSelection(SelectionEvent<MatchServiceType> event) {
+                matchServiceURL.setValue(event.getSelectedItem().getDefaultURL());
+            }
+        });
+
         language = new LanguageComboBox();
 
         uiBinder.createAndBindUi(this);
 
-        updateInterval.addValidator(new MinNumberValidator<Short>((short) 100));
-        updateInterval.addValidator(new MaxNumberValidator<Short>((short) 30000));
+        updateInterval.addValidator(new MinNumberValidator<>((short) 100));
+        updateInterval.addValidator(new MaxNumberValidator<>((short) 30000));
 
         driver.initialize(this);
         driver.edit(applicationSettings);

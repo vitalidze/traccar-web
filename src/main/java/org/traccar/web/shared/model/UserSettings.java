@@ -1,6 +1,7 @@
 package org.traccar.web.shared.model;
 
-import com.google.gson.annotations.Expose;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import javax.persistence.Column;
@@ -26,6 +27,8 @@ public class UserSettings implements IsSerializable {
     public static final double DEFAULT_CENTER_LONGITUDE = 12.5;
     public static final double DEFAULT_CENTER_LATITUDE = 41.9;
 
+    public static final short DEFAULT_ZOOM_TO_FOLLOWED_DEVICE_LEVEL = 16;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -39,6 +42,7 @@ public class UserSettings implements IsSerializable {
         centerLatitude = DEFAULT_CENTER_LATITUDE;
         mapType = MapType.OSM;
         overlays = "GEO_FENCES,VECTOR,MARKERS";
+        followedDeviceZoomLevel = DEFAULT_ZOOM_TO_FOLLOWED_DEVICE_LEVEL;
     }
 
     public enum SpeedUnit implements IsSerializable {
@@ -82,8 +86,7 @@ public class UserSettings implements IsSerializable {
         BING_ROAD("Bing Road") { @Override public boolean isBing() { return true; } },
         BING_HYBRID("Bing Hybrid") { @Override public boolean isBing() { return true; } },
         BING_AERIAL("Bing Aerial") { @Override public boolean isBing() { return true; } },
-        MAPQUEST_ROAD("MapQuest Road"),
-        MAPQUEST_AERIAL("MapQuest Aerial"),
+        BING_ORDNANCE_SURVEY("Bing Ordnance Survey") { @Override public boolean isBing() { return true; } },
         STAMEN_TONER("Stamen Toner");
 
         final String name;
@@ -127,7 +130,6 @@ public class UserSettings implements IsSerializable {
     }
 
     @Enumerated(EnumType.STRING)
-    @Expose
     private SpeedUnit speedUnit;
 
     public void setSpeedUnit(SpeedUnit speedUnit) {
@@ -141,7 +143,6 @@ public class UserSettings implements IsSerializable {
     /**
      * Interval of printing time on recorded trace in minutes based on position time
      */
-    @Expose
     private Short timePrintInterval;
 
     public Short getTimePrintInterval() {
@@ -155,7 +156,6 @@ public class UserSettings implements IsSerializable {
     /**
      * Interval to record latest trace (in minutes)
      */
-    @Expose
     private Short traceInterval;
 
     public Short getTraceInterval() {
@@ -166,6 +166,20 @@ public class UserSettings implements IsSerializable {
         this.traceInterval = traceInterval;
     }
 
+    /**
+     *
+     */
+    private Short followedDeviceZoomLevel;
+
+    public Short getFollowedDeviceZoomLevel() {
+        return followedDeviceZoomLevel;
+    }
+
+    public void setFollowedDeviceZoomLevel(Short followedDeviceZoomLevel) {
+        this.followedDeviceZoomLevel = followedDeviceZoomLevel;
+    }
+
+    @JsonIgnore
     private String timeZoneId;
 
     public String getTimeZoneId() {
@@ -176,16 +190,15 @@ public class UserSettings implements IsSerializable {
         this.timeZoneId = timeZoneId;
     }
 
-    @Expose
     private Integer zoomLevel;
-    @Expose
     private Double centerLongitude;
-    @Expose
     private Double centerLatitude;
     @Enumerated(EnumType.STRING)
-    @Expose
     private MapType mapType;
+    @Column(nullable = true)
+    private boolean maximizeOverviewMap;
 
+    @JsonIgnore
     private String overlays;
 
     public Integer getZoomLevel() {
@@ -228,66 +241,93 @@ public class UserSettings implements IsSerializable {
         this.overlays = overlays;
     }
 
+    public boolean isMaximizeOverviewMap() {
+        return maximizeOverviewMap;
+    }
+
+    public void setMaximizeOverviewMap(boolean maximizeOverviewMap) {
+        this.maximizeOverviewMap = maximizeOverviewMap;
+    }
+
     @Column(nullable = true)
+    @JsonIgnore
     private boolean hideZeroCoordinates;
     @Column(nullable = true)
+    @JsonIgnore
     private boolean hideInvalidLocations;
     @Column(nullable = true)
+    @JsonIgnore
     private boolean hideDuplicates;
+    @JsonIgnore
     private Double minDistance;
+    @JsonIgnore
     private String speedModifier;
+    @JsonIgnore
     private Double speedForFilter;
 
+    @JsonIgnore
     public boolean isHideZeroCoordinates() {
         return hideZeroCoordinates;
     }
 
+    @JsonProperty
     public void setHideZeroCoordinates(boolean hideZeroCoordinates) {
         this.hideZeroCoordinates = hideZeroCoordinates;
     }
 
+    @JsonIgnore
     public boolean isHideInvalidLocations() {
         return hideInvalidLocations;
     }
 
+    @JsonProperty
     public void setHideInvalidLocations(boolean hideInvalidLocations) {
         this.hideInvalidLocations = hideInvalidLocations;
     }
 
+    @JsonIgnore
     public boolean isHideDuplicates() {
         return hideDuplicates;
     }
 
+    @JsonProperty
     public void setHideDuplicates(boolean hideDuplicates) {
         this.hideDuplicates = hideDuplicates;
     }
 
+    @JsonIgnore
     public Double getMinDistance() {
         return minDistance;
     }
 
+    @JsonProperty
     public void setMinDistance(Double minDistance) {
         this.minDistance = minDistance;
     }
 
+    @JsonIgnore
     public String getSpeedModifier() {
         return speedModifier;
     }
 
+    @JsonProperty
     public void setSpeedModifier(String speedModifier) {
         this.speedModifier = speedModifier;
     }
 
+    @JsonIgnore
     public Double getSpeedForFilter() {
         return speedForFilter;
     }
 
+    @JsonProperty
     public void setSpeedForFilter(Double speedForFilter) {
         this.speedForFilter = speedForFilter;
     }
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
+    @JsonIgnore
     private PositionIconType archiveMarkerType;
 
     public PositionIconType getArchiveMarkerType() {
@@ -323,10 +363,10 @@ public class UserSettings implements IsSerializable {
     }
 
     public List<OverlayType> overlays() {
-        if (getOverlays() == null) {
+        if (getOverlays() == null || getOverlays().trim().isEmpty()) {
             return Collections.emptyList();
         }
-        List<OverlayType> overlays = new LinkedList<OverlayType>();
+        List<OverlayType> overlays = new LinkedList<>();
         for (String s : getOverlays().split(",")) {
             overlays.add(OverlayType.valueOf(s));
         }
@@ -338,11 +378,13 @@ public class UserSettings implements IsSerializable {
         speedUnit = userSettings.speedUnit;
         timePrintInterval = userSettings.timePrintInterval;
         traceInterval = userSettings.traceInterval;
+        followedDeviceZoomLevel = userSettings.followedDeviceZoomLevel;
         timeZoneId = userSettings.timeZoneId;
         zoomLevel = userSettings.zoomLevel;
         centerLongitude = userSettings.centerLongitude;
         centerLatitude = userSettings.centerLatitude;
         mapType = userSettings.mapType;
+        maximizeOverviewMap = userSettings.maximizeOverviewMap;
         overlays = userSettings.overlays;
         hideZeroCoordinates = userSettings.hideZeroCoordinates;
         hideInvalidLocations = userSettings.hideInvalidLocations;
@@ -351,5 +393,12 @@ public class UserSettings implements IsSerializable {
         speedModifier = userSettings.speedModifier;
         speedForFilter = userSettings.speedForFilter;
         archiveMarkerType = userSettings.archiveMarkerType;
+    }
+
+    public UserSettings copy() {
+        UserSettings result = new UserSettings();
+        result.copyFrom(this);
+        result.id = 0;
+        return result;
     }
 }

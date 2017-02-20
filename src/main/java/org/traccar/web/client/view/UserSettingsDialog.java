@@ -22,6 +22,7 @@ import java.util.List;
 import com.google.gwt.i18n.client.TimeZoneInfo;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.ToStringValueProvider;
+import com.sencha.gxt.widget.core.client.form.CheckBox;
 import com.sencha.gxt.widget.core.client.form.NumberField;
 import com.sencha.gxt.widget.core.client.form.NumberPropertyEditor;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
@@ -65,7 +66,9 @@ public class UserSettingsDialog implements Editor<UserSettings> {
                                           NumberField<Double> centerLongitude,
                                           NumberField<Double> centerLatitude,
                                           NumberField<Integer> zoomLevel,
+                                          CheckBox maximizeOverviewMap,
                                           GridSelectionModel<UserSettings.OverlayType> overlays);
+        void onSetZoomLevelToCurrent(NumberField<Short> followedDeviceZoomLevel);
     }
 
     private UserSettingsHandler userSettingsHandler;
@@ -86,6 +89,9 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     @UiField
     NumberField<Short> traceInterval;
 
+    @UiField
+    NumberField<Short> followedDeviceZoomLevel;
+
     @UiField(provided = true)
     NumberPropertyEditor<Short> shortPropertyEditor = new NumberPropertyEditor.ShortPropertyEditor();
 
@@ -103,6 +109,9 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
     @UiField
     NumberField<Integer> zoomLevel;
+
+    @UiField
+    CheckBox maximizeOverviewMap;
 
     @UiField(provided = true)
     ComboBox<UserSettings.MapType> mapType;
@@ -125,45 +134,42 @@ public class UserSettingsDialog implements Editor<UserSettings> {
     public UserSettingsDialog(UserSettings userSettings, UserSettingsHandler userSettingsHandler) {
         this.userSettingsHandler = userSettingsHandler;
 
-        ListStore<UserSettings.SpeedUnit> speedUnitStore = new ListStore<UserSettings.SpeedUnit>(
+        ListStore<UserSettings.SpeedUnit> speedUnitStore = new ListStore<>(
                 new EnumKeyProvider<UserSettings.SpeedUnit>());
         speedUnitStore.addAll(Arrays.asList(UserSettings.SpeedUnit.values()));
 
-        speedUnit = new ComboBox<UserSettings.SpeedUnit>(
-                speedUnitStore, new UserSettingsProperties.SpeedUnitLabelProvider());
+        speedUnit = new ComboBox<>(speedUnitStore, new UserSettingsProperties.SpeedUnitLabelProvider());
         speedUnit.setForceSelection(true);
         speedUnit.setTriggerAction(TriggerAction.ALL);
 
-        ListStore<UserSettings.MapType> mapTypeStore = new ListStore<UserSettings.MapType>(
-                new EnumKeyProvider<UserSettings.MapType>());
+        ListStore<UserSettings.MapType> mapTypeStore = new ListStore<>(new EnumKeyProvider<UserSettings.MapType>());
         mapTypeStore.addAll(Arrays.asList(UserSettings.MapType.values()));
-        mapType = new ComboBox<UserSettings.MapType>(
-                mapTypeStore, new UserSettingsProperties.MapTypeLabelProvider());
+        mapType = new ComboBox<>(mapTypeStore, new UserSettingsProperties.MapTypeLabelProvider());
 
         mapType.setForceSelection(true);
         mapType.setTriggerAction(TriggerAction.ALL);
 
         // overlay types grid
-        IdentityValueProvider<UserSettings.OverlayType> identity = new IdentityValueProvider<UserSettings.OverlayType>();
-        final CheckBoxSelectionModel<UserSettings.OverlayType> selectionModel = new CheckBoxSelectionModel<UserSettings.OverlayType>(identity);
+        IdentityValueProvider<UserSettings.OverlayType> identity = new IdentityValueProvider<>();
+        final CheckBoxSelectionModel<UserSettings.OverlayType> selectionModel = new CheckBoxSelectionModel<>(identity);
 
-        ColumnConfig<UserSettings.OverlayType, String> nameCol = new ColumnConfig<UserSettings.OverlayType, String>(new ToStringValueProvider<UserSettings.OverlayType>() {
+        ColumnConfig<UserSettings.OverlayType, String> nameCol = new ColumnConfig<>(new ToStringValueProvider<UserSettings.OverlayType>() {
             @Override
             public String getValue(UserSettings.OverlayType object) {
                 return i18n.overlayType(object);
             }
         }, 200, i18n.overlay());
-        List<ColumnConfig<UserSettings.OverlayType, ?>> columns = new ArrayList<ColumnConfig<UserSettings.OverlayType, ?>>();
+        List<ColumnConfig<UserSettings.OverlayType, ?>> columns = new ArrayList<>();
         columns.add(selectionModel.getColumn());
         columns.add(nameCol);
 
-        columnModel = new ColumnModel<UserSettings.OverlayType>(columns);
+        columnModel = new ColumnModel<>(columns);
 
-        view = new NoScrollbarGridView<UserSettings.OverlayType>();
+        view = new NoScrollbarGridView<>();
         view.setAutoFill(true);
         view.setStripeRows(true);
 
-        overlayTypeStore = new ListStore<UserSettings.OverlayType>(new EnumKeyProvider<UserSettings.OverlayType>());
+        overlayTypeStore = new ListStore<>(new EnumKeyProvider<UserSettings.OverlayType>());
         overlayTypeStore.addAll(Arrays.asList(UserSettings.OverlayType.values()));
 
         timeZone = new TimeZoneComboBox();
@@ -178,11 +184,14 @@ public class UserSettingsDialog implements Editor<UserSettings> {
             grid.getSelectionModel().select(overlayType, true);
         }
 
-        timePrintInterval.addValidator(new MinNumberValidator<Short>((short) 1));
-        timePrintInterval.addValidator(new MaxNumberValidator<Short>((short) 512));
+        timePrintInterval.addValidator(new MinNumberValidator<>((short) 1));
+        timePrintInterval.addValidator(new MaxNumberValidator<>((short) 512));
 
-        traceInterval.addValidator(new MinNumberValidator<Short>((short) 1));
-        traceInterval.addValidator(new MaxNumberValidator<Short>((short) (60 * 48)));
+        traceInterval.addValidator(new MinNumberValidator<>((short) 1));
+        traceInterval.addValidator(new MaxNumberValidator<>((short) (60 * 48)));
+
+        followedDeviceZoomLevel.addValidator(new MinNumberValidator<>((short) 1));
+        followedDeviceZoomLevel.addValidator(new MaxNumberValidator<>((short) 16));
 
         driver.initialize(this);
         driver.edit(userSettings);
@@ -217,6 +226,11 @@ public class UserSettingsDialog implements Editor<UserSettings> {
 
     @UiHandler("takeFromMapButton")
     public void onSaveDefaultMapSateClicked(SelectEvent event) {
-        userSettingsHandler.onTakeCurrentMapState(mapType, centerLongitude, centerLatitude, zoomLevel, grid.getSelectionModel());
+        userSettingsHandler.onTakeCurrentMapState(mapType, centerLongitude, centerLatitude, zoomLevel, maximizeOverviewMap, grid.getSelectionModel());
+    }
+
+    @UiHandler("setZoomLevelToCurrentButton")
+    public void onSetZoomLevelToCurrentClicked(SelectEvent event) {
+        userSettingsHandler.onSetZoomLevelToCurrent(followedDeviceZoomLevel);
     }
 }

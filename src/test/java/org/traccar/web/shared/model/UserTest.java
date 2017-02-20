@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -72,12 +73,12 @@ public class UserTest {
         GeoFence g6 = new GeoFence(6, "g6");
         GeoFence g7 = new GeoFence(7, "g7");
 
-        m1.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g1, g7)));
-        m2.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g1, g2)));
-        m3.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g5)));
-        u1.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g3)));
-        u2.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g4)));
-        u3.setGeoFences(new HashSet<GeoFence>(Arrays.asList(g6)));
+        m1.setGeoFences(new HashSet<>(Arrays.asList(g1, g7)));
+        m2.setGeoFences(new HashSet<>(Arrays.asList(g1, g2)));
+        m3.setGeoFences(new HashSet<>(Collections.singleton(g5)));
+        u1.setGeoFences(new HashSet<>(Collections.singleton(g3)));
+        u2.setGeoFences(new HashSet<>(Collections.singleton(g4)));
+        u3.setGeoFences(new HashSet<>(Collections.singleton(g6)));
 
         // test
         assertEquals(set(g1, g2, g3, g4, g5, g6, g7), m1.getAllAvailableGeoFences());
@@ -126,6 +127,102 @@ public class UserTest {
         assertTrue(u2.hasAccessTo(g7));
 
         assertEquals(set(g1, g5, g6, g7), u3.getAllAvailableGeoFences());
+        assertTrue(u3.hasAccessTo(g1));
+        assertFalse(u3.hasAccessTo(g2));
+        assertFalse(u3.hasAccessTo(g3));
+        assertFalse(u3.hasAccessTo(g4));
+        assertTrue(u3.hasAccessTo(g5));
+        assertTrue(u3.hasAccessTo(g6));
+        assertTrue(u3.hasAccessTo(g7));
+    }
+
+    @Test
+    public void testAvailableGroups() {
+        // set up users hierarchy
+        User m1 = new User("m1");
+        m1.setManager(true);
+        User m2 = new User("m2");
+        m2.setManager(true);
+        m2.setManagedBy(m1);
+        User m3 = new User("m3");
+        m3.setManager(true);
+        m3.setManagedBy(m1);
+
+        m1.setManagedUsers(set(m2, m3));
+
+        User u1 = new User("u1");
+        User u2 = new User("u2");
+        m2.setManagedUsers(set(u1, u2));
+        u1.setManagedBy(m2);
+        u2.setManagedBy(m2);
+
+        User u3 = new User("u3");
+        m3.setManagedUsers(set(u3));
+        u3.setManagedBy(m3);
+
+        // set up geo-fences
+        Group g1 = new Group(1, "g1");
+        Group g2 = new Group(2, "g2");
+        Group g3 = new Group(3, "g3");
+        Group g4 = new Group(4, "g4");
+        Group g5 = new Group(5, "g5");
+        Group g6 = new Group(6, "g6");
+        Group g7 = new Group(7, "g7");
+
+        m1.setGroups(set(g1, g7));
+        m2.setGroups(set(g1, g2));
+        m3.setGroups(set(g5));
+        u1.setGroups(set(g3));
+        u2.setGroups(set(g4));
+        u3.setGroups(set(g6));
+
+        // test
+        assertEquals(set(g1, g2, g3, g4, g5, g6, g7), m1.getAllAvailableGroups());
+        assertTrue(m1.hasAccessTo(g1));
+        assertTrue(m1.hasAccessTo(g2));
+        assertTrue(m1.hasAccessTo(g3));
+        assertTrue(m1.hasAccessTo(g4));
+        assertTrue(m1.hasAccessTo(g5));
+        assertTrue(m1.hasAccessTo(g6));
+        assertTrue(m1.hasAccessTo(g7));
+
+        assertEquals(set(g1, g2, g3, g4, g7), m2.getAllAvailableGroups());
+        assertTrue(m2.hasAccessTo(g1));
+        assertTrue(m2.hasAccessTo(g2));
+        assertTrue(m2.hasAccessTo(g3));
+        assertTrue(m2.hasAccessTo(g4));
+        assertFalse(m2.hasAccessTo(g5));
+        assertFalse(m2.hasAccessTo(g6));
+        assertTrue(m2.hasAccessTo(g7));
+
+        assertEquals(set(g1, g5, g6, g7), m3.getAllAvailableGroups());
+        assertTrue(m3.hasAccessTo(g1));
+        assertFalse(m3.hasAccessTo(g2));
+        assertFalse(m3.hasAccessTo(g3));
+        assertFalse(m3.hasAccessTo(g4));
+        assertTrue(m3.hasAccessTo(g5));
+        assertTrue(m3.hasAccessTo(g6));
+        assertTrue(m3.hasAccessTo(g7));
+
+        assertEquals(set(g1, g2, g3, g7), u1.getAllAvailableGroups());
+        assertTrue(u1.hasAccessTo(g1));
+        assertTrue(u1.hasAccessTo(g2));
+        assertTrue(u1.hasAccessTo(g3));
+        assertFalse(u1.hasAccessTo(g4));
+        assertFalse(u1.hasAccessTo(g5));
+        assertFalse(u1.hasAccessTo(g6));
+        assertTrue(u1.hasAccessTo(g7));
+
+        assertEquals(set(g1, g2, g4, g7), u2.getAllAvailableGroups());
+        assertTrue(u2.hasAccessTo(g1));
+        assertTrue(u2.hasAccessTo(g2));
+        assertFalse(u2.hasAccessTo(g3));
+        assertTrue(u2.hasAccessTo(g4));
+        assertFalse(u2.hasAccessTo(g5));
+        assertFalse(u2.hasAccessTo(g6));
+        assertTrue(u2.hasAccessTo(g7));
+
+        assertEquals(set(g1, g5, g6, g7), u3.getAllAvailableGroups());
         assertTrue(u3.hasAccessTo(g1));
         assertFalse(u3.hasAccessTo(g2));
         assertFalse(u3.hasAccessTo(g3));

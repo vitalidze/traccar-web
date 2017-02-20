@@ -17,6 +17,8 @@ package org.traccar.web.client.view;
 
 import static org.junit.Assert.assertEquals;
 
+import static org.traccar.web.client.view.PositionInfoPopup.intervalText;
+
 import org.junit.Test;
 import org.traccar.web.shared.model.SensorInterval;
 
@@ -46,19 +48,5 @@ public class SensorIntervalTextTest {
         assertEquals("Good", intervalText(89.999, intervals));
         assertEquals("Full", intervalText(90, intervals));
         assertEquals("Full", intervalText(100, intervals));
-    }
-
-    static String intervalText(double value, List<SensorInterval> intervals) {
-        String valueText = null;
-        for (SensorInterval interval : intervals) {
-            if (valueText == null) {
-                valueText = interval.getText();
-            }
-            if (value < interval.getValue()) {
-                break;
-            }
-            valueText = interval.getText();
-        }
-        return valueText;
     }
 }

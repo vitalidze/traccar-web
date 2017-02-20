@@ -15,8 +15,7 @@
  */
 package org.traccar.web.server.model;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.traccar.web.client.model.DataService;
 
 import javax.inject.Inject;
@@ -49,21 +48,22 @@ public class RESTApiServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Gson gson = GsonUtils.create();
+        ObjectMapper jackson = JacksonUtils.create();
         String methodName = req.getPathInfo().substring(1);
-        Object[] args = gson.fromJson(req.getParameter("payload"), Object[].class);
-        makeRestCall(gson, resp, methodName, args);
+        String payload = req.getParameter("payload");
+        Object[] args = payload == null ? new Object[0] : jackson.readValue(payload, Object[].class);
+        makeRestCall(jackson, resp, methodName, args);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Gson gson = GsonUtils.create();
+        ObjectMapper jackson = JacksonUtils.create();
         String methodName = req.getPathInfo().substring(1);
-        Object[] args = gson.fromJson(new InputStreamReader(req.getInputStream()), Object[].class);
-        makeRestCall(gson, resp, methodName, args);
+        Object[] args = jackson.readValue(new InputStreamReader(req.getInputStream()), Object[].class);
+        makeRestCall(jackson, resp, methodName, args);
     }
 
-    private void makeRestCall(Gson gson, HttpServletResponse response, String methodName, Object[] args) throws IOException {
+    private void makeRestCall(ObjectMapper gson, HttpServletResponse response, String methodName, Object[] args) throws IOException {
         try {
             Class<?>[] argClasses = new Class<?>[args == null ? 0 : args.length];
             if (args != null) {
@@ -92,10 +92,10 @@ public class RESTApiServlet extends HttpServlet {
                                     } else if (Date.class.isAssignableFrom(expectedType)) {
                                         args[i] = requestDateFormat.get().parse(args[i].toString());
                                     } else {
-                                        args[i] = gson.fromJson("\"" + args[i].toString() + "\"", expectedType);
+                                        args[i] = gson.readValue("\"" + args[i].toString() + "\"", expectedType);
                                     }
                                 } else {
-                                    args[i] = gson.fromJson(gson.toJson(args[i]), expectedType);
+                                    args[i] = gson.readValue(gson.writeValueAsString(args[i]), expectedType);
                                 }
                             }
                         }
@@ -113,7 +113,8 @@ public class RESTApiServlet extends HttpServlet {
                     response.setHeader("Content-Type", "application/json;charset=UTF-8");
                 }
                 response.setCharacterEncoding("UTF-8");
-                gson.toJson(result, response.getWriter());
+                String s = gson.writeValueAsString(result);
+                response.getWriter().write(s);
             }
         } catch (ParseException pe) {
             log("Unable to parse date: " + pe.getLocalizedMessage());
@@ -146,6 +147,11 @@ public class RESTApiServlet extends HttpServlet {
             try {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } catch (Exception ex) {}
+        } catch (Exception ex) {
+            log("Method '" + methodName + "' failed with unexpected error", ex);
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            } catch (Exception e) {}
         }
     }
 }

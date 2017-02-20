@@ -15,6 +15,18 @@
     <ui:attributes width="-1" height="-1" />
   </ui:with>
 
+  <ui:with type="com.sencha.gxt.core.client.util.Margins" field="bottomMargin10">
+    <ui:attributes bottom="10" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutDataWithButton">
+    <ui:attributes width="1" height="-1"  margins="{bottomMargin10}" />
+  </ui:with>
+
+  <ui:with type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData" field="horizontalLayoutDataTwoWidgets">
+    <ui:attributes width="0.5" height="-1" />
+  </ui:with>
+
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="shortPropertyEditor" />
@@ -27,7 +39,22 @@
   <ui:with type="com.sencha.gxt.data.shared.ListStore" field="overlayTypeStore" />
   <ui:with type="com.sencha.gxt.widget.core.client.grid.ColumnModel" field="columnModel" />
 
-  <gxt:Window ui:field="window" pixelSize="400, -1" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
+  <ui:style>
+    .pad3 {
+        padding: 3px 3px 0px 3px;
+    }
+
+    .customizeButtonGaps > div {
+        margin-left: 4px;
+    }
+
+    .customizeButtonGaps div > div {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+  </ui:style>
+
+  <gxt:Window ui:field="window" pixelSize="445, 590" modal="true" headingText="{i18n.preferences}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:FieldLabel text="{i18n.speedUnits}" labelWidth="160">
@@ -67,18 +94,40 @@
                 </form:widget>
             </form:FieldLabel>
         </container:child>
+        <container:child layoutData="{verticalLayoutDataWithButton}">
+            <form:FieldLabel text="{i18n.followedDeviceZoomLevel}" labelWidth="160">
+                <form:widget>
+                    <container:HorizontalLayoutContainer>
+                        <container:child layoutData="{horizontalLayoutDataTwoWidgets}">
+                            <form:NumberField editor="{shortPropertyEditor}"
+                                              ui:field="followedDeviceZoomLevel"
+                                              allowNegative="false"
+                                              allowDecimals="false"
+                                              allowBlank="true"
+                                              width="4"
+                                              title="{i18n.followedDeviceZoomLevelToolTip}"/>
+                        </container:child>
+                        <container:child layoutData="{horizontalLayoutDataTwoWidgets}">
+                            <button:TextButton ui:field="setZoomLevelToCurrentButton"
+                                               text="{i18n.useCurrentZoomLevel}"
+                                               addStyleNames='{style.customizeButtonGaps}' />
+                        </container:child>
+                    </container:HorizontalLayoutContainer>
+                </form:widget>
+            </form:FieldLabel>
+        </container:child>
       <container:child layoutData="{verticalLayoutData}">
-          <gxt:FramedPanel headingText="{i18n.defaultMapState}">
+          <gxt:FramedPanel headingText="{i18n.defaultMapState}" bodyStyleName="{style.pad3}">
               <container:VerticalLayoutContainer>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.map}">
+                      <form:FieldLabel text="{i18n.map}" labelWidth="180">
                           <form:widget>
                               <form:ComboBox ui:field="mapType" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.longitude}">
+                      <form:FieldLabel text="{i18n.longitude}" labelWidth="180">
                           <form:widget>
                               <form:NumberField editor="{doublePropertyEditor}"
                                                 ui:field="centerLongitude"
@@ -89,7 +138,7 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.latitude}">
+                      <form:FieldLabel text="{i18n.latitude}" labelWidth="180">
                           <form:widget>
                               <form:NumberField editor="{doublePropertyEditor}"
                                                 ui:field="centerLatitude"
@@ -100,13 +149,20 @@
                       </form:FieldLabel>
                   </container:child>
                   <container:child layoutData="{verticalLayoutData}">
-                      <form:FieldLabel text="{i18n.zoom}">
+                      <form:FieldLabel text="{i18n.zoom}" labelWidth="180">
                           <form:widget>
                               <form:NumberField editor="{integerPropertyEditor}"
                                                 ui:field="zoomLevel"
                                                 allowNegative="false"
                                                 allowDecimals="false"
                                                 allowBlank="false" />
+                          </form:widget>
+                      </form:FieldLabel>
+                  </container:child>
+                  <container:child layoutData="{verticalLayoutData}">
+                      <form:FieldLabel text="{i18n.maximizeOverviewMap}" labelWidth="180">
+                          <form:widget>
+                              <form:CheckBox ui:field="maximizeOverviewMap" />
                           </form:widget>
                       </form:FieldLabel>
                   </container:child>
@@ -124,7 +180,7 @@
           </gxt:FramedPanel>
       </container:child>
     </container:VerticalLayoutContainer>
-      
+
     <gxt:button>
       <button:TextButton ui:field="saveButton" text="{i18n.save}" />
     </gxt:button>

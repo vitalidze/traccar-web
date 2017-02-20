@@ -19,9 +19,13 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 import com.google.gwt.xml.client.XMLParser;
+import com.sencha.gxt.core.client.XTemplates;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.tips.ToolTip;
 import com.sencha.gxt.widget.core.client.tips.ToolTipConfig;
@@ -30,49 +34,109 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.shared.model.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PositionInfoPopup {
-    private final static Messages i18n = GWT.create(Messages.class);
+    private final Messages i18n = GWT.create(Messages.class);
 
     final ToolTip toolTip;
     final ListStore<Device> deviceStore;
+    final PopupTemplate template;
+    final PopupResources popupResources;
+
+    interface PopupCssStyle extends CssResource {
+        String rowPaddingLeftRight();
+        String rowPadding310310();
+        String rowPadding31030();
+        String rowBorder();
+        String rowBorderTop();
+        String rowBorderTopBottom();
+        String rowBorderRightBottom();
+        String rowBorderBottom();
+        String font11pt();
+        String font12pt();
+        String font10pt();
+        String geoFenceSquare();
+        String valignMiddle();
+        String paddingLeft5();
+    }
+
+    interface PopupResources extends ClientBundle {
+        @ClientBundle.Source("PositionInfoPopup.css")
+        PopupCssStyle popupStyle();
+    }
+
+    interface PopupTemplate extends XTemplates {
+        @XTemplates.XTemplate(source = "PositionInfoPopup.html")
+        SafeHtml body(PopupCssStyle style, Messages i18n, Position position, Device device,
+                      String ago,
+                      String formattedTime,
+                      String idle,
+                      String formattedIdleSinceTime,
+                      String speed,
+                      String odometer,
+                      List<SensorData> sensorData);
+
+        @XTemplate("<table height=\"100%\"><tr>" +
+                "<td><img src=\"{iconURL}\">&nbsp;</td>" +
+                "<td valign=\"center\">{deviceTitle}</td>" +
+                "<td valign=\"center\" align=\"right\"><img src=\"{arrowIconURL}\"/></td>" +
+                "</tr></table>")
+        SafeHtml title(String iconURL, String deviceTitle, String arrowIconURL);
+    }
+
+    static class SensorData {
+        final String name;
+        final String valueText;
+        final String color;
+        final String iconURL;
+
+        SensorData(String name, String valueText, String color, String iconURL) {
+            this.name = name;
+            this.valueText = valueText;
+            this.color = color;
+            this.iconURL = iconURL;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getValueText() {
+            return valueText;
+        }
+
+        public String getColor() {
+            return color;
+        }
+
+        public String getIconURL() {
+            return iconURL;
+        }
+    }
 
     public PositionInfoPopup(ListStore<Device> deviceStore) {
         this.deviceStore = deviceStore;
         this.toolTip = new ToolTip(new ToolTipConfig());
+        this.template = GWT.create(PopupTemplate.class);
+        this.popupResources = GWT.create(PopupResources.class);
+        this.popupResources.popupStyle().ensureInjected();
     }
 
     public void show(int x, int y, final Position position) {
         long current = System.currentTimeMillis();
 
-        String body = "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">" +
-                (position.getDevice().getDescription() != null && !position.getDevice().getDescription().trim().isEmpty() ? "<tr><td style=\"border-width: 1px 0px 0px 0px; border-style: solid; border-color: #000000; padding: 3px 0px 3px 0px;\" width=\"100%\" colspan=\"2\">" + position.getDevice().getDescription() + "</td></tr>" : "") +
-                "<tr><td style=\"border-width: 1px 0px 1px 0px; border-style: solid; border-color: #000000; padding: 3px 0px 3px 0px;\" width=\"100%\" colspan=\"2\">" + i18n.ago(formatDateTimeDiff(current - position.getTime().getTime())) + "<br>(" + ApplicationContext.getInstance().getFormatterUtil().getTimeFormat().format(position.getTime()) + ")</td></tr>" +
-                (position.getIdleSince() == null ? "" : ("<tr><td style=\"font-size: 11pt; border-width: 0px 1px 1px 0px; border-style: solid; border-color: #000000; padding: 3px 10px 3px 0px;\" valign=\"center\">" + i18n.idle() + "</td><td style=\"border-width: 0px 0px 1px 0px; border-style: solid; border-color: #000000; padding: 3px 10px 3px 10px;\" colspan=\"2\">" + formatDateTimeDiff(current - position.getIdleSince().getTime()) + "<br>(" + i18n.since(ApplicationContext.getInstance().getFormatterUtil().getTimeFormat().format(position.getIdleSince())) + ")</td></tr>")) +
-                (position.getAddress() == null || position.getAddress().isEmpty() ? "" : ("<tr><td style=\"border-width: 0px 0px 1px 0px; border-style: solid; border-color: #000000; padding: 3px 0px 3px 0px;\" colspan=\"2\">" + position.getAddress() + "</td></tr>")) +
-                "<tr>" +
-                (position.getSpeed() == null ? "" : ("<td style=\"font-size: 12pt; border-width: 0px 1px 1px 0px; border-style: solid; border-color: #000000; padding: 3px 10px 3px 0px;\" valign=\"bottom\">" + ApplicationContext.getInstance().getFormatterUtil().getSpeedFormat().format(position.getSpeed()) + "</td>")) +
-                (position.getAltitude() == null ? "" : ("<td style=\"font-size: 10pt; border-bottom: 1px solid #000000; padding: 3px 10px 3px 10px;\" valign=\"bottom\"" + (position.getSpeed() == null ? " colspan=\"2\" align=\"right\"" : "") + ">" + position.getAltitude() + " " + i18n.meter() + "</td>")) +
-                "</tr>";
+        Device device = deviceStore.findModelWithKey(Long.toString(position.getDevice().getId()));
 
-        if (position.getDevice().getOdometer() > 0) {
-            body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + i18n.odometer() + "</td><td>" + ApplicationContext.getInstance().getFormatterUtil().getDistanceFormat().format(position.getDevice().getOdometer()) + "</td></tr>";
-        }
-        if (position.getProtocol() != null) {
-            body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + i18n.protocol() + "</td><td>" + position.getProtocol() + "</td></tr>";
-        }
+        List<SensorData> sensorData = Collections.emptyList();
         String other = position.getOther();
         if (other != null) {
-            Device device = deviceStore.findModelWithKey(Long.toString(position.getDevice().getId()));
-            Map<String, Sensor> sensors = new HashMap<String, Sensor>(device.getSensors().size());
+            Map<String, Sensor> sensors = new HashMap<>(device.getSensors().size());
             for (Sensor sensor : device.getSensors()) {
                 sensors.put(sensor.getParameterName(), sensor);
             }
 
-            Map<String, Object> sensorData = new HashMap<String, Object>();
+            Map<String, Object> parsedSensorData = new HashMap<>();
 
             // XML
             if (other.trim().startsWith("<")) {
@@ -82,7 +146,7 @@ public class PositionInfoPopup {
                         Node node = nodes.item(i);
                         String parameterName = node.getNodeName();
                         String valueText = node.getFirstChild().getNodeValue();
-                        sensorData.put(parameterName, valueText);
+                        parsedSensorData.put(parameterName, valueText);
                     }
                 } catch (Exception error) {
                 }
@@ -94,11 +158,11 @@ public class PositionInfoPopup {
                         for (String parameterName : object.keySet()) {
                             JSONValue value = object.get(parameterName);
                             if (value.isNumber() != null) {
-                                sensorData.put(parameterName, value.isNumber().doubleValue());
+                                parsedSensorData.put(parameterName, value.isNumber().doubleValue());
                             } else if (value.isBoolean() != null) {
-                                sensorData.put(parameterName, value.isBoolean().booleanValue());
+                                parsedSensorData.put(parameterName, value.isBoolean().booleanValue());
                             } else if (value.isString() != null) {
-                                sensorData.put(parameterName, value.isString().stringValue());
+                                parsedSensorData.put(parameterName, value.isString().stringValue());
                             }
                         }
                     }
@@ -106,11 +170,18 @@ public class PositionInfoPopup {
                 }
             }
 
+            if (!device.isShowProtocol()) {
+                parsedSensorData.remove("protocol");
+            }
+
             // write values
-            for (Map.Entry<String, Object> entry : sensorData.entrySet()) {
+            sensorData = new ArrayList<>(parsedSensorData.size());
+            for (Map.Entry<String, Object> entry : parsedSensorData.entrySet()) {
                 String parameterName = entry.getKey();
                 Object value = entry.getValue();
                 String valueText = value.toString();
+                String color = null;
+                String iconURL = null;
                 Sensor sensor = sensors.get(parameterName);
                 if (sensor != null) {
                     if (!sensor.isVisible()) {
@@ -126,46 +197,38 @@ public class PositionInfoPopup {
                         }
                         List<SensorInterval> intervals = SensorsEditor.intervals(sensor);
                         if (!intervals.isEmpty()) {
-                            valueText = intervalText(doubleValue, intervals);
+                            SensorInterval interval = interval(doubleValue, intervals);
+                            valueText = interval.getText() == null ? "" : interval.getText();
+                            color = interval.getColor();
+                            iconURL = interval.getPictureId() == null ? null : (Picture.URL_PREFIX + interval.getPictureId());
                         }
                     }
                 } else if (parameterName.equals("protocol")) {
                     parameterName = i18n.protocol();
                 }
                 if (!valueText.isEmpty()) {
-                    body += "<tr><td style=\"padding: 3px 0px 3px 0px;\">" + parameterName + "</td><td>" + valueText + "</td></tr>";
+                    sensorData.add(new SensorData(parameterName, valueText, color, iconURL));
                 }
             }
         }
 
-        if (position.getGeoFences() != null && !position.getGeoFences().isEmpty()) {
-            body += "<tr><td style=\"border-width: 1px 0px 0px 0px; border-style: solid; border-color: #000000; padding: 3px 10px 3px 0px;\" colspan=\"2\">";
-            for (GeoFence geoFence : position.getGeoFences()) {
-                body += "<p><div style=\"" +
-                        "    width: 10px;\n" +
-                        "    height: 10px;\n" +
-                        "    display: inline-block;\n" +
-                        "    background-color: #" + geoFence.getColor() + ";\n" +
-                        "    border: 1px solid;\n" +
-                        "    left: 5px;\n" +
-                        "    top: 5px;\"></div> " + geoFence.getName() + "</p>";
-            }
-            body += "</td></tr>";
-        }
-
-        body += "</table>";
+        SafeHtml body = template.body(popupResources.popupStyle(), i18n,
+                position,
+                device,
+                i18n.ago(formatDateTimeDiff(current - position.getTime().getTime())),
+                ApplicationContext.getInstance().getFormatterUtil().getTimeFormat().format(position.getTime()),
+                position.getIdleSince() == null ? null : formatDateTimeDiff(current - position.getIdleSince().getTime()),
+                position.getIdleSince() == null ? null : i18n.since(ApplicationContext.getInstance().getFormatterUtil().getTimeFormat().format(position.getIdleSince())),
+                position.getSpeed() == null ? null : ApplicationContext.getInstance().getFormatterUtil().getSpeedFormat().format(position.getSpeed()),
+                position.getDevice().getOdometer() > 0 && device.isShowOdometer() ? ApplicationContext.getInstance().getFormatterUtil().getDistanceFormat().format(position.getDevice().getOdometer()) : null,
+                sensorData);
 
         ToolTipConfig config = new ToolTipConfig();
 
         PositionIcon icon = position.getIcon() == null ? MarkerIcon.create(position) : position.getIcon();
         String deviceTitle = position.getDevice().getName() + (position.getStatus() == Position.Status.OFFLINE ? " (" + i18n.offline() + ")" : "");
 
-        config.setTitleHtml(
-                "<table height=\"100%\"><tr>" +
-                "<td>" +"<img src=\"" + icon.getURL() + "\">&nbsp;</td>" +
-                "<td valign=\"center\">" + deviceTitle + "</td>" +
-                "</tr></table>");
-
+        config.setTitleHtml(template.title(icon.getURL(), deviceTitle, "img/arrow" + (int) ((position.getCourse() + 45 / 2) % 360) / 45 + ".png"));
         config.setBodyHtml(body);
         config.setAutoHide(false);
         config.setDismissDelay(0);
@@ -198,17 +261,22 @@ public class PositionInfoPopup {
         toolTip.update(config);
     }
 
-    public static String intervalText(double value, List<SensorInterval> intervals) {
-        String valueText = null;
+    public static SensorInterval interval(double value, List<SensorInterval> intervals) {
+        SensorInterval result = null;
         for (SensorInterval interval : intervals) {
-            if (valueText == null) {
-                valueText = interval.getText();
+            if (result == null) {
+                result = interval;
             }
             if (value < interval.getValue()) {
                 break;
             }
-            valueText = interval.getText();
+            result = interval;
         }
-        return valueText;
+        return result;
+    }
+
+    public static String intervalText(double value, List<SensorInterval> intervals) {
+        SensorInterval interval = interval(value, intervals);
+        return interval == null ? null : interval.getText();
     }
 }

@@ -68,9 +68,10 @@ public class ApplicationContext {
     }
 
     private Set<Long> followedDeviceIds;
+
     public void follow(Device device) {
         if (followedDeviceIds == null) {
-            followedDeviceIds = new HashSet<Long>();
+            followedDeviceIds = new HashSet<>();
         }
         followedDeviceIds.add(device.getId());
     }
@@ -86,9 +87,10 @@ public class ApplicationContext {
     }
 
     private Set<Long> recordTraceDeviceIds;
+
     public void recordTrace(Device device) {
         if (recordTraceDeviceIds == null) {
-            recordTraceDeviceIds = new HashSet<Long>();
+            recordTraceDeviceIds = new HashSet<>();
         }
         recordTraceDeviceIds.add(device.getId());
     }

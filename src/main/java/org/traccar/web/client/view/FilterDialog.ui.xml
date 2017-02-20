@@ -5,7 +5,8 @@
     xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client"
   	xmlns:container="urn:import:com.sencha.gxt.widget.core.client.container"
   	xmlns:form="urn:import:com.sencha.gxt.widget.core.client.form"
-  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button">
+  	xmlns:button="urn:import:com.sencha.gxt.widget.core.client.button"
+    xmlns:toolbar="urn:import:com.sencha.gxt.widget.core.client.toolbar">
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData" field="verticalLayoutData">
     <ui:attributes width="1" height="24" />
@@ -31,7 +32,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <gxt:Window ui:field="window" pixelSize="475, 180" modal="true" headingText="{i18n.filter}" focusWidget="{saveButton}">
+    <gxt:Window ui:field="window" pixelSize="500, 215" modal="true" headingText="{i18n.filter}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <form:CheckBox ui:field="hideZeroCoordinates" boxLabel="{i18n.hideZeroCoordinates}" />
@@ -45,7 +46,7 @@
         <container:child layoutData="{verticalLayoutData}">
             <container:HorizontalLayoutContainer>
                 <container:child layoutData="{leftLabelLayoutData}">
-                    <g:Label text="{i18n.ignoreLocationsWithDistanceFromPreviousLT}"/>
+                    <toolbar:LabelToolItem label="{i18n.ignoreLocationsWithDistanceFromPreviousLT}" />
                 </container:child>
                 <container:child layoutData="{horizontalLayoutData}">
                     <form:NumberField editor="{doublePropertyEditor}"
@@ -56,14 +57,14 @@
                                       width="64" />
                 </container:child>
                 <container:child layoutData="{rightLabelLayoutData}">
-                    <g:Label ui:field="distanceUnits"/>
+                    <toolbar:LabelToolItem ui:field="distanceUnits"/>
                 </container:child>
             </container:HorizontalLayoutContainer>
         </container:child>
       <container:child layoutData="{verticalLayoutData}">
         <container:HorizontalLayoutContainer>
             <container:child layoutData="{leftLabelLayoutData}">
-              <g:Label text="{i18n.speed}" width="100" />
+              <toolbar:LabelToolItem label="{i18n.speed}" />
             </container:child>
             <container:child layoutData="{horizontalLayoutData}">
               <form:ComboBox ui:field="speedModifier" editable="false" allowTextSelection="false" allowBlank="false" width="46" triggerAction="ALL" />
@@ -77,7 +78,7 @@
                               width="64" />
             </container:child>
             <container:child layoutData="{rightLabelLayoutData}">
-              <g:Label ui:field="speedUnits"/>
+              <toolbar:LabelToolItem ui:field="speedUnits"/>
             </container:child>
           </container:HorizontalLayoutContainer>
       </container:child>

@@ -174,7 +174,7 @@ public abstract class MarkerIcon {
         String url = position.getStatus() == Position.Status.OFFLINE ? deviceIcon.getOfflineURL() : deviceIcon.getDefaultURL();
         int width = position.getStatus() == Position.Status.OFFLINE ? deviceIcon.getOfflineWidth() : deviceIcon.getDefaultWidth();
         int height = position.getStatus() == Position.Status.OFFLINE ? deviceIcon.getOfflineHeight() : deviceIcon.getDefaultHeight();
-        return new PositionIcon(url, width, height,
+        return new PositionIcon(position.getDevice().getIconMode() == DeviceIconMode.ARROW, url, width, height,
                 deviceIcon.getSelectedURL(), deviceIcon.getSelectedWidth(), deviceIcon.getSelectedHeight());
     }
 }

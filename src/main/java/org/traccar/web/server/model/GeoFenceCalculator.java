@@ -16,6 +16,7 @@
 package org.traccar.web.server.model;
 
 import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.LonLat;
 import org.traccar.web.shared.model.Position;
 
 import java.awt.*;
@@ -42,10 +43,10 @@ public class GeoFenceCalculator {
     }
 
     private static class GeoFenceData {
-        final List<GeoFence.LonLat> points;
+        final List<LonLat> points;
         final Shape shape;
 
-        GeoFenceData(List<GeoFence.LonLat> points, Shape shape) {
+        GeoFenceData(List<LonLat> points, Shape shape) {
             this.points = points;
             this.shape = shape;
         }
@@ -54,14 +55,14 @@ public class GeoFenceCalculator {
     private final Map<GeoFence, GeoFenceData> geoFences;
 
     public GeoFenceCalculator(Collection<GeoFence> geoFences) {
-        this.geoFences = new HashMap<GeoFence, GeoFenceData>(geoFences.size());
+        this.geoFences = new HashMap<>(geoFences.size());
         for (GeoFence geoFence : geoFences) {
-            List<GeoFence.LonLat> points = geoFence.points();
+            List<LonLat> points = geoFence.points();
             Shape shape = null;
             switch (geoFence.getType()) {
                 case POLYGON:
                     Path2D polygon = new Path2D.Double();
-                    for (GeoFence.LonLat point : geoFence.points()) {
+                    for (LonLat point : geoFence.points()) {
                         if (polygon.getCurrentPoint() == null) {
                             polygon.moveTo(point.lon, point.lat);
                         } else {
@@ -88,11 +89,11 @@ public class GeoFenceCalculator {
             case POLYGON:
                 return data.shape.contains(position.getLongitude(), position.getLatitude());
             case CIRCLE:
-                GeoFence.LonLat center = data.points.get(0);
+                LonLat center = data.points.get(0);
                 return getDistance(position.getLongitude(), position.getLatitude(), center.lon, center.lat) <= geoFence.getRadius() / 1000;
             case LINE:
-                GeoFence.LonLat prevPoint = null;
-                for (GeoFence.LonLat point : data.points) {
+                LonLat prevPoint = null;
+                for (LonLat point : data.points) {
                     if (prevPoint != null) {
                         // from http://stackoverflow.com/questions/1459368/snap-point-to-a-line
                         double apx = position.getLongitude() - prevPoint.lon;

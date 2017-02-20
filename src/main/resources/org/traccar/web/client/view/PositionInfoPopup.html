@@ -1,0 +1,106 @@
+<table width="100%" cellspacing="0" cellpadding="0">
+    <tpl if="device.description != null && !device.description.empty">
+        <tr>
+            <td class="{style.rowBorder} {style.rowBorderTop} {style.rowPaddingLeftRight}" width="100%" colspan="2">
+                {device.description}
+            </td>
+        </tr>
+    </tpl>
+    <tr>
+        <td class="{style.rowBorder} {style.rowBorderTopBottom} {style.rowPaddingLeftRight}" width="100%" colspan="2">
+            {ago}<br>({formattedTime})
+        </td>
+    </tr>
+    <tpl if="position.idleSince != null">
+        <tr>
+            <td class="{style.font11pt} {style.rowBorder} {style.rowBorderRightBottom} {style.rowPadding310310}" valign="center">
+                {i18n.idle}
+            </td>
+            <td class="{style.rowBorder} {style.rowBorderBottom} {style.rowPadding310310}" colspan="2">
+                {idle}<br>({formattedIdleSinceTime})
+            </td>
+        </tr>
+    </tpl>
+    <tpl if="position.address != null && !position.address.empty">
+        <tr>
+            <td class="{style.rowBorder} {style.rowBorderBottom} {style.rowPaddingLeftRight}" colspan="2">
+                {position.address}
+            </td>
+        </tr>
+    </tpl>
+    <tr>
+        <tpl if="position.speed != null">
+            <td class="{style.font12pt} {style.rowBorder} {style.rowBorderRightBottom} {style.rowPadding31030}" valign="bottom">
+                {speed}
+            </td>
+        </tpl>
+        <tpl if="position.altitude != null">
+            <tpl if="position.speed == null">
+                <td class="{style.font10pt} {style.rowBorder} {style.rowBorderBottom} {style.rowPadding310310}" valign="bottom" colspan="2" align="right">
+                    {position.altitude} {i18n.meter}
+                </td>
+            </tpl>
+            <tpl if="position.speed != null">
+                <td class="{style.font10pt} {style.rowBorder} {style.rowBorderBottom} {style.rowPadding310310}" valign="bottom">
+                    {position.altitude} {i18n.meter}
+                </td>
+            </tpl>
+        </tpl>
+    </tr>
+    <tpl if="position.device.odometer &gt; 0 && device.showOdometer">
+        <tr>
+            <td class="{style.rowPaddingLeftRight}">
+                {i18n.odometer}
+            </td>
+            <td>
+                {odometer}
+            </td>
+        </tr>
+    </tpl>
+    <tpl if="position.protocol != null && device.showProtocol">
+        <tr>
+            <td class="{style.rowPaddingLeftRight}">
+                {i18n.protocol}
+            </td>
+            <td>
+                {position.protocol}
+            </td>
+        </tr>
+    </tpl>
+    <tpl for="sensorData">
+        <tr>
+            <td class="{style.rowPaddingLeftRight}">{name}</td>
+            <tpl if="color == null">
+                <tpl if="iconURL == null">
+                    <td>{valueText}</td>
+                </tpl>
+                <tpl if="iconURL != null">
+                    <td>
+                        <img src="{iconURL}" align="left" class="{style.valignMiddle}">
+                        <span class="{style.valignMiddle} {style.paddingLeft5}">{valueText}</span>
+                    </td>
+                </tpl>
+            </tpl>
+            <tpl if="color != null">
+                <tpl if="iconURL == null">
+                    <td style="color: #{color}">{valueText}</td>
+                </tpl>
+                <tpl if="iconURL != null">
+                    <td>
+                        <img src="{iconURL}" class="{style.valignMiddle}">
+                        <span class="{style.valignMiddle} {style.paddingLeft5}" style="color: #{color};">{valueText}</span>
+                    </td>
+                </tpl>
+            </tpl>
+        </tr>
+    </tpl>
+    <tpl if="position.geoFences != null && !position.geoFences.empty">
+        <tr>
+            <td class="{style.rowBorder} {style.rowBorderTop} {style.rowPadding31030}" colspan="2">
+                <tpl for="position.geoFences">
+                    <p><div class="{style.geoFenceSquare}" style="background-color: #{color};"></div> {name}</p>
+                </tpl>
+            </td>
+        </tr>
+    </tpl>
+</table>

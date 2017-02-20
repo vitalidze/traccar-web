@@ -9,7 +9,7 @@
   <groupId>org.traccar</groupId>
   <artifactId>traccar-web</artifactId>
   <packaging>war</packaging>
-  <version>0.8.3-SNAPSHOT</version>
+  <version>0.12.3</version>
   <name>Traccar Web UI</name>
 
   <properties>
@@ -21,7 +21,7 @@
     <guiceVersion>3.0</guiceVersion>
     <!-- Convenience property to set the javamail version -->
     <javaMailVersion>1.5.2</javaMailVersion>
-    <!-- GWT needs at least java 1.5 -->
+    <jackson2Version>2.6.3</jackson2Version>
     <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -83,6 +83,11 @@
       <artifactId>guice-servlet</artifactId>
       <version>${guiceVersion}</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-multibindings</artifactId>
+      <version>${guiceVersion}</version>
+    </dependency>
     <!-- Database drivers -->
     <dependency>
       <groupId>com.h2database</groupId>
@@ -110,6 +115,12 @@
        <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>com.sencha.gxt</groupId>
+      <artifactId>gxt-theme-neptune</artifactId>
+      <version>3.1.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
        <groupId>org.gwtopenmaps.openlayers</groupId>
        <artifactId>gwt-openlayers-client</artifactId>
        <version>1.0</version>
@@ -126,6 +137,28 @@
       <artifactId>smtp</artifactId>
       <version>${javaMailVersion}</version>
     </dependency>
+    <!-- Jackson dependencies -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson2Version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson2Version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson2Version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.nmorel.gwtjackson</groupId>
+      <artifactId>gwt-jackson</artifactId>
+      <version>0.10.0</version>
+      <scope>provided</scope>
+    </dependency>
     <!-- Test dependencies -->
     <dependency>
       <groupId>junit</groupId>
@@ -139,11 +172,6 @@
       <version>1.10.19</version>
     </dependency>
     <!-- Other dependencies -->
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.3</version>
-    </dependency>
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
@@ -207,7 +235,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.1.1</version>
+        <version>2.6</version>
         <executions>
           <execution>
             <phase>compile</phase>
@@ -223,10 +251,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.3</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
       </plugin>
         <!-- ADD A REFERENCE TO THE MAVEN WRAPPER PLUGIN -->

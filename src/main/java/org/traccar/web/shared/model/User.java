@@ -21,7 +21,8 @@ import java.util.Set;
 
 import javax.persistence.*;
 
-import com.google.gson.annotations.Expose;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -35,7 +36,7 @@ public class User implements IsSerializable, Cloneable {
     public User() {
         admin = false;
         manager = false;
-        transferNotificationEvents = new HashSet<DeviceEventType>();
+        transferNotificationEvents = new HashSet<>();
     }
 
     public User(String login) {
@@ -45,8 +46,8 @@ public class User implements IsSerializable, Cloneable {
     public User(String login, String password) {
         this(login);
         this.password = password;
-        this.geoFences = new HashSet<GeoFence>();
-        this.managedUsers = new HashSet<User>();
+        this.geoFences = new HashSet<>();
+        this.managedUsers = new HashSet<>();
     }
 
     public User(User user) {
@@ -60,9 +61,11 @@ public class User implements IsSerializable, Cloneable {
         userSettings = user.userSettings;
         notifications = user.notifications;
         if (user.notificationEvents != null) {
-            transferNotificationEvents = new HashSet<DeviceEventType>(user.notificationEvents);
+            transferNotificationEvents = new HashSet<>(user.notificationEvents);
         }
         maxNumOfDevices = user.maxNumOfDevices;
+        expirationDate = user.expirationDate;
+        blocked = user.blocked;
         readOnly = user.readOnly;
         archive = user.archive;
         companyName = user.companyName;
@@ -71,7 +74,6 @@ public class User implements IsSerializable, Cloneable {
         phoneNumber = user.phoneNumber;
     }
 
-    @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -81,7 +83,6 @@ public class User implements IsSerializable, Cloneable {
         return id;
     }
 
-    @Expose
     private String login;
 
     public void setLogin(String login) {
@@ -92,17 +93,19 @@ public class User implements IsSerializable, Cloneable {
         return login;
     }
 
+    @JsonIgnore
     private String password;
 
+    @JsonProperty
     public void setPassword(String password) {
         this.password = password;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
-    @Expose
     private PasswordHashMethod password_hash_method;
 
     public void setPasswordHashMethod(PasswordHashMethod type) {
@@ -114,8 +117,18 @@ public class User implements IsSerializable, Cloneable {
         return (password_hash_method == null) ? PasswordHashMethod.PLAIN : password_hash_method;
     }
 
+    @JsonIgnore
+    private String salt;
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
     // TODO temporary nullable to migrate from old database
-    @Expose
     private Boolean admin;
 
     public void setAdmin(boolean admin) {
@@ -127,7 +140,6 @@ public class User implements IsSerializable, Cloneable {
         return (admin == null) ? false : admin;
     }
 
-    @Expose
     private Boolean manager;
 
     public Boolean getManager() {
@@ -149,7 +161,8 @@ public class User implements IsSerializable, Cloneable {
                foreignKey = @ForeignKey(name = "users_devices_fkey_users_id"),
                joinColumns = { @JoinColumn(name = "users_id", table = "users", referencedColumnName = "id") },
                inverseJoinColumns = { @JoinColumn(name = "devices_id", table = "devices", referencedColumnName = "id") })
-    private Set<Device> devices = new HashSet<Device>();
+    @JsonIgnore
+    private Set<Device> devices = new HashSet<>();
 
     public void setDevices(Set<Device> devices) {
         this.devices = devices;
@@ -159,8 +172,9 @@ public class User implements IsSerializable, Cloneable {
         return devices;
     }
 
+    @JsonIgnore
     public Set<Device> getAllAvailableDevices() {
-        Set<Device> devices = new HashSet<Device>();
+        Set<Device> devices = new HashSet<>();
         devices.addAll(getDevices());
         if (getManager()) {
             for (User managedUser : getManagedUsers()) {
@@ -176,6 +190,7 @@ public class User implements IsSerializable, Cloneable {
             foreignKey = @ForeignKey(name = "users_geofences_fkey_user_id"),
             joinColumns = { @JoinColumn(name = "user_id", table = "users", referencedColumnName = "id") },
             inverseJoinColumns = { @JoinColumn(name = "geofence_id", table = "geofences", referencedColumnName = "id") })
+    @JsonIgnore
     private Set<GeoFence> geoFences;
 
     public void setGeoFences(Set<GeoFence> geoFences) {
@@ -186,8 +201,9 @@ public class User implements IsSerializable, Cloneable {
         return geoFences;
     }
 
+    @JsonIgnore
     public Set<GeoFence> getAllAvailableGeoFences() {
-        Set<GeoFence> result = new HashSet<GeoFence>();
+        Set<GeoFence> result = new HashSet<>();
         result.addAll(getGeoFences());
         if (getManager()) {
             for (User user : getManagedUsers()) {
@@ -204,6 +220,10 @@ public class User implements IsSerializable, Cloneable {
     }
 
     public boolean hasAccessTo(GeoFence geoFence) {
+        if (getAdmin()) {
+            return true;
+        }
+
         if (hasAccessOnLowerLevelTo(geoFence)) {
             return true;
         }
@@ -239,7 +259,102 @@ public class User implements IsSerializable, Cloneable {
         return getAllAvailableDevices().contains(device);
     }
 
-    @Expose
+    @GwtTransient
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "reports_users",
+            foreignKey = @ForeignKey(name = "reports_users_fkey_user_id"),
+            joinColumns = { @JoinColumn(name = "user_id", table = "users", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "report_id", table = "reports", referencedColumnName = "id") })
+    @JsonIgnore
+    private Set<Report> reports;
+
+    public Set<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(Set<Report> reports) {
+        this.reports = reports;
+    }
+
+    @JsonIgnore
+    public Set<Report> getAllAvailableReports() {
+        Set<Report> reports = new HashSet<>();
+        reports.addAll(getReports());
+        if (getManager()) {
+            for (User managedUser : getManagedUsers()) {
+                reports.addAll(managedUser.getAllAvailableReports());
+            }
+        }
+        return reports;
+    }
+
+    @GwtTransient
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "groups_users",
+            foreignKey = @ForeignKey(name = "groups_users_fkey_user_id"),
+            joinColumns = { @JoinColumn(name = "user_id", table = "users", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "group_id", table = "groups", referencedColumnName = "id") })
+    @JsonIgnore
+    private Set<Group> groups;
+
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Set<Group> groups) {
+        this.groups = groups;
+    }
+
+    @JsonIgnore
+    public Set<Group> getAllAvailableGroups() {
+        Set<Group> result = new HashSet<>();
+        result.addAll(getGroups());
+        if (getManager()) {
+            for (User user : getManagedUsers()) {
+                result.addAll(user.getAllAvailableGroups());
+            }
+        }
+        User managedBy = getManagedBy();
+        while (managedBy != null) {
+            result.addAll(managedBy.getGroups());
+            managedBy = managedBy.getManagedBy();
+        }
+
+        return result;
+    }
+
+    public boolean hasAccessTo(Group group) {
+        if (getAdmin()) {
+            return true;
+        }
+
+        if (hasAccessOnLowerLevelTo(group)) {
+            return true;
+        }
+        User managedBy = getManagedBy();
+        while (managedBy != null) {
+            if (managedBy.getGroups().contains(group)) {
+                return true;
+            }
+            managedBy = managedBy.getManagedBy();
+        }
+        return false;
+    }
+
+    private boolean hasAccessOnLowerLevelTo(Group group) {
+        if (getGroups().contains(group)) {
+            return true;
+        }
+        if (getManager()) {
+            for (User user : getManagedUsers()) {
+                if (user.hasAccessOnLowerLevelTo(group)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_usersettings_id"))
     private UserSettings userSettings;
@@ -255,6 +370,7 @@ public class User implements IsSerializable, Cloneable {
     @GwtTransient
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "users_fkey_managedby_id"))
+    @JsonIgnore
     private User managedBy;
 
     public User getManagedBy() {
@@ -267,6 +383,7 @@ public class User implements IsSerializable, Cloneable {
 
     @GwtTransient
     @OneToMany(mappedBy = "managedBy", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<User> managedUsers;
 
     public Set<User> getManagedUsers() {
@@ -277,8 +394,9 @@ public class User implements IsSerializable, Cloneable {
         this.managedUsers = managedUsers;
     }
 
+    @JsonIgnore
     public Set<User> getAllManagedUsers() {
-        Set<User> result = new HashSet<User>();
+        Set<User> result = new HashSet<>();
         result.addAll(getManagedUsers());
         for (User managedUser : getManagedUsers()) {
             if (managedUser.getManager()) {
@@ -288,11 +406,13 @@ public class User implements IsSerializable, Cloneable {
         return result;
     }
 
+    @JsonIgnore
     private String email;
     /**
      * @deprecated now user can select types of events for notifications
      */
     @Column(nullable = true)
+    @JsonIgnore
     private boolean notifications;
 
     public String getEmail() {
@@ -318,6 +438,7 @@ public class User implements IsSerializable, Cloneable {
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
     @GwtTransient
+    @JsonIgnore
     private Set<DeviceEventType> notificationEvents;
 
     public Set<DeviceEventType> getNotificationEvents() {
@@ -329,6 +450,7 @@ public class User implements IsSerializable, Cloneable {
     }
 
     @Transient
+    @JsonIgnore
     private Set<DeviceEventType> transferNotificationEvents;
 
     public Set<DeviceEventType> getTransferNotificationEvents() {
@@ -339,7 +461,6 @@ public class User implements IsSerializable, Cloneable {
         this.transferNotificationEvents = transferNotificationEvents;
     }
 
-    @Expose
     @Column(nullable = true)
     private boolean readOnly;
 
@@ -351,7 +472,6 @@ public class User implements IsSerializable, Cloneable {
         this.readOnly = readOnly;
     }
 
-    @Expose
     @Column(nullable = true)
     private boolean archive = true;
 
@@ -364,6 +484,7 @@ public class User implements IsSerializable, Cloneable {
     }
 
     @Column(nullable = true)
+    @JsonIgnore
     private boolean blocked;
 
     public boolean isBlocked() {
@@ -375,6 +496,7 @@ public class User implements IsSerializable, Cloneable {
     }
 
     @Temporal(TemporalType.DATE)
+    @JsonIgnore
     private Date expirationDate;
 
     public Date getExpirationDate() {
@@ -385,6 +507,7 @@ public class User implements IsSerializable, Cloneable {
         this.expirationDate = expirationDate;
     }
 
+    @JsonIgnore
     private Integer maxNumOfDevices;
 
     public Integer getMaxNumOfDevices() {
@@ -395,12 +518,16 @@ public class User implements IsSerializable, Cloneable {
         this.maxNumOfDevices = maxNumOfDevices;
     }
 
+    @JsonIgnore
     private String companyName;
 
+    @JsonIgnore
     private String firstName;
 
+    @JsonIgnore
     private String lastName;
 
+    @JsonIgnore
     private String phoneNumber;
 
     public String getCompanyName() {
@@ -435,6 +562,7 @@ public class User implements IsSerializable, Cloneable {
         this.phoneNumber = phoneNumber;
     }
 
+    @JsonIgnore
     public int getNumberOfDevicesToAdd() {
         int myNumber;
         if (getMaxNumOfDevices() == null) {
@@ -447,6 +575,7 @@ public class User implements IsSerializable, Cloneable {
         return Math.min(myNumber, managerNumber);
     }
 
+    @JsonIgnore
     public User getUserWhoReachedLimitOnDevicesNumber() {
         User user = this;
         while (user != null && user.getNumberOfDevicesToAdd() == 0) {
@@ -458,6 +587,7 @@ public class User implements IsSerializable, Cloneable {
         return null;
     }
 
+    @JsonIgnore
     public int getNumberOfDevicesToDistribute() {
         Integer maxNumberOfDevices = getMaxNumOfDevices();
         User manager = this;
@@ -473,7 +603,7 @@ public class User implements IsSerializable, Cloneable {
         int alreadyDistributedNumberOfDevices = 0;
         Set<User> users = manager.getManagedUsers();
         while (!users.isEmpty()) {
-            Set<User> nextLevelUsers = new HashSet<User>();
+            Set<User> nextLevelUsers = new HashSet<>();
             for (User user : users) {
                 if (user.getMaxNumOfDevices() == null) {
                     nextLevelUsers.addAll(user.getManagedUsers());
@@ -505,5 +635,16 @@ public class User implements IsSerializable, Cloneable {
 
     public boolean isExpired() {
         return getExpirationDate() != null && new Date().compareTo(getExpirationDate()) >= 0;
+    }
+
+    public boolean allowedToChangeGroup(Device device, Group newGroup)
+    {
+        if (device.getGroup() == null && newGroup != null) {
+            return hasAccessTo(newGroup);
+        } else if (device.getGroup() != null
+                && (newGroup == null || newGroup.getId() != device.getGroup().getId())) {
+            return hasAccessTo(device.getGroup()) && (newGroup == null || hasAccessTo(newGroup));
+        }
+        return true;
     }
 }

@@ -15,11 +15,12 @@
  */
 package org.traccar.web.shared.model;
 
-import com.google.gson.annotations.Expose;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -29,13 +30,30 @@ import javax.persistence.*;
 @Table(name = "devices",
        indexes = { @Index(name = "devices_pkey", columnList = "id") },
        uniqueConstraints = { @UniqueConstraint(name = "devices_ukey_uniqueid", columnNames = "uniqueid") })
-public class Device implements IsSerializable {
+public class Device implements IsSerializable, GroupedDevice {
 
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_TIMEOUT = 5 * 60;
+    public static final short DEFAULT_MIN_IDLE_TIME = 1 * 60;
+
+    public static final String DEFAULT_MOVING_ARROW_COLOR = "90EE90";
+    public static final String DEFAULT_PAUSED_ARROW_COLOR = "F3F500";
+    public static final String DEFAULT_STOPPED_ARROW_COLOR = "FF0000";
+    public static final String DEFAULT_OFFLINE_ARROW_COLOR = "DEDEDE";
+
+    public static final double DEFAULT_ARROW_RADIUS = 10;
 
     public Device() {
         iconType = DeviceIconType.DEFAULT;
+        iconMode = DeviceIconMode.ICON;
+        iconArrowMovingColor = DEFAULT_MOVING_ARROW_COLOR;
+        iconArrowPausedColor = DEFAULT_PAUSED_ARROW_COLOR;
+        iconArrowStoppedColor = DEFAULT_STOPPED_ARROW_COLOR;
+        iconArrowOfflineColor = DEFAULT_OFFLINE_ARROW_COLOR;
+        iconArrowRadius = DEFAULT_ARROW_RADIUS;
+        showName = true;
+        showProtocol = true;
+        showOdometer = true;
     }
 
     public Device(Device device) {
@@ -48,22 +66,39 @@ public class Device implements IsSerializable {
         vehicleInfo = device.vehicleInfo;
         timeout = device.timeout;
         idleSpeedThreshold = device.idleSpeedThreshold;
+        minIdleTime = device.minIdleTime;
+        speedLimit = device.speedLimit;
         iconType = device.iconType;
         icon = device.getIcon();
         photo = device.getPhoto();
         odometer = device.odometer;
         autoUpdateOdometer = device.autoUpdateOdometer;
-        maintenances = new ArrayList<Maintenance>(device.maintenances.size());
-        for (Maintenance maintenance : device.maintenances) {
-            maintenances.add(new Maintenance(maintenance));
+        if (device.maintenances != null) {
+            maintenances = new ArrayList<>(device.maintenances.size());
+            for (Maintenance maintenance : device.maintenances) {
+                maintenances.add(new Maintenance(maintenance));
+            }
         }
-        sensors = new ArrayList<Sensor>(device.sensors.size());
-        for (Sensor sensor : device.sensors) {
-            sensors.add(new Sensor(sensor));
+        if (device.sensors != null) {
+            sensors = new ArrayList<>(device.sensors.size());
+            for (Sensor sensor : device.sensors) {
+                sensors.add(new Sensor(sensor));
+            }
         }
+        group = device.group == null ? null : new Group(device.group.getId()).copyFrom(device.group);
+
+        iconMode = device.iconMode;
+        iconRotation = device.iconRotation;
+        iconArrowMovingColor = device.iconArrowMovingColor;
+        iconArrowPausedColor = device.iconArrowPausedColor;
+        iconArrowStoppedColor = device.iconArrowStoppedColor;
+        iconArrowOfflineColor = device.iconArrowOfflineColor;
+        iconArrowRadius = device.iconArrowRadius;
+        showName = device.showName;
+        showProtocol = device.showProtocol;
+        showOdometer = device.showOdometer;
     }
 
-    @Expose
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
@@ -76,6 +111,7 @@ public class Device implements IsSerializable {
     @GwtTransient
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_position_id"))
+    @JsonIgnore
     private Position latestPosition;
 
     public void setLatestPosition(Position latestPosition) {
@@ -86,7 +122,6 @@ public class Device implements IsSerializable {
         return latestPosition;
     }
 
-    @Expose
     private String uniqueId;
 
     public void setUniqueId(String uniqueId) {
@@ -97,7 +132,6 @@ public class Device implements IsSerializable {
         return uniqueId;
     }
 
-    @Expose
     private String name;
 
     public void setName(String name) {
@@ -108,7 +142,6 @@ public class Device implements IsSerializable {
         return name;
     }
 
-    @Expose
     private String description;
 
     public String getDescription() {
@@ -119,30 +152,9 @@ public class Device implements IsSerializable {
         this.description = description;
     }
 
-    private transient boolean follow;
-
-    public boolean isFollow() {
-        return follow;
-    }
-
-    public void setFollow(boolean follow) {
-        this.follow = follow;
-    }
-
-    private transient boolean recordTrace;
-
-    public boolean isRecordTrace() {
-        return recordTrace;
-    }
-
-    public void setRecordTrace(boolean recordTrace) {
-        this.recordTrace = recordTrace;
-    }
-
     /**
      * Consider device offline after 'timeout' seconds spent from last position
      */
-    @Expose
     @Column(nullable = true)
     private int timeout = DEFAULT_TIMEOUT;
 
@@ -154,7 +166,6 @@ public class Device implements IsSerializable {
         this.timeout = timeout;
     }
 
-    @Expose
     @Column(nullable = true)
     private double idleSpeedThreshold;
 
@@ -164,6 +175,28 @@ public class Device implements IsSerializable {
 
     public void setIdleSpeedThreshold(double idleSpeedThreshold) {
         this.idleSpeedThreshold = idleSpeedThreshold;
+    }
+
+    @Column(nullable = true)
+    private int minIdleTime = DEFAULT_MIN_IDLE_TIME;
+
+    public int getMinIdleTime() {
+        return minIdleTime;
+    }
+
+    public void setMinIdleTime(int minIdleTime) {
+        this.minIdleTime = minIdleTime;
+    }
+
+    @Column(nullable = true)
+    private Double speedLimit;
+
+    public Double getSpeedLimit() {
+        return speedLimit;
+    }
+
+    public void setSpeedLimit(Double speedLimit) {
+        this.speedLimit = speedLimit;
     }
 
     // Hibernate bug HHH-8783: (http://hibernate.atlassian.net/browse/HHH-8783)
@@ -177,6 +210,7 @@ public class Device implements IsSerializable {
                foreignKey = @ForeignKey(name = "users_devices_fkey_devices_id"),
                joinColumns = { @JoinColumn(name = "devices_id", table = "devices", referencedColumnName = "id") },
                inverseJoinColumns = { @JoinColumn(name = "users_id", table = "users", referencedColumnName = "id") })
+    @JsonIgnore
     private Set<User> users;
 
     public Set<User> getUsers() {
@@ -188,8 +222,9 @@ public class Device implements IsSerializable {
     }
 
     @GwtTransient
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_owner_id"))
+    @JsonIgnore
     private User owner;
 
     public User getOwner() {
@@ -200,7 +235,6 @@ public class Device implements IsSerializable {
         this.owner = owner;
     }
 
-    @Expose
     @Enumerated(EnumType.STRING)
     private DeviceIconType iconType;
 
@@ -212,7 +246,6 @@ public class Device implements IsSerializable {
         this.iconType = iconType;
     }
 
-    @Expose
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_icon_id"))
     private DeviceIcon icon;
@@ -227,6 +260,7 @@ public class Device implements IsSerializable {
 
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_photo_id"))
+    @JsonIgnore
     private Picture photo;
 
     public Picture getPhoto() {
@@ -237,6 +271,7 @@ public class Device implements IsSerializable {
         this.photo = photo;
     }
 
+    @JsonIgnore
     private String phoneNumber;
 
     public String getPhoneNumber() {
@@ -247,6 +282,7 @@ public class Device implements IsSerializable {
         this.phoneNumber = phoneNumber;
     }
 
+    @JsonIgnore
     private String plateNumber;
 
     public String getPlateNumber() {
@@ -257,6 +293,7 @@ public class Device implements IsSerializable {
         this.plateNumber = plateNumber;
     }
 
+    @JsonIgnore
     private String vehicleInfo;
 
     public String getVehicleInfo() {
@@ -269,6 +306,7 @@ public class Device implements IsSerializable {
 
     // contains current odometer value in kilometers
     @Column(nullable = true)
+    @JsonIgnore
     private double odometer;
 
     public double getOdometer() {
@@ -281,6 +319,7 @@ public class Device implements IsSerializable {
 
     // indicates that odometer must be updated automatically by positions history
     @Column(nullable = true)
+    @JsonIgnore
     private boolean autoUpdateOdometer;
 
     public boolean isAutoUpdateOdometer() {
@@ -291,7 +330,6 @@ public class Device implements IsSerializable {
         this.autoUpdateOdometer = autoUpdateOdometer;
     }
 
-    @Expose
     @Transient
     private List<Maintenance> maintenances;
 
@@ -303,7 +341,6 @@ public class Device implements IsSerializable {
         this.maintenances = maintenances;
     }
 
-    @Expose
     @Transient
     private List<Sensor> sensors;
 
@@ -313,6 +350,143 @@ public class Device implements IsSerializable {
 
     public void setSensors(List<Sensor> sensors) {
         this.sensors = sensors;
+    }
+
+    @ManyToOne
+    @JoinColumn(foreignKey = @ForeignKey(name = "devices_fkey_group_id"))
+    private Group group;
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
+    @Column(nullable = true, length = 128)
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @Column(name = "lastupdate", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdate;
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    @Enumerated(EnumType.STRING)
+    private DeviceIconMode iconMode;
+
+    public DeviceIconMode getIconMode() {
+        return iconMode;
+    }
+
+    public void setIconMode(DeviceIconMode iconMode) {
+        this.iconMode = iconMode;
+    }
+
+    private String iconArrowMovingColor;
+    private String iconArrowPausedColor;
+    private String iconArrowStoppedColor;
+    private String iconArrowOfflineColor;
+
+    public String getIconArrowMovingColor() {
+        return iconArrowMovingColor;
+    }
+
+    public void setIconArrowMovingColor(String iconArrowMovingColor) {
+        this.iconArrowMovingColor = iconArrowMovingColor;
+    }
+
+    public String getIconArrowPausedColor() {
+        return iconArrowPausedColor;
+    }
+
+    public void setIconArrowPausedColor(String iconArrowPausedColor) {
+        this.iconArrowPausedColor = iconArrowPausedColor;
+    }
+
+    public String getIconArrowStoppedColor() {
+        return iconArrowStoppedColor;
+    }
+
+    public void setIconArrowStoppedColor(String iconArrowStoppedColor) {
+        this.iconArrowStoppedColor = iconArrowStoppedColor;
+    }
+
+    public String getIconArrowOfflineColor() {
+        return iconArrowOfflineColor;
+    }
+
+    public void setIconArrowOfflineColor(String iconArrowOfflineColor) {
+        this.iconArrowOfflineColor = iconArrowOfflineColor;
+    }
+
+    @Column(nullable = true)
+    private boolean iconRotation;
+
+    public boolean isIconRotation() {
+        return iconRotation;
+    }
+
+    public void setIconRotation(boolean iconRotation) {
+        this.iconRotation = iconRotation;
+    }
+
+    @Column(nullable = true)
+    private double iconArrowRadius;
+
+    public double getIconArrowRadius() {
+        return iconArrowRadius;
+    }
+
+    public void setIconArrowRadius(double iconArrowRadius) {
+        this.iconArrowRadius = iconArrowRadius;
+    }
+
+    @Column(nullable = true)
+    private boolean showName;
+
+    public boolean isShowName() {
+        return showName;
+    }
+
+    public void setShowName(boolean showName) {
+        this.showName = showName;
+    }
+
+    @Column(nullable = true)
+    private boolean showProtocol;
+    @Column(nullable = true)
+    private boolean showOdometer;
+
+    public boolean isShowProtocol() {
+        return showProtocol;
+    }
+
+    public void setShowProtocol(boolean showProtocol) {
+        this.showProtocol = showProtocol;
+    }
+
+    public boolean isShowOdometer() {
+        return showOdometer;
+    }
+
+    public void setShowOdometer(boolean showOdometer) {
+        this.showOdometer = showOdometer;
     }
 
     @Override

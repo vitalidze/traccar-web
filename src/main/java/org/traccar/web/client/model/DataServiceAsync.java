@@ -61,15 +61,11 @@ public interface DataServiceAsync {
 
     void getApplicationSettings(AsyncCallback<ApplicationSettings> async);
 
-    void getTrackerServerLog(short sizeKB, AsyncCallback<String> async);
-
     void saveRoles(List<User> users, AsyncCallback<Void> async);
 
     void getDeviceShare(Device device, AsyncCallback<Map<User, Boolean>> async);
 
     void saveDeviceShare(Device device, Map<User, Boolean> share, AsyncCallback<Void> async);
-
-    void getLatestNonIdlePositions(AsyncCallback<List<Position>> async);
 
     void getGeoFences(AsyncCallback<List<GeoFence>> async);
 
@@ -82,4 +78,10 @@ public interface DataServiceAsync {
     void getGeoFenceShare(GeoFence geoFence, AsyncCallback<Map<User, Boolean>> async);
 
     void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share, AsyncCallback<Void> async);
+
+    void sendCommand(Command command, AsyncCallback<String> async);
+
+    void saveDefaultUserSettigs(UserSettings userSettings, AsyncCallback<Void> async);
+
+    void getDefaultUserSettings(AsyncCallback<UserSettings> async);
 }

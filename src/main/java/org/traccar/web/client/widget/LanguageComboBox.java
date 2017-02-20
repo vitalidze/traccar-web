@@ -26,7 +26,7 @@ import java.util.Arrays;
 
 public class LanguageComboBox extends ComboBox<String> {
     public LanguageComboBox() {
-        super(new ListStore<String>(new ModelKeyProvider<String>() {
+        super(new ListStore<>(new ModelKeyProvider<String>() {
             @Override
             public String getKey(String item) {
                 return item;

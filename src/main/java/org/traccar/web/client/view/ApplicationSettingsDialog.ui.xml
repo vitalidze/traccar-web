@@ -13,33 +13,35 @@
 
   <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="shortPropertyEditor" />
 
+  <ui:with type="com.sencha.gxt.widget.core.client.form.NumberPropertyEditor" field="integerPropertyEditor" />
+
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-    <gxt:Window ui:field="window" pixelSize="340, -1" modal="true" headingText="{i18n.globalSettings}" focusWidget="{saveButton}">
+    <gxt:Window ui:field="window" pixelSize="540, -1" modal="true" headingText="{i18n.globalSettings}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.registration}" labelWidth="210">
+        <form:FieldLabel text="{i18n.registration}" labelWidth="230">
           <form:widget>
             <form:CheckBox ui:field="registrationEnabled" />
           </form:widget>
         </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.disallowDeviceManagementByUsers}" labelWidth="210">
+        <form:FieldLabel text="{i18n.disallowDeviceManagementByUsers}" labelWidth="230">
             <form:widget>
                 <form:CheckBox ui:field="disallowDeviceManagementByUsers" />
             </form:widget>
         </form:FieldLabel>
       </container:child>
+        <container:child layoutData="{verticalLayoutData}">
+            <form:FieldLabel text="{i18n.allowCommandsOnlyForAdmins}" labelWidth="230">
+                <form:widget>
+                    <form:CheckBox ui:field="allowCommandsOnlyForAdmins" />
+                </form:widget>
+            </form:FieldLabel>
+        </container:child>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.eventRecordingEnabled}" labelWidth="210">
-            <form:widget>
-                <form:CheckBox ui:field="eventRecordingEnabled" />
-            </form:widget>
-        </form:FieldLabel>
-      </container:child>
-      <container:child layoutData="{verticalLayoutData}">
-          <form:FieldLabel text="{i18n.updateInterval}" labelWidth="210">
+          <form:FieldLabel text="{i18n.updateInterval}" labelWidth="230">
               <form:widget>
                   <form:NumberField editor="{shortPropertyEditor}"
                                     ui:field="updateInterval"
@@ -51,26 +53,60 @@
           </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
-          <form:FieldLabel text="{i18n.defaultHashImplementation}" labelWidth="210">
+          <form:FieldLabel text="{i18n.defaultHashImplementation}" labelWidth="230">
               <form:widget>
                   <form:ComboBox ui:field="defaultHashImplementation" />
               </form:widget>
           </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.language}" labelWidth="210">
+        <form:FieldLabel text="{i18n.language}" labelWidth="230">
             <form:widget>
                 <form:ComboBox ui:field="language" />
             </form:widget>
         </form:FieldLabel>
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
-        <form:FieldLabel text="{i18n.bingMapsKey}" labelWidth="210">
+        <form:FieldLabel text="{i18n.bingMapsKey}" labelWidth="230">
             <form:widget>
                 <form:TextField ui:field="bingMapsKey" />
             </form:widget>
         </form:FieldLabel>
       </container:child>
+        <container:child layoutData="{verticalLayoutData}">
+            <form:FieldLabel text="{i18n.eventRecordingEnabled}" labelWidth="230">
+                <form:widget>
+                    <form:CheckBox ui:field="eventRecordingEnabled" />
+                </form:widget>
+            </form:FieldLabel>
+        </container:child>
+        <container:child layoutData="{verticalLayoutData}">
+            <form:FieldLabel text="{i18n.notificationExpiryPeriod} ({i18n.minute})" labelWidth="230">
+                <form:widget>
+                    <form:NumberField editor="{integerPropertyEditor}"
+                                      ui:field="notificationExpirationPeriod"
+                                      allowNegative="false"
+                                      allowDecimals="false"
+                                      allowBlank="false"
+                                      width="4" />
+                </form:widget>
+            </form:FieldLabel>
+        </container:child>
+      <container:child layoutData="{verticalLayoutData}">
+          <form:FieldLabel text="{i18n.matchServiceType} ({i18n.snapToRoads})" labelWidth="230">
+              <form:widget>
+                  <form:ComboBox ui:field="matchServiceType" />
+              </form:widget>
+          </form:FieldLabel>
+      </container:child>
+        <container:child layoutData="{verticalLayoutData}">
+            <form:FieldLabel text="{i18n.matchServiceURL} ({i18n.snapToRoads})" labelWidth="230">
+                <form:widget>
+                    <form:TextField ui:field="matchServiceURL" />
+                </form:widget>
+            </form:FieldLabel>
+        </container:child>
+
     </container:VerticalLayoutContainer>
       
     <gxt:button>

@@ -16,7 +16,9 @@
 package org.traccar.web.shared.model;
 
 public enum PictureType {
-    MARKER(40 * 1024, 256, 256), DEVICE_PHOTO(300 * 1024, 1024, 768);
+    MARKER(40 * 1024, 256, 256),
+    DEVICE_PHOTO(300 * 1024, 1024, 768),
+    SENSOR_INTERVAL(40 * 1024, 128, 128);
 
     final int maxFileSize;
     final int maxWidth;

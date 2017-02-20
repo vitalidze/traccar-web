@@ -15,8 +15,6 @@
  */
 package org.traccar.web.client.view;
 
-import com.google.gwt.core.client.GWT;
-import org.gwtopenmaps.openlayers.client.OpenLayers;
 import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.*;
@@ -24,6 +22,7 @@ import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.LonLat;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,7 @@ import java.util.Map;
 
 public class GeoFenceRenderer {
     private final MapView mapView;
-    private final Map<Long, GeoFenceDrawing> drawings = new HashMap<Long, GeoFenceDrawing>();
+    private final Map<Long, GeoFenceDrawing> drawings = new HashMap<>();
 
     public GeoFenceRenderer(MapView mapView) {
         this.mapView = mapView;
@@ -65,7 +64,7 @@ public class GeoFenceRenderer {
     }
 
     private void drawCircle(GeoFence circle, boolean drawTitle) {
-        GeoFence.LonLat center = circle.points().get(0);
+        LonLat center = circle.points().get(0);
         Polygon circleShape = Polygon.createRegularPolygon(mapView.createPoint(center.lon, center.lat), applyMercatorScale(center.lat, circle.getRadius()), 100, 0f);
 
         Style st = new Style();
@@ -85,10 +84,10 @@ public class GeoFenceRenderer {
     }
 
     private void drawPolygon(GeoFence polygon, boolean drawTitle) {
-        List<GeoFence.LonLat> lonLats = polygon.points();
+        List<LonLat> lonLats = polygon.points();
         Point[] points = new Point[lonLats.size()];
         int i = 0;
-        for (GeoFence.LonLat lonLat : lonLats) {
+        for (LonLat lonLat : lonLats) {
             points[i++] = mapView.createPoint(lonLat.lon, lonLat.lat);
         }
         Polygon polygonShape = new Polygon(new LinearRing[] { new LinearRing(points) });
@@ -111,11 +110,11 @@ public class GeoFenceRenderer {
     }
 
     private void drawLine(GeoFence line, boolean drawTitle) {
-        List<GeoFence.LonLat> lonLats = line.points();
+        List<LonLat> lonLats = line.points();
         Point[] linePoints = new Point[lonLats.size()];
 
         int i = 0;
-        for (GeoFence.LonLat lonLat : lonLats) {
+        for (LonLat lonLat : lonLats) {
             linePoints[i++] = mapView.createPoint(lonLat.lon, lonLat.lat);
         }
 

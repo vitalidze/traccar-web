@@ -37,7 +37,7 @@
     }
   </ui:style>
 
-  <gxt:Window ui:field="window" pixelSize="368, 426" modal="true" headingText="{i18n.notificationSettings}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="450, 550" modal="true" headingText="{i18n.notificationSettings}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
         <container:child layoutData="{verticalLayoutData}">
           <gxt:PlainTabPanel>
@@ -143,7 +143,7 @@
                         </form:FieldLabel>
                     </container:child>
                     <container:child layoutData="{verticalLayoutData}">
-                        <grid:Grid ui:field="placeholderGrid" />
+                        <grid:Grid ui:field="placeholderGrid" height="210" />
                     </container:child>
                     <container:child layoutData="{horizontalLayoutData}">
                         <button:TextButton ui:field="testTemplateButton" text="{i18n.test}" width="96" />

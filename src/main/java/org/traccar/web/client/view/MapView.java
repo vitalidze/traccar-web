@@ -15,9 +15,7 @@
  */
 package org.traccar.web.client.view;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.data.shared.ListStore;
@@ -26,23 +24,26 @@ import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
+import org.gwtopenmaps.openlayers.client.OpenLayers;
 import org.gwtopenmaps.openlayers.client.OpenLayersStyle;
 import org.gwtopenmaps.openlayers.client.Projection;
 import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.StyleMap;
 import org.gwtopenmaps.openlayers.client.StyleOptions;
 import org.gwtopenmaps.openlayers.client.StyleRules;
-import org.gwtopenmaps.openlayers.client.control.LayerSwitcher;
-import org.gwtopenmaps.openlayers.client.control.ScaleLine;
+import org.gwtopenmaps.openlayers.client.control.*;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.event.MapZoomListener;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.*;
+import org.gwtopenmaps.openlayers.client.layer.Vector;
 import org.gwtopenmaps.openlayers.client.util.JSObject;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.GeoFenceDrawing;
 import org.traccar.web.client.Track;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.state.DeviceVisibilityHandler;
+import org.traccar.web.client.state.DeviceVisibilityProvider;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
 import org.traccar.web.shared.model.Position;
@@ -71,8 +72,9 @@ public class MapView {
 
     private MapWidget mapWidget;
     private Map map;
+    private OverviewMap overviewMap;
     private Vector vectorLayer;
-    private Markers markerLayer;
+    private Vector markerLayer;
     private Vector geofenceLayer;
     private TMS seamarkLayer;
 
@@ -80,6 +82,10 @@ public class MapView {
 
     public Map getMap() {
         return map;
+    }
+
+    public OverviewMap getOverviewMap() {
+        return overviewMap;
     }
 
     public Vector getVectorLayer() {
@@ -90,7 +96,7 @@ public class MapView {
         return geofenceLayer;
     }
 
-    public Markers getMarkerLayer() {
+    public Vector getMarkerLayer() {
         return markerLayer;
     }
 
@@ -113,7 +119,15 @@ public class MapView {
                     ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey().trim().isEmpty())) {
                 continue;
             }
-            map.addLayer(createMap(mapType));
+
+            Layer mapLayer = createMap(mapType);
+
+            try {
+                map.addLayer(mapLayer);
+            } catch (Exception ex) {
+                GWT.log("Error adding map layer " + mapType, ex);
+                map.removeLayer(mapLayer);
+            }
         }
     }
 
@@ -145,36 +159,10 @@ public class MapView {
                 return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.ROAD));
             case BING_HYBRID:
                 return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.HYBRID));
+            case BING_ORDNANCE_SURVEY:
+                return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.ORDNANCESURVEY));
             case BING_AERIAL:
                 return new Bing(new BingOptions(mapType.getName(), ApplicationContext.getInstance().getApplicationSettings().getBingMapsKey(), BingType.AERIAL));
-            case MAPQUEST_ROAD:
-            case MAPQUEST_AERIAL:
-                XYZOptions mqOptions = new XYZOptions();
-                mqOptions.setTransitionEffect(TransitionEffect.RESIZE);
-                mqOptions.setProjection("EPSG:900913");
-                String tiles = "map";
-                switch (mapType) {
-                    case MAPQUEST_ROAD:
-                        mqOptions.setAttribution(
-                                "Data, imagery and map information provided by <a href='http://www.mapquest.com/'  target='_blank'>MapQuest</a>," +
-                                " <a href='http://www.openstreetmap.org/' target='_blank'>Open Street Map</a> and contributors," +
-                                " <a href='http://creativecommons.org/licenses/by-sa/2.0/' target='_blank'>CC-BY-SA</a>" +
-                                "  <img src='http://developer.mapquest.com/content/osm/mq_logo.png' border='0'>");
-                        break;
-                    case MAPQUEST_AERIAL:
-                        tiles = "sat";
-                        mqOptions.setAttribution(
-                                "Tiles Courtesy of <a href='http://open.mapquest.co.uk/' target='_blank'>MapQuest</a>." +
-                                        " Portions Courtesy NASA/JPL-Caltech and U.S. Depart. of Agriculture, Farm Service Agency." +
-                                        " <img src='http://developer.mapquest.com/content/osm/mq_logo.png' border='0'>");
-                        break;
-                }
-
-                return new XYZ(mapType.getName(), new String[] {
-                        "http://otile1.mqcdn.com/tiles/1.0.0/" + tiles + "/${z}/${x}/${y}.png",
-                        "http://otile2.mqcdn.com/tiles/1.0.0/" + tiles + "/${z}/${x}/${y}.png",
-                        "http://otile3.mqcdn.com/tiles/1.0.0/" + tiles + "/${z}/${x}/${y}.png",
-                        "http://otile4.mqcdn.com/tiles/1.0.0/" + tiles + "/${z}/${x}/${y}.png"}, mqOptions);
             case STAMEN_TONER:
                 Layer stamenLayer = Layer.narrowToLayer(createStamenLayer("toner"));
                 stamenLayer.setName(mapType.getName());
@@ -187,11 +175,13 @@ public class MapView {
         return $wnd.getTileURL;
     }-*/;
 
-    public MapView(MapHandler mapHandler, ListStore<Device> deviceStore) {
+    public MapView(MapHandler mapHandler,
+                   ListStore<Device> deviceStore,
+                   DeviceVisibilityHandler deviceVisibilityHandler) {
         this.mapHandler = mapHandler;
         this.popup = new PositionInfoPopup(deviceStore);
         contentPanel = new ContentPanel();
-        contentPanel.setHeadingText(i18n.map());
+        contentPanel.setHeaderVisible(false);
 
         MapOptions defaultMapOptions = new MapOptions();
         defaultMapOptions.setMaxExtent(new Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34));
@@ -208,8 +198,11 @@ public class MapView {
         vectorOptions.setStyle(style);
         vectorLayer = new Vector(i18n.overlayType(UserSettings.OverlayType.VECTOR), vectorOptions);
 
-        MarkersOptions markersOptions = new MarkersOptions();
-        markerLayer = new Markers(i18n.overlayType(UserSettings.OverlayType.MARKERS), markersOptions);
+        VectorOptions markersOptions = new VectorOptions();
+        RendererOptions rendererOptions = new RendererOptions();
+        rendererOptions.setZIndexing(true);
+        markersOptions.setRendererOptions(rendererOptions);
+        markerLayer = new Vector(i18n.overlayType(UserSettings.OverlayType.MARKERS), markersOptions);
 
         vectorOptions = new VectorOptions();
         OpenLayersStyle defaultStyle = new OpenLayersStyle(new StyleRules(), new StyleOptions());
@@ -221,14 +214,6 @@ public class MapView {
 
         List<UserSettings.OverlayType> userOverlays = ApplicationContext.getInstance().getUserSettings().overlays();
 
-        map.addLayer(geofenceLayer);
-        map.addLayer(vectorLayer);
-        map.addLayer(markerLayer);
-
-        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.GEO_FENCES));
-        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.VECTOR));
-        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.MARKERS));
-
         TMSOptions seamarkOptions = new TMSOptions();
         seamarkOptions.setType("png");
         seamarkOptions.setGetURL(getTileURL());
@@ -239,8 +224,35 @@ public class MapView {
         map.addLayer(seamarkLayer);
         seamarkLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.SEAMARK));
 
+        map.addLayer(geofenceLayer);
+        map.addLayer(vectorLayer);
+        map.addLayer(markerLayer);
+
+        geofenceLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.GEO_FENCES));
+        vectorLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.VECTOR));
+        markerLayer.setIsVisible(userOverlays.contains(UserSettings.OverlayType.MARKERS));
+
+        // mouse click
+        SelectFeature selectFeature = new SelectFeature(markerLayer);
+        selectFeature.setAutoActivate(true);
+
+        // mouse over/out
+        SelectFeatureOptions selectFeatureHoverOptions = new SelectFeatureOptions();
+        selectFeatureHoverOptions.setHighlightOnly(true);
+        selectFeatureHoverOptions.setHover();
+
+        SelectFeature selectFeatureHover = new SelectFeature(markerLayer, selectFeatureHoverOptions);
+        selectFeatureHover.setAutoActivate(true);
+        selectFeatureHover.setHover(true);
+        selectFeatureHover.setClickOut(false);
+
+        map.addControl(selectFeatureHover);
+        map.addControl(selectFeature);
         map.addControl(new LayerSwitcher());
         map.addControl(new ScaleLine());
+        OverviewMapOptions options = new OverviewMapOptions();
+        options.getJSObject().setProperty("maximized", ApplicationContext.getInstance().getUserSettings().isMaximizeOverviewMap());
+        map.addControl((overviewMap = new OverviewMap(options)));
 
         contentPanel.add(mapWidget);
 
@@ -271,10 +283,18 @@ public class MapView {
             }
         });
 
-        latestPositionRenderer = new MapPositionRenderer(this, latestPositionSelectHandler, positionMouseHandler);
-        archivePositionRenderer = new MapPositionRenderer(this, archivePositionSelectHandler, positionMouseHandler);
-        latestPositionTrackRenderer = new MapPositionRenderer(this, null, null);
+        latestPositionRenderer = new MapPositionRenderer(this, latestPositionSelectHandler, positionMouseHandler, deviceVisibilityHandler, selectFeatureHover);
+        archivePositionRenderer = new MapPositionRenderer(this, archivePositionSelectHandler, positionMouseHandler, new DeviceVisibilityProvider() {
+            @Override
+            public boolean isVisible(Device device) {
+                return true;
+            }
+        }, null);
+        latestPositionTrackRenderer = new MapPositionRenderer(this, null, null, deviceVisibilityHandler, null);
         geoFenceRenderer = new GeoFenceRenderer(this);
+
+        // register arrow graphic
+        OpenLayers.addWellKnownGraphic(new int[] {0,10, 4,8, 7,10, 4,0, 0,10}, "arrow");
     }
 
     private final MapPositionRenderer latestPositionRenderer;
@@ -282,22 +302,28 @@ public class MapView {
     private final MapPositionRenderer latestPositionTrackRenderer;
     private final GeoFenceRenderer geoFenceRenderer;
 
-    public void clearLatestPositions() {
-        latestPositionRenderer.clearPositionsAndTitlesAndAlerts();
+    public void clearLatestPosition(Long deviceId) {
+        latestPositionRenderer.clear(deviceId);
     }
 
-    public void showLatestPositions(List<Position> positions) {
-        for (Position position : positions) {
-            latestPositionRenderer.showPositions(Arrays.asList(position));
-        }
+    public void clearAlert(Long deviceId) {
+        latestPositionRenderer.clearAlert(deviceId);
     }
 
-    public void showDeviceName(List<Position> positions) {
-        latestPositionRenderer.showDeviceName(positions);
+    public void showLatestPosition(Position position) {
+        latestPositionRenderer.showPositions(Collections.singletonList(position));
     }
 
-    public void showAlerts(List<Position> positions) {
-        latestPositionRenderer.showAlerts(positions);
+    public void showAlert(Position position) {
+        latestPositionRenderer.showAlert(position);
+    }
+
+    public void moveLatestPosition(Position position) {
+        latestPositionRenderer.movePosition(position);
+    }
+
+    public void moveAlert(Position position) {
+        latestPositionRenderer.moveAlert(position);
     }
 
     public void clearLatestTrackPositions(Device device, Date before) {
@@ -334,12 +360,24 @@ public class MapView {
         }
     }
 
+    public void showPauseAndStops(List<Position> positions) {
+        archivePositionRenderer.showPauseAndStops(positions);
+    }
+
     public void showArchiveTime(List<Position> positions) {
         archivePositionRenderer.showTime(positions, false);
     }
 
+    public void showArchiveArrows(List<Position> positions, String color) {
+        archivePositionRenderer.showArrows(positions, color);
+    }
+
     public void selectDevice(Device device) {
         latestPositionRenderer.selectDevice(device, true);
+    }
+
+    public void zoomIn(Device device) {
+        latestPositionRenderer.zoomIn(device);
     }
 
     public void selectArchivePosition(Position position) {

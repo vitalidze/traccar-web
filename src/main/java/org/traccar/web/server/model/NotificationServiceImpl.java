@@ -15,11 +15,15 @@
  */
 package org.traccar.web.server.model;
 
+import static org.traccar.web.shared.model.MessagePlaceholder.*;
+
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.floreysoft.jmte.Engine;
 import com.floreysoft.jmte.NamedRenderer;
 import com.floreysoft.jmte.RenderFormatInfo;
 import com.floreysoft.jmte.Renderer;
-import com.google.gson.stream.JsonWriter;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.DataService;
@@ -34,13 +38,13 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.servlet.ServletException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -73,11 +77,17 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         @Inject
         Provider<ApplicationSettings> applicationSettings;
 
+        @Inject
+        ServerMessages messages;
+
         @Transactional
         @Override
         public void doWork() throws Exception {
-            Set<DeviceEventType> eventTypes = new HashSet<DeviceEventType>();
-            for (User user : entityManager.get().createQuery("SELECT u FROM User u INNER JOIN FETCH u.notificationEvents", User.class).getResultList()) {
+            Set<DeviceEventType> eventTypes = new HashSet<>();
+            for (User user : entityManager.get()
+                    .createQuery("SELECT u FROM User u INNER JOIN FETCH u.notificationEvents", User.class)
+                    .setFlushMode(FlushModeType.COMMIT)
+                    .getResultList()) {
                 eventTypes.addAll(user.getNotificationEvents());
             }
 
@@ -85,21 +95,34 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 return;
             }
 
-            Map<User, Set<DeviceEvent>> events = new HashMap<User, Set<DeviceEvent>>();
+            ApplicationSettings appSettings = applicationSettings.get();
+            Map<User, Set<DeviceEvent>> events = new HashMap<>();
             List<User> admins = null;
-            Map<User, List<User>> managers = new HashMap<User, List<User>>();
+            Map<User, List<User>> managers = new HashMap<>();
+            Date currentDate = new Date();
 
-            for (DeviceEvent event : entityManager.get().createQuery("SELECT e FROM DeviceEvent e INNER JOIN FETCH e.position WHERE e.notificationSent = :false AND e.type IN (:types)", DeviceEvent.class)
+            for (DeviceEvent event : entityManager.get().createQuery(
+                    "SELECT e FROM DeviceEvent e INNER JOIN FETCH e.position" +
+                            " WHERE e.notificationSent = :false" +
+                            " AND e.expired = :false" +
+                            " AND e.type IN (:types)", DeviceEvent.class)
+                                    .setFlushMode(FlushModeType.COMMIT)
                                     .setParameter("false", false)
                                     .setParameter("types", eventTypes)
                                     .getResultList()) {
+                // check whether event is expired
+                if (currentDate.getTime() - event.getTime().getTime() > appSettings.getNotificationExpirationPeriod() * 1000 * 60) {
+                    event.setExpired(true);
+                    continue;
+                }
+
                 Device device = event.getDevice();
 
                 for (User user : device.getUsers()) {
                     addEvent(events, user, event);
                     List<User> userManagers = managers.get(user);
                     if (userManagers == null) {
-                        userManagers = new LinkedList<User>();
+                        userManagers = new LinkedList<>();
                         User manager = user.getManagedBy();
                         while (manager != null) {
                             if (!manager.getNotificationEvents().isEmpty()) {
@@ -118,7 +141,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 }
 
                 if (admins == null) {
-                    admins = entityManager.get().createQuery("SELECT u FROM User u WHERE u.admin=:true", User.class)
+                    admins = entityManager.get()
+                            .createQuery("SELECT u FROM User u WHERE u.admin=:true", User.class)
+                            .setFlushMode(FlushModeType.COMMIT)
                             .setParameter("true", true)
                             .getResultList();
                 }
@@ -145,11 +170,11 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                     NotificationTemplate template = settings.findTemplate(deviceEvent.getType());
                     if (template == null) {
                         template = new NotificationTemplate();
-                        template.setBody(defaultBody(deviceEvent.getType(), applicationSettings.get().getLanguage()));
+                        template.setBody(defaultBody(deviceEvent.getType(), appSettings.getLanguage()));
                     }
 
                     Engine engine = getTemplateEngine(getTimeZone(user));
-                    Map<String, Object> model = getTemplateModel(deviceEvent);
+                    Map<String, Object> model = getTemplateModel(user, deviceEvent);
                     String subject = engine.transform(template.getSubject(), model);
                     String body = engine.transform(template.getBody(), model);
 
@@ -171,16 +196,15 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             if (user.isBlocked() || user.isExpired()) {
                 return;
             }
-            if (event.getType() == DeviceEventType.GEO_FENCE_ENTER || event.getType() == DeviceEventType.GEO_FENCE_EXIT) {
-                // check whether user has access to the geo-fence
-                if (!user.getAdmin() && !user.hasAccessTo(event.getGeoFence())) {
-                    return;
-                }
+            // check whether user has access to the geo-fence
+            if ((event.getType() == DeviceEventType.GEO_FENCE_ENTER || event.getType() == DeviceEventType.GEO_FENCE_EXIT) 
+                    && !user.hasAccessTo(event.getGeoFence())) {
+                return;
             }
 
             Set<DeviceEvent> userEvents = events.get(user);
             if (userEvents == null) {
-                userEvents = new HashSet<DeviceEvent>();
+                userEvents = new HashSet<>();
                 events.put(user, userEvents);
             }
             userEvents.add(event);
@@ -200,7 +224,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
             // take settings from first admin ordered by id
             if (s == null) {
-                List<NotificationSettings> settings = entityManager.get().createQuery("SELECT s FROM NotificationSettings s WHERE s.user.admin=:true ORDER BY s.user.id ASC", NotificationSettings.class)
+                List<NotificationSettings> settings = entityManager.get()
+                        .createQuery("SELECT s FROM NotificationSettings s WHERE s.user.admin=:true ORDER BY s.user.id ASC", NotificationSettings.class)
+                        .setFlushMode(FlushModeType.COMMIT)
                         .setParameter("true", true)
                         .getResultList();
                 if (!settings.isEmpty()) {
@@ -212,7 +238,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         }
 
         private NotificationSettings getNotificationSettings(User user) {
-            List<NotificationSettings> settings = entityManager.get().createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
+            List<NotificationSettings> settings = entityManager.get()
+                    .createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
+                    .setFlushMode(FlushModeType.COMMIT)
                     .setParameter("user", user)
                     .getResultList();
             return settings.isEmpty() ? null : settings.get(0);
@@ -233,7 +261,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             try {
                 msg.setFrom(new InternetAddress(settings.getFromAddress()));
                 msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getLogin() + " <" + user.getEmail() + ">", false));
-                msg.setSubject(subject);
+                msg.setSubject(subject, "UTF-8");
 
                 msg.setContent(body, contentType);
                 msg.setHeader("X-Mailer", "traccar-web.sendmail");
@@ -269,16 +297,19 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setDoOutput(true);
                 os = conn.getOutputStream();
-                JsonWriter writer = new JsonWriter(new OutputStreamWriter(os));
-                writer.beginObject();
-                writer
-                    .name("email").value(user.getEmail())
-                    .name("type").value("note")
-                    .name("title").value(subject)
-                        .name("body").value(body);
-                writer.endObject();
-                writer.flush();
-                writer.close();
+
+                JsonFactory jsonFactory = new JsonFactory(); // or, for data binding, org.codehaus.jackson.mapper.MappingJsonFactory
+                JsonGenerator json = jsonFactory.createGenerator(os, JsonEncoding.UTF8);
+
+                json.writeStartObject();
+                json.writeStringField("email", user.getEmail());
+                json.writeStringField("type", "note");
+                json.writeStringField("title", subject);
+                json.writeStringField("body", body);
+                json.writeEndObject();
+                json.flush();
+                json.close();
+
                 is = conn.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                 try {
@@ -298,6 +329,17 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             } finally {
                 if (is != null ) try { is.close(); } catch (IOException ignored) {}
             }
+        }
+
+        String defaultBody(DeviceEventType type, String locale) {
+            String body = messages.message(locale, "defaultNotificationTemplate[" + type.name() + "]");
+
+            return body.replace("''", "'")
+                    .replace("{1}", "${deviceName}")
+                    .replace("{2}", "${geoFenceName}")
+                    .replace("{3}", "${eventTime}")
+                    .replace("{4}", "${positionTime}")
+                    .replace("{5}", "${maintenanceName}");
         }
     }
 
@@ -436,9 +478,15 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
         c.set(Calendar.HOUR, c.get(Calendar.HOUR) - 1);
         c.set(Calendar.MINUTE, c.get(Calendar.MINUTE) - 15);
         testPosition.setTime(c.getTime());
+        testPosition.setAddress("New York, Times Square");
+        testPosition.setLatitude(40.758899);
+        testPosition.setLongitude(-73.987325);
+        testPosition.setAltitude(100d);
+        testPosition.setSpeed(UserSettings.SpeedUnit.kilometersPerHour.toKnots(5d));
+        testPosition.setCourse(30d);
 
         Engine engine = getTemplateEngine(getTimeZone(sessionUser.get()));
-        Map<String, Object> model = getTemplateModel(new DeviceEvent(new Date(), testDevice, testPosition, testGeoFence, testMaintenance));
+        Map<String, Object> model = getTemplateModel(sessionUser.get(), new DeviceEvent(new Date(), testDevice, testPosition, testGeoFence, testMaintenance));
 
         String transformedSubject = engine.transform(template.getSubject(), model);
         String transformedBody = engine.transform(template.getBody(), model);
@@ -451,13 +499,22 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 "</div>";
     }
 
-    private static Map<String, Object> getTemplateModel(DeviceEvent event) {
-        Map<String, Object> model = new HashMap<String, Object>();
-        model.put(MessagePlaceholder.deviceName.name(), event.getDevice() == null ? "N/A" : event.getDevice().getName());
-        model.put(MessagePlaceholder.geoFenceName.name(), event.getGeoFence() == null ? "N/A" : event.getGeoFence().getName());
-        model.put(MessagePlaceholder.eventTime.name(), event.getTime());
-        model.put(MessagePlaceholder.positionTime.name(), event.getPosition() == null ? null : event.getPosition().getTime());
-        model.put(MessagePlaceholder.maintenanceName.name(), event.getMaintenance() == null ? "N/A" : event.getMaintenance().getName());
+    private static Map<String, Object> getTemplateModel(User user, DeviceEvent event) {
+        Map<String, Object> model = new HashMap<>();
+        model.put(deviceName.name(), event.getDevice() == null ? "N/A" : event.getDevice().getName());
+        model.put(geoFenceName.name(), event.getGeoFence() == null ? "N/A" : event.getGeoFence().getName());
+        model.put(eventTime.name(), event.getTime());
+        if (event.getPosition() != null) {
+            Position p = event.getPosition();
+            model.put(positionTime.name(), p.getTime());
+            model.put(positionAddress.name(), p.getAddress());
+            model.put(positionLat.name(), p.getLatitude());
+            model.put(positionLon.name(), p.getLongitude());
+            model.put(positionAlt.name(), p.getAltitude());
+            model.put(positionSpeed.name(), p.getSpeed() == null ? null : (p.getSpeed() * user.getUserSettings().getSpeedUnit().getFactor()));
+            model.put(positionCourse.name(), p.getCourse());
+        }
+        model.put(maintenanceName.name(), event.getMaintenance() == null ? "N/A" : event.getMaintenance().getName());
         return model;
     }
 
@@ -515,7 +572,9 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
     @RequireUser(roles = { Role.ADMIN, Role.MANAGER })
     @Override
     public NotificationSettings getSettings() {
-        List<NotificationSettings> settings = entityManager.get().createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
+        List<NotificationSettings> settings = entityManager.get()
+                .createQuery("SELECT n FROM NotificationSettings n WHERE n.user = :user", NotificationSettings.class)
+                .setFlushMode(FlushModeType.COMMIT)
                 .setParameter("user", sessionUser.get())
                 .getResultList();
         if (settings.isEmpty()) {
@@ -559,27 +618,5 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 entityManager.get().persist(newTemplate);
             }
         }
-    }
-
-    static String defaultBody(DeviceEventType type, String locale) throws IOException {
-        Properties defaultMessages = new Properties();
-        defaultMessages.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/client/i18n/Messages.properties"));
-
-        Properties localeMessages = new Properties();
-        InputStream messagesIS = Thread.currentThread().getContextClassLoader().getResourceAsStream("org/traccar/web/client/i18n/Messages_" + locale + ".properties");
-        if (messagesIS == null) {
-            localeMessages = defaultMessages;
-        } else {
-            localeMessages.load(new InputStreamReader(messagesIS, "UTF-8"));
-        }
-
-        String key = "defaultNotificationTemplate[" + type.name() + "]";
-        String body = localeMessages.getProperty(key, defaultMessages.getProperty(key));
-        return body.replace("''", "'")
-                .replace("{1}", "${deviceName}")
-                .replace("{2}", "${geoFenceName}")
-                .replace("{3}", "${eventTime}")
-                .replace("{4}", "${positionTime}")
-                .replace("{5}", "${maintenanceName}");
     }
 }

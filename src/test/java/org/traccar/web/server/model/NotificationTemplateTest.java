@@ -17,28 +17,36 @@ package org.traccar.web.server.model;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.traccar.web.shared.model.DeviceEventType;
 
 import java.io.IOException;
 
 public class NotificationTemplateTest {
+    NotificationServiceImpl.NotificationSender sender = new NotificationServiceImpl.NotificationSender();
+
+    @Before
+    public void init() throws IOException {
+        sender.messages = new ServerMessages();
+    }
+
     @Test
     public void testDefaultBodyEng() throws IOException {
-        assertEquals("Device '${deviceName}' went offline at ${eventTime}", NotificationServiceImpl.defaultBody(DeviceEventType.OFFLINE, null));
-        assertEquals("Device '${deviceName}' went offline at ${eventTime}", NotificationServiceImpl.defaultBody(DeviceEventType.OFFLINE, "en"));
-        assertEquals("Device '${deviceName}' went offline at ${eventTime}", NotificationServiceImpl.defaultBody(DeviceEventType.OFFLINE, "default"));
-        assertEquals("Device '${deviceName}' went offline at ${eventTime}", NotificationServiceImpl.defaultBody(DeviceEventType.OFFLINE, "not_exist"));
-        assertEquals("Device '${deviceName}' went offline at ${eventTime}", NotificationServiceImpl.defaultBody(DeviceEventType.OFFLINE, ""));
+        assertEquals("Device '${deviceName}' went offline at ${eventTime}", sender.defaultBody(DeviceEventType.OFFLINE, null));
+        assertEquals("Device '${deviceName}' went offline at ${eventTime}", sender.defaultBody(DeviceEventType.OFFLINE, "en"));
+        assertEquals("Device '${deviceName}' went offline at ${eventTime}", sender.defaultBody(DeviceEventType.OFFLINE, "default"));
+        assertEquals("Device '${deviceName}' went offline at ${eventTime}", sender.defaultBody(DeviceEventType.OFFLINE, "not_exist"));
+        assertEquals("Device '${deviceName}' went offline at ${eventTime}", sender.defaultBody(DeviceEventType.OFFLINE, ""));
 
-        assertEquals("Device '${deviceName}' entered geo-fence '${geoFenceName}' at ${positionTime}", NotificationServiceImpl.defaultBody(DeviceEventType.GEO_FENCE_ENTER, null));
-        assertEquals("Device '${deviceName}' exited geo-fence '${geoFenceName}' at ${positionTime}", NotificationServiceImpl.defaultBody(DeviceEventType.GEO_FENCE_EXIT, null));
+        assertEquals("Device '${deviceName}' entered geo-fence '${geoFenceName}' at ${positionTime}", sender.defaultBody(DeviceEventType.GEO_FENCE_ENTER, null));
+        assertEquals("Device '${deviceName}' exited geo-fence '${geoFenceName}' at ${positionTime}", sender.defaultBody(DeviceEventType.GEO_FENCE_EXIT, null));
     }
 
     @Test
     public void testDefaultBodyRus() throws IOException {
-        assertEquals("Потеряна связь с устройством '${deviceName}' в ${eventTime}", NotificationServiceImpl.defaultBody(DeviceEventType.OFFLINE, "ru"));
-        assertEquals("Устройство '${deviceName}' вошло в геозону '${geoFenceName}' в ${positionTime}", NotificationServiceImpl.defaultBody(DeviceEventType.GEO_FENCE_ENTER, "ru"));
-        assertEquals("Устройство '${deviceName}' покинуло геозону '${geoFenceName}' в ${positionTime}", NotificationServiceImpl.defaultBody(DeviceEventType.GEO_FENCE_EXIT, "ru"));
+        assertEquals("Потеряна связь с устройством '${deviceName}' в ${eventTime}", sender.defaultBody(DeviceEventType.OFFLINE, "ru"));
+        assertEquals("Устройство '${deviceName}' вошло в геозону '${geoFenceName}' в ${positionTime}", sender.defaultBody(DeviceEventType.GEO_FENCE_ENTER, "ru"));
+        assertEquals("Устройство '${deviceName}' покинуло геозону '${geoFenceName}' в ${positionTime}", sender.defaultBody(DeviceEventType.GEO_FENCE_EXIT, "ru"));
     }
 }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN"
+        "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
+<module>
+    <inherits name="com.google.gwt.user.User" />
+    <inherits name="com.google.gwt.json.JSON" />
+
+    <define-configuration-property name="locale.queryparam" is-multi-valued="false"/>
+    <set-configuration-property name="locale.queryparam" value="locale"/>
+
+    <define-configuration-property name="locale.cookie" is-multi-valued="false"/>
+    <set-configuration-property name="locale.cookie" value="GWT_LOCALE" />
+
+    <!-- define property to hold all available locales -->
+    <define-configuration-property name="traccar.locale"
+                     is-multi-valued="true"/>
+    <set-configuration-property name="traccar.locale" value="default" />
+    <extend-configuration-property name="traccar.locale" value="ru" />
+    <extend-configuration-property name="traccar.locale" value="de" />
+    <extend-configuration-property name="traccar.locale" value="it" />
+    <extend-configuration-property name="traccar.locale" value="es" />
+    <extend-configuration-property name="traccar.locale" value="pl" />
+    <extend-configuration-property name="traccar.locale" value="tl" />
+    <extend-configuration-property name="traccar.locale" value="nl" />
+    <extend-configuration-property name="traccar.locale" value="hu" />
+    <extend-configuration-property name="traccar.locale" value="pt_PT" />
+    <extend-configuration-property name="traccar.locale" value="sv_SE" />
+    <extend-configuration-property name="traccar.locale" value="bg" />
+    <extend-configuration-property name="traccar.locale" value="fr" />
+    <extend-configuration-property name="traccar.locale" value="pt_BR" />
+    <extend-configuration-property name="traccar.locale" value="da" />
+    <extend-configuration-property name="traccar.locale" value="cs" />
+    <extend-configuration-property name="traccar.locale" value="sr" />
+    <extend-configuration-property name="traccar.locale" value="sr_Latn" />
+    <extend-configuration-property name="traccar.locale" value="he" />
+    <extend-configuration-property name="traccar.locale" value="fa" />
+    <extend-configuration-property name="traccar.locale" value="el_GR" />
+    <extend-configuration-property name="traccar.locale" value="mk" />
+    <extend-configuration-property name="traccar.locale" value="vi" />
+    <extend-configuration-property name="traccar.locale" value="ar" />
+    <extend-configuration-property name="traccar.locale" value="ro" />
+    <extend-configuration-property name="traccar.locale" value="fi" />
+    <extend-configuration-property name="traccar.locale" value="hr" />
+    <extend-configuration-property name="traccar.locale" value="tr" />
+    <extend-configuration-property name="traccar.locale" value="id" />
+    <extend-configuration-property name="traccar.locale" value="kk" />
+    <extend-configuration-property name="traccar.locale" value="hi_IN" />
+    <extend-configuration-property name="traccar.locale" value="tr" />
+    <extend-configuration-property name="traccar.locale" value="sl" />
+
+    <!-- generator for all 'Messages' interfaces -->
+    <generate-with class="org.traccar.web.i18n.rebind.LocalizableGenerator">
+        <when-type-assignable class="com.google.gwt.i18n.shared.Localizable" />
+    </generate-with>
+
+    <generate-with class="org.traccar.web.i18n.rebind.LocaleInfoGenerator">
+        <when-type-is class="com.google.gwt.i18n.client.impl.LocaleInfoImpl" />
+    </generate-with>
+
+    <source path="client" />
+</module>

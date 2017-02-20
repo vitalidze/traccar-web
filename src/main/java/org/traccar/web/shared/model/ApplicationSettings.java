@@ -1,16 +1,10 @@
 package org.traccar.web.shared.model;
 
-import com.google.gson.annotations.Expose;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gwt.user.client.rpc.GwtTransient;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Enumerated;
-import javax.persistence.EnumType;
+import javax.persistence.*;
 
 @Entity
 @Table(name="application_settings")
@@ -18,36 +12,41 @@ public class ApplicationSettings implements IsSerializable {
 
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_UPDATE_INTERVAL = 15000;
+    public static final short DEFAULT_NOTIFICATION_EXPIRATION_PERIOD = 12 * 60;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false, unique = true)
+    @JsonIgnore
     private long id;
 
     public ApplicationSettings() {
         registrationEnabled = true;
         updateInterval = DEFAULT_UPDATE_INTERVAL;
-        defaultPasswordHash = PasswordHashMethod.MD5;
+        defaultPasswordHash = PasswordHashMethod.PBKDF2WithHmacSha1;
         eventRecordingEnabled = true;
         language = "default";
+        notificationExpirationPeriod = DEFAULT_NOTIFICATION_EXPIRATION_PERIOD;
+        matchServiceType = MatchServiceType.OSRM_V4;
+        matchServiceURL = matchServiceType.getDefaultURL();
     }
 
-    @Expose
     private boolean registrationEnabled;
 
-    @Expose
     private Short updateInterval;
 
     @Enumerated(EnumType.STRING)
-    @Expose
     private PasswordHashMethod defaultPasswordHash;
 
-    @Expose
     @Column(nullable = true)
     private boolean disallowDeviceManagementByUsers;
 
     @Column(nullable = true)
+    @JsonIgnore
     private boolean eventRecordingEnabled;
+
+    @Column(nullable = true)
+    private int notificationExpirationPeriod;
 
     public void setRegistrationEnabled(boolean registrationEnabled) {
         this.registrationEnabled = registrationEnabled;
@@ -89,6 +88,7 @@ public class ApplicationSettings implements IsSerializable {
         this.eventRecordingEnabled = eventRecordingEnabled;
     }
 
+    @JsonIgnore
     private String language;
 
     public String getLanguage() {
@@ -99,6 +99,7 @@ public class ApplicationSettings implements IsSerializable {
         this.language = language;
     }
 
+    @JsonIgnore
     private String salt;
 
     public String getSalt() {
@@ -109,7 +110,6 @@ public class ApplicationSettings implements IsSerializable {
         this.salt = salt;
     }
 
-    @Expose
     private String bingMapsKey;
 
     public String getBingMapsKey() {
@@ -118,6 +118,60 @@ public class ApplicationSettings implements IsSerializable {
 
     public void setBingMapsKey(String bingMapsKey) {
         this.bingMapsKey = bingMapsKey;
+    }
+
+    public int getNotificationExpirationPeriod() {
+        return notificationExpirationPeriod;
+    }
+
+    public void setNotificationExpirationPeriod(int notificationExpirationPeriod) {
+        this.notificationExpirationPeriod = notificationExpirationPeriod;
+    }
+
+    @Enumerated(EnumType.STRING)
+    private MatchServiceType matchServiceType;
+
+    public MatchServiceType getMatchServiceType() {
+        return matchServiceType;
+    }
+
+    public void setMatchServiceType(MatchServiceType matchServiceType) {
+        this.matchServiceType = matchServiceType;
+    }
+
+    private String matchServiceURL;
+
+    public String getMatchServiceURL() {
+        return matchServiceURL;
+    }
+
+    public void setMatchServiceURL(String matchServiceURL) {
+        this.matchServiceURL = matchServiceURL;
+    }
+
+    @Column(nullable = true)
+    private boolean allowCommandsOnlyForAdmins;
+
+    public boolean isAllowCommandsOnlyForAdmins() {
+        return allowCommandsOnlyForAdmins;
+    }
+
+    public void setAllowCommandsOnlyForAdmins(boolean allowCommandsOnlyForAdmins) {
+        this.allowCommandsOnlyForAdmins = allowCommandsOnlyForAdmins;
+    }
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(foreignKey = @ForeignKey(name = "appsettings_fkey_usersettings_id"))
+    @GwtTransient
+    @JsonIgnore
+    private UserSettings userSettings;
+
+    public UserSettings getUserSettings() {
+        return userSettings;
+    }
+
+    public void setUserSettings(UserSettings userSettings) {
+        this.userSettings = userSettings;
     }
 
     @Override

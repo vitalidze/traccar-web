@@ -31,6 +31,9 @@
       <container:child layoutData="{layoutData}">
         <gxt:ContentPanel ui:field="contentPanel" headerVisible="false">
           <container:VerticalLayoutContainer>
+            <container:child layoutData="{toolBarRowData}">
+              <form:StoreFilterField ui:field="userFilter" emptyText="{i18n.filter}..."/>
+            </container:child>
             <container:child layoutData="{layoutData}">
               <grid:Grid ui:field="grid" store="{shareStore}" cm="{columnModel}" view="{view}" />
             </container:child>

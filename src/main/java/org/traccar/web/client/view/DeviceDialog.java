@@ -15,17 +15,23 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sencha.gxt.data.shared.ListStore;
-import com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer;
+import com.sencha.gxt.widget.core.client.TabPanel;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.MaxNumberValidator;
 import com.sencha.gxt.widget.core.client.form.validator.MinNumberValidator;
-import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
+import org.traccar.web.client.model.GroupProperties;
+import org.traccar.web.client.model.GroupStore;
 import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
@@ -61,6 +67,9 @@ public class DeviceDialog implements Editor<Device> {
     Window window;
 
     @UiField
+    TabPanel tabs;
+
+    @UiField
     TextField name;
 
     @UiField
@@ -91,19 +100,26 @@ public class DeviceDialog implements Editor<Device> {
     NumberField<Double> idleSpeedThreshold;
 
     @UiField
-    FieldLabel labelMarkers;
+    NumberField<Integer> minIdleTime;
 
     @UiField
-    HorizontalLayoutContainer panelMarkers;
+    NumberField<Double> speedLimit;
 
     @UiField
-    Image markerImage;
+    CheckBox showProtocol;
+
+    @UiField
+    CheckBox showOdometer;
 
     @UiField
     ScrollPanel panelPhoto;
 
     @UiField
     Image photo;
+
+    @UiField
+    VerticalLayoutContainer iconTab;
+    final DeviceIconEditor iconEditor;
 
     @UiField
     VerticalLayoutContainer sensorsTab;
@@ -113,28 +129,44 @@ public class DeviceDialog implements Editor<Device> {
     VerticalLayoutContainer maintenanceTab;
     final MaintenanceEditor maintenanceEditor;
 
-    MarkerIcon selectedIcon;
+    @UiField(provided = true)
+    ComboBox<Group> group;
 
     @UiField
     Messages i18n;
 
     final Device device;
 
-    public DeviceDialog(Device device, ListStore<Device> deviceStore, DeviceHandler deviceHandler) {
+    public DeviceDialog(Device device, ListStore<Device> deviceStore, final GroupStore groupStore, DeviceHandler deviceHandler) {
         this.device = device;
         this.deviceHandler = deviceHandler;
-        this.selectedIcon = MarkerIcon.create(device);
+
+        GroupProperties groupProperties = GWT.create(GroupProperties.class);
+
+        this.group = new ComboBox<>(groupStore.toListStore(), groupProperties.label(), new AbstractSafeHtmlRenderer<Group>() {
+            @Override
+            public SafeHtml render(Group group) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                for (int i = 0; i < groupStore.getDepth(group); i++) {
+                    builder.appendHtmlConstant("&nbsp;&nbsp;&nbsp;");
+                }
+                return builder.appendEscaped(group.getName() == null ? "" : group.getName()).toSafeHtml();
+            }
+        });
+        this.group.setForceSelection(false);
 
         uiBinder.createAndBindUi(this);
 
-        timeout.addValidator(new MinNumberValidator<Integer>(1));
-        timeout.addValidator(new MaxNumberValidator<Integer>(7 * 24 * 60 * 60));
+        timeout.addValidator(new MinNumberValidator<>(1));
+        timeout.addValidator(new MaxNumberValidator<>(7 * 24 * 60 * 60));
 
         driver.initialize(this);
         driver.edit(device);
 
         idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
-        updateIcon();
+        if (device.getSpeedLimit() != null) {
+            speedLimit.setValue(device.getSpeedLimit() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
+        }
 
         updatePhoto();
 
@@ -144,7 +176,17 @@ public class DeviceDialog implements Editor<Device> {
         maintenanceEditor = new MaintenanceEditor(device, deviceStore);
         maintenanceTab.add(maintenanceEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));
 
-        labelMarkers.setText(i18n.overlayType(UserSettings.OverlayType.MARKERS));
+        iconEditor = new DeviceIconEditor(device);
+        iconTab.add(iconEditor.getPanel(), new VerticalLayoutContainer.VerticalLayoutData(1, 1));
+
+        tabs.addSelectionHandler(new SelectionHandler<Widget>() {
+            @Override
+            public void onSelection(SelectionEvent<Widget> event) {
+                if (event.getSelectedItem() == iconTab) {
+                    iconEditor.loadIcons();
+                }
+            }
+        });
     }
 
     public void show() {
@@ -160,8 +202,11 @@ public class DeviceDialog implements Editor<Device> {
         window.hide();
         Device device = driver.flush();
         device.setIdleSpeedThreshold(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getIdleSpeedThreshold()));
-        device.setIconType(selectedIcon.getBuiltInIcon());
-        device.setIcon(selectedIcon.getDatabaseIcon());
+        if (device.getSpeedLimit() != null) {
+            device.setSpeedLimit(ApplicationContext.getInstance().getUserSettings().getSpeedUnit().toKnots(device.getSpeedLimit()));
+        }
+
+        iconEditor.flush();
         maintenanceEditor.flush();
         sensorsEditor.flush();
         deviceHandler.onSave(device);
@@ -170,24 +215,6 @@ public class DeviceDialog implements Editor<Device> {
     @UiHandler("cancelButton")
     public void onCancelClicked(SelectEvent event) {
         window.hide();
-    }
-
-    @UiHandler("selectButton")
-    public void onSelectMarkerIconClicked(SelectEvent event) {
-        new DeviceMarkersDialog(selectedIcon, new DeviceMarkersDialog.DeviceMarkerHandler() {
-            @Override
-            public void onSave(MarkerIcon icon) {
-                if (icon != null) {
-                    selectedIcon = icon;
-                    updateIcon();
-                }
-            }
-        }).show();
-    }
-
-    private void updateIcon() {
-        markerImage.setUrl(selectedIcon.getOfflineURL());
-        panelMarkers.forceLayout();
     }
 
     @UiHandler("editPhotoButton")

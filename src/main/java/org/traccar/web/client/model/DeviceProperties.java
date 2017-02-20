@@ -43,12 +43,13 @@ public interface DeviceProperties extends PropertyAccess<Device> {
 
     ValueProvider<Device, Double> idleSpeedThreshold();
 
+    ValueProvider<Device, String> iconArrowMovingColor();
+    ValueProvider<Device, String> iconArrowPausedColor();
+    ValueProvider<Device, String> iconArrowStoppedColor();
+    ValueProvider<Device, String> iconArrowOfflineColor();
+
     @Path("name")
     LabelProvider<Device> label();
-
-    ValueProvider<Device, Boolean> follow();
-
-    ValueProvider<Device, Boolean> recordTrace();
 
     ValueProvider<Device, Double> odometer();
 

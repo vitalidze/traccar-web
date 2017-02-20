@@ -143,7 +143,13 @@ myApp.onPageInit('login-screen', function (page) {
 
     // set up open desktop version action
     pageContainer.find('.open-desktop-version').on('click', function() {
-        window.location = '../?' + (locale == null ? '' : 'locale=' + locale + '&') + 'nomobileredirect=1';
+        var localeParam = locale == null ? ''
+            : locale == 'en' ? 'default'
+            : locale;
+        if (localeParam != '') {
+            localeParam = 'locale=' + localeParam + '&';
+        }
+        window.location = '../?' + localeParam + 'nomobileredirect=1';
     });
 
     pageContainer.find('#form-login').on('submit', function(e) {
@@ -197,7 +203,7 @@ var OpenSideMenuControl = function(opt_options) {
     anchor.addEventListener('touchstart', handleOpenSideMenu, false);
 
     var element = document.createElement('div');
-    element.className = 'button-open-side-menu ol-unselectable ol-has-tooltip';
+    element.className = 'button-map button-open-side-menu ol-unselectable ol-has-tooltip';
     element.appendChild(anchor);
 
     ol.control.Control.call(this, {
@@ -207,6 +213,83 @@ var OpenSideMenuControl = function(opt_options) {
 
 };
 ol.inherits(OpenSideMenuControl, ol.control.Control);
+
+// button that puts current device location on map
+var GeoLocateMeControl = function(opt_options) {
+    var options = opt_options || {};
+
+    var anchor = document.createElement('a');
+    anchor.href = '#geolocate-me';
+    anchor.innerHTML = "&#9678;";
+
+    var geolocation = null;
+    var centerAndZoomOnFirstChange = false;
+    var handleGeoLocateMe = function(e) {
+        e.preventDefault();
+        if (geolocation == null) {
+            geolocation = new ol.Geolocation({
+                projection: map.getView().getProjection()
+            });
+
+            var accuracyFeature = new ol.Feature();
+            geolocation.on('change:accuracyGeometry', function() {
+                accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
+                if (centerAndZoomOnFirstChange) {
+                    map.getView().fit(geolocation.getAccuracyGeometry(), map.getSize());
+                    centerAndZoomOnFirstChange = false;
+                }
+            });
+
+            var positionFeature = new ol.Feature();
+            positionFeature.setStyle(new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 6,
+                    fill: new ol.style.Fill({
+                        color: '#3399CC'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#fff',
+                        width: 2
+                    })
+                })
+            }));
+
+            geolocation.on('change:position', function() {
+                var coordinates = geolocation.getPosition();
+                positionFeature.setGeometry(coordinates ? new ol.geom.Point(coordinates) : null);
+            });
+
+            new ol.layer.Vector({
+                map: map,
+                source: new ol.source.Vector({
+                    features: [accuracyFeature, positionFeature]
+                })
+            });
+        }
+
+        geolocation.setTracking(!geolocation.getTracking());
+        centerAndZoomOnFirstChange = geolocation.getTracking();
+        if (geolocation.getTracking()) {
+            $$('#geolocate-me').addClass('button-map-selected');
+        } else {
+            $$('#geolocate-me').removeClass('button-map-selected');
+        }
+    };
+
+    anchor.addEventListener('click', handleGeoLocateMe, false);
+    anchor.addEventListener('touchstart', handleGeoLocateMe, false);
+
+    var element = document.createElement('div');
+    element.id = 'geolocate-me';
+    element.className = 'button-map button-geolocate-me ol-unselectable ol-has-tooltip';
+    element.appendChild(anchor);
+
+    ol.control.Control.call(this, {
+        element: element,
+        target: options.target
+    });
+};
+ol.inherits(GeoLocateMeControl, ol.control.Control);
 
 // initialize map when page ready
 var map;
@@ -251,6 +334,8 @@ myApp.onPageInit('map-screen', function(page) {
             style = 'AerialWithLabels';
         } else if (appState.userSettings.mapType == "BING_AERIAL") {
             style = 'Aerial';
+        } else if (appState.userSettings.mapType == "BING_ORDNANCE_SURVEY") {
+            style = 'ORDNANCESURVEY';
         }
 
         layers.push(new ol.layer.Tile({
@@ -324,7 +409,7 @@ myApp.onPageInit('map-screen', function(page) {
         target: divOlMap,
         layers: layers,
         view: view,
-        controls: controls.extend([new OpenSideMenuControl()])
+        controls: controls.extend([new OpenSideMenuControl(), new GeoLocateMeControl()])
     });
 
     // set up map center and zoom
@@ -414,6 +499,7 @@ function catchPosition(position) {
     var point = createPoint(position.longitude, position.latitude);
     if (!ol.extent.containsCoordinate(mapExtent, point)) {
         map.getView().setCenter(point);
+        autoZoom();
     }
 }
 
@@ -582,6 +668,7 @@ function drawDeviceDetails(deviceId, position) {
                     }
                 });
                 map.getView().setCenter(createPoint(position.longitude, position.latitude));
+                autoZoom();
                 myApp.closePanel();
             });
 
@@ -698,18 +785,12 @@ function drawMarker(position) {
     });
 
     var markerStyle = new ol.style.Style({
-        image: new ol.style.Icon({
-            anchor: [0.5, 1.0],
-            anchorXUnits: 'fraction',
-            anchorYUnits: 'fraction',
-            opacity: 0.9,
-            src: getIconURL(position)
-        }),
+        image: createMarkerImage(position),
         text: new ol.style.Text({
             text: position.device.name,
             textAlign: 'center',
             offsetX: 0,
-            offsetY: 8,
+            offsetY: isArrow(position) ? 18 : 8,
             font: '12px Arial',
             fill: new ol.style.Fill({
                 color: '#0000FF'
@@ -728,6 +809,35 @@ function drawMarker(position) {
     }
     position.marker = markerFeature;
     vectorLayer.getSource().addFeature(markerFeature);
+}
+
+function createMarkerImage(position) {
+    if (isArrow(position)) {
+        return new ol.style.Arrow({
+            radius: 10,
+            fill: new ol.style.Fill({
+                color: '#' + getArrowColor(position)
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'black',
+                width: 0.5
+            }),
+            rotation: getRotation(position)
+        });
+    } else {
+        return new ol.style.Icon({
+            anchor: [0.5, 1.0],
+            anchorXUnits: 'fraction',
+            anchorYUnits: 'fraction',
+            opacity: 0.9,
+            src: getIconURL(position),
+            rotation: position.device.iconRotation ? getRotation(position) : 0
+        });
+    }
+}
+
+function isArrow(position) {
+    return position.device.iconMode == 'ARROW';
 }
 
 function getIconURL(position) {
@@ -749,13 +859,36 @@ function getIconURL(position) {
     }
 }
 
+function getArrowColor(position) {
+    if (position.offline || position.speed == null) {
+        return position.device.iconArrowOfflineColor;
+    } else {
+        if (position.speed > position.device.idleSpeedThreshold) {
+            return position.device.iconArrowMovingColor;
+        } else {
+            return position.device.iconArrowStoppedColor;
+        }
+    }
+}
+
+function getRotation(position) {
+    return (position.course == null ? 0 : position.course) * Math.PI/ 180;
+}
+
+function autoZoom() {
+    if (appState.userSettings.followedDeviceZoomLevel != null
+        && appState.userSettings.followedDeviceZoomLevel != map.getView().getZoom()) {
+        map.getView().setZoom(appState.userSettings.followedDeviceZoomLevel);
+    }
+}
+
 function callGet(options) {
-    options.httpMethod = 'GET'
+    options.httpMethod = 'GET';
     invoke(options);
 }
 
 function callPost(options) {
-    options.httpMethod = 'POST'
+    options.httpMethod = 'POST';
     invoke(options);
 }
 
@@ -779,9 +912,13 @@ function invoke(options) {
 
             if (xhr.status != 200 && options.error != undefined) {
                 options.error(xhr);
+                options.error = undefined;
             }
         },
-        error: options.error
+        error: function(xhr) {
+            options.error(xhr);
+            options.error = undefined;
+        }
     })
 }
 

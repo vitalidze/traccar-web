@@ -52,6 +52,9 @@ public class DeviceEvent {
 
     private boolean notificationSent;
 
+    @Column(nullable = true)
+    private boolean expired;
+
     public DeviceEvent() {
     }
 
@@ -125,6 +128,14 @@ public class DeviceEvent {
 
     public void setNotificationSent(boolean notificationSent) {
         this.notificationSent = notificationSent;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
     }
 
     @Override

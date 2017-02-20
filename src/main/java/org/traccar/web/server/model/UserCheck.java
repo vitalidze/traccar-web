@@ -22,7 +22,6 @@ import org.traccar.web.shared.model.User;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import java.util.Date;
 
 public class UserCheck implements MethodInterceptor {
     @Inject
@@ -45,7 +44,7 @@ public class UserCheck implements MethodInterceptor {
         }
     }
 
-    private final ThreadLocal<Role[]> rolesChecked = new ThreadLocal<Role[]>();
+    private final ThreadLocal<Role[]> rolesChecked = new ThreadLocal<>();
     void checkRequireUser(RequireUser requireUser) {
         if (rolesChecked.get() != null) {
             // this method require an logged in user
@@ -93,7 +92,7 @@ public class UserCheck implements MethodInterceptor {
         }
     }
 
-    final ThreadLocal<Boolean> checkedDeviceManagement = new ThreadLocal<Boolean>();
+    final ThreadLocal<Boolean> checkedDeviceManagement = new ThreadLocal<>();
     void checkDeviceManagementAccess(ManagesDevices managesDevices) throws Throwable {
         if (checkedDeviceManagement.get() != null) {
             return;
@@ -110,7 +109,7 @@ public class UserCheck implements MethodInterceptor {
         }
     }
 
-    final ThreadLocal<Boolean> checkedRequireWrite = new ThreadLocal<Boolean>();
+    final ThreadLocal<Boolean> checkedRequireWrite = new ThreadLocal<>();
     void checkRequireWrite(RequireWrite requireWrite) {
         if (checkedRequireWrite.get() != null) {
             return;

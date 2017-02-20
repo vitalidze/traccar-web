@@ -26,10 +26,7 @@ import com.sencha.gxt.widget.core.client.form.PasswordField;
 import org.traccar.web.client.Application;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.BaseAsyncCallback;
-import org.traccar.web.client.model.NotificationService;
-import org.traccar.web.client.model.NotificationServiceAsync;
-import org.traccar.web.client.model.UserProperties;
+import org.traccar.web.client.model.*;
 import org.traccar.web.client.view.*;
 import org.traccar.web.shared.model.*;
 
@@ -40,13 +37,16 @@ import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 
-public class SettingsController implements DeviceView.SettingsHandler {
+public class SettingsController implements NavView.SettingsHandler {
 
     private Messages i18n = GWT.create(Messages.class);
     private final UserSettingsDialog.UserSettingsHandler userSettingsHandler;
+    private final UserSettingsDialog.UserSettingsHandler defaultUserSettingsHandler;
 
-    public SettingsController(UserSettingsDialog.UserSettingsHandler userSettingsHandler) {
+    public SettingsController(UserSettingsDialog.UserSettingsHandler userSettingsHandler,
+                              UserSettingsDialog.UserSettingsHandler defaultUserSettingsHandler) {
         this.userSettingsHandler = userSettingsHandler;
+        this.defaultUserSettingsHandler = defaultUserSettingsHandler;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class SettingsController implements DeviceView.SettingsHandler {
             @Override
             public void onSuccess(List<User> result) {
                 UserProperties userProperties = GWT.create(UserProperties.class);
-                final ListStore<User> userStore = new ListStore<User>(userProperties.id());
+                final ListStore<User> userStore = new ListStore<>(userProperties.id());
                 userStore.addAll(result);
 
                 new UsersDialog(userStore, new UsersDialog.UserHandler() {
@@ -137,7 +137,7 @@ public class SettingsController implements DeviceView.SettingsHandler {
 
                     @Override
                     public void onSaveRoles() {
-                        List<User> updatedUsers = new ArrayList<User>(userStore.getModifiedRecords().size());
+                        List<User> updatedUsers = new ArrayList<>(userStore.getModifiedRecords().size());
                         for (Store<User>.Record record : userStore.getModifiedRecords()) {
                             User updatedUser = new User(record.getModel());
                             for (Store.Change<User, ?> change : record.getChanges()) {
@@ -261,6 +261,16 @@ public class SettingsController implements DeviceView.SettingsHandler {
                         });
                     }
                 }).show();
+            }
+        });
+    }
+
+    @Override
+    public void onDefaultPreferencesSelected() {
+        Application.getDataService().getDefaultUserSettings(new BaseAsyncCallback<UserSettings>(i18n) {
+            @Override
+            public void onSuccess(UserSettings result) {
+                new UserSettingsDialog(result, defaultUserSettingsHandler).show();
             }
         });
     }
