@@ -6,20 +6,20 @@
     xmlns:gxt="urn:import:com.sencha.gxt.widget.core.client">
 
   <ui:with type="com.sencha.gxt.core.client.util.Margins" field="westMargins">
-    <ui:attributes top="5" right="5" bottom="0" left="5" />
+    <ui:attributes top="0" right="0" bottom="0" left="0" />
   </ui:with>
   <ui:with type="com.sencha.gxt.core.client.util.Margins" field="centerMargins">
-    <ui:attributes top="5" right="5" bottom="0" left="0" />
+    <ui:attributes top="0" right="0" bottom="0" left="0" />
   </ui:with>
   <ui:with type="com.sencha.gxt.core.client.util.Margins" field="southMargins">
-    <ui:attributes top="5" right="5" bottom="5" left="5" />
+    <ui:attributes top="3" right="0" bottom="0" left="0" />
   </ui:with>
   <ui:with type="com.sencha.gxt.core.client.util.Margins" field="northMargins">
-    <ui:attributes top="5" right="5" bottom="0" left="5" />
+    <ui:attributes top="0" right="1" bottom="0" left="0" />
   </ui:with>
 
   <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="northData">
-    <ui:attributes size="38" minSize="38" margins="{northMargins}" />
+    <ui:attributes size="37" minSize="37" margins="{northMargins}" />
   </ui:with>
   <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="westData">
     <ui:attributes size="0.15" maxSize="2147483647" margins="{westMargins}" split="true" />
@@ -28,7 +28,7 @@
     <ui:attributes margins="{centerMargins}" />
   </ui:with>
   <ui:with type="com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData" field="southData">
-    <ui:attributes size="84" minSize="84" maxSize="2147483647" margins="{southMargins}" split="true" />
+    <ui:attributes size="87" minSize="87" maxSize="2147483647" margins="{southMargins}" split="true" />
   </ui:with>
 
   <container:Viewport>
