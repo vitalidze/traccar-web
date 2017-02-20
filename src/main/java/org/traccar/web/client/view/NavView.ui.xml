@@ -103,7 +103,7 @@
       </button:TextButton>
       <toolbar:FillToolItem/>
       <button:TextButton ui:field="settingsAccount" addStyleNames="{style.gwt-Button-right}">
-          <img style="vertical-align:middle" src='img/profile.svg' />&nbsp;<font>Profile settings</font>
+          <img style="vertical-align:middle" src='img/profiles.svg' />&nbsp;<font>Profile settings</font>
       </button:TextButton>
       <button:TextButton ui:field="settingsPreferences" addStyleNames="{style.gwt-Button-right}">
           <img style="vertical-align:middle" src='img/map.svg' />&nbsp;<font>Map options</font>
