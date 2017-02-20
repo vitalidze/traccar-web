@@ -22,7 +22,7 @@ import javax.persistence.*;
        uniqueConstraints = { @UniqueConstraint(name = "ui_state_user_name", columnNames = {"user_id", "name"}) })
 public class UIStateEntry {
     public static final String ARCHIVE_GRID_STATE_ID = "archiveGrid";
-    public static final String DEFAULT_ARCHIVE_GRID_STATE = "{\"hidden\":[\"valid\",\"address\"]}";
+    public static final String DEFAULT_ARCHIVE_GRID_STATE = "{\"hidden\":[\"valid\",\"altitude\",\"power\",\"course\"]}";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
