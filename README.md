@@ -1,14 +1,14 @@
-# traccar-web
+#bLLETS pro
 
-Web page - http://traccar.litvak.su
+Web page - 
 
-News - http://traccar.litvak.su/news.html
+News - 
 
-Demo - http://traccar.litvak.su/demo.html
+Demo - 
 
-Authors: Anton Tananaev (anton.tananaev@gmail.com), Vitaly Litvak (vitavaque@gmail.com)
+Author: Godwin peter .O (godwin@peter.com.ng)
 
-Support project - [donate](http://traccar.litvak.su/donate.html)
+
 
 ## Summary
 
@@ -24,15 +24,7 @@ See complete [features list on official web site](http://traccar.litvak.su/featu
 
 ## Building
 
-See [building instructions on official web site](http://traccar.litvak.su/building.html)
 
-## Eclipse
-
-See [Eclipse IDE setup instructions on official web site](http://traccar.litvak.su/ide/eclipse.html)
-
-## IntelliJ IDEA
-
-See [IntelliJ IDEA IDE setup instructions on official web site](http://traccar.litvak.su/ide/idea.html)
 
 ## NetBeans
 
