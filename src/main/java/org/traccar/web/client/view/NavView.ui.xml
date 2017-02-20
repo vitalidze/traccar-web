@@ -8,18 +8,94 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
-  <ui:style>
+ 
+<ui:style>
+      
+    @external gwt-Button gwt-Button-right gwt-Button-rightty app-menu logo-button;
+    .gwt-Button { 
+      background-color: 0 !important;
+      color: 0 !important;
+      padding-right: 19px;
+      border: 0px solid #bbb;
+      border-bottom: 0px solid #999;
+      cursor: pointer;
+      text-shadow: 0 0px 0 #ddd;
+      
+      }
+      
+      .gwt-Button-right { 
+      background-color: 0 !important;
+      padding-left: 19px;
+      border: 0px solid #bbb;
+      border-bottom: 0px solid #999;
+      cursor: pointer;
+      text-shadow: 0 0px 0 #ddd;
+      
+      }
+      
+      .gwt-Button-rightty { 
+      background-color: 0 !important;
+      padding-left: 19px;
+      padding-right: 19px;
+      padding-top: 0px;
+      padding-bottom: 0px;
+      border: 0px solid #bbb;
+      border-bottom: 0px solid #999;
+      cursor: pointer;
+      text-shadow: 0 0px 0 #ddd;
+      
+      }
+      
     .app-menu {
-      background-color: #157FCC !important;
+      background-color: #3B4767 !important;
       background-image: none !important;
+      margin: 0px 0px 0px 0px;
+      padding: 0px 0px 0px 0px;
+      
     }
+      
+    .logo-button{
+      padding-right: 100px;
+      background-image: none !important;
+       background-color: 0 !important;
+      }
+      
+      /** Button test ********************/
+      
+      
+      
+      
+      
   </ui:style>
+  
 
   <gxt:ContentPanel ui:field="contentPanel" headerVisible="false" addStyleNames="{style.app-menu}">
+      
     <toolbar:ToolBar addStyleNames="{style.app-menu}">
-      <button:TextButton ui:field="reportsButton" text="{i18n.reports}" />
-      <button:TextButton ui:field="groupsButton" text="{i18n.groups}" />
-      <button:TextButton text="{i18n.settings}" ui:field="settingsButton">
+        <!--Logo crap crap-->
+        <button:TextButton ui:field="logoButton" addStyleNames="{style.logo-button}">
+            &nbsp;
+            <img style="vertical-align:middle" height="24px" width="65px" src='http://localhost/BHN_only.png' />
+            &nbsp;
+        </button:TextButton>
+        
+        <button:TextButton ui:field="reportsButton" addStyleNames="{style.gwt-Button}">
+            <img style="vertical-align:middle" src='http://localhost/report.svg' />
+            &nbsp;
+            <font>Reports</font>
+            &nbsp;
+        </button:TextButton>
+        <button:TextButton ui:field="groupsButton" addStyleNames="{style.gwt-Button}">
+            <img style="vertical-align:middle" src='http://localhost/folder.svg' />
+            &nbsp;
+            <font>Groups</font>
+            &nbsp;
+        </button:TextButton>
+      <button:TextButton ui:field="settingsButton" addStyleNames="{style.gwt-Button}">
+            <img style="vertical-align:middle" src='http://localhost/settings.svg' />
+            &nbsp;
+            <font>Settings</font>
+            &nbsp;
         <button:menu>
           <menu:Menu>
             <menu:MenuItem text="{i18n.users}" ui:field="settingsUsers" visible="false" />
@@ -29,7 +105,11 @@
           </menu:Menu>
         </button:menu>
       </button:TextButton>
-      <button:TextButton text="{i18n.logs}" ui:field="logsButton">
+      <button:TextButton ui:field="logsButton" addStyleNames="{style.gwt-Button}">
+            <img style="vertical-align:middle" src='http://localhost/log.svg' />
+            &nbsp;
+            <font>Logger</font>
+            &nbsp;
         <button:menu>
           <menu:Menu>
             <menu:MenuItem text="{i18n.trackerServerLog}" ui:field="showTrackerServerLog" />
@@ -37,11 +117,31 @@
           </menu:Menu>
         </button:menu>
       </button:TextButton>
-      <button:TextButton text="{i18n.importData}" ui:field="importButton" />
-      <toolbar:FillToolItem addStyleNames="{style.app-menu}"/>
-      <button:TextButton text="{i18n.account}" ui:field="settingsAccount" />
-      <button:TextButton text="{i18n.preferences}" ui:field="settingsPreferences" />
-      <button:TextButton text="{i18n.logout}" ui:field="logoutButton" />
+      <button:TextButton ui:field="importButton" addStyleNames="{style.gwt-Button}">
+            <img style="vertical-align:middle" src='http://localhost/import.svg' />
+            &nbsp;
+            <font>Import</font>
+            &nbsp;
+      </button:TextButton>
+      <toolbar:FillToolItem/>
+      <button:TextButton ui:field="settingsAccount" addStyleNames="{style.gwt-Button-right}">
+          <img style="vertical-align:middle" src='http://localhost/profile.svg' />
+            &nbsp;
+            <font>Profile settings</font>
+            &nbsp;
+      </button:TextButton>
+      <button:TextButton ui:field="settingsPreferences" addStyleNames="{style.gwt-Button-right}">
+          <img style="vertical-align:middle" src='http://localhost/map.svg' />
+            &nbsp;
+            <font>Map options</font>
+            &nbsp;
+      </button:TextButton>
+      <button:TextButton ui:field="logoutButton" addStyleNames="{style.gwt-Button-rightty}">
+          <img style="vertical-align:middle" src='http://localhost/signout.svg' />
+            &nbsp;
+            <font>Sign out</font>
+            &nbsp;
+      </button:TextButton>
     </toolbar:ToolBar>
   </gxt:ContentPanel>
 
