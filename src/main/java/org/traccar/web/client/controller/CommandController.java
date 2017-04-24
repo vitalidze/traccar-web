@@ -78,7 +78,7 @@ public class CommandController implements ContentController, DeviceView.CommandH
                 command.getAttributes().put(CommandType.KEY_MESSAGE, message);
                 break;
             case custom:
-                command.setCommand(rawCommand);
+                command.getAttributes().put(CommandType.KEY_DATA, rawCommand);
                 break;
         }
 
