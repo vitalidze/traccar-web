@@ -37,4 +37,5 @@ public enum CommandType implements IsSerializable {
     public static final String KEY_RADIUS = "radius";
     public static final String KEY_PHONE_NUMBER = "phoneNumber";
     public static final String KEY_MESSAGE = "message";
+    public static final String KEY_DATA = "data";
 }

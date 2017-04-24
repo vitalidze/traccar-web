@@ -1100,10 +1100,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         if (applicationSettings.get().isAllowCommandsOnlyForAdmins() && !getSessionUser().getAdmin()) {
             throw new AccessDeniedException();
         }
-
+        
         ObjectMapper jsonMapper = new ObjectMapper();
         Map<String, Object> result = new HashMap<>();
         try {
+
             boolean traccarVersionBiggerThan_3_9 = false;
 
             Class<?> contextClass = Class.forName("org.traccar.Context");
