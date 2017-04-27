@@ -23,7 +23,7 @@ import java.util.Map;
 public class Command implements IsSerializable {
     private long deviceId;
     private CommandType type;
-    private String command;
+
     @SuppressWarnings("GwtInconsistentSerializableClass")
     @GwtTransient
     private Map<String, Object> attributes;
@@ -45,14 +45,6 @@ public class Command implements IsSerializable {
 
     public void setType(CommandType type) {
         this.type = type;
-    }
-
-    public String getCommand() {
-        return command;
-    }
-
-    public void setCommand(String command) {
-        this.command = command;
     }
 
     public Map<String, Object> getAttributes() {
