@@ -552,9 +552,9 @@ var i18n = {
         your_password: 'Inserire la password',
         sign_in: 'Accedi',
         register: 'Registrazione',
-        user_name_and_password_must_not_be_empty: 'Nome Utente e Password non possono essere vuoti',
-        user_name_or_password_is_invalid: 'Nome Utente e Password non sono validi',
-        user_name_already_taken: 'Il Nome Utente è già utilizzato',
+        user_name_and_password_must_not_be_empty: 'Nome utente e password non possono essere vuoti',
+        user_name_or_password_is_invalid: 'Nome utente o password non validi',
+        user_name_already_taken: 'Il nome utente è già utilizzato',
         unexpected_error: 'Errore inaspettato',
         open_desktop_version: 'Apri versione Desktop',
         // sidebar
@@ -571,12 +571,12 @@ var i18n = {
         course: 'Percorso',
         address: 'Indirizzo',
         follow: 'Segui',
-        stop_following: 'Stop following',
+        stop_following: 'Smetti di seguire',
         geo_fence: 'Geo-fence',
-        send_location_by_email: 'Send location by Email',
-        send_location_url_by_email: 'Send location URL by Email',
-        send_location_by_sms: 'Send location by SMS',
-        send_location_url_by_sms: 'Send location URL by SMS'
+        send_location_by_email: 'Invia posizione via email',
+        send_location_url_by_email: 'Invia URL della posizone via email',
+        send_location_by_sms: 'Iniva posizione via SMS',
+        send_location_url_by_sms: 'Invia URL posizione via SMS'
     },
     lt: {
         _name_: 'Latvian',
