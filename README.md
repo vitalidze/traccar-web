@@ -1,42 +1,10 @@
-# traccar-web
+#bLEETS pro
 
-Web page - http://traccar.litvak.su
-
-News - http://traccar.litvak.su/news.html
-
-Demo - http://traccar.litvak.su/demo.html
-
-Authors: Anton Tananaev (anton.tananaev@gmail.com), Vitaly Litvak (vitavaque@gmail.com)
-
-Support project - [donate](http://traccar.litvak.su/donate.html)
+Author: Godwin peter .O (godwin@peter.com.ng)
 
 ## Summary
 
 Web interface for traccar server.
-
-## Installation
-
-See [installation instructions on official web site](http://traccar.litvak.su/installation.html).
-
-## Features
-
-See complete [features list on official web site](http://traccar.litvak.su/features/).
-
-## Building
-
-See [building instructions on official web site](http://traccar.litvak.su/building.html)
-
-## Eclipse
-
-See [Eclipse IDE setup instructions on official web site](http://traccar.litvak.su/ide/eclipse.html)
-
-## IntelliJ IDEA
-
-See [IntelliJ IDEA IDE setup instructions on official web site](http://traccar.litvak.su/ide/idea.html)
-
-## NetBeans
-
-See [NetBeans IDE setup instructions on official web site](http://traccar.litvak.su/ide/netbeans.html)
 
 ## License
 

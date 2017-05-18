@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2017 Godwin peter .O (godwin@peter.com.ng)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ public class ArchiveView implements SelectionChangedEvent.SelectionChangedHandle
         long min = 60 * 1000;
         Date now = new Date();
         Date to = new Date(((now.getTime() + 15 * min) / (15 * min)) * 15 * min);
-        Date from = new Date(to.getTime() - 60 * min);
+        Date from = new Date(to.getTime() - 1440 * min);
         fromDate.setValue(from);
         fromTime.setValue(from);
         toDate.setValue(to);

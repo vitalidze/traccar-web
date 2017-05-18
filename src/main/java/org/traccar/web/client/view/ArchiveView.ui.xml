@@ -50,7 +50,7 @@
                     <button:TextButton ui:field="styleButton" text="{i18n.style}">
                         <button:menu>
                             <menu:Menu ui:field="menu1">
-                                <menu:CheckMenuItem ui:field="zoomToTrackMenu" text="{i18n.zoomToTrack}" />
+                                <menu:CheckMenuItem ui:field="zoomToTrackMenu" enabled="true" text="{i18n.zoomToTrack}" />
                                 <menu:SeparatorMenuItem />
                                 <menu:MenuItem ui:field="markersMenu">
                                     <menu:submenu>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Anton Tananaev (anton.tananaev@gmail.com)
+ * Copyright 2017 Godwin peter .O (godwin@peter.com.ng)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class ApplicationView extends Composite {
         final ContentPanel panel;
         final ToolButton btnExpandCollapse;
 
-        int previousSize = 200;
+        int previousSize = 425;
         boolean expanded;
 
         ExpandCollapseHandler(BorderLayoutContainer.BorderLayoutData layoutData,
@@ -124,10 +124,10 @@ public class ApplicationView extends Composite {
             archivePanel.removeFromParent();
         }
 
-        if (devicePanel.getElement().getSize().getWidth() < 350) {
-            westData.setSize(350);
+        if (devicePanel.getElement().getSize().getWidth() < 410) {
+            westData.setSize(410);
         }
 
-        new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 84);
+        new ExpandCollapseHandler(southData, Style.LayoutRegion.SOUTH, archivePanel, 87);
     }
 }

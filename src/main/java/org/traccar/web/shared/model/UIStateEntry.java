@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
+ * Copyright 2017 Godwin peter .O (godwin@peter.com.ng)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import javax.persistence.*;
        uniqueConstraints = { @UniqueConstraint(name = "ui_state_user_name", columnNames = {"user_id", "name"}) })
 public class UIStateEntry {
     public static final String ARCHIVE_GRID_STATE_ID = "archiveGrid";
-    public static final String DEFAULT_ARCHIVE_GRID_STATE = "{\"hidden\":[\"valid\",\"address\"]}";
+    public static final String DEFAULT_ARCHIVE_GRID_STATE = "{\"hidden\":[\"valid\",\"altitude\",\"power\",\"course\"]}";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
