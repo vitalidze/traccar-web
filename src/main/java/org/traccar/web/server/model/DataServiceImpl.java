@@ -20,6 +20,7 @@ import static org.traccar.web.server.model.PasswordUtils.hash;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
