@@ -91,7 +91,7 @@ public class ReportDS extends ReportGenerator {
         }
     }
 
-    List<Data> calculate(List<Position> positions) {
+    static List<Data> calculate(List<Position> positions) {
         Position prevPosition = null;
         List<Data> datas = new ArrayList<>();
         Data currentData = null;
@@ -263,7 +263,16 @@ public class ReportDS extends ReportGenerator {
         tableEnd();
     }
 
-    private boolean isIdle(Position position) {
+    private static boolean isIdle(Position position) {
         return position.getSpeed() == null || position.getSpeed() <= position.getDevice().getIdleSpeedThreshold();
+    }
+
+    static String getStopsOlString(List<Position> positions){
+        String output = "";
+        List<Data> stops = calculate(positions);
+        for (Data data : stops) {
+            output += ",new ol.Feature({ geometry: new ol.geom.Point(ol.proj.transform(["+data.start.getLongitude()+","+data.start.getLatitude()+"], 'EPSG:4326', 'EPSG:3857')), name: 'Route End2222'})";
+        }
+        return output;
     }
 }
