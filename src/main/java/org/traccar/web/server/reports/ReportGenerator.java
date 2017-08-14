@@ -16,6 +16,7 @@
 package org.traccar.web.server.reports;
 
 import org.traccar.web.client.model.DataService;
+import org.traccar.web.client.model.GroupService;
 import org.traccar.web.server.model.ServerMessages;
 import org.traccar.web.shared.model.*;
 
@@ -297,7 +298,7 @@ public abstract class ReportGenerator {
     }
 
     List<Device> getDevices(Report report) {
-        if (report.getDevices().isEmpty()) {
+        if (report.getDevices().isEmpty() && report.getGroups().isEmpty()) {
             return dataService.getDevices();
         } else {
             List<Device> devices = new ArrayList<>(report.getDevices().size());
@@ -307,6 +308,16 @@ public abstract class ReportGenerator {
                     devices.add(device);
                 }
             }
+            List<Device> allDevices = dataService.getDevices();
+            for (Group reportGroup : report.getGroups()) {
+                Group group = entityManager.find(Group.class, reportGroup.getId());
+                for (Device device : allDevices) {
+                    if (group.contains(device) && !devices.contains(device)) {
+                        devices.add(device);
+                    }
+                }
+            }
+
             return devices;
         }
     }

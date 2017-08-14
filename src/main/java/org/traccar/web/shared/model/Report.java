@@ -108,6 +108,21 @@ public class Report implements IsSerializable {
         this.geoFences = geoFences;
     }
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "reports_groups",
+            foreignKey = @ForeignKey(name = "reports_groups_fkey_report_id"),
+            joinColumns = { @JoinColumn(name = "report_id", table = "reports", referencedColumnName = "id") },
+            inverseJoinColumns = { @JoinColumn(name = "group_id", table = "groups", referencedColumnName = "id") })
+    private Set<Group> groups;
+
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Set<Group> groups) {
+        this.groups = groups;
+    }
+
     @Enumerated(EnumType.STRING)
     private Period period;
 

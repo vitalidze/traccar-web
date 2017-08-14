@@ -69,6 +69,8 @@
 
   <ui:with type="com.sencha.gxt.data.shared.ListStore" field="deviceStore" />
 
+  <ui:with type="com.sencha.gxt.data.shared.ListStore" field="groupStore" />
+
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
 
   <ui:style>
@@ -128,6 +130,11 @@
                 <container:child layoutData="{boxLayoutDataMargins0500Flex3}">
                     <gxt:ContentPanel headingText="{i18n.devices}" bodyStyleName="{style.pad3}">
                         <gxt:ListView ui:field="devicesList" store="{deviceStore}" />
+                    </gxt:ContentPanel>
+                </container:child>
+                <container:child layoutData="{boxLayoutDataMargins0500Flex3}">
+                    <gxt:ContentPanel headingText="{i18n.groups}"  bodyStyleName="{style.pad3}">
+                        <gxt:ListView ui:field="groupsList" store="{groupStore}" />
                     </gxt:ContentPanel>
                 </container:child>
                 <container:child layoutData="{boxLayoutDataMargins0Flex3}">

@@ -116,6 +116,10 @@ public class Group implements IsSerializable, GroupedDevice {
 
         Group that = (Group) o;
 
+        if (getId() > 0 && that.getId() > 0) {
+            return getId() == that.getId();
+        }
+
         if (getId() != that.getId()) return false;
         if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) return false;
         if (getParent() != null ? !getParent().equals(that.getParent()) : that.getParent() != null) return false;
@@ -124,8 +128,20 @@ public class Group implements IsSerializable, GroupedDevice {
     }
 
     public Group copyFrom(Group group) {
+        this.id = group.id;
         this.name = group.name;
         this.description = group.description;
         return this;
+    }
+
+    public boolean contains(Device device) {
+        Group deviceGroup = device.getGroup();
+        while (deviceGroup != null) {
+            if (equals(deviceGroup)) {
+                return true;
+            }
+            deviceGroup = deviceGroup.getParent();
+        }
+        return false;
     }
 }

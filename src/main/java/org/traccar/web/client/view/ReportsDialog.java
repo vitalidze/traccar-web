@@ -26,7 +26,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Widget;
+import com.sencha.gxt.cell.core.client.SimpleSafeHtmlCell;
 import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
+import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.Style;
 import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
@@ -48,6 +50,7 @@ import org.traccar.web.client.editor.DateTimeEditor;
 import org.traccar.web.client.editor.ListViewEditor;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.*;
+import org.traccar.web.client.renderer.GroupSafeHtmlRenderer;
 import org.traccar.web.client.widget.PeriodComboBox;
 import org.traccar.web.shared.model.*;
 
@@ -116,6 +119,14 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
     final ListViewEditor<GeoFence> geoFences;
 
     @UiField(provided = true)
+    final ListStore<Group> groupStore;
+
+    @UiField(provided = true)
+    final ListView<Group, Group> groupsList;
+
+    final ListViewEditor<Group> groups;
+
+    @UiField(provided = true)
     final PeriodComboBox period;
 
     @UiField
@@ -153,6 +164,7 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
     public ReportsDialog(ListStore<Report> reportStore,
                          ListStore<Device> deviceStore,
                          ListStore<GeoFence> geoFenceStore,
+                         GroupStore groupStore,
                          ReportHandler reportHandler) {
         ReportProperties reportProperties = GWT.create(ReportProperties.class);
 
@@ -171,6 +183,10 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
         GeoFenceProperties geoFenceProperties = GWT.create(GeoFenceProperties.class);
         this.geoFenceStore = geoFenceStore;
         this.geoFencesList = new ListView<>(geoFenceStore, geoFenceProperties.name());
+
+        this.groupStore = groupStore.toListStore();
+        this.groupsList = new ListView<>(this.groupStore, new IdentityValueProvider<Group>());
+        this.groupsList.setCell(new SimpleSafeHtmlCell<>(new GroupSafeHtmlRenderer(groupStore)));
 
         ListStore<ReportType> geoFenceTypeStore = new ListStore<>(
                 new EnumKeyProvider<ReportType>());
@@ -217,6 +233,7 @@ public class ReportsDialog implements Editor<Report>, ReportsController.ReportHa
         geoFencesPanel.setHeadingText(i18n.overlayType(UserSettings.OverlayType.GEO_FENCES));
         geoFences = new ListViewEditor<>(geoFencesList);
         devices = new ListViewEditor<>(devicesList);
+        groups = new ListViewEditor<>(groupsList);
         fromDate = new DateTimeEditor(fromDateField, fromTimeField);
         toDate = new DateTimeEditor(toDateField, toTimeField);
 

@@ -20,6 +20,7 @@ import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.ReportService;
 import org.traccar.web.shared.model.Device;
 import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.Group;
 import org.traccar.web.shared.model.Report;
 import org.traccar.web.shared.model.User;
 
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 @Singleton
 public class ReportServiceImpl extends RemoteServiceServlet implements ReportService {
@@ -69,6 +71,10 @@ public class ReportServiceImpl extends RemoteServiceServlet implements ReportSer
         for (GeoFence geoFence : report.getGeoFences()) {
             result.getGeoFences().add(new GeoFence().copyFrom(geoFence));
         }
+        result.setGroups(new HashSet<Group>(report.getGroups().size()));
+        for (Group group : report.getGroups()) {
+            result.getGroups().add(new Group().copyFrom(group));
+        }
         return result;
     }
 
@@ -80,6 +86,7 @@ public class ReportServiceImpl extends RemoteServiceServlet implements ReportSer
 
         toSave.setDevices(new HashSet<Device>(report.getDevices().size()));
         toSave.setGeoFences(new HashSet<GeoFence>(report.getGeoFences().size()));
+        toSave.setGroups(new HashSet<Group>(report.getGroups().size()));
         toSave.setUsers(new HashSet<User>(1));
         toSave.getUsers().add(sessionUser.get());
         processDevicesAndGeoFences(report, toSave);
@@ -127,6 +134,22 @@ public class ReportServiceImpl extends RemoteServiceServlet implements ReportSer
         }
         for (Iterator<GeoFence> it = toSave.getGeoFences().iterator(); it.hasNext(); ) {
             if (!report.getGeoFences().contains(it.next())) {
+                it.remove();
+            }
+        }
+
+        Set<Group> reportGroups = new HashSet<>(report.getGroups().size());
+        for (Group group : report.getGroups()) {
+            reportGroups.add(entityManager.get().find(Group.class, group.getId()));
+        }
+        for (Group group : reportGroups) {
+            if (!toSave.getGroups().contains(group)) {
+                toSave.getGroups().add(group);
+            }
+        }
+
+        for (Iterator<Group> it = toSave.getGroups().iterator(); it.hasNext(); ) {
+            if (!reportGroups.contains(it.next())) {
                 it.remove();
             }
         }

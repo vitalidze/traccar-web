@@ -26,6 +26,7 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.BaseAsyncCallback;
+import org.traccar.web.client.model.GroupStore;
 import org.traccar.web.client.model.ReportService;
 import org.traccar.web.client.model.ReportServiceAsync;
 import org.traccar.web.client.view.NavView;
@@ -43,6 +44,7 @@ public class ReportsController implements ContentController, ReportsMenu.ReportH
     private final ListStore<Report> reportStore;
     private final ListStore<Device> deviceStore;
     private final ListStore<GeoFence> geoFenceStore;
+    private final GroupStore groupStore;
 
     interface ReportMapper extends ObjectMapper<Report> {}
 
@@ -52,10 +54,11 @@ public class ReportsController implements ContentController, ReportsMenu.ReportH
         void reportRemoved(Report report);
     }
 
-    public ReportsController(ListStore<Report> reportStore, ListStore<Device> deviceStore, ListStore<GeoFence> geoFenceStore) {
+    public ReportsController(ListStore<Report> reportStore, ListStore<Device> deviceStore, ListStore<GeoFence> geoFenceStore, GroupStore groupStore) {
         this.reportStore = reportStore;
         this.deviceStore = deviceStore;
         this.geoFenceStore = geoFenceStore;
+        this.groupStore = groupStore;
     }
 
     @Override
@@ -95,7 +98,7 @@ public class ReportsController implements ContentController, ReportsMenu.ReportH
     @Override
     public ReportsDialog createDialog() {
         final ReportServiceAsync service = GWT.create(ReportService.class);
-        return new ReportsDialog(reportStore, deviceStore, geoFenceStore, new ReportsDialog.ReportHandler() {
+        return new ReportsDialog(reportStore, deviceStore, geoFenceStore, groupStore, new ReportsDialog.ReportHandler() {
             @Override
             public void onAdd(Report report, final ReportHandler handler) {
                 service.addReport(report, new BaseAsyncCallback<Report>(i18n) {

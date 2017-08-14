@@ -17,9 +17,6 @@ package org.traccar.web.client.view;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.text.shared.AbstractSafeHtmlRenderer;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sencha.gxt.data.shared.ListStore;
@@ -32,6 +29,7 @@ import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.GroupProperties;
 import org.traccar.web.client.model.GroupStore;
+import org.traccar.web.client.renderer.GroupSafeHtmlRenderer;
 import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
@@ -137,22 +135,13 @@ public class DeviceDialog implements Editor<Device> {
 
     final Device device;
 
-    public DeviceDialog(Device device, ListStore<Device> deviceStore, final GroupStore groupStore, DeviceHandler deviceHandler) {
+    public DeviceDialog(Device device, ListStore<Device> deviceStore, GroupStore groupStore, DeviceHandler deviceHandler) {
         this.device = device;
         this.deviceHandler = deviceHandler;
 
         GroupProperties groupProperties = GWT.create(GroupProperties.class);
 
-        this.group = new ComboBox<>(groupStore.toListStore(), groupProperties.label(), new AbstractSafeHtmlRenderer<Group>() {
-            @Override
-            public SafeHtml render(Group group) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                for (int i = 0; i < groupStore.getDepth(group); i++) {
-                    builder.appendHtmlConstant("&nbsp;&nbsp;&nbsp;");
-                }
-                return builder.appendEscaped(group.getName() == null ? "" : group.getName()).toSafeHtml();
-            }
-        });
+        this.group = new ComboBox<>(groupStore.toListStore(), groupProperties.label(), new GroupSafeHtmlRenderer(groupStore));
         this.group.setForceSelection(false);
 
         uiBinder.createAndBindUi(this);
