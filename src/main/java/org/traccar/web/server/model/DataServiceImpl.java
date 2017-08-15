@@ -642,6 +642,26 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
     }
 
+    
+    
+    @Transactional
+    @RequireUser
+    @Override
+    public Device loadSensors(Device device){
+        if(device.getSensors() == null)
+            device.setSensors(new ArrayList<Sensor>());
+        device.getSensors().clear();
+
+         LinkedList<Sensor> currentSensors = new LinkedList<>(getSessionEntityManager().createQuery("SELECT s FROM Sensor s WHERE s.device = :device", Sensor.class)
+                .setParameter("device", device)
+                .getResultList());
+
+        for (Sensor sensor : currentSensors) {
+            device.getSensors().add(sensor);
+        }
+        return device;        
+    }
+    
     @Transactional
     @RequireUser
     @RequireWrite

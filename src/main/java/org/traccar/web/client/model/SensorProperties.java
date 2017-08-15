@@ -30,4 +30,6 @@ public interface SensorProperties extends PropertyAccess<Sensor> {
     ValueProvider<Sensor, String> description();
 
     ValueProvider<Sensor, Boolean> visible();
+    
+    ValueProvider<Sensor, Boolean> onGraph();
 }

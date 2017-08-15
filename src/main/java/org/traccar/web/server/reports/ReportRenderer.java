@@ -68,6 +68,9 @@ public class ReportRenderer {
             line("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/ol3/3.11.1/ol.min.js\" type=\"text/javascript\"></script>");
         }
 
+        if(report.getType().suportsGraph())
+            line("\n<script src=\"http://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js\"></script>");
+        
         line("</head>").line("<body>").line("<div class=\"container\">");
     }
 
@@ -290,5 +293,9 @@ public class ReportRenderer {
     private ReportRenderer line(String html) {
         writer.println(html);
         return this;
+    }
+    
+    public void addGraph(){
+        line("ovo je grafik!!!");
     }
 }

@@ -53,6 +53,8 @@ public interface DataService extends RemoteService {
 
     Device updateDevice(Device device) throws TraccarException;
 
+    Device loadSensors(Device device);
+    
     Device removeDevice(Device device) throws AccessDeniedException;
 
     Map<User, Boolean> getDeviceShare(Device device);
@@ -86,4 +88,5 @@ public interface DataService extends RemoteService {
     void saveGeoFenceShare(GeoFence geoFence, Map<User, Boolean> share);
 
     String sendCommand(Command command) throws AccessDeniedException;
+
 }

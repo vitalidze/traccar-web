@@ -34,5 +34,7 @@ public class ReportsModule extends AbstractModule {
                 .addBinding(ReportType.EVENTS).to(ReportEV.class);
         MapBinder.newMapBinder(binder(), ReportType.class, ReportGenerator.class)
                 .addBinding(ReportType.MILEAGE_DETAIL).to(ReportMD.class);
+        MapBinder.newMapBinder(binder(), ReportType.class, ReportGenerator.class)
+            .addBinding(ReportType.GRAPH).to(ReportGraph.class);
     }
 }
