@@ -2,11 +2,9 @@ package org.traccar.web.client.model;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.traccar.web.shared.model.EventRule;
-import org.traccar.web.shared.model.Group;
 import org.traccar.web.shared.model.User;
 
 import java.util.List;
-import java.util.Map;
 
 public interface EventRuleServiceAsync {
     void getEventRules(User user, AsyncCallback<List<EventRule>> async);
@@ -16,5 +14,4 @@ public interface EventRuleServiceAsync {
     void updateEventRule(User user, EventRule eventRule, AsyncCallback<EventRule> async);
 
     void removeEventRule(EventRule eventRule, AsyncCallback<Void> async);
-
 }

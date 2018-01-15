@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
+ * Copyright 2018 Vitaly Litvak (vitavaque@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,14 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import org.traccar.web.shared.model.AccessDeniedException;
 import org.traccar.web.shared.model.EventRule;
-import org.traccar.web.shared.model.Group;
 import org.traccar.web.shared.model.User;
 
 import java.util.List;
-import java.util.Map;
 
 @RemoteServiceRelativePath("eventRuleService")
 public interface EventRuleService extends RemoteService {
-    List<EventRule> getEventRules(User user);
-    EventRule addEventRule(User user, EventRule eventRule);
+    List<EventRule> getEventRules(User user) throws AccessDeniedException;
+    EventRule addEventRule(User user, EventRule eventRule) throws AccessDeniedException;
     EventRule updateEventRule(User user, EventRule eventRule) throws AccessDeniedException;
     void removeEventRule(EventRule eventRule) throws AccessDeniedException;
-
 }

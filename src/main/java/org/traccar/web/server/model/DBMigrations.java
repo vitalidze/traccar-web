@@ -55,6 +55,7 @@ public class DBMigrations {
                 new SetDefaultDeviceIconModeAndRotation(),
                 new SetDefaultArrowIconSettings(),
                 new SetDefaultDeviceShowNameProtocolAndOdometer(),
+                new SetDefaultDeviceSendNotifications(),
                 new SetDefaultDeviceIconArrowRadius(),
                 new SetDefaultHashImplementation(),
                 new SetGlobalHashSalt(),
@@ -447,6 +448,15 @@ public class DBMigrations {
                         .setParameter("true", true)
                         .executeUpdate();
             }
+        }
+    }
+
+    static class SetDefaultDeviceSendNotifications implements Migration {
+        @Override
+        public void migrate(EntityManager em) throws Exception {
+            em.createQuery("UPDATE " + Device.class.getName() + " D SET D.sendNotifications=:true WHERE D.sendNotifications IS NULL")
+                .setParameter("true", true)
+                .executeUpdate();
         }
     }
 

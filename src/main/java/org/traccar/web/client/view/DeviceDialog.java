@@ -162,7 +162,9 @@ public class DeviceDialog implements Editor<Device> {
         if (device.getSpeedLimit() != null) {
             speedLimit.setValue(device.getSpeedLimit() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
         }
-        if (device.getId() == 0 || ApplicationContext.getInstance().getUser().getId() == device.getOwnerId()) {
+        if (device.getId() == 0
+                || ApplicationContext.getInstance().getUser().getId() == device.getOwnerId()
+                || ApplicationContext.getInstance().getUser().getAdmin()) {
             sendNotifications.setEnabled(true);
             sendNotificationsCont.setVisible(true);
         } else {

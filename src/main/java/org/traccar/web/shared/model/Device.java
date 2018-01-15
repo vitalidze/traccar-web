@@ -204,13 +204,13 @@ public class Device implements IsSerializable, GroupedDevice {
     }
 
     @Column(nullable = true)
-    private Boolean sendNotifications;
+    private boolean sendNotifications = true;
 
-    public Boolean getSendNotifications() {
+    public boolean isSendNotifications() {
         return sendNotifications;
     }
 
-    public void setSendNotifications(Boolean sendNotifications) {
+    public void setSendNotifications(boolean sendNotifications) {
         this.sendNotifications = sendNotifications;
     }
 

@@ -28,7 +28,6 @@ import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
-import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
 import com.sencha.gxt.widget.core.client.grid.*;
@@ -36,8 +35,6 @@ import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
 import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
 import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.client.ApplicationContext;
-import org.traccar.web.client.controller.DeviceController;
-import org.traccar.web.client.controller.GeoFenceController;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.*;
 import org.traccar.web.shared.model.*;
@@ -53,17 +50,14 @@ import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 
 import java.util.*;
-import java.util.logging.Logger;
+
 import com.google.gwt.regexp.shared.RegExp;
 
 public class UserDialog implements Editor<User> {
-
-    private static RegExp EVENT_RULE_TIME_FRAME_PATTERN = RegExp.compile("^(\\d{1,2}(:\\d{1,2})?[ap]m\\-\\d{1,2}(:\\d{1,2})?[ap]m,)+$");
-    private static RegExp EVENT_RULE_COURSE_PATTERN = RegExp.compile("^(\\d{1,3}\\-\\d{1,3},)+$");
+    private static RegExp EVENT_RULE_TIME_FRAME_PATTERN = RegExp.compile("^" + EventRule.TIME_FRAME_REGEX + "(," + EventRule.TIME_FRAME_REGEX + ")*$", "i");
+    private static RegExp EVENT_RULE_COURSE_PATTERN = RegExp.compile("^" + EventRule.COURSE_REGEX + "(," + EventRule.COURSE_REGEX +")*$");
 
     private static UserDialogUiBinder uiBinder = GWT.create(UserDialogUiBinder.class);
-    private final GeoFenceController geoFenceController;
-    private final DeviceController deviceController;
 
     interface UserDialogUiBinder extends UiBinder<Widget, UserDialog> {
     }
@@ -168,12 +162,9 @@ public class UserDialog implements Editor<User> {
 
     private EventRuleProperties eventRulesProperties = GWT.create(EventRuleProperties.class);
 
-    private Logger logger = Logger.getLogger(UserDialog.class.getName());
-
-    public UserDialog(final User user, GeoFenceController geoFenceController, DeviceController deviceController, UserHandler userHandler, EventRuleHandler eventRuleHandler) {
+    public UserDialog(final User user, UserHandler userHandler, EventRuleHandler eventRuleHandler,
+                      ListStore<GeoFence> geoFenceStore, ListStore<Device> deviceStore) {
         this.user = user;
-        this.geoFenceController = geoFenceController;
-        this.deviceController = deviceController;
         this.userHandler = userHandler;
         this.eventRuleHandler = eventRuleHandler;
         // notification types grid
@@ -206,7 +197,7 @@ public class UserDialog implements Editor<User> {
         List<ColumnConfig<EventRule, ?>> eventRulesColumnConfigList = new ArrayList<>();
 
         ColumnConfig<EventRule, Device> colDevice = new ColumnConfig<>(eventRulesProperties.device(), 120, i18n.eventRuleDevice());
-        ComboBoxCell<Device> cmbDeviceCell = new ComboBoxCell<Device>(deviceController.getDeviceStore(), new LabelProvider<Device>() {
+        ComboBoxCell<Device> cmbDeviceCell = new ComboBoxCell<Device>(deviceStore, new LabelProvider<Device>() {
             @Override
             public String getLabel(Device item) {
                 return item.getName();
@@ -223,13 +214,12 @@ public class UserDialog implements Editor<User> {
         eventRulesColumnConfigList.add(colDevice);
 
         ColumnConfig<EventRule, GeoFence> colGeoFence = new ColumnConfig<>(eventRulesProperties.geoFence(), 120, i18n.eventRuleGeoFence());
-        ComboBoxCell<GeoFence> cmbGeoFenceCell = new ComboBoxCell<GeoFence>(geoFenceController.getGeoFenceStore(), new LabelProvider<GeoFence>() {
+        ComboBoxCell<GeoFence> cmbGeoFenceCell = new ComboBoxCell<GeoFence>(geoFenceStore, new LabelProvider<GeoFence>() {
             @Override
             public String getLabel(GeoFence item) {
                 return item.getName();
             }
         });
-//        cmbCell.addSelectionHandler(selHandler);
         cmbGeoFenceCell.setWidth(100);
         cmbGeoFenceCell.setForceSelection(true);
         cmbGeoFenceCell.setAllowBlank(true);
@@ -249,7 +239,6 @@ public class UserDialog implements Editor<User> {
                 return i18n.deviceEventType(item);
             }
         });
-//        cmbCell.addSelectionHandler(selHandler);
         cmbDeviceEventType.setWidth(100);
         cmbDeviceEventType.setForceSelection(true);
         cmbDeviceEventType.setAllowBlank(false);
@@ -284,7 +273,6 @@ public class UserDialog implements Editor<User> {
         });
 
         eventRulesStore = new ListStore<>(eventRulesProperties.id());
-//        eventRulesStore.addAll(user.getEventRules());
         eventRuleHandler.onShowEventRules(eventRulesStore, user);
 
         uiBinder.createAndBindUi(this);
@@ -367,7 +355,6 @@ public class UserDialog implements Editor<User> {
             window.hide();
             User user = driver.flush();
             user.setTransferNotificationEvents(new HashSet<>(grid.getSelectionModel().getSelectedItems()));
-//            eventRuleHandler.onSave();
             userHandler.onSave(user, eventRulesStore);
         }
     }
@@ -385,17 +372,16 @@ public class UserDialog implements Editor<User> {
             for (Store.Change<EventRule, ?> change : record.getChanges()) {
                 change.modify(eventRule);
             }
-//            logger.warning("[getDevice():" + eventRule.getDevice() + "] [getGeoFence():" + eventRule.getGeoFence() + "] [getDeviceEventType():" + eventRule.getDeviceEventType() + "] ");
             if (eventRule.getDevice() == null || eventRule.getDeviceEventType() == null
                     || (eventRule.getGeoFence() == null && (eventRule.getDeviceEventType() == DeviceEventType.GEO_FENCE_ENTER || eventRule.getDeviceEventType() == DeviceEventType.GEO_FENCE_EXIT))) {
                 invalidEventRules.add(originalEventRule);
                 break;
             }
-            if (eventRule.getTimeFrame() != null && !EVENT_RULE_TIME_FRAME_PATTERN.test(eventRule.getTimeFrame().trim() + ",")) {
+            if (eventRule.getTimeFrame() != null && !EVENT_RULE_TIME_FRAME_PATTERN.test(eventRule.getTimeFrame().trim())) {
                 invalidEventRules.add(originalEventRule);
                 break;
             }
-            if (eventRule.getCourse() != null && !EVENT_RULE_COURSE_PATTERN.test(eventRule.getCourse().trim() + ",")) {
+            if (eventRule.getCourse() != null && !EVENT_RULE_COURSE_PATTERN.test(eventRule.getCourse().trim())) {
                 invalidEventRules.add(originalEventRule);
                 break;
             }

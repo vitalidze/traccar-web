@@ -87,7 +87,7 @@ public class Application {
                 reportStore,
                 reportsController,
                 this);
-        settingsController = new SettingsController(userSettingsHandler, new DefaultUserSettingsHandlerImpl(), geoFenceController, deviceController);
+        settingsController = new SettingsController(userSettingsHandler, new DefaultUserSettingsHandlerImpl(), geoFenceController.getGeoFenceStore(), deviceStore);
         groupsController = new GroupsController(groupStore, deviceController);
         importController = new ImportController(deviceController.getDeviceStore());
         logController = new LogController();

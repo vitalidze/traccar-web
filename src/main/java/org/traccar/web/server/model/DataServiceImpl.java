@@ -379,6 +379,7 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
         }
         entityManager.createQuery("DELETE FROM NotificationSettings s WHERE s.user=:user").setParameter("user", user).executeUpdate();
         entityManager.createQuery("UPDATE Device d SET d.owner=null WHERE d.owner=:user").setParameter("user", user).executeUpdate();
+        entityManager.createQuery("DELETE FROM EventRule s WHERE s.user=:user").setParameter("user", user).executeUpdate();
         for (Device device : user.getDevices()) {
             device.getUsers().remove(user);
         }
@@ -544,8 +545,11 @@ public class DataServiceImpl extends RemoteServiceServlet implements DataService
             tmp_device.setIdleSpeedThreshold(device.getIdleSpeedThreshold());
             tmp_device.setMinIdleTime(device.getMinIdleTime());
             tmp_device.setSpeedLimit(device.getSpeedLimit());
-            tmp_device.setSendNotifications(device.getSendNotifications());
-//            tmp_device.setOwnerId(device.getOwner() != null ? device.getOwner().getId() : device.getOwnerId());
+            if (Objects.equals(tmp_device.getOwner(), getSessionUser()) || getSessionUser().getAdmin()) {
+                tmp_device.setSendNotifications(device.isSendNotifications());
+            } else if (tmp_device.isSendNotifications() != device.isSendNotifications()) {
+                throw new AccessDeniedException();
+            }
             tmp_device.setOwnerId(device.getOwnerId());
             tmp_device.setIconType(device.getIconType());
             tmp_device.setIcon(device.getIcon() == null ? null : entityManager.find(DeviceIcon.class, device.getIcon().getId()));

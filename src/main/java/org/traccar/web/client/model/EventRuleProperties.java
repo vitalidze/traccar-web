@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
+ * Copyright 2018 Vitaly Litvak (vitavaque@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
  */
 package org.traccar.web.client.model;
 
-import com.google.gwt.core.client.GWT;
 import com.sencha.gxt.core.client.ValueProvider;
-import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
-import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.shared.model.*;
+import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.DeviceEventType;
+import org.traccar.web.shared.model.EventRule;
+import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.User;
 
 public interface EventRuleProperties extends PropertyAccess<EventRule> {
     ModelKeyProvider<EventRule> id();
@@ -36,8 +37,5 @@ public interface EventRuleProperties extends PropertyAccess<EventRule> {
 
     ValueProvider<EventRule, String> timeFrame();
 
-    ValueProvider<EventRule, Long> timeZoneShift();
-
     ValueProvider<EventRule, String> course();
-
 }

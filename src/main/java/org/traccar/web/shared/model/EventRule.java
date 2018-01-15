@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Vitaly Litvak (vitavaque@gmail.com)
+ * Copyright 2018 Vitaly Litvak (vitavaque@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import java.util.Date;
 @Entity
 @Table(name = "event_rules")
 public class EventRule implements IsSerializable {
+    public static final String TIME_REGEX = "((1[0-2]|\\d)(:[0-5]\\d)?[ap]m)";
+    public static final String TIME_FRAME_REGEX = TIME_REGEX + "\\-" + TIME_REGEX;
+    public static final String COURSE_REGEX = "(\\d{1,3})\\-(\\d{1,3})";
 
     public EventRule() {
     }
@@ -113,16 +116,6 @@ public class EventRule implements IsSerializable {
         this.timeFrame = timeFrame;
     }
 
-    private Long timeZoneShift;
-
-    public Long getTimeZoneShift() {
-        return timeZoneShift;
-    }
-
-    public void setTimeZoneShift(Long timeZoneShift) {
-        this.timeZoneShift = timeZoneShift;
-    }
-
     private String course;
 
     public String getCourse() {
@@ -143,7 +136,6 @@ public class EventRule implements IsSerializable {
 //        geoFence = eventRules.geoFence;
         deviceEventType = eventRules.deviceEventType;
         timeFrame = eventRules.timeFrame;
-        timeZoneShift = eventRules.timeZoneShift;
         course = eventRules.course;
         return this;
     }
@@ -152,7 +144,6 @@ public class EventRule implements IsSerializable {
         id = eventRules.id;
         deviceEventType = eventRules.deviceEventType;
         timeFrame = eventRules.timeFrame;
-        timeZoneShift = eventRules.timeZoneShift;
         course = eventRules.course;
         return this;
     }
