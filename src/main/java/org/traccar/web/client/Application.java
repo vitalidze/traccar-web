@@ -69,7 +69,6 @@ public class Application {
         ReportProperties reportProperties = GWT.create(ReportProperties.class);
         final ListStore<Report> reportStore = new ListStore<>(reportProperties.id());
 
-        settingsController = new SettingsController(userSettingsHandler, new DefaultUserSettingsHandlerImpl());
         visibilityController = new VisibilityController();
         mapController = new MapController(mapHandler, deviceStore, visibilityController);
         geoFenceController = new GeoFenceController(deviceStore, mapController);
@@ -88,6 +87,7 @@ public class Application {
                 reportStore,
                 reportsController,
                 this);
+        settingsController = new SettingsController(userSettingsHandler, new DefaultUserSettingsHandlerImpl(), geoFenceController, deviceController);
         groupsController = new GroupsController(groupStore, deviceController);
         importController = new ImportController(deviceController.getDeviceStore());
         logController = new LogController();

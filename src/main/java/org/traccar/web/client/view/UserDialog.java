@@ -15,18 +15,32 @@
  */
 package org.traccar.web.client.view;
 
+import com.google.gwt.user.client.Random;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.sencha.gxt.cell.core.client.form.ComboBoxCell;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.ToStringValueProvider;
+import com.sencha.gxt.data.shared.LabelProvider;
 import com.sencha.gxt.data.shared.ListStore;
+import com.sencha.gxt.data.shared.Store;
+import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
+import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.box.AlertMessageBox;
 import com.sencha.gxt.widget.core.client.form.*;
 import com.sencha.gxt.widget.core.client.form.validator.RegExValidator;
 import com.sencha.gxt.widget.core.client.grid.*;
+import com.sencha.gxt.widget.core.client.grid.editing.GridEditing;
+import com.sencha.gxt.widget.core.client.grid.editing.GridInlineEditing;
+import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.client.ApplicationContext;
+import org.traccar.web.client.controller.DeviceController;
+import org.traccar.web.client.controller.GeoFenceController;
 import org.traccar.web.client.i18n.Messages;
-import org.traccar.web.client.model.EnumKeyProvider;
-import org.traccar.web.shared.model.DeviceEventType;
-import org.traccar.web.shared.model.User;
+import org.traccar.web.client.model.*;
+import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -38,14 +52,18 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.Window;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Logger;
+import com.google.gwt.regexp.shared.RegExp;
 
 public class UserDialog implements Editor<User> {
 
+    private static RegExp EVENT_RULE_TIME_FRAME_PATTERN = RegExp.compile("^(\\d{1,2}(:\\d{1,2})?[ap]m\\-\\d{1,2}(:\\d{1,2})?[ap]m,)+$");
+    private static RegExp EVENT_RULE_COURSE_PATTERN = RegExp.compile("^(\\d{1,3}\\-\\d{1,3},)+$");
+
     private static UserDialogUiBinder uiBinder = GWT.create(UserDialogUiBinder.class);
+    private final GeoFenceController geoFenceController;
+    private final DeviceController deviceController;
 
     interface UserDialogUiBinder extends UiBinder<Widget, UserDialog> {
     }
@@ -56,10 +74,20 @@ public class UserDialog implements Editor<User> {
     }
 
     public interface UserHandler {
-        void onSave(User user);
+        void onSave(User user, ListStore<EventRule> eventRulesStore);
     }
 
     private UserHandler userHandler;
+
+    public interface EventRuleHandler {
+        void onShowEventRules(ListStore<EventRule> eventRulesStore, User user);
+        void onSave(ListStore<EventRule> eventRulesStore, User user);
+        void onRemove(ListStore<EventRule> eventRulesStore, EventRule eventRule);
+    }
+
+    private User user;
+
+    private EventRuleHandler eventRuleHandler;
 
     @UiField
     Window window;
@@ -115,11 +143,39 @@ public class UserDialog implements Editor<User> {
     @UiField(provided = true)
     ListStore<DeviceEventType> notificationEventStore;
 
+    @UiField
+    @Editor.Ignore
+    TextButton addButton;
+
+    @UiField
+    @Editor.Ignore
+    TextButton removeButton;
+
+    @UiField
+    Grid<EventRule> eventRulesGrid;
+
+    @UiField(provided = true)
+    GridView<EventRule> eventRulesView;
+
+    @UiField(provided = true)
+    ColumnModel<EventRule> eventRulesColumnModel;
+
+    @UiField(provided = true)
+    ListStore<EventRule> eventRulesStore;
+
     @UiField(provided = true)
     Messages i18n = GWT.create(Messages.class);
 
-    public UserDialog(User user, UserHandler userHandler) {
+    private EventRuleProperties eventRulesProperties = GWT.create(EventRuleProperties.class);
+
+    private Logger logger = Logger.getLogger(UserDialog.class.getName());
+
+    public UserDialog(final User user, GeoFenceController geoFenceController, DeviceController deviceController, UserHandler userHandler, EventRuleHandler eventRuleHandler) {
+        this.user = user;
+        this.geoFenceController = geoFenceController;
+        this.deviceController = deviceController;
         this.userHandler = userHandler;
+        this.eventRuleHandler = eventRuleHandler;
         // notification types grid
         IdentityValueProvider<DeviceEventType> identity = new IdentityValueProvider<>();
         final CheckBoxSelectionModel<DeviceEventType> selectionModel = new CheckBoxSelectionModel<>(identity);
@@ -143,6 +199,94 @@ public class UserDialog implements Editor<User> {
         notificationEventStore = new ListStore<>(new EnumKeyProvider<DeviceEventType>());
         notificationEventStore.addAll(Arrays.asList(DeviceEventType.values()));
 
+        // event rules grid
+        IdentityValueProvider<EventRule> eventRulesIdentity = new IdentityValueProvider<>();
+        final CheckBoxSelectionModel<EventRule> eventRulesSelectionModel = new CheckBoxSelectionModel<>(eventRulesIdentity);
+
+        List<ColumnConfig<EventRule, ?>> eventRulesColumnConfigList = new ArrayList<>();
+
+        ColumnConfig<EventRule, Device> colDevice = new ColumnConfig<>(eventRulesProperties.device(), 120, i18n.eventRuleDevice());
+        ComboBoxCell<Device> cmbDeviceCell = new ComboBoxCell<Device>(deviceController.getDeviceStore(), new LabelProvider<Device>() {
+            @Override
+            public String getLabel(Device item) {
+                return item.getName();
+            }
+        });
+//        cmbCell.addSelectionHandler(selHandler);
+        cmbDeviceCell.setWidth(100);
+        cmbDeviceCell.setForceSelection(true);
+        cmbDeviceCell.setAllowBlank(false);
+        cmbDeviceCell.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+        colDevice.setFixed(true);
+        colDevice.setResizable(false);
+        colDevice.setCell(cmbDeviceCell);
+        eventRulesColumnConfigList.add(colDevice);
+
+        ColumnConfig<EventRule, GeoFence> colGeoFence = new ColumnConfig<>(eventRulesProperties.geoFence(), 120, i18n.eventRuleGeoFence());
+        ComboBoxCell<GeoFence> cmbGeoFenceCell = new ComboBoxCell<GeoFence>(geoFenceController.getGeoFenceStore(), new LabelProvider<GeoFence>() {
+            @Override
+            public String getLabel(GeoFence item) {
+                return item.getName();
+            }
+        });
+//        cmbCell.addSelectionHandler(selHandler);
+        cmbGeoFenceCell.setWidth(100);
+        cmbGeoFenceCell.setForceSelection(true);
+        cmbGeoFenceCell.setAllowBlank(true);
+        cmbGeoFenceCell.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+        colGeoFence.setFixed(true);
+        colGeoFence.setResizable(false);
+        colGeoFence.setCell(cmbGeoFenceCell);
+        eventRulesColumnConfigList.add(colGeoFence);
+
+        ListStore<DeviceEventType> deviceEventTypeStore = new ListStore<>(new EnumKeyProvider<DeviceEventType>());
+        deviceEventTypeStore.addAll(Arrays.asList(DeviceEventType.values()));
+
+        ColumnConfig<EventRule, DeviceEventType> colDeviceEventType = new ColumnConfig<>(eventRulesProperties.deviceEventType(), 120, i18n.eventRuleEvent());
+        ComboBoxCell<DeviceEventType> cmbDeviceEventType = new ComboBoxCell<DeviceEventType>(deviceEventTypeStore, new LabelProvider<DeviceEventType>() {
+            @Override
+            public String getLabel(DeviceEventType item) {
+                return i18n.deviceEventType(item);
+            }
+        });
+//        cmbCell.addSelectionHandler(selHandler);
+        cmbDeviceEventType.setWidth(100);
+        cmbDeviceEventType.setForceSelection(true);
+        cmbDeviceEventType.setAllowBlank(false);
+        cmbDeviceEventType.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+        colDeviceEventType.setFixed(true);
+        colDeviceEventType.setResizable(false);
+        colDeviceEventType.setCell(cmbDeviceEventType);
+        eventRulesColumnConfigList.add(colDeviceEventType);
+
+        ColumnConfig<EventRule, String> colTimeFrame = new ColumnConfig<>(eventRulesProperties.timeFrame(), 170, i18n.timeFrame());
+        colTimeFrame.setFixed(true);
+        colTimeFrame.setResizable(false);
+        colTimeFrame.setToolTip(SafeHtmlUtils.fromTrustedString("<div qtip=\"8pm-9:30pm,10pm-11pm\">8pm-9:30pm,10pm-11pm</div>"));
+        eventRulesColumnConfigList.add(colTimeFrame);
+
+        ColumnConfig<EventRule, String> colCourse = new ColumnConfig<>(eventRulesProperties.course(), 170, i18n.course());
+        colCourse.setFixed(true);
+        colCourse.setResizable(false);
+        colCourse.setToolTip(SafeHtmlUtils.fromTrustedString("<div qtip=\"30-110,116-300\">30-110,116-300</div>"));
+        eventRulesColumnConfigList.add(colCourse);
+
+        eventRulesColumnModel = new ColumnModel<>(eventRulesColumnConfigList);
+
+        eventRulesView = new GridView<>();
+        eventRulesView.setAutoFill(true);
+        eventRulesView.setStripeRows(true);
+        eventRulesSelectionModel.addSelectionChangedHandler(new SelectionChangedEvent.SelectionChangedHandler<EventRule>() {
+            @Override
+            public void onSelectionChanged(SelectionChangedEvent<EventRule> event) {
+                removeButton.setEnabled(!event.getSelection().isEmpty());
+            }
+        });
+
+        eventRulesStore = new ListStore<>(eventRulesProperties.id());
+//        eventRulesStore.addAll(user.getEventRules());
+        eventRuleHandler.onShowEventRules(eventRulesStore, user);
+
         uiBinder.createAndBindUi(this);
 
         grid.setSelectionModel(selectionModel);
@@ -151,6 +295,16 @@ public class UserDialog implements Editor<User> {
         for (DeviceEventType deviceEventType : user.getTransferNotificationEvents()) {
             grid.getSelectionModel().select(deviceEventType, true);
         }
+
+        eventRulesGrid.setSelectionModel(eventRulesSelectionModel);
+        eventRulesGrid.getView().setForceFit(true);
+        eventRulesGrid.getView().setAutoFill(true);
+
+        GridEditing<EventRule> editing = new GridInlineEditing<EventRule>(eventRulesGrid);
+        editing.addEditor(colTimeFrame, new TextField());
+        editing.addEditor(colCourse, new TextField());
+
+
 
         User currentUser = ApplicationContext.getInstance().getUser();
         if (currentUser.getAdmin() || currentUser.getManager()) {
@@ -181,13 +335,40 @@ public class UserDialog implements Editor<User> {
         window.hide();
     }
 
+    @UiHandler("addButton")
+    public void onAddClicked(SelectEvent event) {
+        // , "8pm-9:30pm,10pm-11pm", "30-110,116-300"
+        EventRule newEventRule = new EventRule(user);
+        Integer id = Random.nextInt();
+        if (id > 0) id = -id;
+        newEventRule.setId(id);
+        eventRulesStore.add(newEventRule);
+        eventRulesStore.getRecord(newEventRule);
+    }
+
+    @UiHandler("removeButton")
+    public void onRemoveClicked(SelectEvent event) {
+        ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmEventRuleRemoval());
+        final EventRule eventRule = eventRulesGrid.getSelectionModel().getSelectedItem();
+        dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+            @Override
+            public void onDialogHide(DialogHideEvent event) {
+                if (event.getHideButton() == Dialog.PredefinedButton.YES) {
+                    eventRuleHandler.onRemove(eventRulesStore, eventRule);
+                }
+            }
+        });
+        dialog.show();
+    }
+
     @UiHandler("saveButton")
     public void onSaveClicked(SelectEvent event) {
         if (validate()) {
             window.hide();
             User user = driver.flush();
             user.setTransferNotificationEvents(new HashSet<>(grid.getSelectionModel().getSelectedItems()));
-            userHandler.onSave(user);
+//            eventRuleHandler.onSave();
+            userHandler.onSave(user, eventRulesStore);
         }
     }
 
@@ -197,6 +378,35 @@ public class UserDialog implements Editor<User> {
     }
 
     private boolean validate() {
+        List<EventRule> invalidEventRules = new LinkedList<EventRule>();
+        for (Store<EventRule>.Record record : eventRulesStore.getModifiedRecords()) {
+            final EventRule originalEventRule = record.getModel();
+            EventRule eventRule = new EventRule().copyFromClient(originalEventRule);
+            for (Store.Change<EventRule, ?> change : record.getChanges()) {
+                change.modify(eventRule);
+            }
+//            logger.warning("[getDevice():" + eventRule.getDevice() + "] [getGeoFence():" + eventRule.getGeoFence() + "] [getDeviceEventType():" + eventRule.getDeviceEventType() + "] ");
+            if (eventRule.getDevice() == null || eventRule.getDeviceEventType() == null
+                    || (eventRule.getGeoFence() == null && (eventRule.getDeviceEventType() == DeviceEventType.GEO_FENCE_ENTER || eventRule.getDeviceEventType() == DeviceEventType.GEO_FENCE_EXIT))) {
+                invalidEventRules.add(originalEventRule);
+                break;
+            }
+            if (eventRule.getTimeFrame() != null && !EVENT_RULE_TIME_FRAME_PATTERN.test(eventRule.getTimeFrame().trim() + ",")) {
+                invalidEventRules.add(originalEventRule);
+                break;
+            }
+            if (eventRule.getCourse() != null && !EVENT_RULE_COURSE_PATTERN.test(eventRule.getCourse().trim() + ",")) {
+                invalidEventRules.add(originalEventRule);
+                break;
+            }
+        }
+        if (!invalidEventRules.isEmpty()) {
+            eventRulesGrid.getSelectionModel().select(invalidEventRules, true);
+            AlertMessageBox dialog = new AlertMessageBox(i18n.close(), i18n.alertEventRuleInvalid());
+            dialog.show();
+            return false;
+        }
+
         String login = this.login.getCurrentValue();
         String password = this.password.getCurrentValue();
         if (login == null || login.isEmpty() || password == null || password.isEmpty()) {

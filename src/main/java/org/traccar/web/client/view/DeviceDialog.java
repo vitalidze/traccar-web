@@ -104,6 +104,12 @@ public class DeviceDialog implements Editor<Device> {
     NumberField<Double> speedLimit;
 
     @UiField
+    VerticalLayoutContainer sendNotificationsCont;
+
+    @UiField
+    CheckBox sendNotifications;
+
+    @UiField
     CheckBox showProtocol;
 
     @UiField
@@ -155,6 +161,13 @@ public class DeviceDialog implements Editor<Device> {
         idleSpeedThreshold.setValue(device.getIdleSpeedThreshold() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
         if (device.getSpeedLimit() != null) {
             speedLimit.setValue(device.getSpeedLimit() * ApplicationContext.getInstance().getUserSettings().getSpeedUnit().getFactor());
+        }
+        if (device.getId() == 0 || ApplicationContext.getInstance().getUser().getId() == device.getOwnerId()) {
+            sendNotifications.setEnabled(true);
+            sendNotificationsCont.setVisible(true);
+        } else {
+            sendNotifications.setEnabled(false);
+            sendNotificationsCont.setVisible(false);
         }
 
         updatePhoto();

@@ -126,6 +126,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
 
     String confirmDeviceRemoval();
 
+    String confirmDeviceRemovalWithExistingEventRules();
+
     String errRemoteCall();
 
     String recordTrace();
@@ -260,6 +262,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
 
     String geoFence();
 
+    String timeFrame();
+
     String type();
 
     String width();
@@ -271,6 +275,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String errGeoFenceIsEmpty();
 
     String confirmGeoFenceRemoval();
+
+    String confirmGeoFenceRemovalWithExistingEventRules();
 
     String newGeoFence();
 
@@ -449,6 +455,8 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
 
     String speedLimit();
 
+    String sendNotifications();
+
     String status();
 
     String start();
@@ -560,4 +568,18 @@ public interface Messages extends com.google.gwt.i18n.client.Messages {
     String defaultPreferences();
 
     String matchServiceType();
+
+    String eventRuleDevice();
+
+    String eventRuleGeoFence();
+
+    String eventRuleEvent();
+
+    String eventRules();
+
+    String eventRulesCourse();
+
+    String confirmEventRuleRemoval();
+
+    String alertEventRuleInvalid();
 }

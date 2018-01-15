@@ -185,6 +185,19 @@ public class User implements IsSerializable, Cloneable {
     }
 
     @GwtTransient
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<EventRule> eventRules = new HashSet<>();
+
+    public void setEventRules(Set<EventRule> eventRules) {
+        this.eventRules = eventRules;
+    }
+
+    public Set<EventRule> getEventRules() {
+        return eventRules;
+    }
+
+    @GwtTransient
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_geofences",
             foreignKey = @ForeignKey(name = "users_geofences_fkey_user_id"),

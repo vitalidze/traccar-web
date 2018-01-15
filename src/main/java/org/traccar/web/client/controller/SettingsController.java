@@ -16,6 +16,7 @@
 package org.traccar.web.client.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -42,28 +43,37 @@ public class SettingsController implements NavView.SettingsHandler {
     private Messages i18n = GWT.create(Messages.class);
     private final UserSettingsDialog.UserSettingsHandler userSettingsHandler;
     private final UserSettingsDialog.UserSettingsHandler defaultUserSettingsHandler;
+    private final GeoFenceController geoFenceController;
+    private final DeviceController deviceController;
+    private final UserDialog.EventRuleHandler eventRuleHandler;
 
     public SettingsController(UserSettingsDialog.UserSettingsHandler userSettingsHandler,
-                              UserSettingsDialog.UserSettingsHandler defaultUserSettingsHandler) {
+                              UserSettingsDialog.UserSettingsHandler defaultUserSettingsHandler,
+                              GeoFenceController geoFenceController,
+                              DeviceController deviceController) {
         this.userSettingsHandler = userSettingsHandler;
         this.defaultUserSettingsHandler = defaultUserSettingsHandler;
+        this.geoFenceController = geoFenceController;
+        this.deviceController = deviceController;
+        eventRuleHandler = new EventRuleHandlerImpl();
     }
 
     @Override
     public void onAccountSelected() {
         new UserDialog(
-                ApplicationContext.getInstance().getUser(),
+                ApplicationContext.getInstance().getUser(), geoFenceController, deviceController,
                 new UserDialog.UserHandler() {
                     @Override
-                    public void onSave(User user) {
+                    public void onSave(final User user, final ListStore<EventRule> eventRulesStore) {
                         Application.getDataService().updateUser(user, new BaseAsyncCallback<User>(i18n) {
                             @Override
                             public void onSuccess(User result) {
                                 ApplicationContext.getInstance().setUser(result);
+                                eventRuleHandler.onSave(eventRulesStore, result);
                             }
                         });
                     }
-                }).show();
+        }, eventRuleHandler).show();
     }
 
     @Override
@@ -86,12 +96,14 @@ public class SettingsController implements NavView.SettingsHandler {
                     public void onAdd() {
                         class AddHandler implements UserDialog.UserHandler {
                             @Override
-                            public void onSave(final User user) {
+                            public void onSave(final User user, final ListStore<EventRule> eventRulesStore) {
                                 Application.getDataService().addUser(user, new BaseAsyncCallback<User>(i18n) {
                                     @Override
                                     public void onSuccess(User result) {
                                         userStore.add(result);
+                                        eventRuleHandler.onSave(eventRulesStore, result);
                                     }
+
                                     @Override
                                     public void onFailure(Throwable caught) {
                                         AlertMessageBox msg;
@@ -104,7 +116,7 @@ public class SettingsController implements NavView.SettingsHandler {
                                         msg.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
                                             @Override
                                             public void onDialogHide(DialogHideEvent event) {
-                                                new UserDialog(user, AddHandler.this).show();
+                                                new UserDialog(user, geoFenceController, deviceController, AddHandler.this, eventRuleHandler).show();
                                             }
                                         });
                                         msg.show();
@@ -113,25 +125,25 @@ public class SettingsController implements NavView.SettingsHandler {
                             }
                         }
 
-                        new UserDialog(new User(), new AddHandler()).show();
+                        new UserDialog(new User(), geoFenceController, deviceController, new AddHandler(), eventRuleHandler).show();
                     }
 
                     @Override
                     public void onRemove(final User user) {
                         final ConfirmMessageBox dialog = new ConfirmMessageBox(i18n.confirm(), i18n.confirmUserRemoval());
                         dialog.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
-							@Override
-							public void onDialogHide(DialogHideEvent event) {
-								if (event.getHideButton() == PredefinedButton.YES) {
+                            @Override
+                            public void onDialogHide(DialogHideEvent event) {
+                                if (event.getHideButton() == PredefinedButton.YES) {
                                     Application.getDataService().removeUser(user, new BaseAsyncCallback<User>(i18n) {
                                         @Override
                                         public void onSuccess(User result) {
                                             userStore.remove(user);
                                         }
                                     });
-								}
-							}
-						});
+                                }
+                            }
+                        });
                         dialog.show();
                     }
 
@@ -156,7 +168,8 @@ public class SettingsController implements NavView.SettingsHandler {
 
                     @Override
                     public void onChangePassword(final User user) {
-                        final AbstractInputMessageBox passwordInput = new AbstractInputMessageBox(new PasswordField(), i18n.changePassword(), i18n.enterNewPassword(user.getLogin())) {};
+                        final AbstractInputMessageBox passwordInput = new AbstractInputMessageBox(new PasswordField(), i18n.changePassword(), i18n.enterNewPassword(user.getLogin())) {
+                        };
                         passwordInput.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
                             @Override
                             public void onDialogHide(DialogHideEvent event) {
@@ -273,5 +286,57 @@ public class SettingsController implements NavView.SettingsHandler {
                 new UserSettingsDialog(result, defaultUserSettingsHandler).show();
             }
         });
+    }
+
+    public static class EventRuleHandlerImpl implements UserDialog.EventRuleHandler {
+        final EventRuleServiceAsync service = GWT.create(EventRuleService.class);
+        private Messages i18n = GWT.create(Messages.class);
+        @Override
+        public void onShowEventRules(final ListStore<EventRule> eventRulesStore,User user) {
+            final EventRuleServiceAsync service = GWT.create(EventRuleService.class);
+            service.getEventRules(user, new BaseAsyncCallback<List<EventRule>>(i18n) {
+                @Override
+                public void onSuccess(List<EventRule> result) {
+                    eventRulesStore.replaceAll(result);
+                }
+            });
+        }
+        @Override
+        public void onSave(final ListStore<EventRule> eventRulesStore, User user) {
+            for (Store<EventRule>.Record record : eventRulesStore.getModifiedRecords()) {
+                final EventRule originalEventRule = record.getModel();
+                EventRule eventRule = new EventRule().copyFromClient(originalEventRule);
+                for (Store.Change<EventRule, ?> change : record.getChanges()) {
+                    change.modify(eventRule);
+                }
+                eventRule.setTimeZoneShift((long) new Date().getTimezoneOffset()*60*1000);
+                if (eventRule.getId() <= 0) {
+                    eventRule.setId(0);
+                    service.addEventRule(user, eventRule, new BaseAsyncCallback<EventRule>(i18n) {
+                        @Override
+                        public void onSuccess(EventRule result) {
+                            eventRulesStore.remove(originalEventRule);
+                            eventRulesStore.add(result);
+                        }
+                    });
+                } else {
+                    service.updateEventRule(user, eventRule, new BaseAsyncCallback<EventRule>(i18n) {
+                        @Override
+                        public void onSuccess(EventRule result) {
+                            eventRulesStore.update(result);
+                        }
+                    });
+                }
+            }
+        }
+        @Override
+        public void onRemove(final ListStore<EventRule> eventRulesStore, final EventRule eventRule) {
+            service.removeEventRule(eventRule, new BaseAsyncCallback<Void>(i18n) {
+                @Override
+                public void onSuccess(Void result) {
+                    eventRulesStore.remove(eventRule);
+                }
+            });
+        }
     }
 }

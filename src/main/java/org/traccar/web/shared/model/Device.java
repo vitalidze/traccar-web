@@ -68,6 +68,10 @@ public class Device implements IsSerializable, GroupedDevice {
         idleSpeedThreshold = device.idleSpeedThreshold;
         minIdleTime = device.minIdleTime;
         speedLimit = device.speedLimit;
+        sendNotifications = device.sendNotifications;
+        if (device.ownerId != 0) {
+            ownerId = device.ownerId;
+        }
         iconType = device.iconType;
         icon = device.getIcon();
         photo = device.getPhoto();
@@ -199,6 +203,17 @@ public class Device implements IsSerializable, GroupedDevice {
         this.speedLimit = speedLimit;
     }
 
+    @Column(nullable = true)
+    private Boolean sendNotifications;
+
+    public Boolean getSendNotifications() {
+        return sendNotifications;
+    }
+
+    public void setSendNotifications(Boolean sendNotifications) {
+        this.sendNotifications = sendNotifications;
+    }
+
     // Hibernate bug HHH-8783: (http://hibernate.atlassian.net/browse/HHH-8783)
     //     ForeignKey(name) has no effect in JoinTable (and others).  It is
     //     reported as closed but the comments indicate it is still not fixed
@@ -233,6 +248,22 @@ public class Device implements IsSerializable, GroupedDevice {
 
     public void setOwner(User owner) {
         this.owner = owner;
+        if (owner != null) {
+            this.ownerId = owner.getId();
+        } else {
+            this.ownerId = 0;
+        }
+    }
+
+    @Transient
+    private long ownerId;
+
+    public long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(long ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Enumerated(EnumType.STRING)

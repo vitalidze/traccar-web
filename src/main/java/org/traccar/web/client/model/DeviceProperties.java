@@ -54,4 +54,9 @@ public interface DeviceProperties extends PropertyAccess<Device> {
     ValueProvider<Device, Double> odometer();
 
     ValueProvider<Device, Boolean> autoUpdateOdometer();
+
+    ValueProvider<Device, Boolean> sendNotifications();
+
+    ValueProvider<Device, Long> ownerId();
+
 }
