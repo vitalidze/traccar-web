@@ -18,14 +18,19 @@ package org.traccar.web.server.model;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.inject.persist.Transactional;
 import org.traccar.web.client.model.EventRuleService;
-import org.traccar.web.shared.model.*;
+import org.traccar.web.shared.model.AccessDeniedException;
+import org.traccar.web.shared.model.Device;
+import org.traccar.web.shared.model.EventRule;
+import org.traccar.web.shared.model.GeoFence;
+import org.traccar.web.shared.model.User;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Singleton
 public class EventRuleServiceImpl extends RemoteServiceServlet implements EventRuleService {
@@ -34,9 +39,6 @@ public class EventRuleServiceImpl extends RemoteServiceServlet implements EventR
 
     @Inject
     private Provider<User> sessionUser;
-
-    @Inject
-    private Logger logger;
 
     void checkAccess(User user) throws AccessDeniedException {
         if (user == null) {
@@ -70,12 +72,6 @@ public class EventRuleServiceImpl extends RemoteServiceServlet implements EventR
     @Override
     public EventRule addEventRule(User originalUser, EventRule eventRule) throws AccessDeniedException {
         EventRule toSave = new EventRule().copyFromServer(eventRule);
-        logger.info("EventRuleServiceImpl.addEventRule() id:" + eventRule.getId());
-        logger.info("EventRuleServiceImpl.addEventRule() course:" + eventRule.getCourse());
-        logger.info("EventRuleServiceImpl.addEventRule() TimeFrame:" + eventRule.getTimeFrame());
-        logger.info("EventRuleServiceImpl.addEventRule() DeviceEventType:" + eventRule.getDeviceEventType());
-        logger.info("EventRuleServiceImpl.addEventRule() originalUser:" + originalUser);
-        logger.info("EventRuleServiceImpl.addEventRule() originalUser.id:" + (originalUser != null ? originalUser.getId() : "ISNULL"));
         User user = entityManager.get().find(User.class, originalUser.getId());
         checkAccess(user);
         Device device = eventRule.getDevice() == null ? null : entityManager.get().find(Device.class, eventRule.getDevice().getId());
@@ -87,12 +83,6 @@ public class EventRuleServiceImpl extends RemoteServiceServlet implements EventR
         user.getEventRules().add(toSave);
         entityManager.get().persist(toSave);
 
-        user.getDevices().add(toSave.getDevice());
-        if (toSave.getGeoFence() != null) {
-            user.getGeoFences().add(toSave.getGeoFence());
-        }
-        entityManager.get().persist(user);
-
         return toSave;
     }
 
@@ -101,11 +91,6 @@ public class EventRuleServiceImpl extends RemoteServiceServlet implements EventR
     @RequireWrite
     @Override
     public EventRule updateEventRule(User originalUser, EventRule eventRule) throws AccessDeniedException {
-        logger.info("EventRuleServiceImpl.updateEventRule() id:" + eventRule.getId());
-        logger.info("EventRuleServiceImpl.updateEventRule() course:" + eventRule.getCourse());
-        logger.info("EventRuleServiceImpl.updateEventRule() TimeFrame:" + eventRule.getTimeFrame());
-        logger.info("EventRuleServiceImpl.updateEventRule() DeviceEventType:" + eventRule.getDeviceEventType());
-        logger.info("EventRuleServiceImpl.updateEventRule() id:" + eventRule.getId());
         EventRule toSave = entityManager.get().find(EventRule.class, eventRule.getId());
         User user = entityManager.get().find(User.class, originalUser.getId());
         Device device = eventRule.getDevice() == null ? null : entityManager.get().find(Device.class, eventRule.getDevice().getId());
@@ -117,10 +102,6 @@ public class EventRuleServiceImpl extends RemoteServiceServlet implements EventR
         toSave.setDevice(device);
         toSave.setGeoFence(geoFence);
 
-        user.getDevices().add(toSave.getDevice());
-        user.getGeoFences().add(toSave.getGeoFence());
-        entityManager.get().persist(user);
-
         return toSave;
     }
 
@@ -129,7 +110,6 @@ public class EventRuleServiceImpl extends RemoteServiceServlet implements EventR
     @RequireWrite
     @Override
     public void removeEventRule(EventRule eventRule) throws AccessDeniedException {
-        logger.info("EventRuleServiceImpl.removeEventRule() id:" + eventRule.getId());
         checkAccess(eventRule.getUser());
         EventRule toRemove = entityManager.get().find(EventRule.class, eventRule.getId());
         entityManager.get().remove(toRemove);

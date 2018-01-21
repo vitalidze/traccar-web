@@ -37,5 +37,7 @@ public interface EventRuleProperties extends PropertyAccess<EventRule> {
 
     ValueProvider<EventRule, String> timeFrame();
 
+    ValueProvider<EventRule, String> dayOfWeek();
+
     ValueProvider<EventRule, String> course();
 }

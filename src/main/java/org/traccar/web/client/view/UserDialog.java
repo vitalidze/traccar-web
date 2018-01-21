@@ -54,8 +54,9 @@ import java.util.*;
 import com.google.gwt.regexp.shared.RegExp;
 
 public class UserDialog implements Editor<User> {
-    private static RegExp EVENT_RULE_TIME_FRAME_PATTERN = RegExp.compile("^" + EventRule.TIME_FRAME_REGEX + "(," + EventRule.TIME_FRAME_REGEX + ")*$", "i");
-    private static RegExp EVENT_RULE_COURSE_PATTERN = RegExp.compile("^" + EventRule.COURSE_REGEX + "(," + EventRule.COURSE_REGEX +")*$");
+    private static final RegExp EVENT_RULE_TIME_FRAME_PATTERN = RegExp.compile("^" + EventRule.TIME_FRAME_REGEX + "(," + EventRule.TIME_FRAME_REGEX + ")*$", "i");
+    private static final RegExp EVENT_RULE_DAY_OF_WEEK_FRAME_PATTERN = RegExp.compile("^" + EventRule.DAY_OF_WEEK_FRAME_REGEX + "(," + EventRule.DAY_OF_WEEK_FRAME_REGEX + ")*$", "i");
+    private static final RegExp EVENT_RULE_COURSE_PATTERN = RegExp.compile("^" + EventRule.COURSE_REGEX + "(," + EventRule.COURSE_REGEX +")*$");
 
     private static UserDialogUiBinder uiBinder = GWT.create(UserDialogUiBinder.class);
 
@@ -254,6 +255,12 @@ public class UserDialog implements Editor<User> {
         colTimeFrame.setToolTip(SafeHtmlUtils.fromTrustedString("<div qtip=\"8pm-9:30pm,10pm-11pm\">8pm-9:30pm,10pm-11pm</div>"));
         eventRulesColumnConfigList.add(colTimeFrame);
 
+        ColumnConfig<EventRule, String> colDayOfWeek = new ColumnConfig<>(eventRulesProperties.dayOfWeek(), 170, i18n.dayOfWeek());
+        colDayOfWeek.setFixed(true);
+        colDayOfWeek.setResizable(false);
+        colDayOfWeek.setToolTip(SafeHtmlUtils.fromTrustedString("<div qtip=\"Wed-Fri,3-5,Mon\">Wed-Fri,3-5,1,Mon</div>"));
+        eventRulesColumnConfigList.add(colDayOfWeek);
+
         ColumnConfig<EventRule, String> colCourse = new ColumnConfig<>(eventRulesProperties.course(), 170, i18n.course());
         colCourse.setFixed(true);
         colCourse.setResizable(false);
@@ -290,9 +297,8 @@ public class UserDialog implements Editor<User> {
 
         GridEditing<EventRule> editing = new GridInlineEditing<EventRule>(eventRulesGrid);
         editing.addEditor(colTimeFrame, new TextField());
+        editing.addEditor(colDayOfWeek, new TextField());
         editing.addEditor(colCourse, new TextField());
-
-
 
         User currentUser = ApplicationContext.getInstance().getUser();
         if (currentUser.getAdmin() || currentUser.getManager()) {
@@ -301,8 +307,7 @@ public class UserDialog implements Editor<User> {
             readOnly.setEnabled(true);
             expirationDate.setEnabled(true);
             maxNumOfDevices.setEnabled(true);
-        }
-        else {
+        } else {
             manager.setEnabled(false);
             admin.setEnabled(false);
             readOnly.setEnabled(false);
@@ -378,6 +383,10 @@ public class UserDialog implements Editor<User> {
                 break;
             }
             if (eventRule.getTimeFrame() != null && !EVENT_RULE_TIME_FRAME_PATTERN.test(eventRule.getTimeFrame().trim())) {
+                invalidEventRules.add(originalEventRule);
+                break;
+            }
+            if (eventRule.getDayOfWeek() != null && !EVENT_RULE_DAY_OF_WEEK_FRAME_PATTERN.test(eventRule.getDayOfWeek().trim())) {
                 invalidEventRules.add(originalEventRule);
                 break;
             }

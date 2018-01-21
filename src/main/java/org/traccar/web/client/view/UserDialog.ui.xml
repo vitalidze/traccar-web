@@ -39,7 +39,7 @@
 
   <ui:with field='i18n' type='org.traccar.web.client.i18n.Messages' />
  
-  <gxt:Window ui:field="window" pixelSize="760, 640" modal="true" headingText="{i18n.account}" focusWidget="{saveButton}">
+  <gxt:Window ui:field="window" pixelSize="800, 640" modal="true" headingText="{i18n.account}" focusWidget="{saveButton}">
     <container:VerticalLayoutContainer>
       <container:child layoutData="{verticalLayoutData}">
         <container:HBoxLayoutContainer>

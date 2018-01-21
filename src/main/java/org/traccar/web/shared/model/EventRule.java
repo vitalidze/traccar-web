@@ -27,6 +27,8 @@ import java.util.Date;
 public class EventRule implements IsSerializable {
     public static final String TIME_REGEX = "((1[0-2]|\\d)(:[0-5]\\d)?[ap]m)";
     public static final String TIME_FRAME_REGEX = TIME_REGEX + "\\-" + TIME_REGEX;
+    public static final String DAY_OF_WEEK_REGEX = "([0-7]|Mon|Tue|Wed|Thu|Fri|Sat|Sun)";
+    public static final String DAY_OF_WEEK_FRAME_REGEX = DAY_OF_WEEK_REGEX + "(\\-" + DAY_OF_WEEK_REGEX + ")?";
     public static final String COURSE_REGEX = "(\\d{1,3})\\-(\\d{1,3})";
 
     public EventRule() {
@@ -116,6 +118,16 @@ public class EventRule implements IsSerializable {
         this.timeFrame = timeFrame;
     }
 
+    private String dayOfWeek;
+
+    public String getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public void setDayOfWeek(String dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
+    }
+
     private String course;
 
     public String getCourse() {
@@ -136,6 +148,7 @@ public class EventRule implements IsSerializable {
 //        geoFence = eventRules.geoFence;
         deviceEventType = eventRules.deviceEventType;
         timeFrame = eventRules.timeFrame;
+        dayOfWeek = eventRules.dayOfWeek;
         course = eventRules.course;
         return this;
     }
@@ -144,6 +157,7 @@ public class EventRule implements IsSerializable {
         id = eventRules.id;
         deviceEventType = eventRules.deviceEventType;
         timeFrame = eventRules.timeFrame;
+        dayOfWeek = eventRules.dayOfWeek;
         course = eventRules.course;
         return this;
     }

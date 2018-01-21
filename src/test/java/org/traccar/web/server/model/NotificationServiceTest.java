@@ -94,4 +94,37 @@ public class NotificationServiceTest {
         assertTrue(sender.isCourseOk(pos, "99-100"));
         assertTrue(sender.isCourseOk(pos, "98-99"));
     }
+
+    @Test
+    public void testDayOfWeek() {
+        Position pos = position("01/01/2018 00:00:00");
+        assertTrue(sender.isDayOfWeekOk(pos, "Mon", TimeZone.getDefault()));
+        assertTrue(sender.isDayOfWeekOk(pos, "Mon-Mon", TimeZone.getDefault()));
+        assertTrue(sender.isDayOfWeekOk(pos, "Mon-Tue", TimeZone.getDefault()));
+        assertTrue(sender.isDayOfWeekOk(pos, "Mon-Wed", TimeZone.getDefault()));
+        assertTrue(sender.isDayOfWeekOk(pos, "Mon-Thu", TimeZone.getDefault()));
+        assertTrue(sender.isDayOfWeekOk(pos, "Mon-Fri", TimeZone.getDefault()));
+        assertTrue(sender.isDayOfWeekOk(pos, "Mon-Sat", TimeZone.getDefault()));
+        assertTrue(sender.isDayOfWeekOk(pos, "Mon-Sun", TimeZone.getDefault()));
+        assertFalse(sender.isDayOfWeekOk(pos, "Tue", TimeZone.getDefault()));
+        assertTrue(sender.isDayOfWeekOk(pos, "Mon,Tue", TimeZone.getDefault()));
+        assertTrue(sender.isDayOfWeekOk(pos, "0,1", TimeZone.getDefault()));
+        assertTrue(sender.isDayOfWeekOk(pos, "Tue,1", TimeZone.getDefault()));
+
+        TimeZone tzGMT = TimeZone.getTimeZone("GMT");
+        TimeZone tzGMTMinus1 = TimeZone.getTimeZone("GMT-1");
+        TimeZone tzGMTPlus1 = TimeZone.getTimeZone("GMT+1");
+        pos = position("01/01/2018 00:00:00", tzGMT);
+        assertTrue(sender.isDayOfWeekOk(pos, "1", tzGMT));
+        assertFalse(sender.isDayOfWeekOk(pos, "1", tzGMTMinus1));
+        assertTrue(sender.isDayOfWeekOk(pos, "1", tzGMTPlus1));
+
+        pos = position("01/07/2018 01:00:00", tzGMT);
+        assertTrue(sender.isDayOfWeekOk(pos, "7", tzGMT));
+        assertTrue(sender.isDayOfWeekOk(pos, "7", tzGMTMinus1));
+        assertTrue(sender.isDayOfWeekOk(pos, "7", tzGMTPlus1));
+        assertTrue(sender.isDayOfWeekOk(pos, "0", tzGMT));
+        assertTrue(sender.isDayOfWeekOk(pos, "0", tzGMTMinus1));
+        assertTrue(sender.isDayOfWeekOk(pos, "0", tzGMTPlus1));
+    }
 }

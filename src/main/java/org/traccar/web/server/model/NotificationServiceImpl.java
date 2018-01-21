@@ -62,6 +62,7 @@ import java.util.regex.Pattern;
 @Singleton
 public class NotificationServiceImpl extends RemoteServiceServlet implements NotificationService {
     private static Pattern EVENT_RULE_TIME_FRAME_PATTERN = Pattern.compile(EventRule.TIME_FRAME_REGEX, Pattern.CASE_INSENSITIVE);
+    private static Pattern EVENT_RULE_DAY_OF_WEEK_FRAME_PATTERN = Pattern.compile(EventRule.DAY_OF_WEEK_FRAME_REGEX, Pattern.CASE_INSENSITIVE);
     private static Pattern EVENT_RULE_COURSE_PATTERN = Pattern.compile(EventRule.COURSE_REGEX);
     private static SimpleDateFormat EVENT_RULE_TIME_FRAME_FORMAT_01 = new SimpleDateFormat("h:mm a");
     private static SimpleDateFormat EVENT_RULE_TIME_FRAME_FORMAT_02 = new SimpleDateFormat("h a");
@@ -270,6 +271,59 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             return false;
         }
 
+        private int parseDayOfWeek(String dayOfWeek) {
+            if (dayOfWeek.length() == 1) {
+                int d = Integer.parseInt(dayOfWeek);
+                return d == 0 ? 7 : d;
+            }
+
+            if (dayOfWeek.equalsIgnoreCase("Mon")) {
+                return 1;
+            } else if (dayOfWeek.equalsIgnoreCase("Tue")) {
+                return 2;
+            } else if (dayOfWeek.equalsIgnoreCase("Wed")) {
+                return 3;
+            } else if (dayOfWeek.equalsIgnoreCase("Thu")) {
+                return 4;
+            } else if (dayOfWeek.equalsIgnoreCase("Fri")) {
+                return 5;
+            } else if (dayOfWeek.equalsIgnoreCase("Sat")) {
+                return 6;
+            } else if (dayOfWeek.equalsIgnoreCase("Sun")) {
+                return 7;
+            }
+
+            throw new IllegalArgumentException("'" + dayOfWeek + "' day of week has unsupported format");
+        }
+
+        protected boolean isDayOfWeekOk(Position pos, String dayOfWeek, TimeZone timeZone) {
+            if (dayOfWeek == null || dayOfWeek.trim().isEmpty()) {
+                return true;
+            }
+
+            Calendar posTime = Calendar.getInstance(timeZone);
+            posTime.setTime(pos.getTime());
+            int posDayOfWeek = posTime.get(Calendar.DAY_OF_WEEK); // calendar monday is 2, but we expect monday to be 1
+            posDayOfWeek = posDayOfWeek == Calendar.SUNDAY ? 7 : (posDayOfWeek - 1);
+
+            Matcher matcher = EVENT_RULE_DAY_OF_WEEK_FRAME_PATTERN.matcher(dayOfWeek);
+            while (matcher.find()) {
+                String fromDoW = dayOfWeek.substring(matcher.start(1), matcher.end(1));
+                String toDoW = matcher.group(2) == null ? null : dayOfWeek.substring(matcher.start(2), matcher.end(2));
+
+                int from = parseDayOfWeek(fromDoW);
+                if (toDoW == null && from == posDayOfWeek) {
+                    return true;
+                }
+
+                if (toDoW != null && (posDayOfWeek >= from && posDayOfWeek <= parseDayOfWeek(toDoW.substring(1)))) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         protected boolean isCourseOk(Position pos, String course) {
             if (pos.getCourse() == null || course == null || course.trim().isEmpty()) {
                 return true;
@@ -300,6 +354,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 if (eventRule.getDeviceEventType() == event.getType() && event.getDevice().equals(eventRule.getDevice())) {
                     hasAppropriateRule = true;
                     if (isTimeFrameOk(event.getPosition(), eventRule.getTimeFrame(), getTimeZone(user))
+                            && isDayOfWeekOk(event.getPosition(), eventRule.getTimeFrame(), getTimeZone(user))
                             && isCourseOk(event.getPosition(), eventRule.getCourse())) {
                         switch (eventRule.getDeviceEventType()) {
                             case GEO_FENCE_ENTER:
@@ -331,7 +386,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
             }
             // check user notification settings
             if (!user.getNotificationEvents().contains(event.getType()) || !checkEventRules(user, event, eventRules)) {
-
+                return;
             }
 
             Set<DeviceEvent> userEvents = events.get(user);
