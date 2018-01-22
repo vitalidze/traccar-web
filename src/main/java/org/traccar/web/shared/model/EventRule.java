@@ -138,18 +138,15 @@ public class EventRule implements IsSerializable {
         this.course = course;
     }
 
-    public EventRule copyFromClient(EventRule eventRules) {
-        id = eventRules.id;
-        user = eventRules.user == null ? null : new User(eventRules.user);
-        device = eventRules.device == null ? null : new Device(eventRules.device);
-        geoFence = eventRules.geoFence == null ? null : new GeoFence().copyFrom(eventRules.geoFence);
-//        user = eventRules.user;
-//        device = eventRules.device;
-//        geoFence = eventRules.geoFence;
-        deviceEventType = eventRules.deviceEventType;
-        timeFrame = eventRules.timeFrame;
-        dayOfWeek = eventRules.dayOfWeek;
-        course = eventRules.course;
+    public EventRule copyFromClient(EventRule eventRule) {
+        id = eventRule.id;
+        user = eventRule.user == null ? null : new User(eventRule.user);
+        device = eventRule.device == null ? null : new Device(eventRule.device);
+        geoFence = eventRule.geoFence == null ? null : new GeoFence().copyFrom(eventRule.geoFence);
+        deviceEventType = eventRule.deviceEventType;
+        timeFrame = eventRule.timeFrame;
+        dayOfWeek = eventRule.dayOfWeek;
+        course = eventRule.course;
         return this;
     }
 

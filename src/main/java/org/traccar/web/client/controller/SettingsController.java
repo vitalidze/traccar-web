@@ -332,12 +332,16 @@ public class SettingsController implements NavView.SettingsHandler {
         }
         @Override
         public void onRemove(final ListStore<EventRule> eventRulesStore, final EventRule eventRule) {
-            service.removeEventRule(eventRule, new BaseAsyncCallback<Void>(i18n) {
-                @Override
-                public void onSuccess(Void result) {
-                    eventRulesStore.remove(eventRule);
-                }
-            });
+            if (eventRule.getId() > 0) {
+                service.removeEventRule(eventRule, new BaseAsyncCallback<Void>(i18n) {
+                    @Override
+                    public void onSuccess(Void result) {
+                        eventRulesStore.remove(eventRule);
+                    }
+                });
+            } else {
+                eventRulesStore.remove(eventRule);
+            }
         }
     }
 }

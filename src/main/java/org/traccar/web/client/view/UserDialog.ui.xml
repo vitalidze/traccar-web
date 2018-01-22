@@ -150,6 +150,7 @@
       <container:child layoutData="{toolBarRowData}">
         <toolbar:ToolBar>
           <button:TextButton ui:field="addButton" text="{i18n.add}" />
+          <button:TextButton ui:field="copyButton" text="{i18n.copyFrom}" enabled="false" />
           <button:TextButton ui:field="removeButton" text="{i18n.remove}" enabled="false" />
         </toolbar:ToolBar>
       </container:child>

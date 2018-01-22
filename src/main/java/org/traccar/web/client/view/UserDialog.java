@@ -144,6 +144,10 @@ public class UserDialog implements Editor<User> {
 
     @UiField
     @Editor.Ignore
+    TextButton copyButton;
+
+    @UiField
+    @Editor.Ignore
     TextButton removeButton;
 
     @UiField
@@ -275,6 +279,7 @@ public class UserDialog implements Editor<User> {
         eventRulesSelectionModel.addSelectionChangedHandler(new SelectionChangedEvent.SelectionChangedHandler<EventRule>() {
             @Override
             public void onSelectionChanged(SelectionChangedEvent<EventRule> event) {
+                copyButton.setEnabled(!event.getSelection().isEmpty());
                 removeButton.setEnabled(!event.getSelection().isEmpty());
             }
         });
@@ -332,9 +337,20 @@ public class UserDialog implements Editor<User> {
     public void onAddClicked(SelectEvent event) {
         // , "8pm-9:30pm,10pm-11pm", "30-110,116-300"
         EventRule newEventRule = new EventRule(user);
-        Integer id = Random.nextInt();
-        if (id > 0) id = -id;
-        newEventRule.setId(id);
+        newEventRule.setId(-eventRulesStore.size());
+        eventRulesStore.add(newEventRule);
+        eventRulesStore.getRecord(newEventRule);
+    }
+
+    @UiHandler("copyButton")
+    public void onCopyClicked(SelectEvent event) {
+        EventRule newEventRule = new EventRule(user);
+        EventRule selectedItem = eventRulesGrid.getSelectionModel().getSelectedItem();
+        newEventRule.copyFromClient(selectedItem);
+        newEventRule.setId(-eventRulesStore.size());
+        for (Store.Change<EventRule, ?> change : eventRulesStore.getRecord(selectedItem).getChanges()) {
+            change.modify(newEventRule);
+        }
         eventRulesStore.add(newEventRule);
         eventRulesStore.getRecord(newEventRule);
     }
