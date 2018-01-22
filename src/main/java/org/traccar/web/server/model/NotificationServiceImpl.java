@@ -102,7 +102,6 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
             Map<User, Set<EventRule>> eventRules = new HashMap<>();
             for (EventRule eventRule : entityManager.get().createQuery("FROM EventRule", EventRule.class).getResultList()) {
-                eventTypes.add(eventRule.getDeviceEventType());
                 Set<EventRule> userRules = eventRules.get(eventRule.getUser());
                 if (userRules == null) {
                     eventRules.put(eventRule.getUser(), userRules = new HashSet<>());
@@ -351,21 +350,23 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
             boolean hasAppropriateRule = false;
             for (EventRule eventRule : eventRules) {
-                if (eventRule.getDeviceEventType() == event.getType() && event.getDevice().equals(eventRule.getDevice())) {
+                if (eventRule.getDeviceEventType() == event.getType()) {
                     hasAppropriateRule = true;
-                    if (isTimeFrameOk(event.getPosition(), eventRule.getTimeFrame(), getTimeZone(user))
-                            && isDayOfWeekOk(event.getPosition(), eventRule.getTimeFrame(), getTimeZone(user))
-                            && isCourseOk(event.getPosition(), eventRule.getCourse())) {
-                        switch (eventRule.getDeviceEventType()) {
-                            case GEO_FENCE_ENTER:
-                            case GEO_FENCE_EXIT:
-                                if (eventRule.getGeoFence() == null
-                                        || (event.getGeoFence() != null && eventRule.getGeoFence() != null && event.getGeoFence().equals(eventRule.getGeoFence()))) {
-                                    return true;
-                                }
-                            default:
+                }
+                if (eventRule.getDeviceEventType() == event.getType()
+                        && event.getDevice().equals(eventRule.getDevice())
+                        && isTimeFrameOk(event.getPosition(), eventRule.getTimeFrame(), getTimeZone(user))
+                        && isDayOfWeekOk(event.getPosition(), eventRule.getTimeFrame(), getTimeZone(user))
+                        && isCourseOk(event.getPosition(), eventRule.getCourse())) {
+                    switch (eventRule.getDeviceEventType()) {
+                        case GEO_FENCE_ENTER:
+                        case GEO_FENCE_EXIT:
+                            if (eventRule.getGeoFence() == null
+                                    || (event.getGeoFence() != null && eventRule.getGeoFence() != null && event.getGeoFence().equals(eventRule.getGeoFence()))) {
                                 return true;
-                        }
+                            }
+                        default:
+                            return true;
                     }
                 }
             }
