@@ -37,6 +37,7 @@ import com.sencha.gxt.widget.core.client.selection.SelectionChangedEvent;
 import org.traccar.web.client.ApplicationContext;
 import org.traccar.web.client.i18n.Messages;
 import org.traccar.web.client.model.*;
+import org.traccar.web.client.state.GridStateHandler;
 import org.traccar.web.shared.model.*;
 
 import com.google.gwt.core.client.GWT;
@@ -208,13 +209,11 @@ public class UserDialog implements Editor<User> {
                 return item.getName();
             }
         });
-//        cmbCell.addSelectionHandler(selHandler);
         cmbDeviceCell.setWidth(100);
         cmbDeviceCell.setForceSelection(true);
         cmbDeviceCell.setAllowBlank(false);
         cmbDeviceCell.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
-        colDevice.setFixed(true);
-        colDevice.setResizable(false);
+        colDevice.setHideable(false);
         colDevice.setCell(cmbDeviceCell);
         eventRulesColumnConfigList.add(colDevice);
 
@@ -229,8 +228,6 @@ public class UserDialog implements Editor<User> {
         cmbGeoFenceCell.setForceSelection(true);
         cmbGeoFenceCell.setAllowBlank(true);
         cmbGeoFenceCell.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
-        colGeoFence.setFixed(true);
-        colGeoFence.setResizable(false);
         colGeoFence.setCell(cmbGeoFenceCell);
         eventRulesColumnConfigList.add(colGeoFence);
 
@@ -248,28 +245,26 @@ public class UserDialog implements Editor<User> {
         cmbDeviceEventType.setForceSelection(true);
         cmbDeviceEventType.setAllowBlank(false);
         cmbDeviceEventType.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
-        colDeviceEventType.setFixed(true);
-        colDeviceEventType.setResizable(false);
         colDeviceEventType.setCell(cmbDeviceEventType);
+        colDeviceEventType.setHideable(false);
         eventRulesColumnConfigList.add(colDeviceEventType);
 
         ColumnConfig<EventRule, String> colTimeFrame = new ColumnConfig<>(eventRulesProperties.timeFrame(), 170, i18n.timeFrame());
-        colTimeFrame.setFixed(true);
-        colTimeFrame.setResizable(false);
         colTimeFrame.setToolTip(SafeHtmlUtils.fromTrustedString("<div qtip=\"8pm-9:30pm,10pm-11pm\">8pm-9:30pm,10pm-11pm</div>"));
         eventRulesColumnConfigList.add(colTimeFrame);
 
         ColumnConfig<EventRule, String> colDayOfWeek = new ColumnConfig<>(eventRulesProperties.dayOfWeek(), 170, i18n.dayOfWeek());
-        colDayOfWeek.setFixed(true);
-        colDayOfWeek.setResizable(false);
         colDayOfWeek.setToolTip(SafeHtmlUtils.fromTrustedString("<div qtip=\"Wed-Fri,3-5,Mon\">Wed-Fri,3-5,1,Mon</div>"));
         eventRulesColumnConfigList.add(colDayOfWeek);
 
         ColumnConfig<EventRule, String> colCourse = new ColumnConfig<>(eventRulesProperties.course(), 170, i18n.course());
-        colCourse.setFixed(true);
-        colCourse.setResizable(false);
         colCourse.setToolTip(SafeHtmlUtils.fromTrustedString("<div qtip=\"30-110,116-300\">30-110,116-300</div>"));
         eventRulesColumnConfigList.add(colCourse);
+
+        for (ColumnConfig<?, ?> columnConfig : eventRulesColumnConfigList) {
+            columnConfig.setFixed(true);
+            columnConfig.setResizable(false);
+        }
 
         eventRulesColumnModel = new ColumnModel<>(eventRulesColumnConfigList);
 
@@ -299,6 +294,8 @@ public class UserDialog implements Editor<User> {
         eventRulesGrid.setSelectionModel(eventRulesSelectionModel);
         eventRulesGrid.getView().setForceFit(true);
         eventRulesGrid.getView().setAutoFill(true);
+
+        new GridStateHandler<>(eventRulesGrid).loadState();
 
         GridEditing<EventRule> editing = new GridInlineEditing<EventRule>(eventRulesGrid);
         editing.addEditor(colTimeFrame, new TextField());

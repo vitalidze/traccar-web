@@ -156,7 +156,7 @@
       </container:child>
       <container:child layoutData="{verticalLayoutData}">
         <gxt:ContentPanel animCollapse="false" width="100%" height="220px" headingText="{i18n.eventRules}">
-          <grid:Grid ui:field="eventRulesGrid" store="{eventRulesStore}" cm="{eventRulesColumnModel}" view="{eventRulesView}" />
+          <grid:Grid ui:field="eventRulesGrid" store="{eventRulesStore}" cm="{eventRulesColumnModel}" view="{eventRulesView}" stateful="true" stateId="eventRulesGrid" />
         </gxt:ContentPanel>
       </container:child>
     </container:VerticalLayoutContainer>
