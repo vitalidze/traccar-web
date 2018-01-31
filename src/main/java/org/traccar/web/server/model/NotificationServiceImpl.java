@@ -356,7 +356,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
                 if (eventRule.getDeviceEventType() == event.getType()
                         && event.getDevice().equals(eventRule.getDevice())
                         && isTimeFrameOk(event.getPosition(), eventRule.getTimeFrame(), getTimeZone(user))
-                        && isDayOfWeekOk(event.getPosition(), eventRule.getTimeFrame(), getTimeZone(user))
+                        && isDayOfWeekOk(event.getPosition(), eventRule.getDayOfWeek(), getTimeZone(user))
                         && isCourseOk(event.getPosition(), eventRule.getCourse())) {
                     switch (eventRule.getDeviceEventType()) {
                         case GEO_FENCE_ENTER:
@@ -461,7 +461,7 @@ public class NotificationServiceImpl extends RemoteServiceServlet implements Not
 
                 return true;
             } catch (MessagingException me) {
-                logger.log(Level.SEVERE, "Unable to send Email message", me);
+                logger.log(Level.SEVERE, "Unable to send Email message (" + me.getClass().getName() + ": " + me.getLocalizedMessage() + ")");
                 return false;
             } finally {
                 if (transport != null) try { transport.close(); } catch (MessagingException ignored) {}

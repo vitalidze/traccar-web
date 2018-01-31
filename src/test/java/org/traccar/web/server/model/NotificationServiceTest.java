@@ -80,6 +80,9 @@ public class NotificationServiceTest {
         assertFalse(sender.isTimeFrameOk(pos, "11am-0am", tzGMTPlus1));
         assertTrue(sender.isTimeFrameOk(pos, "0am-11am", tzGMTPlus1));
         assertTrue(sender.isTimeFrameOk(pos, "1am-1am", tzGMTPlus1));
+
+        pos = position("01/31/2018 14:20:28");
+        assertTrue(sender.isTimeFrameOk(pos, "0:01am-11:59pm", TimeZone.getDefault()));
     }
 
     @Test
@@ -126,5 +129,8 @@ public class NotificationServiceTest {
         assertTrue(sender.isDayOfWeekOk(pos, "0", tzGMT));
         assertTrue(sender.isDayOfWeekOk(pos, "0", tzGMTMinus1));
         assertTrue(sender.isDayOfWeekOk(pos, "0", tzGMTPlus1));
+
+        pos = position("01/31/2018 14:20:28");
+        assertTrue(sender.isDayOfWeekOk(pos, "1-3", TimeZone.getDefault()));
     }
 }
