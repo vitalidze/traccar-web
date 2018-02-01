@@ -223,6 +223,7 @@
           <execution>
             <configuration>
               <module>org.traccar.web.Traccar</module>
+              <genParam>false</genParam>
             </configuration>
             <goals>
               <goal>compile</goal>
