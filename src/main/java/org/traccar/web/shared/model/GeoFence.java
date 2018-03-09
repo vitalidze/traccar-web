@@ -26,7 +26,7 @@ import java.util.*;
 @Entity
 @Table(name = "geofences",
        indexes = { @Index(name = "geofences_pkey", columnList = "id") })
-public class GeoFence implements IsSerializable {
+public class GeoFence implements IsSerializable, Comparable<GeoFence> {
 
     public GeoFence() {
         type = GeoFenceType.POLYGON;
@@ -258,5 +258,12 @@ public class GeoFence implements IsSerializable {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public int compareTo(GeoFence o) {
+        String thisName = getName() == null ? "" : getName().trim();
+        String thatName = o == null || o.getName() == null ? "" : o.getName().trim();
+        return thisName.compareTo(thatName);
     }
 }

@@ -30,7 +30,7 @@ import javax.persistence.*;
 @Table(name = "devices",
        indexes = { @Index(name = "devices_pkey", columnList = "id") },
        uniqueConstraints = { @UniqueConstraint(name = "devices_ukey_uniqueid", columnNames = "uniqueid") })
-public class Device implements IsSerializable, GroupedDevice {
+public class Device implements IsSerializable, GroupedDevice, Comparable<Device> {
 
     private static final long serialVersionUID = 1;
     public static final short DEFAULT_TIMEOUT = 5 * 60;
@@ -535,5 +535,12 @@ public class Device implements IsSerializable, GroupedDevice {
     @Override
     public int hashCode() {
         return getUniqueId() != null ? getUniqueId().hashCode() : 0;
+    }
+
+    @Override
+    public int compareTo(Device o) {
+        String thisName = getName() == null ? "" : getName().trim();
+        String thatName = o == null || o.getName() == null ? "" : o.getName().trim();
+        return thisName.compareTo(thatName);
     }
 }
