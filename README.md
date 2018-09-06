@@ -16,7 +16,7 @@ Web interface for traccar server.
 
 ## Installation
 
-See [installation instructions on official web site](http://traccar.litvak.su/installation.html) or user [Official Docker Self-Contained Image](https://hub.docker.com/r/vitalidze/traccar-web/).
+See [installation instructions on official web site](http://traccar.litvak.su/installation.html) or use [Official Self-Contained Docker Image](https://hub.docker.com/r/vitalidze/traccar-web/).
 
 ## Features
 
